@@ -1,0 +1,23 @@
+# Variables de entorno (nunca subir a GitHub)
+.env
+.env.*
+!.env.example
+*.env.local
+env.local
+
+# Dependencias y builds
+node_modules/
+.vercel/
+.next/
+dist/
+
+# Sistema / editor
+.DS_Store
+*.log
+.vscode/
+.idea/
+
+# Llaves y dependencias de administración (nunca subir)
+service-account*.json
+*-firebase-adminsdk-*.json
+scripts/node_modules/

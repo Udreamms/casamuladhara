@@ -926,8 +926,8 @@ input[type=range].n2-range{width:100%;accent-color:var(--forest);padding:0;backg
     <a class="brand" href="index.html" style="text-decoration:none" aria-label="Volver al sitio de Casa Muladhara"><svg><use href="#mark"/></svg><div><b>CASA MULADHARA</b><small>AULA VIRTUAL</small></div></a>
     <nav class="nav" id="nav" aria-label="Secciones"></nav>
     <div class="side-foot">
-      <span class="av" style="--c:#f2c66d">VR</span>
-      <div class="who"><b>Valentina Rojas</b><small>Estudiante · Nivel 3</small></div>
+      <span class="av" id="me-av" style="--c:#f2c66d"></span>
+      <div class="who"><b id="me-name"></b><small id="me-sub"></small></div>
     </div>
     <a class="logout" href="index.html" style="text-decoration:none"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7M5 10v10h14V10"/></svg>Volver al sitio</a>
     <button class="logout" id="logout"><svg viewBox="0 0 24 24"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/></svg>Cerrar sesión</button>
@@ -942,28 +942,13 @@ input[type=range].n2-range{width:100%;accent-color:var(--forest);padding:0;backg
       </div>
       <div class="pop" id="pop" hidden>
         <h4>Notificaciones</h4>
-        <ul>
-          <li><span class="av sm karen">MH</span><div>La Maestra Holística respondió tu pregunta en <b>Clase 4 · Lectura del campo áurico</b><small>Hace 2 horas</small></div></li>
-          <li><span class="av sm" style="--c:#cfe0c4">📅</span><div>Clase en vivo mañana: <b>Clase 5 · Liberación de memorias</b><small>Hace 5 horas</small></div></li>
-          <li><span class="av sm" style="--c:#f2c66d">★</span><div>Ganaste la insignia <b>Guardiana de Espacios</b><small>12 sep</small></div></li>
-        </ul>
+        <ul id="notif-list"></ul>
       </div>
     </header>
     <main class="view" id="view"></main>
   </div>
 </div>
-<div class="login" id="login">
-  <form class="login-card" id="login-form">
-    <div class="lg"><svg><use href="#mark"/></svg><b>CASA MULADHARA</b><small>AULA VIRTUAL</small></div>
-    <div class="bye" id="bye" hidden>Cerraste sesión. ¡Hasta pronto!</div>
-    <h2>Ingresa a tu aula</h2>
-    <label for="lg-mail">Correo<input type="email" id="lg-mail" value="valentina@ejemplo.com"></label>
-    <label for="lg-pass">Contraseña<input type="password" id="lg-pass" value="ejemplo123"></label>
-    <button class="btn">Ingresar</button>
-    <button type="button" class="forgot" data-toast="Te enviaríamos un enlace a tu correo para crear una nueva contraseña">Olvidé mi contraseña</button>
-    <a class="forgot" href="index.html" style="text-align:center">← Volver al sitio</a>
-  </form>
-</div>
+<div class="login" id="login"><div class="login-card" style="text-align:center"><div class="lg"><svg><use href="#mark"/></svg><b>CASA MULADHARA</b><small>AULA VIRTUAL</small></div><p class="muted" style="margin:0" id="login-msg">Abriendo tu aula…</p></div></div>
 <div class="toast" id="toast" role="status" hidden></div>
 <div class="scrim" id="scrim" hidden><div class="modal" id="modal" role="dialog" aria-modal="true"></div></div>
 
@@ -1114,19 +1099,11 @@ const BADGES=[
 ];
 
 const CHANNELS=[
- {id:'general',name:'General',count:128},{id:'presentaciones',name:'Preséntate',count:64},
- {id:'n1',name:'Nivel 1 · Péndulo',count:41},{id:'n2',name:'Nivel 2 · Espacios',count:33},{id:'n3',name:'Nivel 3 · Radiestesia',count:27},
- {id:'n4',name:'Nivel 4 · Especializaciones',count:0},{id:'n5',name:'Nivel 5 · Tarot',count:0},{id:'testimonios',name:'Testimonios',count:52}
+ {id:'general',name:'General'},{id:'presentaciones',name:'Preséntate'},
+ {id:'n1',name:'Nivel 1 · Péndulo'},{id:'n2',name:'Nivel 2 · Espacios'},{id:'n3',name:'Nivel 3 · Radiestesia'},
+ {id:'n4',name:'Nivel 4 · Especializaciones'},{id:'n5',name:'Nivel 5 · Tarot'},{id:'testimonios',name:'Testimonios'}
 ];
-let POSTS=[
- {ch:'n3',who:'Maestra Holística',karen:1,ini:'MH',when:'Hace 3 h',txt:'Queridas, para la clase 5 de mañana tengan a mano el gráfico de memorias celulares (está en Recursos) y un vaso de agua. Haremos práctica en parejas.',likes:34,liked:0,replies:[{who:'Camila Fuentes',ini:'CF',c:'#cfe0c4',txt:'¡Gracias Maestra! ¿Sirve impreso en blanco y negro?'},{who:'Maestra Holística',karen:1,ini:'MH',txt:'Sí Camila, funciona igual de bien.'}]},
- {ch:'n3',who:'Javiera Muñoz',ini:'JM',c:'#e8c9b8',when:'Hace 6 h',txt:'Hice mi primera medición del campo áurico con mi mamá y encontré una fuga a la altura del plexo. Después del parche se sintió mucho más liviana. ¡Qué emoción!',likes:21,liked:1,replies:[]},
- {ch:'general',who:'Daniela Pérez',ini:'DP',c:'#d4dcea',when:'Ayer',txt:'¿Alguien de Viña del Mar que quiera juntarse a practicar péndulo hebreo los sábados?',likes:9,liked:0,replies:[{who:'Valentina Rojas',ini:'VR',c:'#f2c66d',txt:'¡Yo! Estoy en Quilpué, cerquita.'}]},
- {ch:'n2',who:'Fernanda Soto',ini:'FS',c:'#f2e1b5',when:'Hace 2 días',txt:'Comparto foto del altar que armé después de limpiar mi consulta con el protocolo de la clase 4. Los pacientes notan la diferencia.',likes:27,liked:0,replies:[]},
- {ch:'testimonios',who:'Paula Herrera',ini:'PH',c:'#cfe0c4',when:'Hace 4 días',txt:'Terminé el Nivel 1 y no puedo creer cuánto cambió mi forma de ver la energía. Gracias Maestra por la paciencia y el cariño.',likes:48,liked:0,replies:[]},
- {ch:'presentaciones',who:'Ignacia Vidal',ini:'IV',c:'#efd3c3',when:'Hace 5 días',txt:'Hola a todas, soy Ignacia, de Santiago, enfermera. Llegué a Casa Muladhara buscando herramientas para acompañar mejor a mis pacientes.',likes:15,liked:0,replies:[]},
- {ch:'n1',who:'Maestra Holística',karen:1,ini:'MH',when:'Hace 1 semana',txt:'Recordatorio: para recibir tu insignia del Nivel 1 sube tus 3 prácticas en la lección "Evaluación y entrega de insignia".',likes:19,liked:0,replies:[]}
-];
+let POSTS=[];
 const RES=[
  {t:'Tabla de etiquetas hebreas',type:'PDF',lvl:1,size:'860 KB',k:'pdf'},
  {t:'Meditación de protección',type:'Audio',lvl:1,size:'12 min',k:'mp3'},
@@ -1174,28 +1151,16 @@ const FAQ={
 };
 
 /* ---------- state ---------- */
-const PAYMENTS=[
- {d:'10 sep 2026',c:'Cuota 4 de 9 · Plan mensual',a:55,s:'ok'},
- {d:'10 ago 2026',c:'Cuota 3 de 9 · Plan mensual',a:55,s:'ok'},
- {d:'10 jul 2026',c:'Cuota 2 de 9 · Plan mensual',a:55,s:'ok'},
- {d:'10 jun 2026',c:'Cuota 1 de 9 · Plan mensual',a:55,s:'ok'}
-];
-const STUDENTS=[
- {n:'Valentina Rojas',ini:'VR',c:'#f2c66d',plan:'Mensual',lvl:3,last:'10 sep',next:'10 oct',s:'ok'},
- {n:'Camila Fuentes',ini:'CF',c:'#cfe0c4',plan:'Pago completo',lvl:3,last:'02 jun',next:'Pagado',s:'full'},
- {n:'Javiera Muñoz',ini:'JM',c:'#e8c9b8',plan:'Mensual',lvl:3,last:'05 sep',next:'05 oct',s:'retry'},
- {n:'Fernanda Soto',ini:'FS',c:'#f2e1b5',plan:'Mensual',lvl:2,last:'28 sep',next:'28 oct',s:'ok'},
- {n:'Daniela Pérez',ini:'DP',c:'#d4dcea',plan:'Mensual',lvl:1,last:'25 ago',next:'25 sep',s:'paused'},
- {n:'Paula Herrera',ini:'PH',c:'#cfe0c4',plan:'Pago completo',lvl:2,last:'14 may',next:'Pagado',s:'full'},
- {n:'Ignacia Vidal',ini:'IV',c:'#efd3c3',plan:'Mensual',lvl:1,last:'01 oct',next:'01 nov',s:'ok'}
-];
-const STP={ok:'<span class="pill done">Al día</span>',full:'<span class="pill done">Pagado completo</span>',retry:'<span class="pill prog">Reintentando cobro</span>',paused:'<span class="pill bad">Acceso pausado</span>'};
-const S={overdue:false,plan:'mensual',view:'inicio',level:'radiestesia',lesson:[1,0],tab:'temas',ch:'n3',resType:'Todos',resLvl:'0',resQ:'',supTopic:'clases',openMods:{},playing:false,t:0,notes:{},qa:{},sent:false,sl:{},anim:0};
+let PAYMENTS=[];
+let STUDENTS=[];
+const STP={none:'<span class="pill lock">Sin plan</span>',ok:'<span class="pill done">Al día</span>',full:'<span class="pill done">Pagado completo</span>',retry:'<span class="pill prog">Reintentando cobro</span>',overdue:'<span class="pill bad">Pago pendiente</span>',paused:'<span class="pill bad">Acceso pausado</span>'};
+let ME={name:'',ini:'',c:'#f2c66d'};
+const S={overdue:false,plan:'none',view:'inicio',level:'radiestesia',lesson:[1,0],tab:'temas',ch:'n3',resType:'Todos',resLvl:'0',resQ:'',supTopic:'clases',openMods:{},playing:false,t:0,notes:{},qa:{},sent:false,sl:{},anim:0};
 const NAV=[
  ['inicio','Inicio','<path d="M4 11 12 4l8 7v9h-5v-6H9v6H4z"/>'],
  ['formacion','Mi formación','<path d="M3 8 12 4l9 4-9 4z"/><path d="M7 10v5c3 2 7 2 10 0v-5"/>'],
  ['insignias','Insignias','<circle cx="12" cy="9" r="6"/><path d="m9 14-2 7 5-3 5 3-2-7"/>'],
- ['comunidad','Comunidad','<path d="M4 5h16v11H9l-5 4z"/>',3],
+ ['comunidad','Comunidad','<path d="M4 5h16v11H9l-5 4z"/>'],
  ['calendario','Calendario','<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'],
  ['recursos','Recursos','<path d="M5 4h10l4 4v12H5z"/><path d="M14 4v5h5"/>'],
  ['trabaja','Trabaja con nosotras','<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/>'],
@@ -2606,13 +2571,14 @@ function pathHTML(){
 const V={};
 V.inicio=()=>{
   const p=totalPct();const r=52,c=2*Math.PI*r;
+  const resume=resumePoint();
   const lv=LEVELS[2],les=allLessons(lv)[9];
   return `
   <section class="hero"><svg class="motif"><use href="#mark"/></svg>
     <div><span class="eyebrow">Escuela de Formación Holística</span>
-      <h2>Hola, Valentina. Hoy sigues en el Nivel 3.</h2>
-      <p>Te quedaste en la Clase 4 · Lectura del campo áurico. Mañana a las 10:00 es la clase en vivo de Liberación de memorias.</p>
-      <div class="hero-actions"><button class="btn btn-primary" data-open-lesson="radiestesia,1,2">Continuar clase</button><button class="btn btn-ghost" data-go="calendario">Ver calendario</button></div></div>
+      <h2>Hola, ${esc(ME.name.split(' ')[0])}. ${resume.lv.status==='locked'?'Te damos la bienvenida.':'Hoy sigues en el Nivel '+resume.lv.n+'.'}</h2>
+      <p>${resume.started?'Te quedaste en '+esc(resume.les.t)+'.':'Tu camino empieza en '+esc(resume.les.t)+'. Cuando marques una clase como vista, tu avance se guarda.'}</p>
+      <div class="hero-actions"><button class="btn btn-primary" data-open-lesson="${resume.lv.id},${resume.i},${resume.j}">${resume.started?'Continuar clase':'Comenzar'}</button><button class="btn btn-ghost" data-go="calendario">Ver calendario</button></div></div>
     <div class="ring-wrap"><svg class="ring" viewBox="0 0 120 120"><circle cx="60" cy="60" r="${r}" fill="none" stroke="rgba(236,231,211,.15)" stroke-width="8"/><circle cx="60" cy="60" r="${r}" fill="none" stroke="#f2c66d" stroke-width="8" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-p/100)}" transform="rotate(-90 60 60)"/><text x="60" y="58" text-anchor="middle" font-family="Marcellus,Georgia,serif" font-size="26" fill="#ece7d3">${p}%</text><text x="60" y="76" text-anchor="middle" font-family="Josefin Sans,system-ui,sans-serif" font-size="7" letter-spacing="1.5" fill="#b9c4b5">DE TU FORMACIÓN</text></svg>
       <span class="lbl">Camino a Terapeuta<br>Holístico Integral</span></div>
   </section>
@@ -2621,11 +2587,11 @@ V.inicio=()=>{
     <section class="card panel"><div class="panel-h"><h3>Próxima clase en vivo</h3><button class="link" data-go="calendario">Calendario</button></div>
       <div class="next-class"><div class="date"><small>Sáb</small><b>11</b><small>Oct</small></div><div class="t"><b>${les.t}</b><span>10:00 a 11:30 · Nivel 3 · con la Maestra Holística</span></div><button class="btn btn-sm" data-toast="La sala se abre 15 minutos antes de la clase">Entrar</button></div>
       <div class="panel-h" style="margin-top:6px"><h3>Conversaciones recientes</h3><button class="link" data-go="comunidad">Comunidad</button></div>
-      <div>${POSTS.slice(0,3).map(p=>`<div class="mini-post">${av(p)}<div style="min-width:0"><b>${esc(p.who)}</b>${p.karen?'<span class="tag-k">Maestra</span>':''}<p>${esc(p.txt)}</p></div></div>`).join('')}</div>
+      <div>${POSTS.length?'':'<p class="muted" style="font-size:.88rem">Aún no hay conversaciones. Rompe el hielo en Comunidad.</p>'}${POSTS.slice(0,3).map(p=>`<div class="mini-post">${av(p)}<div style="min-width:0"><b>${esc(p.who)}</b>${p.karen?'<span class="tag-k">Maestra</span>':''}<p>${esc(p.txt)}</p></div></div>`).join('')}</div>
     </section>
     <section class="card panel"><div class="panel-h"><h3>Tus insignias</h3><button class="link" data-go="insignias">Ver todas</button></div>
       <div class="badge-row">${BADGES.slice(0,4).map(b=>`<span title="${b.name}" style="${b.earned?'':'filter:grayscale(1);opacity:.4'}">${badgeSVG(b,!!b.earned)}</span>`).join('')}</div>
-      <p class="muted" style="font-size:.88rem">Llevas 2 de 8 insignias. La próxima es <b style="color:var(--fg)">Sanadora del Alma</b>, al terminar el Nivel 3.</p>
+      <p class="muted" style="font-size:.88rem">Llevas ${BADGES.filter(b=>b.earned).length} de ${BADGES.length} insignias.${(()=>{const nb=BADGES.find(b=>!b.earned);return nb?' La próxima es <b style="color:var(--fg)">'+nb.name+'</b>, al terminar su nivel.':''})()}</p>
       <div class="panel-h" style="margin-top:6px"><h3>Nuevo en Recursos</h3><button class="link" data-go="recursos">Biblioteca</button></div>
       <div class="files">${RES.filter(r=>r.new).map(fileHTML).join('')}</div>
     </section>
@@ -2635,7 +2601,7 @@ function fileHTML(f){const k=f.k||f.type;return `<div class="file"><span class="
 
 V.formacion=()=>`
   <div class="view-head"><div><span class="eyebrow">Escuela de Formación Holística</span><h1>Mi formación</h1><p>Cinco niveles que te llevan a la certificación de Terapeuta Holístico Integral. Toca un nivel para ver sus clases, videos y materiales.</p></div>
-  <div class="stat-row"><div><b>${totalPct()}%</b>avance total</div><div><b>${LEVELS.flatMap(allLessons).filter(l=>l.done).length}</b>clases vistas</div><div><b>2/8</b>insignias</div></div></div>
+  <div class="stat-row"><div><b>${totalPct()}%</b>avance total</div><div><b>${LEVELS.flatMap(allLessons).filter(l=>l.done).length}</b>clases vistas</div><div><b>${BADGES.filter(b=>b.earned).length}/${BADGES.length}</b>insignias</div></div></div>
   ${pathHTML()}
   <section style="display:grid;gap:14px">${LEVELS.map(lv=>`<article class="card panel" style="grid-template-columns:minmax(0,1fr) auto;align-items:center">
     <div style="display:grid;gap:8px;min-width:0"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="eyebrow">Nivel ${lv.n}</span>${modePill(lv)}${statusPill(lv)}</div>
@@ -2648,12 +2614,11 @@ V.curso=()=>{
   const flat=allLessons(lv);const doneN=flat.filter(l=>l.done).length;
   const upcoming=!locked&&!les.done&&/En vivo/.test(les.len);
   const isSl=!!les.slides;
-  if(S.overdue&&!locked)return `<div class="crumbs"><button data-go="formacion">Mi formación</button><span>/</span><span>Nivel ${lv.n} · ${lv.title}</span></div>
+  if(S.overdue&&!locked&&!CM.isAdmin)return `<div class="crumbs"><button data-go="formacion">Mi formación</button><span>/</span><span>Nivel ${lv.n} · ${lv.title}</span></div>
   <div class="player" style="max-width:900px"><svg class="motif"><use href="#mark"/></svg><div style="position:relative;display:grid;gap:12px;justify-items:center;text-align:center;padding:20px"><span class="pill bad" style="background:rgba(239,138,115,.2);color:#ffd2c7">Acceso pausado</span><b style="font:400 clamp(1.2rem,3vw,1.8rem)/1.2 var(--f-display)">${esc(les.t)}</b><span style="color:#b9c4b5;font-size:.9rem;max-width:30em">Esta clase vuelve a estar disponible en cuanto pagues tu cuota pendiente. No pierdes tu avance.</span><button class="btn btn-sm" style="background:#e9e4d0;color:#1f3f32" data-checkout="1">Pagar y reactivar</button></div></div>`;
   const tabs=[['temas','Temas de la clase'],['materiales','Materiales'],['preguntas','Preguntas'],['notas','Mis notas']];
-  const key=lv.id+mi+li;
-  const qa=S.qa[key]||(key==='radiestesia12'?[{who:'Valentina Rojas',ini:'VR',c:'#f2c66d',txt:'En el minuto 52, ¿el parche se hace con la etiqueta de sanación o con el gráfico?'},{who:'Maestra Holística',karen:1,ini:'MH',txt:'Con el gráfico, Valentina. La etiqueta la usas solo si la fuga vuelve a aparecer en la segunda medición.',reply:1}]:[]);
-  S.qa[key]=qa;
+  const key=lv.id+'_'+mi+'_'+li;
+  const qa=(CM.questions[key]||[]).flatMap(q=>[{...person(ME.name),who:ME.name,ini:ME.ini,c:ME.c,txt:q.text}].concat(q.reply?[{who:'Maestra Holística',karen:1,ini:'MH',txt:q.reply,reply:1}]:[]));
   const dur=toSec(les.len)||1;
   const si=isSl?Math.min(S.sl[key]||0,les.slides.length-1):0;
   const body={
@@ -2661,7 +2626,7 @@ V.curso=()=>{
     materiales:les.files.length?`<div class="files">${les.files.map(f=>fileHTML({...f,k:f.type})).join('')}</div>`:`<p class="muted">Esta clase no tiene materiales descargables.</p>`,
     preguntas:`<div class="qa">${qa.map(q=>`<div class="q ${q.reply?'reply':''}">${av(q)}<div class="bubble"><b>${esc(q.who)}</b>${q.karen?'<span class="tag-k">Maestra</span>':''}<p>${esc(q.txt)}</p></div></div>`).join('')||'<p class="muted">Aún no hay preguntas. Sé la primera.</p>'}
       <form class="reply-form" id="qa-form"><input type="text" id="qa-in" placeholder="Escribe tu pregunta para la Maestra Holística" aria-label="Tu pregunta"><button class="btn btn-primary btn-sm">Enviar</button></form></div>`,
-    notas:`<textarea id="notes" placeholder="Tus apuntes de esta clase. Solo tú los ves.">${esc(S.notes[key]||'')}</textarea><div><button class="btn btn-ghost btn-sm" id="save-notes">Guardar notas</button></div>`
+    notas:`<textarea id="notes" placeholder="Tus apuntes de esta clase. Solo tú los ves.">${esc(CM.notes[key]||'')}</textarea><div><button class="btn btn-ghost btn-sm" id="save-notes">Guardar notas</button></div>`
   };
   return `
   <div class="crumbs"><button data-go="formacion">Mi formación</button><span>/</span><span>Nivel ${lv.n} · ${lv.title}</span></div>
@@ -2692,7 +2657,7 @@ function curLesson(){const lv=LEVELS.find(l=>l.id===S.level);return lv.modules[S
 function goSlide(v){const lv=LEVELS.find(l=>l.id===S.level),les=curLesson();if(!les.slides)return;
   if(v==='nextles'){S.full=0;document.body.style.overflow='';const nx=$('#next-les');nx&&nx.click();return}
   if(v==='zoom'){S.full=!S.full;document.body.style.overflow=S.full?'hidden':'';render(false);return}
-  const key=lv.id+S.lesson[0]+S.lesson[1];const n=les.slides.length;let i=S.sl[key]||0;
+  const key=lv.id+'_'+S.lesson[0]+'_'+S.lesson[1];const n=les.slides.length;let i=S.sl[key]||0;
   i=v==='next'?Math.min(n-1,i+1):v==='prev'?Math.max(0,i-1):Math.max(0,Math.min(n-1,+v));S.sl[key]=i;S.anim=1;render(false);
   const d=document.querySelector('.deck');if(d){const r=d.getBoundingClientRect();if(r.top<0)window.scrollTo({top:window.scrollY+r.top-80,behavior:'smooth'})}}
 function toSec(s){if(!s||!/\d/.test(s)||/En vivo|paso/.test(s))return 0;return s.split(':').map(Number).reduce((a,b)=>a*60+b,0)}
@@ -2709,20 +2674,20 @@ V.insignias=()=>{
 };
 
 V.comunidad=()=>{
-  const ch=CHANNELS.find(c=>c.id===S.ch);const list=POSTS.map((p,i)=>({...p,i})).filter(p=>p.ch===S.ch);
+  const ch=CHANNELS.find(c=>c.id===S.ch);const list=POSTS.filter(p=>p.ch===S.ch).map(p=>({...p,i:p.id}));
   return `<div class="view-head"><div><span class="eyebrow">Comunidad</span><h1>Conversa con tus compañeras</h1><p>Un espacio por nivel para compartir prácticas, dudas y avances. La Maestra Holística participa en todos.</p></div></div>
   <div class="comm">
-    <nav class="card channels" aria-label="Canales"><span class="nav-label">Canales</span>${CHANNELS.map(c=>`<button class="ch" aria-current="${c.id===S.ch}" data-ch="${c.id}"># ${c.name}${c.count?`<small>${c.count}</small>`:''}</button>`).join('')}</nav>
+    <nav class="card channels" aria-label="Canales"><span class="nav-label">Canales</span>${CHANNELS.map(c=>{const n=POSTS.filter(p=>p.ch===c.id).length;return `<button class="ch" aria-current="${c.id===S.ch}" data-ch="${c.id}"># ${c.name}${n?`<small>${n}</small>`:''}</button>`}).join('')}</nav>
     <div style="display:grid;gap:14px;min-width:0">
-      <form class="card composer" id="composer"><div class="top"><span class="av" style="--c:#f2c66d">VR</span><textarea id="post-in" placeholder="Comparte algo en # ${ch.name}" aria-label="Nueva publicación"></textarea></div>
-        <div class="act"><span class="muted" style="font-size:.78rem">Publicas como Valentina Rojas</span><button class="btn btn-primary btn-sm">Publicar</button></div></form>
+      <form class="card composer" id="composer"><div class="top"><span class="av" style="--c:${ME.c}">${esc(ME.ini)}</span><textarea id="post-in" placeholder="Comparte algo en # ${ch.name}" aria-label="Nueva publicación"></textarea></div>
+        <div class="act"><span class="muted" style="font-size:.78rem">Publicas como ${esc(ME.name)}</span><button class="btn btn-primary btn-sm">Publicar</button></div></form>
       <div class="feed">${list.length?list.map(p=>`<article class="card post"><div class="post-h">${av(p)}<div><b>${esc(p.who)}</b>${p.karen?'<span class="tag-k">Maestra Holística</span>':''}<small>${p.when} · # ${ch.name}</small></div></div><p>${esc(p.txt)}</p>
-        <div class="post-a"><button aria-pressed="${!!p.liked}" data-like="${p.i}"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>${p.likes+(p.liked?1:0)}</button><button data-focus-reply="${p.i}"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>${p.replies.length} respuestas</button></div>
+        <div class="post-a"><button aria-pressed="${!!p.liked}" data-like="${p.i}"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>${p.likes}</button><button data-focus-reply="${p.i}"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>${p.replies.length} respuestas</button>${(p.mine||CM.isAdmin)?`<button data-delpost="${p.id}" style="margin-left:auto">Eliminar</button>`:''}</div>
         ${p.replies.length?`<div class="replies">${p.replies.map(r=>`<div class="q">${av(r)}<div class="bubble"><b>${esc(r.who)}</b>${r.karen?'<span class="tag-k">Maestra</span>':''}<p>${esc(r.txt)}</p></div></div>`).join('')}</div>`:''}
         <form class="reply-form" data-reply="${p.i}"><input type="text" id="r${p.i}" placeholder="Responder" aria-label="Responder"><button class="btn btn-ghost btn-sm">Enviar</button></form></article>`).join(''):`<div class="card empty">Este canal se abre cuando comience el nivel. Mientras tanto, conversa en # General.</div>`}</div>
     </div>
     <aside class="right" style="display:grid;gap:14px">
-      <section class="card panel"><h3 style="font-size:1.1rem">En línea ahora</h3>${[['Maestra Holística','MH',1,'Maestra'],['Camila Fuentes','CF',0,'Nivel 3','#cfe0c4'],['Javiera Muñoz','JM',0,'Nivel 3','#e8c9b8'],['Fernanda Soto','FS',0,'Nivel 2','#f2e1b5']].map(([n,i,k,r,c])=>`<div class="member">${av({karen:k,ini:i,c})}<div><b>${n}</b><small>${r}</small></div><span class="online"></span></div>`).join('')}</section>
+      <section class="card panel"><h3 style="font-size:1.1rem">Tu perfil</h3><div class="member">${av({ini:ME.ini,c:ME.c})}<div><b>${esc(ME.name)}</b><small>${CM.isAdmin?'Maestra':'Estudiante'}</small></div></div></section>
       <section class="card panel"><h3 style="font-size:1.1rem">Acuerdos de la comunidad</h3><ul class="rules"><li>Habla desde el respeto y el cariño.</li><li>Lo que se comparte aquí, se queda aquí.</li><li>No publiques datos de tus consultantes.</li><li>Las dudas de clase van en la pestaña Preguntas de cada clase.</li></ul></section>
     </aside>
   </div>`;
@@ -2754,7 +2719,7 @@ V.soporte=()=>{
     <section class="card panel"><h3>Escríbenos</h3>${S.sent?`<div class="ok-msg">Recibimos tu mensaje. Te responderemos por correo dentro de 24 horas hábiles.</div>`:''}
       <form class="ticket" id="ticket"><label for="tk-topic">Tema<select id="tk-topic">${Object.values(FAQ).map(v=>`<option>${v.name}</option>`).join('')}<option>Otro</option></select></label>
       <label for="tk-msg">Cuéntanos qué pasó<textarea id="tk-msg" style="min-height:110px" placeholder="Describe tu duda o problema"></textarea></label><button class="btn btn-primary">Enviar mensaje</button></form>
-      <h3 style="font-size:1.05rem;margin-top:8px">Tus solicitudes</h3><ul class="tickets"><li><span>No veo la grabación de la Clase 3</span><span class="pill done">Resuelta</span></li>${S.sent?'<li><span>Nueva solicitud</span><span class="pill prog">Abierta</span></li>':''}</ul>
+      <h3 style="font-size:1.05rem;margin-top:8px">Tus solicitudes</h3><ul class="tickets">${CM.tickets.map(t=>`<li><span>${esc(t.topic)}: ${esc(t.message.slice(0,60))}${t.message.length>60?'…':''}</span><span class="pill ${t.status==='open'?'prog':'done'}">${t.status==='open'?'Abierta':'Resuelta'}</span></li>`).join('')||'<li><span class="muted">Aún no has enviado solicitudes.</span></li>'}</ul>
     </section>
   </div>`;
 };
@@ -2799,83 +2764,57 @@ V.trabaja=()=>{
 };
 
 V.pagos=()=>{
-  const paid=PAYMENTS.filter(p=>p.s==='ok').length;
+  const paid=PAYMENTS.filter(p=>p.s==='ok'&&p.kind!=='full').length;
   const full=S.plan==='completo';
+  const noplan=S.plan==='none';
   return `<div class="view-head"><div><span class="eyebrow">Mi plan</span><h1>Mis pagos</h1><p>Tu formación completa de cinco niveles. El cobro mensual es automático, así no tienes que acordarte cada mes.</p></div></div>
   <div class="plans">
-    <article class="card plan ${!full?'cur':''}">${!full?'<span class="pill prog tagc">Tu plan</span>':''}<span class="eyebrow">Plan en cuotas</span><div class="price">55<small>USD al mes · 9 cuotas</small></div>
+    <article class="card plan ${(!full&&!noplan)?'cur':''}">${(!full&&!noplan)?'<span class="pill prog tagc">Tu plan</span>':''}<span class="eyebrow">Plan en cuotas</span><div class="price">55<small>USD al mes · 9 cuotas</small></div>
       <ul><li>Cobro automático el día 10 de cada mes</li><li>Después de la cuota 9 se deja de cobrar</li><li>Acceso a los niveles a medida que avanzas</li><li>Puedes pasarte al pago completo cuando quieras</li></ul>
-      ${full?'':`<div class="bar"><i style="width:${paid/9*100}%"></i></div><span class="muted" style="font-size:.82rem">${paid} cuotas pagadas</span>`}</article>
+      ${(full||noplan)?'':`<div class="bar"><i style="width:${paid/9*100}%"></i></div><span class="muted" style="font-size:.82rem">${paid} cuotas pagadas</span>`}</article>
     <article class="card plan ${full?'cur':''}">${full?'<span class="pill done tagc">Tu plan</span>':''}<span class="eyebrow">Pago completo</span><div class="price">499<small>USD una vez</small></div>
       <ul><li>Un solo pago por toda la formación</li><li>Acceso garantizado hasta tu certificación</li><li>Sin cobros mensuales</li></ul>
-      ${full?'<span class="pill done" style="justify-self:start">Formación pagada</span>':`<button class="btn btn-primary btn-sm" style="justify-self:start" data-checkout="completo">Pasarme al pago completo</button>`}</article>
+      ${full?'<span class="pill done" style="justify-self:start">Formación pagada</span>':`<button class="btn btn-primary btn-sm" style="justify-self:start" data-checkout="completo">Quiero el pago completo</button>`}</article>
   </div>
   <div class="cols">
     <section class="card panel"><h3>Historial de pagos</h3><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Fecha</th><th>Detalle</th><th>Monto</th><th>Estado</th><th></th></tr></thead><tbody>
-      ${S.overdue?'<tr><td>10 oct 2026</td><td>Cuota 5 de 9 · Plan mensual</td><td>55 USD</td><td><span class="pill bad">Rechazado</span></td><td><button class="link" data-checkout="1">Pagar</button></td></tr>':''}
-      ${PAYMENTS.map(p=>`<tr><td>${p.d}</td><td>${p.c}</td><td>${p.a} USD</td><td><span class="pill done">Pagado</span></td><td><button class="link" data-toast="En la plataforma real esto descarga la boleta">Boleta</button></td></tr>`).join('')}
+            ${PAYMENTS.map(p=>`<tr><td>${esc(p.d)}</td><td>${esc(p.c)}</td><td>${esc(p.a)} USD</td><td><span class="pill ${p.s==='ok'?'done':'bad'}">${p.s==='ok'?'Pagado':'Rechazado'}</span></td><td></td></tr>`).join('')||'<tr><td colspan="5" class="muted">Aún no tienes pagos registrados.</td></tr>'}
     </tbody></table></div></section>
     <section class="card panel"><h3>Próximo cobro</h3>
-      ${full?'<p class="muted">No tienes cobros pendientes. Tu formación está pagada.</p>':`<dl class="kv"><dt>Fecha</dt><dd>${S.overdue?'Pendiente desde 10 oct':'10 oct 2026'}</dd><dt>Monto</dt><dd>55 USD</dd><dt>Plan</dt><dd>Mensual</dd></dl>`}
-      <h3 style="font-size:1.05rem;margin-top:6px">Medio de pago</h3>
-      <div class="cardchip"><span class="brandc">VISA</span><div style="flex:1"><b style="font-size:.9rem">•••• 4242</b><small class="muted" style="display:block;font-size:.76rem">Vence 08/28</small></div><button class="link" data-toast="Aquí se abre el formulario seguro del proveedor de pagos">Cambiar</button></div>
-      <div class="demo-sw"><span>Prueba de la maqueta: ¿qué ve una alumna si su tarjeta es rechazada?</span><button class="btn btn-ghost btn-sm" id="sim">${S.overdue?'Volver a la normalidad':'Simular pago rechazado'}</button></div>
+      ${full?'<p class="muted">No tienes cobros pendientes. Tu formación está pagada.</p>':noplan?'<p class="muted">Aún no tienes un plan activo. Escríbenos desde Ayuda y la Maestra te activa tu plan.</p>':`<dl class="kv"><dt>Estado</dt><dd>${S.overdue?'Pago pendiente':'Al día'}</dd><dt>Monto</dt><dd>55 USD</dd><dt>Plan</dt><dd>Mensual</dd></dl>`}
     </section>
   </div>`;
 };
 
 V.maestra=()=>{
+  if(!CM.isAdmin)return '<div class="card empty">Este panel es solo para la Maestra.</div>';
   const n=k=>STUDENTS.filter(s=>s.s===k).length;
   const mrr=STUDENTS.filter(s=>s.plan==='Mensual'&&s.s!=='paused').length*55;
-  return `<div class="view-head"><div><span class="eyebrow">Solo para la Maestra Holística</span><h1>Pagos de tus alumnas</h1><p>Los cobros, recordatorios y pausas de acceso pasan solos. Aquí ves en qué está cada alumna sin tener que escribirle a nadie.</p></div></div>
-  <div class="kpis"><div><b>${STUDENTS.length}</b><span>alumnas activas</span></div><div><b>${n('ok')+n('full')}</b><span>al día</span></div><div><b>${n('retry')}</b><span>reintentando cobro</span></div><div><b>${n('paused')}</b><span>con acceso pausado</span></div></div>
-  <section style="display:grid;gap:12px"><h3 style="font-size:1.25rem">Así funciona el cobro automático</h3>
-  <ol class="flow"><li><b>Día 0</b><span>Cobro automático</span><small>Se cobra la cuota a la tarjeta guardada. Tres días antes la alumna recibe un aviso por correo.</small></li>
-  <li><b>Día 1 a 5</b><span>Reintentos</span><small>Si la tarjeta falla, se reintenta el cobro los días 1, 3 y 5, y la alumna recibe un correo con un enlace para pagar.</small></li>
-  <li><b>Día 7</b><span>Acceso pausado</span><small>Si sigue sin pagar, se pausa su acceso a clases y materiales. Su avance queda guardado.</small></li>
-  <li><b>Al pagar</b><span>Reactivación inmediata</span><small>Apenas paga, vuelve a ver todo al instante. Tú no tienes que hacer nada.</small></li></ol></section>
+  return `<div class="view-head"><div><span class="eyebrow">Solo para la Maestra Holística</span><h1>Pagos de tus alumnas</h1><p>Aquí ves a las alumnas registradas, su plan y su nivel. El plan, el nivel y el estado de pago se cambian desde el administrador (scripts/admin.mjs).</p></div></div>
+  <div class="kpis"><div><b>${STUDENTS.length}</b><span>alumnas activas</span></div><div><b>${n('ok')+n('full')}</b><span>al día</span></div><div><b>${n('none')}</b><span>sin plan</span></div><div><b>${n('overdue')+n('retry')+n('paused')}</b><span>con pago pendiente</span></div></div>
   <div class="cols" style="grid-template-columns:1fr">
     <section class="card panel"><div class="panel-h"><h3>Alumnas</h3><span class="muted" style="font-size:.82rem">Ingreso mensual recurrente: <b style="color:var(--fg)">${mrr} USD</b></span></div>
-      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Alumna</th><th>Plan</th><th>Nivel</th><th>Último pago</th><th>Próximo cobro</th><th>Estado</th></tr></thead><tbody>
-      ${STUDENTS.map(s=>{const st=(s.n==='Valentina Rojas'&&S.overdue)?'retry':s.s;return `<tr><td><span style="display:flex;gap:10px;align-items:center">${av(s)}${s.n}</span></td><td>${s.plan}</td><td>${s.lvl}</td><td>${s.last}</td><td>${s.next}</td><td>${STP[st]}</td></tr>`}).join('')}
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Alumna</th><th>Correo</th><th>Plan</th><th>Nivel</th><th>Desde</th><th>Estado</th></tr></thead><tbody>
+      ${STUDENTS.map(s=>`<tr><td><span style="display:flex;gap:10px;align-items:center">${av(s)}${esc(s.n)}</span></td><td>${esc(s.email)}</td><td>${s.plan}</td><td>${s.lvl}</td><td>${s.last}</td><td>${STP[s.s]||STP.none}</td></tr>`).join('')||'<tr><td colspan="6" class="muted">Todavía no hay alumnas registradas.</td></tr>'}
       </tbody></table></div></section>
-    <section class="card panel"><h3>Actividad automática</h3><ul class="log">
-      ${S.overdue?'<li><span class="dotc" style="--c:var(--live)"></span><div>Pago rechazado de Valentina Rojas. Se le envió el enlace para pagar.<small>Hoy, 08:00</small></div></li>':''}
-      <li><span class="dotc" style="--c:var(--brass)"></span><div>Segundo reintento de cobro a Javiera Muñoz. Correo enviado.<small>Hoy, 08:00</small></div></li>
-      <li><span class="dotc" style="--c:var(--ok)"></span><div>Ignacia Vidal pagó su cuota de octubre.<small>1 oct</small></div></li>
-      <li><span class="dotc" style="--c:var(--live)"></span><div>Acceso pausado a Daniela Pérez tras 7 días sin pago.<small>2 oct</small></div></li>
-      <li><span class="dotc" style="--c:var(--muted)"></span><div>Aviso de cobro enviado a 4 alumnas para el día 10.<small>7 oct</small></div></li>
-    </ul></section>
   </div>`;
 };
 
 function checkoutModal(kind){
-  const full=kind==='completo';
-  openModal(`<form class="checkout" id="pay-form"><span class="eyebrow">Pago seguro</span><h3>${full?'Pago completo de la formación':'Pagar tu cuota pendiente'}</h3>
-   <label class="opt"><input type="radio" name="pl" value="m" ${full?'':'checked'}><div><b>Cuota mensual</b><small>Plan mensual · cuota de octubre</small></div><span class="amt">55 USD</span></label>
-   <label class="opt"><input type="radio" name="pl" value="c" ${full?'checked':''}><div><b>Pago completo</b><small>Toda la formación, sin más cuotas</small></div><span class="amt">499 USD</span></label>
-   <div class="cardchip"><span class="brandc">VISA</span><div style="flex:1"><b style="font-size:.9rem">•••• 4242</b><small class="muted" style="display:block;font-size:.76rem">Tarjeta guardada de ejemplo</small></div><button type="button" class="link" data-toast="Aquí se abre el formulario seguro del proveedor de pagos">Usar otra</button></div>
-   <button class="btn btn-primary" id="pay-btn">Pagar ${full?'499':'55'} USD</button>
-   <p class="secure">Maqueta: no se cobra nada. En la versión real, el pago lo procesa el proveedor elegido y la tarjeta nunca pasa por la plataforma.</p></form>`);
-  const f=$('#pay-form');f.onchange=()=>{$('#pay-btn').textContent='Pagar '+(f.pl.value==='c'?'499':'55')+' USD'};
-  f.onsubmit=e=>{e.preventDefault();const c=f.pl.value==='c';
-    if(S.overdue||!c)PAYMENTS.unshift({d:'10 oct 2026',c:'Cuota 5 de 9 · Plan mensual',a:55,s:'ok'});
-    if(c){S.plan='completo';PAYMENTS.unshift({d:'10 oct 2026',c:'Pago completo de la formación',a:499,s:'ok'})}
-    S.overdue=false;closeModal();render(false);toast(c?'Pago completo registrado. Tu formación está pagada':'Pago recibido. Tu acceso está activo de nuevo')};
+  openModal(`<div class="modal-b"><span class="eyebrow">Pagos</span><h3>${kind==='completo'?'Pago completo de la formación':'Pagar tu cuota'}</h3><p>El pago en línea aún no está habilitado en el aula. Escríbenos desde <b>Ayuda</b> y la Maestra te comparte el enlace de pago y activa tu plan apenas se registre.</p><div class="acts"><button class="btn btn-primary btn-sm" data-go="soporte">Ir a Ayuda</button></div></div>`);
 }
 
 /* ---------- render + events ---------- */
 let timer;
 function render(scrollTop=true){
-  $('#nav').innerHTML=NAV.map(([k,n,ic,c])=>`${k==='maestra'?'<span class="nav-label">Solo para la Maestra</span>':''}<button data-go="${k}" ${(S.view===k||(S.view==='curso'&&k==='formacion'))?'aria-current="page"':''}><svg viewBox="0 0 24 24">${ic}</svg>${n}${c?`<span class="count">${c}</span>`:''}</button>`).join('');
-  $('#view').innerHTML=(S.overdue&&S.view!=='maestra'?`<div class="alert"><div><b>Tu cuota de octubre no se pudo cobrar</b><p>Tu acceso a clases, grabaciones y materiales está pausado. Se reactiva apenas se registre el pago.</p></div><button class="btn btn-sm" data-checkout="1">Pagar 55 USD ahora</button></div>`:'')+V[S.view]();
+  $('#nav').innerHTML=NAV.filter(x=>x[0]!=='maestra'||CM.isAdmin).map(([k,n,ic,c])=>`${k==='maestra'?'<span class="nav-label">Solo para la Maestra</span>':''}<button data-go="${k}" ${(S.view===k||(S.view==='curso'&&k==='formacion'))?'aria-current="page"':''}><svg viewBox="0 0 24 24">${ic}</svg>${n}${c?`<span class="count">${c}</span>`:''}</button>`).join('');
+  $('#view').innerHTML=(S.overdue&&S.view!=='maestra'?`<div class="alert"><div><b>Tu cuota está pendiente</b><p>Tu acceso a clases, grabaciones y materiales está pausado. Se reactiva apenas se registre el pago.</p></div><button class="btn btn-sm" data-checkout="1">Cómo pagar</button></div>`:'')+V[S.view]();
   if(scrollTop)window.scrollTo(0,0);
   bindView();pndMount();
 }
 function go(v){S.view=v;stopPlay();closeSide();render()}
 function openLevel(id){const lv=LEVELS.find(l=>l.id===id);S.level=id;let pos=[0,0];
   outer:for(let i=0;i<lv.modules.length;i++)for(let j=0;j<lv.modules[i].lessons.length;j++){if(!lv.modules[i].lessons[j].done){pos=[i,j];break outer}}
-  if(lv.status==='progress'){pos=[1,0]}
   S.lesson=pos;S.tab='temas';S.t=0;stopPlay();S.view='curso';closeSide();render()}
 function stopPlay(){S.playing=false;clearInterval(timer)}
 function bindView(){
@@ -2885,20 +2824,19 @@ function bindView(){
     render(false)};
   $('#play')&&($('#play').onclick=play);$('#play2')&&($('#play2').onclick=play);
   const tr=$('#track');if(tr)tr.onclick=e=>{const r=tr.getBoundingClientRect();const lv=LEVELS.find(l=>l.id===S.level);const les=lv.modules[S.lesson[0]].lessons[S.lesson[1]];S.t=(e.clientX-r.left)/r.width*toSec(les.len);render(false)};
-  const n=$('#notes');if(n){n.oninput=()=>{S.notes[S.level+S.lesson.join('')]=n.value};$('#save-notes').onclick=()=>toast('Notas guardadas')}
-  const qf=$('#qa-form');if(qf)qf.onsubmit=e=>{e.preventDefault();const v=$('#qa-in').value.trim();if(!v)return;S.qa[S.level+S.lesson.join('')].push({who:'Valentina Rojas',ini:'VR',c:'#f2c66d',txt:v});render(false);toast('Pregunta enviada a la Maestra Holística')};
-  const md=$('#mark-done');if(md)md.onclick=()=>{const lv=LEVELS.find(l=>l.id===S.level);const les=lv.modules[S.lesson[0]].lessons[S.lesson[1]];les.done=!les.done;render(false);toast(les.done?'Clase marcada como vista':'Clase marcada como no vista')};
+  const n=$('#notes');if(n){n.oninput=()=>{CM.notes[lkey()]=n.value};$('#save-notes').onclick=()=>CM.saveNote(lkey(),n.value).then(()=>toast('Notas guardadas')).catch(fail)}
+  const qf=$('#qa-form');if(qf)qf.onsubmit=e=>{e.preventDefault();const v=$('#qa-in').value.trim();if(!v)return;CM.ask(lkey(),v).then(()=>{render(false);toast('Pregunta enviada a la Maestra Holística')}).catch(fail)};
+  const md=$('#mark-done');if(md)md.onclick=()=>{const lv=LEVELS.find(l=>l.id===S.level);const les=lv.modules[S.lesson[0]].lessons[S.lesson[1]];const nv=!les.done;md.disabled=true;CM.setDone(lkey(),nv).then(()=>{les.done=nv;refreshDerived();render(false);toast(nv?'Clase marcada como vista':'Clase marcada como no vista')}).catch(e=>{md.disabled=false;fail(e)})};
   const nx=$('#next-les');if(nx)nx.onclick=()=>{const lv=LEVELS.find(l=>l.id===S.level);let [i,j]=S.lesson;j++;if(j>=lv.modules[i].lessons.length){i++;j=0}if(i>=lv.modules.length){toast('Terminaste las clases de este nivel');return}S.lesson=[i,j];S.openMods[lv.id+i]=true;S.t=0;stopPlay();render()};
-  const cp=$('#composer');if(cp)cp.onsubmit=e=>{e.preventDefault();const v=$('#post-in').value.trim();if(!v)return;POSTS.unshift({ch:S.ch,who:'Valentina Rojas',ini:'VR',c:'#f2c66d',when:'Ahora',txt:v,likes:0,liked:0,replies:[]});render(false);toast('Publicado')};
-  document.querySelectorAll('form[data-reply]').forEach(f=>f.onsubmit=e=>{e.preventDefault();const i=+f.dataset.reply;const inp=f.querySelector('input');const v=inp.value.trim();if(!v)return;POSTS[i].replies.push({who:'Valentina Rojas',ini:'VR',c:'#f2c66d',txt:v});render(false)});
+  const cp=$('#composer');if(cp)cp.onsubmit=e=>{e.preventDefault();const v=$('#post-in').value.trim();if(!v)return;CM.post(S.ch,v).then(()=>{$('#post-in').value='';toast('Publicado')}).catch(fail)};
+  document.querySelectorAll('form[data-reply]').forEach(f=>f.onsubmit=e=>{e.preventDefault();const inp=f.querySelector('input');const v=inp.value.trim();if(!v)return;CM.reply(f.dataset.reply,v).then(()=>{inp.value=''}).catch(fail)});
   const rl=$('#rlvl');if(rl)rl.onchange=()=>{S.resLvl=rl.value;render(false)};
   const rq=$('#rq');if(rq)rq.oninput=()=>{S.resQ=rq.value;const pos=rq.selectionStart;render(false);const r2=$('#rq');r2.focus();r2.setSelectionRange(pos,pos)};
-  const tk=$('#ticket');if(tk)tk.onsubmit=e=>{e.preventDefault();if(!$('#tk-msg').value.trim()){toast('Escribe tu mensaje antes de enviarlo');return}S.sent=true;render(false);toast('Mensaje enviado')};
+  const tk=$('#ticket');if(tk)tk.onsubmit=e=>{e.preventDefault();const m=$('#tk-msg').value.trim();if(!m){toast('Escribe tu mensaje antes de enviarlo');return}CM.ticket($('#tk-topic').value,m).then(()=>{S.sent=true;render(false);toast('Mensaje enviado')}).catch(fail)};
   const sq=$('#sq');if(sq)sq.oninput=()=>{const q=sq.value.toLowerCase().trim();if(!q){render(false);return}const hits=Object.values(FAQ).flatMap(v=>v.q).filter(([a,b])=>(a+b).toLowerCase().includes(q));$('#faq').innerHTML=hits.length?hits.map(([a,b])=>`<details open><summary>${a}</summary><p>${b}</p></details>`).join(''):'<p class="muted" style="padding:14px 4px">No encontramos respuestas. Escríbenos con el formulario.</p>'};
   const cv=$('#cert-preview');if(cv)cv.onclick=certModal;
   const ap=$('#apply');if(ap)ap.onsubmit=e=>{e.preventDefault();S.applied=true;render();toast('Postulación enviada a Karen')};
   const ar=$('#app-reset');if(ar)ar.onclick=()=>{S.applied=false;render(false)};
-  const sim=$('#sim');if(sim)sim.onclick=()=>{S.overdue=!S.overdue;if(S.overdue)S.plan='mensual';render(false);toast(S.overdue?'Simulación: la alumna ahora ve su acceso pausado':'Simulación terminada')};
 }
 function updPlayer(les,dur){const f=$('#tfill');if(!f)return;f.style.width=S.t/dur*100+'%';$('#tnow').textContent=fmt(S.t);const c=$('#chap-now');if(c&&les.topics.length)c.textContent=les.topics[curChapter(les)].t;
   document.querySelectorAll('.chapters li').forEach((li,i)=>li.classList.toggle('now',i===curChapter(les)))}
@@ -2917,7 +2855,8 @@ document.addEventListener('click',e=>{
   else if(d.checkout)checkoutModal(d.checkout);
   else if(d.badge)badgeModal(d.badge);
   else if(d.ch){S.ch=d.ch;render(false)}
-  else if(d.like){const p=POSTS[+d.like];p.liked=p.liked?0:1;render(false)}
+  else if(d.like){t.disabled=true;CM.toggleLike(d.like).catch(e=>{t.disabled=false;fail(e)})}
+  else if(d.delpost){if(confirm('¿Eliminar esta publicación?'))CM.deletePost(d.delpost).catch(fail)}
   else if(d.focusReply){const i=$('#r'+d.focusReply);i&&i.focus()}
   else if(d.rtype){S.resType=d.rtype;render(false)}
   else if(d.topic){S.supTopic=d.topic;render(false)}
@@ -2934,22 +2873,81 @@ function badgeModal(id){const b=BADGES.find(x=>x.id===id);const lv=LEVELS.find(l
   <p>${b.earned?`Obtenida el ${b.earned} al completar todas las clases y la práctica final. Otorgada por la Maestra Holística, Casa Muladhara.`:`Se obtiene al completar ${lv.title}${b.lvl===4?' en esta especialización':''} y su práctica final.`}</p>
   <div class="acts">${b.earned?`<button class="btn btn-primary btn-sm" data-toast="Aquí se comparte en Instagram, Facebook o LinkedIn">Compartir</button><button class="btn btn-ghost btn-sm" data-toast="Enlace de verificación copiado">Copiar enlace de verificación</button>`:`<button class="btn btn-primary btn-sm" data-open-level="${lv.id}">Ver el nivel</button>`}</div></div>`)}
 document.getElementById('modal').addEventListener('click',e=>{const t=e.target.closest('[data-open-level]');if(t)closeModal()});
-function certModal(){openModal(`<div class="modal-b"><span class="eyebrow">Vista previa</span><div class="certificate"><svg class="wm"><use href="#mark"/></svg><span class="k">Escuela de Formación Holística · Casa Muladhara</span><h4>Certificado de</h4><h4 style="font-size:clamp(1.1rem,3.8vw,1.7rem)">Terapeuta Holístico Integral</h4><p>se otorga a</p><div class="name">Valentina Rojas</div><p>por completar los cinco niveles de la formación: Péndulo Hebreo, Limpieza energética de casas y espacios, Radiestesia y Sanación del Alma, Especializaciones en Radiestesia y Tarot Terapéutico.</p><div class="sig"><div>Karen Oyarce<br>Maestra Holística</div><div>Código de verificación<br>CM-THI-2027-0142</div></div></div>
+function certModal(){openModal(`<div class="modal-b"><span class="eyebrow">Vista previa</span><div class="certificate"><svg class="wm"><use href="#mark"/></svg><span class="k">Escuela de Formación Holística · Casa Muladhara</span><h4>Certificado de</h4><h4 style="font-size:clamp(1.1rem,3.8vw,1.7rem)">Terapeuta Holístico Integral</h4><p>se otorga a</p><div class="name">${esc(ME.name)}</div><p>por completar los cinco niveles de la formación: Péndulo Hebreo, Limpieza energética de casas y espacios, Radiestesia y Sanación del Alma, Especializaciones en Radiestesia y Tarot Terapéutico.</p><div class="sig"><div>Karen Oyarce<br>Maestra Holística</div><div>Código de verificación<br>CM-THI-2027-0142</div></div></div>
   <p>Así se verá tu certificado al terminar. Te faltan los niveles 3, 4 y 5.</p></div>`)}
 
 /* shell */
 function closeSide(){$('#side').classList.remove('open');const s=document.querySelector('.scrim-side');s&&s.remove()}
 $('#menu-btn').onclick=()=>{$('#side').classList.add('open');const s=document.createElement('div');s.className='scrim-side';s.onclick=closeSide;document.body.appendChild(s)};
-function sesion(v){try{v===undefined?0:v?sessionStorage.setItem('cm-sesion','1'):sessionStorage.removeItem('cm-sesion');return sessionStorage.getItem('cm-sesion')==='1'}catch(_){return false}}
-$('#logout').onclick=()=>{stopPlay();closeSide();closeModal();sesion(false);$('#bye').hidden=false;$('#login').hidden=false;$('#lg-mail').focus()};
-$('#login-form').onsubmit=e=>{e.preventDefault();sesion(true);$('#login').hidden=true;S.view='inicio';render();toast('Bienvenida a tu aula, Valentina')};
-if(sesion())$('#login').hidden=true;
+$('#logout').onclick=()=>{stopPlay();closeSide();closeModal();CM.signOut()};
 $('#bell').onclick=e=>{e.stopPropagation();const p=$('#pop');p.hidden=!p.hidden;$('#bell-dot').hidden=true};
 document.addEventListener('click',e=>{if(!e.target.closest('#pop')&&!e.target.closest('#bell'))$('#pop').hidden=true});
 $('#theme-btn').onclick=()=>{const r=document.documentElement;const dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;r.dataset.theme=dark?'light':'dark'};
 $('#gsearch').addEventListener('keydown',e=>{if(e.key==='Enter'){S.resQ=e.target.value;S.resType='Todos';S.resLvl='0';e.target.value='';go('recursos')}});
 
-render();
+/* ---------- conexión con la cuenta (Firestore) ---------- */
+const lkey=()=>S.level+'_'+S.lesson.join('_');
+const person=(n)=>({who:n});
+const fail=e=>{console.error(e);toast(e&&e.code==='permission-denied'?'No tienes permiso para hacer eso.':'No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.')};
+const fmtDay=d=>d.toLocaleDateString('es',{day:'numeric',month:'short',year:'numeric'});
+
+// primera clase pendiente del nivel más avanzado que ya tiene abierto
+function resumePoint(){
+  const open=LEVELS.filter(l=>l.status!=='locked');
+  let started=false;
+  for(const lv of open){
+    for(let i=0;i<lv.modules.length;i++)for(let j=0;j<lv.modules[i].lessons.length;j++){
+      if(lv.modules[i].lessons[j].done)started=true;
+      else return {lv,i,j,les:lv.modules[i].lessons[j],started};
+    }
+  }
+  const lv=open[open.length-1]||LEVELS[0];const i=0,j=0;
+  return {lv,i,j,les:lv.modules[i].lessons[j],started:true};
+}
+
+// estados de nivel e insignias salen del avance real de la alumna
+function refreshDerived(){
+  LEVELS.forEach(lv=>{lv.status=lv.n>CM.profile.accessLevel?'locked':(pct(lv)===100?'done':'progress')});
+  const lastDone=lv=>{let t=0;lv.modules.forEach((m,i)=>m.lessons.forEach((l,j)=>{const d=CM.doneAt[lv.id+'_'+i+'_'+j];if(d&&d.toMillis)t=Math.max(t,d.toMillis())}));return t?fmtDay(new Date(t)):'hoy'};
+  BADGES.forEach(b=>{
+    const lv=LEVELS.find(l=>l.n===b.lvl);
+    let ok;
+    if(b.lvl===4){const idx={b4a:0,b4b:1,b4c:2,b4d:3}[b.id];ok=lv.modules[idx].lessons.every(l=>l.done)}
+    else ok=pct(lv)===100;
+    b.earned=ok?lastDone(lv):undefined;
+  });
+  S.overdue=CM.profile.paymentStatus==='overdue';
+  S.plan=CM.profile.plan==='completo'?'completo':(CM.profile.plan==='mensual'?'mensual':'none');
+  PAYMENTS=CM.payments.map(p=>({d:p.paidAt&&p.paidAt.toDate?fmtDay(p.paidAt.toDate()):(p.createdAt&&p.createdAt.toDate?fmtDay(p.createdAt.toDate()):''),c:p.concept||'Pago',a:p.amount||0,s:p.status==='paid'||p.status==='ok'?'ok':'failed',kind:p.kind}));
+}
+
+function renderNotifs(){
+  const ul=$('#notif-list');if(!ul)return;
+  ul.innerHTML=CM.notifications.length?CM.notifications.map(n=>`<li><span class="av sm karen">MH</span><div>${esc(n.text||'')}<small>${esc(n.when||'')}</small></div></li>`).join(''):'<li><div class="muted">Aún no tienes notificaciones.</div></li>';
+  $('#bell-dot').hidden=!CM.notifications.some(n=>n.read===false);
+}
+
+window.cmStart=async function(cm){
+  ME={name:cm.profile.name,ini:cm.profile.ini,c:cm.profile.c};
+  $('#me-av').textContent=ME.ini;$('#me-av').style.setProperty('--c',ME.c);
+  $('#me-name').textContent=ME.name;
+  // los datos de ejemplo del diseño original no se muestran: todo parte en blanco y se llena con su avance real
+  LEVELS.forEach(lv=>lv.modules.forEach((m,i)=>m.lessons.forEach((l,j)=>{l.done=!!cm.progress[lv.id+'_'+i+'_'+j]})));
+  refreshDerived();
+  $('#me-sub').textContent=cm.isAdmin?'Maestra Holística':'Estudiante · Nivel '+Math.max(1,...LEVELS.filter(l=>l.status!=='locked').map(l=>l.n));
+  renderNotifs();
+  if(cm.isAdmin){
+    try{
+      const st=await cm.loadStudents();
+      STUDENTS=st.map(u=>({n:u.n,ini:u.ini,c:u.c,email:u.email||'',plan:u.plan==='completo'?'Pago completo':u.plan==='mensual'?'Mensual':'Sin plan',lvl:u.accessLevel||1,last:u.since||'',s:u.paymentStatus==='overdue'?'overdue':u.plan==='completo'?'full':u.plan==='mensual'?'ok':'none'}));
+    }catch(e){console.error(e)}
+  }
+  cm.onPosts=()=>{POSTS=cm.posts;const a=document.activeElement;const typing=a&&/INPUT|TEXTAREA/.test(a.tagName)&&a.value;if(!typing&&['comunidad','inicio'].includes(S.view))render(false)};
+  POSTS=cm.posts;
+  $('#login').hidden=true;
+  render();
+};
 </script>
+<script type="module" src="assets/js/cloud.js"></script>
 
 </body></html>

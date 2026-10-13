@@ -1,0 +1,11 @@
+{
+  "name": "casamuladhara-scripts",
+  "private": true,
+  "type": "module",
+  "description": "Herramientas de administración (no se despliegan con el sitio).",
+  "dependencies": {
+    "firebase": "^11.10.0",
+    "firebase-admin": "^13.0.0",
+    "google-auth-library": "^9.15.0"
+  }
+}

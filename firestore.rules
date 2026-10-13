@@ -1,0 +1,167 @@
+rules_version = '2';
+
+// Casa Muladhara · Aula virtual
+// Principio: cada alumna solo puede leer y escribir lo que cuelga de users/{su uid}.
+// La Maestra (custom claim admin=true) ve y administra todo. Todo lo demás está denegado.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+    function isAdmin() { return signedIn() && request.auth.token.get('admin', false) == true; }
+    function onlyKeys(keys) { return request.resource.data.keys().hasOnly(keys); }
+    function hasKeys(keys) { return request.resource.data.keys().hasAll(keys); }
+    function changed() { return request.resource.data.diff(resource.data).affectedKeys(); }
+    function text(v, max) { return v is string && v.size() > 0 && v.size() <= max; }
+    function userDoc(uid) { return get(/databases/$(database)/documents/users/$(uid)).data; }
+
+    // ---------- Perfil de cada alumna ----------
+    match /users/{uid} {
+      allow get: if isOwner(uid) || isAdmin();
+      allow list: if isAdmin();
+
+      // La alumna crea su propio perfil una sola vez, con valores iniciales fijos.
+      // Rol, nivel, plan y estado de pago NO los puede escoger ella.
+      allow create: if isOwner(uid)
+        && onlyKeys(['uid', 'email', 'displayName', 'photoURL', 'role', 'accessLevel', 'plan', 'paymentStatus', 'createdAt', 'lastLogin'])
+        && hasKeys(['uid', 'email', 'displayName', 'photoURL', 'role', 'accessLevel', 'plan', 'paymentStatus', 'createdAt', 'lastLogin'])
+        && request.resource.data.uid == uid
+        && request.auth.token.email != null
+        && request.resource.data.email == request.auth.token.email.lower()
+        && request.resource.data.displayName is string && request.resource.data.displayName.size() <= 120
+        && request.resource.data.photoURL is string && request.resource.data.photoURL.size() <= 600
+        && request.resource.data.role == 'student'
+        && request.resource.data.accessLevel == 1
+        && request.resource.data.plan == 'none'
+        && request.resource.data.paymentStatus == 'none'
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.lastLogin == request.time;
+
+      allow update: if isAdmin()
+        || (isOwner(uid)
+            && changed().hasOnly(['displayName', 'photoURL', 'lastLogin'])
+            && request.resource.data.displayName is string && request.resource.data.displayName.size() <= 120
+            && request.resource.data.photoURL is string && request.resource.data.photoURL.size() <= 600
+            && request.resource.data.lastLogin == request.time);
+
+      allow delete: if isAdmin();
+
+      // Avance por clase (clave = nivel_módulo_clase)
+      match /progress/{key} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create, update: if (isOwner(uid) || isAdmin())
+          && key.matches('^[a-z0-9_-]{1,80}$')
+          && onlyKeys(['done', 'updatedAt'])
+          && request.resource.data.done is bool
+          && request.resource.data.updatedAt == request.time;
+        allow delete: if isOwner(uid) || isAdmin();
+      }
+
+      // Notas privadas por clase
+      match /notes/{key} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create, update: if isOwner(uid)
+          && key.matches('^[a-z0-9_-]{1,80}$')
+          && onlyKeys(['text', 'updatedAt'])
+          && request.resource.data.text is string && request.resource.data.text.size() <= 20000
+          && request.resource.data.updatedAt == request.time;
+        allow delete: if isOwner(uid);
+      }
+
+      // Preguntas de clase a la Maestra (solo las ve su autora y la Maestra)
+      match /questions/{id} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid)
+          && onlyKeys(['lessonKey', 'text', 'answered', 'createdAt'])
+          && request.resource.data.lessonKey.matches('^[a-z0-9_-]{1,80}$')
+          && text(request.resource.data.text, 2000)
+          && request.resource.data.answered == false
+          && request.resource.data.createdAt == request.time;
+        allow update: if isAdmin();   // la Maestra responde
+        allow delete: if isOwner(uid) || isAdmin();
+      }
+
+      // Solicitudes de ayuda
+      match /tickets/{id} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid)
+          && onlyKeys(['topic', 'message', 'status', 'createdAt'])
+          && text(request.resource.data.topic, 80)
+          && text(request.resource.data.message, 4000)
+          && request.resource.data.status == 'open'
+          && request.resource.data.createdAt == request.time;
+        allow update, delete: if isAdmin();
+      }
+
+      // Pagos: la alumna solo los ve; los registra la Maestra o el backend (Admin SDK)
+      match /payments/{id} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow write: if isAdmin();
+      }
+
+      // Notificaciones: las crea la Maestra, la alumna solo marca como leída
+      match /notifications/{id} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create, delete: if isAdmin();
+        allow update: if isAdmin() || (isOwner(uid) && changed().hasOnly(['read']) && request.resource.data.read is bool);
+      }
+
+      // "Me gusta" propios en la comunidad
+      match /likes/{postId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid) && onlyKeys(['createdAt']) && request.resource.data.createdAt == request.time;
+        allow delete: if isOwner(uid);
+      }
+    }
+
+    // La Maestra consulta preguntas y solicitudes de todas las alumnas
+    match /{path=**}/questions/{id} { allow read: if isAdmin(); }
+    match /{path=**}/tickets/{id}   { allow read: if isAdmin(); }
+
+    // ---------- Comunidad (espacio compartido a propósito entre alumnas) ----------
+    // Solo expone lo que la propia alumna decide publicar y su nombre; nunca su correo.
+    match /posts/{postId} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && onlyKeys(['ch', 'text', 'authorUid', 'authorName', 'isTeacher', 'likeCount', 'createdAt'])
+        && request.resource.data.ch in ['general', 'presentaciones', 'n1', 'n2', 'n3', 'n4', 'n5', 'testimonios']
+        && text(request.resource.data.text, 3000)
+        && request.resource.data.authorUid == request.auth.uid
+        && request.resource.data.authorName == userDoc(request.auth.uid).displayName
+        && request.resource.data.isTeacher == isAdmin()
+        && request.resource.data.likeCount == 0
+        && request.resource.data.createdAt == request.time;
+
+      // Contador de "me gusta": solo +1 / -1 y solo junto con el documento like de quien lo da
+      allow update: if isAdmin()
+        || (signedIn()
+            && changed().hasOnly(['likeCount'])
+            && (
+              (!exists(/databases/$(database)/documents/users/$(request.auth.uid)/likes/$(postId))
+                && existsAfter(/databases/$(database)/documents/users/$(request.auth.uid)/likes/$(postId))
+                && request.resource.data.likeCount == resource.data.likeCount + 1)
+              ||
+              (exists(/databases/$(database)/documents/users/$(request.auth.uid)/likes/$(postId))
+                && !existsAfter(/databases/$(database)/documents/users/$(request.auth.uid)/likes/$(postId))
+                && request.resource.data.likeCount == resource.data.likeCount - 1)
+            ));
+
+      allow delete: if isAdmin() || (signedIn() && resource.data.authorUid == request.auth.uid);
+    }
+
+    match /replies/{replyId} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && onlyKeys(['postId', 'text', 'authorUid', 'authorName', 'isTeacher', 'createdAt'])
+        && request.resource.data.postId is string && request.resource.data.postId.size() <= 40
+        && exists(/databases/$(database)/documents/posts/$(request.resource.data.postId))
+        && text(request.resource.data.text, 2000)
+        && request.resource.data.authorUid == request.auth.uid
+        && request.resource.data.authorName == userDoc(request.auth.uid).displayName
+        && request.resource.data.isTeacher == isAdmin()
+        && request.resource.data.createdAt == request.time;
+      allow update: if false;
+      allow delete: if isAdmin() || (signedIn() && resource.data.authorUid == request.auth.uid);
+    }
+  }
+}
