@@ -6,26 +6,32 @@ Sitio estático (Vercel, sin build) con aula virtual conectada a Firebase (proye
 - `login.html`: ingreso / registro (correo y contraseña, Google).
 - `aula.html`: aula virtual. Sin sesión redirige a `login.html`.
 - `assets/js/firebase.js`, `assets/js/cloud.js`: configuración y capa de datos (Auth + Firestore).
-- `curso/clases.js`: contenido de las clases. Solo se sirve con suscripción activa (ver abajo).
-- `api/billing.js`, `api/stripe-webhook.js`: suscripción con Stripe (funciones de Vercel).
-- `middleware.js`: bloquea en el servidor `curso/` y los materiales de `assets/n2`, `assets/n3`.
+- `curso/n1.js`, `curso/n2.js`, `curso/n3.js`: contenido de las clases de cada nivel. Solo se sirven a quien tiene ese nivel abierto.
+- `api/billing.js`, `api/stripe-webhook.js`: pagos con Stripe (funciones de Vercel).
+- `api/_lib/access.js`: la regla única de quién abre qué nivel.
+- `middleware.js`: bloquea en el servidor `curso/nN.js` y `assets/nN/` según el nivel de cada alumna.
 - `firestore.rules`, `storage.rules`, `firestore.indexes.json`: seguridad e índices.
 
-## Suscripción (Stripe, 55 USD al mes)
-- Tres roles en `users/{uid}.role`: `admin` (la Maestra), `student_free` y `student_subscribed`. Nadie elige su rol: el webhook de Stripe lo cambia según el pago y las reglas de Firestore impiden ponérselo desde el navegador.
-- Toda cuenta nueva es **gratis**: entra al aula, ve el programa, la comunidad y su perfil, pero las clases, videos y materiales están bloqueados con un botón "Suscribirme".
-- El botón abre Stripe Checkout (`/api/billing`). Si ya tiene suscripción, abre el portal de Stripe para cambiar tarjeta, pagar una cuota pendiente o cancelar.
-- Stripe avisa a `/api/stripe-webhook`, que deja la cuenta en `plan: mensual` + `paymentStatus: ok` y le da el claim `member` (abre las clases). Si un cobro falla queda `overdue` (acceso pausado, conserva su avance); si cancela vuelve a `none`. Cada factura queda en `users/{uid}/payments`.
-- El contenido no viaja al navegador sin acceso: `middleware.js` revisa el token de Firebase (cookie `cm_session`) y exige `member` o `admin` antes de servir `curso/` y `assets/n2`, `assets/n3`.
-- Dentro de la suscripción, los niveles se siguen abriendo con `accessLevel` (lo sube la Maestra).
-- Al activar esto, publica las reglas (`node scripts/deploy-backend.mjs`) y corre una vez `node scripts/admin.mjs sync-members` para que las alumnas que ya tienen plan al día no pierdan el acceso.
-- Regalar acceso sin pago: `node scripts/admin.mjs enroll correo --plan mensual --pay ok` (o `--plan completo`). Quitarlo: `--plan none --pay none`.
+## Formación y pagos (Stripe)
+Una sola inscripción para la formación completa de cinco niveles: **9 cuotas de 55 USD** (Stripe deja de cobrar sola después de la novena) o **499 USD al contado**. Quien paga en cuotas puede pagar lo que le falta al contado cuando quiera.
 
-Variables de entorno en Vercel: ver `.env.example` (`STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID`, `STRIPE_WEBHOOK_SECRET`, `FIREBASE_SERVICE_ACCOUNT`).
-Eventos del webhook en Stripe: `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid`, `invoice.payment_failed`.
+- **Roles** (`users/{uid}.role`): `admin` (la Maestra), `student_free` (toda cuenta nueva: ve el programa y la comunidad, todo bloqueado), `student_subscribed` (paga en cuotas al día o ya pagó todo) y `student_permanent` (alumnas que pagaron niveles antes de la plataforma). Nadie elige su rol: lo ponen el webhook de Stripe o la Maestra, y las reglas de Firestore impiden cambiarlo desde el navegador.
+- **Nivel abierto** (claim `lvl` en el token): el mayor entre el acceso permanente (`grantLevel`) y, si paga al día, el nivel de avance (`accessLevel`, que sube la Maestra; como mínimo el siguiente al permanente). `middleware.js` lo exige antes de servir el contenido de cada nivel.
+- **Cuota atrasada**: se pausa lo que no tenía; conserva su acceso permanente y su avance. Cada pago queda en `users/{uid}/payments`.
 
-## Aislamiento de datos
-Todo lo personal (perfil, avance, notas, preguntas, ayuda, pagos) vive bajo `users/{uid}`; las reglas solo dejan acceder a su dueña o a la Maestra (claim `admin`). Nivel, plan, pago y rol no se pueden cambiar desde el navegador. La comunidad es el único espacio compartido y solo expone nombre y lo publicado, nunca el correo.
+### Tus alumnas actuales
+```bash
+node scripts/admin.mjs grant ana@correo.com 2      # acceso permanente hasta el Nivel 2, sin cobro
+node scripts/admin.mjs cuotas ana@correo.com 4     # si quiere seguir, paga solo 4 cuotas (o 220 USD al contado)
+node scripts/admin.mjs enroll ana@correo.com --level 3   # sube el nivel abierto mientras paga
+```
+Para regalar la formación completa: `enroll correo --plan completo`.
+
+### Puesta en marcha
+1. En Stripe: un producto con un precio recurrente mensual de 55 USD y otro único de 499 USD; activa el portal de clientes (cambiar tarjeta y cancelar).
+2. En Stripe → Webhooks: el endpoint `https://TU-DOMINIO/api/stripe-webhook` con `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid` e `invoice.payment_failed`.
+3. En Vercel, las variables de `.env.example`: `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID`, `STRIPE_PRICE_FULL_ID`, `STRIPE_WEBHOOK_SECRET`, `FIREBASE_SERVICE_ACCOUNT`.
+4. Después de publicar: `node scripts/deploy-backend.mjs` (reglas), el `grant` de cada alumna actual y una vez `node scripts/admin.mjs sync-members`.
 
 ## Administración (en tu computador)
 Requiere la llave de servicio en `~/.config/casamuladhara/service-account.json` (fuera del repo).

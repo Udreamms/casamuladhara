@@ -65,16 +65,16 @@ if (!snap.exists()) {
 snap = await getDoc(userRef);
 const p = snap.data();
 
-let token = await user.getIdTokenResult(true);
+const token = await user.getIdTokenResult(true);
 setSessionCookie(token.token);
 const isAdmin = token.claims.admin === true;
-// member=true lo pone el webhook de Stripe (o la Maestra con scripts/admin.mjs) mientras la suscripción esté al día
+// lvl (hasta qué nivel puede abrir) lo pone el webhook de Stripe o la Maestra con scripts/admin.mjs
 const paid = new URLSearchParams(location.search).get('pago');
 if (paid) history.replaceState(null, '', 'aula.html');
 
 const name = p.displayName || pretty((p.email || '').split('@')[0]);
 const CM = {
-  uid, isAdmin, member: token.claims.member === true, paid,
+  uid, isAdmin, lvl: isAdmin ? 5 : Number(token.claims.lvl) || 0, paid,
   profile: { ...p, name, ini: initials(name), c: colorFor(uid), accessLevel: Number(p.accessLevel) || 1, plan: p.plan || 'none', paymentStatus: p.paymentStatus || 'none' },
   progress: {}, doneAt: {}, notes: {}, questions: {}, tickets: [], payments: [], notifications: [],
   posts: [], likes: new Set(), students: [],
@@ -155,8 +155,12 @@ CM.loadStudents = async () => {
 };
 
 // ---- Suscripción (Stripe): devuelve la URL de pago o del portal para administrarla ----
-CM.billing = async () => {
-  const r = await fetch('/api/billing', { method: 'POST', headers: { Authorization: `Bearer ${await user.getIdToken()}` } });
+CM.billing = async (kind) => {
+  const r = await fetch('/api/billing', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${await user.getIdToken()}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ kind }),
+  });
   const out = await r.json().catch(() => ({}));
   if (!r.ok || !out.url) throw new Error(out.error || 'No se pudo abrir el pago. Inténtalo de nuevo.');
   return out.url;
@@ -165,11 +169,16 @@ CM.billing = async () => {
 window.CM = CM;
 window.cmStart(CM);
 
-// Al volver de Stripe el webhook puede tardar unos segundos: esperamos el acceso y recargamos el aula
-if (paid === 'ok' && !CM.member && !isAdmin) {
+// Al volver de Stripe el webhook puede tardar unos segundos: esperamos a que se registre y recargamos el aula
+if (paid === 'ok' && !isAdmin) {
+  const before = JSON.stringify([p.plan, p.paymentStatus, p.paidInstallments || 0]);
   for (let i = 0; i < 20; i++) {
     await new Promise((r) => setTimeout(r, 3000));
-    token = await user.getIdTokenResult(true);
-    if (token.claims.member === true) { location.replace('aula.html'); break; }
+    const now = (await getDoc(userRef)).data();
+    if (JSON.stringify([now.plan, now.paymentStatus, now.paidInstallments || 0]) !== before) {
+      await user.getIdToken(true);
+      location.replace('aula.html');
+      break;
+    }
   }
 }
