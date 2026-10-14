@@ -25,6 +25,14 @@
       ]
     },
     {
+      "collectionGroup": "replies",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "ch", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "questions",
       "queryScope": "COLLECTION_GROUP",
       "fields": [

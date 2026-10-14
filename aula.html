@@ -201,7 +201,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 .file .fx{flex:1;min-width:0}
 .file .fx b{display:block;font-size:.92rem}
 .file .fx small{color:var(--muted);font-size:.78rem}
-textarea,input[type=text],input[type=email],input[type=password],select{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px;width:100%}
+textarea,input[type=text],input[type=email],input[type=password],input[type=url],input[type=number],input[type=datetime-local],select{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px;width:100%}
 textarea{min-height:140px;resize:vertical}
 .qa{display:grid;gap:14px}
 .q{display:flex;gap:12px}
@@ -1124,14 +1124,6 @@ const RES=[
  {t:'Meditación de raíz (chakra Muladhara)',type:'Audio',lvl:0,size:'20 min',k:'mp3'},
  {t:'Bibliografía recomendada',type:'PDF',lvl:0,size:'300 KB',k:'pdf'}
 ];
-const EVENTS=[
- {d:'11',m:'oct',day:'Sábado',time:'10:00 a 11:30',t:'Clase 5 · Liberación de memorias',lvl:'Nivel 3',kind:'Clase en vivo',today:1},
- {d:'15',m:'oct',day:'Miércoles',time:'19:00 a 20:00',t:'Círculo de práctica abierto',lvl:'Todos los niveles',kind:'Práctica'},
- {d:'18',m:'oct',day:'Sábado',time:'10:00 a 11:30',t:'Clase 6 · Cortes de lazos y contratos',lvl:'Nivel 3',kind:'Clase en vivo'},
- {d:'22',m:'oct',day:'Miércoles',time:'19:00 a 20:00',t:'Preguntas y respuestas con la Maestra Holística',lvl:'Todos los niveles',kind:'Encuentro'},
- {d:'25',m:'oct',day:'Sábado',time:'10:00 a 11:30',t:'Clase 7 · Recuperación de fragmentos del alma',lvl:'Nivel 3',kind:'Clase en vivo'},
- {d:'08',m:'nov',day:'Sábado',time:'9:00 a 17:00',t:'Péndulo Hebreo Nivel 1 · Jornada presencial',lvl:'Nivel 1 · nueva generación',kind:'Presencial'}
-];
 const FAQ={
  cuenta:{name:'Acceso y cuenta',ic:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',q:[
   ['Olvidé mi contraseña, ¿cómo la recupero?','En la pantalla de ingreso toca "Olvidé mi contraseña" y te llegará un enlace a tu correo. Revisa también la carpeta de spam.'],
@@ -1261,6 +1253,48 @@ function pathHTML(){
     <button class="lvl summit" data-go="insignias">${summitSVG()}<small>Certificación final</small><h3>Terapeuta Holístico Integral</h3></button></div>`;
 }
 
+/* ---------- vista gratis, clases en vivo y videos ---------- */
+// Sin inscripción se ven los títulos del Nivel 1; de los demás niveles, solo nombre y duración
+const detailOpen=lv=>CM.isAdmin||S.paying||lv.n<=Math.max(1,S.lvl);
+const CTA_TXT='Comienza tu formación: 9 cuotas de 55 USD';
+const LIVE_OPEN_MIN=15;
+const liveOf=key=>CM.agenda.find(a=>a.id===key);
+const liveEnd=a=>a.start.toMillis()+(a.durationMin||90)*60000;
+const liveState=a=>{const n=Date.now();return n<a.start.toMillis()-LIVE_OPEN_MIN*60000?'soon':n<=liveEnd(a)?'open':'done'};
+const fmtWhen=a=>a.start.toDate().toLocaleString('es',{weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
+const fmtHour=ms=>new Date(ms).toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
+const isHttps=u=>/^https:\/\/[^\s"<>]+$/i.test(u||'');
+const keyLesson=key=>{const [id,i,j]=String(key).split('_');const lv=LEVELS.find(l=>l.id===id);const les=lv&&lv.modules[+i]&&lv.modules[+i].lessons[+j];return les?{lv,i:+i,j:+j,les}:null};
+// YouTube, Vimeo y Google Drive se ven dentro del aula; cualquier otro enlace se abre aparte
+function embedURL(u){try{const x=new URL(u);const h=x.hostname.replace(/^www\./,'');
+  if(h==='youtu.be')return 'https://www.youtube-nocookie.com/embed/'+x.pathname.slice(1);
+  if(h.endsWith('youtube.com')){const v=x.searchParams.get('v')||(x.pathname.match(/\/(?:live|embed|shorts)\/([\w-]+)/)||[])[1];if(v)return 'https://www.youtube-nocookie.com/embed/'+v}
+  if(h.endsWith('vimeo.com')){const v=(x.pathname.match(/(\d{5,})/)||[])[1];if(v)return 'https://player.vimeo.com/video/'+v}
+  if(h==='drive.google.com'){const v=(x.pathname.match(/\/d\/([\w-]+)/)||[])[1];if(v)return 'https://drive.google.com/file/d/'+v+'/preview'}
+}catch(e){}return ''}
+const playerMsg=inner=>`<div class="player"><svg class="motif"><use href="#mark"/></svg><div style="position:relative;display:grid;gap:12px;justify-items:center;text-align:center;padding:20px">${inner}</div></div>`;
+const lightBtn='class="btn btn-primary btn-sm" style="background:#e9e4d0;color:#1f3f32"';
+function videoHTML(u,label){const e=embedURL(u);
+  if(e)return `<div class="player"><iframe src="${esc(e)}" title="${esc(label)}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe></div>`;
+  return playerMsg(`<b style="font:400 clamp(1.2rem,3vw,1.8rem)/1.2 var(--f-display)">${esc(label)}</b>${isHttps(u)?`<a ${lightBtn} href="${esc(u)}" target="_blank" rel="noopener">Ver el video</a>`:''}`)}
+// la clase en vivo de una lección: antes, la fecha y el botón para entrar; después, la grabación
+function liveHTML(key,les){const a=liveOf(key);if(!a)return '';const L=CM.liveLinks[key]||{};const st=liveState(a);
+  if(st==='done'&&L.recordingUrl)return videoHTML(L.recordingUrl,'Grabación · '+les.t);
+  const pill=t=>`<span class="pill live" style="color:#ece7d3;border-color:rgba(236,231,211,.4)">${t}</span>`;
+  const title=`<b style="font:400 clamp(1.2rem,3vw,1.8rem)/1.2 var(--f-display)">${esc(les.t)}</b>`;
+  const note=t=>`<span style="color:#b9c4b5;font-size:.88rem;max-width:30em">${t}</span>`;
+  if(st==='done')return playerMsg(pill('Clase realizada')+title+note('La grabación de esta clase quedará aquí muy pronto.'));
+  return playerMsg(pill(st==='open'?'En vivo ahora':'Próxima clase en vivo')+title+note(fmtWhen(a)+' · '+(a.durationMin||90)+' min')
+    +(st==='open'&&isHttps(L.url)?`<a ${lightBtn} href="${esc(L.url)}" target="_blank" rel="noopener">Entrar a la clase</a>`:note('La sala se abre '+LIVE_OPEN_MIN+' minutos antes de la clase. La grabación queda aquí al terminar.')))}
+const gcalLink=a=>{const f=ms=>new Date(ms).toISOString().replace(/[-:]|\.\d{3}/g,'');return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(a.title+' · Casa Muladhara')+'&dates='+f(a.start.toMillis())+'/'+f(liveEnd(a))};
+function liveDate(a){const d=a.start.toDate();return `<div class="date"><small>${d.toLocaleDateString('es',{weekday:'short'}).replace('.','')}</small><b>${d.getDate()}</b><small>${d.toLocaleDateString('es',{month:'short'}).replace('.','')}</small></div>`}
+function liveActs(a){const k=keyLesson(a.id),L=CM.liveLinks[a.id]||{},open=liveState(a)==='open';
+  if(!(CM.isAdmin||S.lvl>=a.level))return `<button class="btn btn-ghost btn-sm" data-go="pagos">Inscríbete</button>`;
+  return (open&&isHttps(L.url)?`<a class="btn btn-primary btn-sm" href="${esc(L.url)}" target="_blank" rel="noopener">Entrar</a>`:'')
+    +(k?`<button class="btn btn-ghost btn-sm" data-open-lesson="${k.lv.id},${k.i},${k.j}">Ver clase</button>`:'');}
+const upcomingLive=()=>CM.agenda.filter(a=>liveEnd(a)>=Date.now());
+const toLocalInput=d=>new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);
+
 /* ---------- views ---------- */
 const V={};
 V.inicio=()=>{
@@ -1271,15 +1305,18 @@ V.inicio=()=>{
   <section class="hero"><svg class="motif"><use href="#mark"/></svg>
     <div><span class="eyebrow">Escuela de Formación Holística</span>
       <h2>Hola, ${esc(ME.name.split(' ')[0])}. ${resume.lv.status==='locked'?'Te damos la bienvenida.':'Hoy sigues en el Nivel '+resume.lv.n+'.'}</h2>
-      <p>${resume.started?'Te quedaste en '+esc(resume.les.t)+'.':'Tu camino empieza en '+esc(resume.les.t)+'. Cuando marques una clase como vista, tu avance se guarda.'}</p>
-      <div class="hero-actions"><button class="btn btn-primary" data-open-lesson="${resume.lv.id},${resume.i},${resume.j}">${resume.started?'Continuar clase':'Comenzar'}</button><button class="btn btn-ghost" data-go="calendario">Ver calendario</button></div></div>
+      <p>${CM.free?'Conoce el programa del Nivel 1 y cómo funciona la formación de cinco niveles.':resume.started?'Te quedaste en '+esc(resume.les.t)+'.':'Tu camino empieza en '+esc(resume.les.t)+'. Cuando marques una clase como vista, tu avance se guarda.'}</p>
+      <div class="hero-actions">${CM.free?'<button class="btn btn-primary" data-open-level="pendulo">Ver el programa</button>':`<button class="btn btn-primary" data-open-lesson="${resume.lv.id},${resume.i},${resume.j}">${resume.started?'Continuar clase':'Comenzar'}</button>`}<button class="btn btn-ghost" data-go="calendario">Ver calendario</button></div></div>
     <div class="ring-wrap"><svg class="ring" viewBox="0 0 120 120"><circle cx="60" cy="60" r="${r}" fill="none" stroke="rgba(236,231,211,.15)" stroke-width="8"/><circle cx="60" cy="60" r="${r}" fill="none" stroke="#f2c66d" stroke-width="8" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-p/100)}" transform="rotate(-90 60 60)"/><text x="60" y="58" text-anchor="middle" font-family="Marcellus,Georgia,serif" font-size="26" fill="#ece7d3">${p}%</text><text x="60" y="76" text-anchor="middle" font-family="Josefin Sans,system-ui,sans-serif" font-size="7" letter-spacing="1.5" fill="#b9c4b5">DE TU FORMACIÓN</text></svg>
       <span class="lbl">Camino a Terapeuta<br>Holístico Integral</span></div>
   </section>
+  ${CM.free?`<section class="card panel" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));align-items:center;gap:22px">
+    ${CM.config.welcomeVideo?videoHTML(CM.config.welcomeVideo,'Bienvenida de la Maestra'):playerMsg('<span class="pill pres">Muy pronto</span><b style="font:400 clamp(1.1rem,2.6vw,1.6rem)/1.2 var(--f-display)">Un video de bienvenida de la Maestra</b>')}
+    <div style="display:grid;gap:12px"><span class="eyebrow">Bienvenida</span><h3 style="font-size:1.35rem">Conoce la formación</h3><p class="muted" style="margin:0">La Maestra te cuenta qué vas a aprender en los cinco niveles y cómo funciona la formación. Revisa el programa del Nivel 1, preséntate en la comunidad y mira las próximas clases.</p><button class="btn btn-primary" style="justify-self:start" data-go="pagos">${CTA_TXT}</button></div></section>`:''}
   <section style="display:grid;gap:14px"><div class="panel-h"><h3 style="font-size:1.35rem">Tu camino de cinco niveles</h3><button class="link" data-go="formacion">Ver todo</button></div>${pathHTML()}</section>
   <div class="cols">
     <section class="card panel"><div class="panel-h"><h3>Próxima clase en vivo</h3><button class="link" data-go="calendario">Calendario</button></div>
-      <div class="next-class"><div class="date"><small>Sáb</small><b>11</b><small>Oct</small></div><div class="t"><b>${les.t}</b><span>10:00 a 11:30 · Nivel 3 · con la Maestra Holística</span></div><button class="btn btn-sm" data-toast="La sala se abre 15 minutos antes de la clase">Entrar</button></div>
+      ${(()=>{const a=upcomingLive()[0];if(!a)return '<p class="muted" style="font-size:.88rem">No hay clases en vivo programadas por ahora.</p>';const k=keyLesson(a.id);return `<div class="next-class">${liveDate(a)}<div class="t"><b>${esc(k?k.les.t:a.title)}</b><span>${fmtHour(a.start.toMillis())} a ${fmtHour(liveEnd(a))} · Nivel ${a.level} · con la Maestra Holística</span></div><div style="display:flex;gap:6px">${liveActs(a)}</div></div>`})()}
       <div class="panel-h" style="margin-top:6px"><h3>Conversaciones recientes</h3><button class="link" data-go="comunidad">Comunidad</button></div>
       <div>${POSTS.length?'':'<p class="muted" style="font-size:.88rem">Aún no hay conversaciones. Rompe el hielo en Comunidad.</p>'}${POSTS.slice(0,3).map(p=>`<div class="mini-post">${av(p)}<div style="min-width:0"><b>${esc(p.who)}</b>${p.karen?'<span class="tag-k">Maestra</span>':''}<p>${esc(p.txt)}</p></div></div>`).join('')}</div>
     </section>
@@ -1299,8 +1336,8 @@ V.formacion=()=>`
   ${pathHTML()}
   <section style="display:grid;gap:14px">${LEVELS.map(lv=>`<article class="card panel" style="grid-template-columns:minmax(0,1fr) auto;align-items:center">
     <div style="display:grid;gap:8px;min-width:0"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="eyebrow">Nivel ${lv.n}</span>${modePill(lv)}${statusPill(lv)}</div>
-    <h3 style="font-size:1.35rem">${lv.title}</h3><p class="muted" style="font-size:.9rem;max-width:60em">${lv.desc}</p><span class="muted" style="font-size:.8rem">${lv.dur} · ${allLessons(lv).length} clases</span></div>
-    <button class="btn ${lv.status==='locked'?'btn-ghost':'btn-primary'}" data-open-level="${lv.id}">${lv.status==='done'?'Repasar':lv.status==='progress'?'Continuar':'Ver programa'}</button></article>`).join('')}</section>`;
+    <h3 style="font-size:1.35rem">${lv.title}</h3>${detailOpen(lv)?`<p class="muted" style="font-size:.9rem;max-width:60em">${lv.desc}</p><span class="muted" style="font-size:.8rem">${lv.dur} · ${allLessons(lv).length} clases</span>`:`<span class="muted" style="font-size:.8rem">${lv.dur}</span>`}</div>
+    ${detailOpen(lv)?`<button class="btn ${lv.status==='locked'?'btn-ghost':'btn-primary'}" data-open-level="${lv.id}">${lv.status==='done'?'Repasar':lv.status==='progress'?'Continuar':'Ver programa'}</button>`:`<button class="btn btn-ghost" data-go="pagos">Inscríbete para ver el programa</button>`}</article>`).join('')}</section>`;
 
 V.curso=()=>{
   const lv=LEVELS.find(l=>l.id===S.level);const [mi,li]=S.lesson;const les=lv.modules[mi].lessons[li];
@@ -1308,6 +1345,9 @@ V.curso=()=>{
   const flat=allLessons(lv);const doneN=flat.filter(l=>l.done).length;
   const upcoming=!locked&&!les.done&&/En vivo/.test(les.len);
   const isSl=!!les.slides;
+  if(!detailOpen(lv))return `<div class="crumbs"><button data-go="formacion">Mi formación</button><span>/</span><span>Nivel ${lv.n} · ${lv.title}</span></div>
+  <div style="max-width:900px">${playerMsg(`<span class="pill pres">Nivel ${lv.n}</span><b style="font:400 clamp(1.2rem,3vw,1.8rem)/1.2 var(--f-display)">${lv.title}</b><span style="color:#b9c4b5;font-size:.9rem">${lv.dur}</span><span style="color:#b9c4b5;font-size:.9rem;max-width:30em">El programa de este nivel se muestra al inscribirte en la formación.</span><button ${lightBtn} data-go="pagos">${CTA_TXT}</button>`)}</div>`;
+  const live=!locked&&liveHTML(lv.id+'_'+mi+'_'+li,les);
   if(S.overdue&&locked&&!CM.isAdmin)return `<div class="crumbs"><button data-go="formacion">Mi formación</button><span>/</span><span>Nivel ${lv.n} · ${lv.title}</span></div>
   <div class="player" style="max-width:900px"><svg class="motif"><use href="#mark"/></svg><div style="position:relative;display:grid;gap:12px;justify-items:center;text-align:center;padding:20px"><span class="pill bad" style="background:rgba(239,138,115,.2);color:#ffd2c7">Acceso pausado</span><b style="font:400 clamp(1.2rem,3vw,1.8rem)/1.2 var(--f-display)">${esc(les.t)}</b><span style="color:#b9c4b5;font-size:.9rem;max-width:30em">Esta clase vuelve a estar disponible en cuanto se registre el pago de tu cuota. No pierdes tu avance.</span><button class="btn btn-sm" style="background:#e9e4d0;color:#1f3f32" data-checkout="portal">Actualizar mi pago</button></div></div>`;
   const tabs=[['temas','Temas de la clase'],['materiales','Materiales'],['preguntas','Preguntas'],['notas','Mis notas']];
@@ -1327,8 +1367,8 @@ V.curso=()=>{
   <div class="course">
     <div style="display:grid;gap:20px;min-width:0">
       ${locked?`<div class="player"><svg class="motif"><use href="#mark"/></svg><div style="position:relative;display:grid;gap:12px;justify-items:center;text-align:center;padding:20px"><span class="pill pres">Nivel ${lv.n}</span><b style="font:400 clamp(1.2rem,3vw,1.8rem)/1.2 var(--f-display)">${lv.title}</b>${S.paying?`<span style="color:#b9c4b5;font-size:.9rem">Se desbloquea al completar el Nivel ${lv.n-1}</span><button class="btn btn-primary btn-sm" style="background:#e9e4d0;color:#1f3f32" data-go="pagos">Ver mi plan</button>`:`<span style="color:#b9c4b5;font-size:.9rem;max-width:30em">Esta clase es parte de la formación completa. Inscríbete para abrir las clases, videos y materiales nivel a nivel.</span><button class="btn btn-primary btn-sm" style="background:#e9e4d0;color:#1f3f32" data-go="pagos">Ver cómo inscribirme</button>`}</div></div>`:
-      upcoming?`<div class="player"><svg class="motif"><use href="#mark"/></svg><div class="cap"><div><small>Nivel ${lv.n} · Próxima clase en vivo</small><b>${esc(les.t)}</b></div></div><div style="position:relative;display:grid;gap:12px;justify-items:center;text-align:center"><span class="pill live" style="color:#ece7d3;border-color:rgba(236,231,211,.4)">${les.len.replace('En vivo','En vivo el')}</span><button class="btn btn-primary btn-sm" style="background:#e9e4d0;color:#1f3f32" data-toast="La sala se abre 15 minutos antes de la clase">Entrar a la clase</button><span style="color:#b9c4b5;font-size:.82rem">La grabación queda aquí al terminar</span></div></div>`:
-      isSl?deckHTML(les,si):`<div class="player" id="player"><svg class="motif"><use href="#mark"/></svg>
+      live&&!isSl?live:upcoming?`<div class="player"><svg class="motif"><use href="#mark"/></svg><div class="cap"><div><small>Nivel ${lv.n} · Próxima clase en vivo</small><b>${esc(les.t)}</b></div></div><div style="position:relative;display:grid;gap:12px;justify-items:center;text-align:center"><span class="pill live" style="color:#ece7d3;border-color:rgba(236,231,211,.4)">${les.len.replace('En vivo','En vivo el')}</span><span style="color:#b9c4b5;font-size:.88rem">La Maestra publicará aquí la fecha y el enlace de la sala.</span><span style="color:#b9c4b5;font-size:.82rem">La grabación queda aquí al terminar</span></div></div>`:
+      isSl?(live||'')+deckHTML(les,si):`<div class="player" id="player"><svg class="motif"><use href="#mark"/></svg>
         <div class="cap"><div><small>Nivel ${lv.n} · ${esc(lv.modules[mi].title)}</small><b>${esc(les.t)}</b></div></div>
         <button class="play" id="play" aria-label="${S.playing?'Pausar':'Reproducir'}">${S.playing?'<svg viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>':'<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>'}</button>
         ${les.topics.length?`<span class="chapter-now" id="chap-now">${esc(les.topics[curChapter(les)].t)}</span>`:''}
@@ -1344,9 +1384,20 @@ V.curso=()=>{
       ${lv.modules.map((m,i)=>{const open=S.openMods[lv.id+i]!==undefined?S.openMods[lv.id+i]:i===mi;const md=m.lessons.filter(l=>l.done).length;
         return `<div class="mod"><button class="mod-h" aria-expanded="${open}" data-mod="${i}"><b>${esc(m.title)}</b><small>${md}/${m.lessons.length}</small><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
         <div ${open?'':'hidden'}>${m.lessons.map((l,j)=>`<button class="les ${i===mi&&j===li?'cur':''} ${locked?'locked':''}" data-les="${i},${j}" ${locked?'aria-disabled="true"':''}><span class="chk ${l.done?'on':''} ${locked?'lk':''}">${locked?icLock:''}</span><span>${esc(l.t)}</span><small>${esc(l.len)}</small></button>`).join('')}</div></div>`}).join('')}
+      ${!S.paying&&!CM.isAdmin?`<div style="padding:18px;display:grid;gap:10px;border-top:1px solid var(--line)"><p class="muted" style="margin:0;font-size:.88rem">Las clases, videos y materiales se abren al inscribirte en la formación completa.</p><button class="btn btn-primary btn-sm" data-go="pagos">${CTA_TXT}</button></div>`:''}
     </aside>
-  </div>`;
+  </div>${CM.isAdmin&&!locked?liveEditor(lv,mi,li):''}`;
 };
+// Solo la Maestra: programa la clase en vivo de esta lección y agrega la grabación
+function liveEditor(lv,mi,li){const key=lv.id+'_'+mi+'_'+li,a=liveOf(key),L=CM.liveLinks[key]||{};
+  return `<details class="card panel" style="margin-top:20px" ${a?'open':''}><summary style="cursor:pointer"><b>Clase en vivo de esta lección</b> <span class="muted" style="font-size:.84rem">· solo la Maestra</span></summary>
+  <form id="live-form" data-key="${key}" data-level="${lv.n}" style="display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-top:12px">
+    <label class="n2-f"><span>Fecha y hora</span><input type="datetime-local" id="lv-start" value="${a?toLocalInput(a.start.toDate()):''}" required></label>
+    <label class="n2-f"><span>Duración (minutos)</span><input type="number" id="lv-dur" min="15" max="600" step="5" value="${a?a.durationMin:90}"></label>
+    <label class="n2-f"><span>Enlace de la sala (Zoom o Meet)</span><input type="url" id="lv-url" placeholder="https://" value="${esc(L.url||'')}"></label>
+    <label class="n2-f"><span>Grabación (YouTube, Vimeo o Drive)</span><input type="url" id="lv-rec" placeholder="https://" value="${esc(L.recordingUrl||'')}"></label>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn btn-primary btn-sm">Guardar</button>${a?'<button type="button" class="btn btn-ghost btn-sm" id="lv-del">Quitar esta clase en vivo</button>':''}</div>
+  </form><p class="muted" style="margin:0;font-size:.82rem">Las alumnas con este nivel ven la fecha y el botón para entrar ${LIVE_OPEN_MIN} minutos antes. Al terminar, si agregas la grabación, la ven en esta misma clase.</p></details>`}
 function curLesson(){const lv=LEVELS.find(l=>l.id===S.level);return lv.modules[S.lesson[0]].lessons[S.lesson[1]]}
 function goSlide(v){const lv=LEVELS.find(l=>l.id===S.level),les=curLesson();if(!les.slides)return;
   if(v==='nextles'){S.full=0;document.body.style.overflow='';const nx=$('#next-les');nx&&nx.click();return}
@@ -1368,17 +1419,20 @@ V.insignias=()=>{
 };
 
 V.comunidad=()=>{
+  const chans=CM.free?CHANNELS.filter(c=>CM.freeChannels.includes(c.id)):CHANNELS;
+  if(!chans.some(c=>c.id===S.ch))S.ch=chans[0].id;
+  const canWrite=!CM.free||S.ch==='presentaciones';
   const ch=CHANNELS.find(c=>c.id===S.ch);const list=POSTS.filter(p=>p.ch===S.ch).map(p=>({...p,i:p.id}));
-  return `<div class="view-head"><div><span class="eyebrow">Comunidad</span><h1>Conversa con tus compañeras</h1><p>Un espacio por nivel para compartir prácticas, dudas y avances. La Maestra Holística participa en todos.</p></div></div>
+  return `<div class="view-head"><div><span class="eyebrow">Comunidad</span><h1>Conversa con tus compañeras</h1><p>${CM.free?'Preséntate y lee lo que cuentan las alumnas de la formación. Los canales de cada nivel se abren al inscribirte.':'Un espacio por nivel para compartir prácticas, dudas y avances. La Maestra Holística participa en todos.'}</p></div></div>
   <div class="comm">
-    <nav class="card channels" aria-label="Canales"><span class="nav-label">Canales</span>${CHANNELS.map(c=>{const n=POSTS.filter(p=>p.ch===c.id).length;return `<button class="ch" aria-current="${c.id===S.ch}" data-ch="${c.id}"># ${c.name}${n?`<small>${n}</small>`:''}</button>`}).join('')}</nav>
+    <nav class="card channels" aria-label="Canales"><span class="nav-label">Canales</span>${chans.map(c=>{const n=POSTS.filter(p=>p.ch===c.id).length;return `<button class="ch" aria-current="${c.id===S.ch}" data-ch="${c.id}"># ${c.name}${n?`<small>${n}</small>`:''}</button>`}).join('')}</nav>
     <div style="display:grid;gap:14px;min-width:0">
-      <form class="card composer" id="composer"><div class="top"><span class="av" style="--c:${ME.c}">${esc(ME.ini)}</span><textarea id="post-in" placeholder="Comparte algo en # ${ch.name}" aria-label="Nueva publicación"></textarea></div>
-        <div class="act"><span class="muted" style="font-size:.78rem">Publicas como ${esc(ME.name)}</span><button class="btn btn-primary btn-sm">Publicar</button></div></form>
+      ${canWrite?`<form class="card composer" id="composer"><div class="top"><span class="av" style="--c:${ME.c}">${esc(ME.ini)}</span><textarea id="post-in" placeholder="Comparte algo en # ${ch.name}" aria-label="Nueva publicación"></textarea></div>
+        <div class="act"><span class="muted" style="font-size:.78rem">Publicas como ${esc(ME.name)}</span><button class="btn btn-primary btn-sm">Publicar</button></div></form>`:''}
       <div class="feed">${list.length?list.map(p=>`<article class="card post"><div class="post-h">${av(p)}<div><b>${esc(p.who)}</b>${p.karen?'<span class="tag-k">Maestra Holística</span>':''}<small>${p.when} · # ${ch.name}</small></div></div><p>${esc(p.txt)}</p>
         <div class="post-a"><button aria-pressed="${!!p.liked}" data-like="${p.i}"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>${p.likes}</button><button data-focus-reply="${p.i}"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>${p.replies.length} respuestas</button>${(p.mine||CM.isAdmin)?`<button data-delpost="${p.id}" style="margin-left:auto">Eliminar</button>`:''}</div>
         ${p.replies.length?`<div class="replies">${p.replies.map(r=>`<div class="q">${av(r)}<div class="bubble"><b>${esc(r.who)}</b>${r.karen?'<span class="tag-k">Maestra</span>':''}<p>${esc(r.txt)}</p></div></div>`).join('')}</div>`:''}
-        <form class="reply-form" data-reply="${p.i}"><input type="text" id="r${p.i}" placeholder="Responder" aria-label="Responder"><button class="btn btn-ghost btn-sm">Enviar</button></form></article>`).join(''):`<div class="card empty">Este canal se abre cuando comience el nivel. Mientras tanto, conversa en # General.</div>`}</div>
+        ${canWrite?`<form class="reply-form" data-reply="${p.i}"><input type="text" id="r${p.i}" placeholder="Responder" aria-label="Responder"><button class="btn btn-ghost btn-sm">Enviar</button></form>`:''}</article>`).join(''):`<div class="card empty">Este canal se abre cuando comience el nivel. Mientras tanto, conversa en # General.</div>`}</div>
     </div>
     <aside class="right" style="display:grid;gap:14px">
       <section class="card panel"><h3 style="font-size:1.1rem">Tu perfil</h3><div class="member">${av({ini:ME.ini,c:ME.c})}<div><b>${esc(ME.name)}</b><small>${CM.isAdmin?'Maestra':'Estudiante'}</small></div></div></section>
@@ -1387,10 +1441,11 @@ V.comunidad=()=>{
   </div>`;
 };
 
-V.calendario=()=>`<div class="view-head"><div><span class="eyebrow">Calendario</span><h1>Clases y encuentros</h1><p>Todas tus clases en vivo, círculos de práctica y jornadas presenciales. Horario de Chile.</p></div></div>
-  <div class="agenda">${EVENTS.map(e=>`<article class="card ev ${e.today?'today':''}"><div class="date"><small>${e.day.slice(0,3)}</small><b>${e.d}</b><small>${e.m}</small></div>
-  <div style="min-width:0"><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">${e.kind==='Presencial'?'<span class="pill pres">Presencial</span>':`<span class="pill live">${e.kind}</span>`}${e.today?'<span class="pill prog">Mañana</span>':''}</div><h3>${e.t}</h3><p>${e.day} · ${e.time} · ${e.lvl}</p></div>
-  <div class="acts"><button class="btn btn-ghost btn-sm" data-toast="Agregado a tu calendario">Agregar a mi calendario</button>${e.kind!=='Presencial'?`<button class="btn btn-primary btn-sm" data-toast="La sala se abre 15 minutos antes">Entrar</button>`:''}</div></article>`).join('')}</div>`;
+V.calendario=()=>{const up=upcomingLive();
+  return `<div class="view-head"><div><span class="eyebrow">Calendario</span><h1>Clases y encuentros</h1><p>Las próximas clases en vivo con la Maestra. La hora se muestra en tu zona horaria.</p></div></div>
+  <div class="agenda">${up.length?up.map(a=>{const k=keyLesson(a.id),open=liveState(a)==='open';return `<article class="card ev ${open?'today':''}">${liveDate(a)}
+  <div style="min-width:0"><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px"><span class="pill live">Clase en vivo</span>${open?'<span class="pill pres">Ahora</span>':''}</div><h3>${esc(k?k.les.t:a.title)}</h3><p>${a.start.toDate().toLocaleDateString('es',{weekday:'long'})} · ${fmtHour(a.start.toMillis())} a ${fmtHour(liveEnd(a))} · Nivel ${a.level}</p></div>
+  <div class="acts"><a class="btn btn-ghost btn-sm" href="${gcalLink(a)}" target="_blank" rel="noopener">Agregar a mi calendario</a>${liveActs(a)}</div></article>`}).join(''):'<div class="card empty">Aún no hay clases en vivo programadas. Aquí verás las próximas fechas.</div>'}</div>`};
 
 V.recursos=()=>{
   const types=['Todos','PDF','Audio','Video','Plantilla'];
@@ -1493,6 +1548,14 @@ V.maestra=()=>{
       <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Alumna</th><th>Correo</th><th>Acceso</th><th>Cuota</th><th>Nivel abierto</th><th>Próximo cobro</th><th>Desde</th></tr></thead><tbody>
       ${STUDENTS.map(s=>`<tr><td><span style="display:flex;gap:10px;align-items:center">${av(s)}${esc(s.n)}</span></td><td>${esc(s.email)}</td><td>${ACC[s.acc](s)}</td><td>${esc(s.cuota)||'—'}</td><td>${s.lvl?'Hasta el Nivel '+s.lvl:'Ninguno'}</td><td>${esc(s.next)||'—'}</td><td>${s.last}</td></tr>`).join('')||'<tr><td colspan="7" class="muted">Todavía no hay alumnas registradas.</td></tr>'}
       </tbody></table></div></section>
+    <section class="card panel"><div class="panel-h"><h3>Preguntas por responder${CM.pending.length?' ('+CM.pending.length+')':''}</h3></div>
+      ${CM.pending.length?CM.pending.map((q,ix)=>{const k=keyLesson(q.lessonKey),st=STUDENTS.find(s=>s.id===q.uid);return `<article style="display:grid;gap:8px;padding:14px 0;border-top:1px solid var(--line)">
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">${st?av(st):''}<b>${esc(st?st.n:'Alumna')}</b><span class="muted" style="font-size:.84rem">${k?'Nivel '+k.lv.n+' · '+esc(k.les.t)+' · ':''}${esc(q.when)}</span>${k?`<button class="link" data-open-lesson="${k.lv.id},${k.i},${k.j}">Ver clase</button>`:''}</div>
+        <p style="margin:0">${esc(q.text)}</p>
+        <form data-answer="${ix}" style="display:grid;gap:8px"><textarea placeholder="Tu respuesta. La alumna la ve debajo de la clase y recibe un aviso." aria-label="Respuesta"></textarea><button class="btn btn-primary btn-sm" style="justify-self:start">Responder</button></form></article>`}).join(''):'<p class="muted" style="margin:0">No tienes preguntas pendientes. Cuando una alumna pregunte en una clase, aparecerá aquí.</p>'}
+    </section>
+    <section class="card panel"><h3>Video de bienvenida</h3><p class="muted" style="margin:0;font-size:.88rem">Lo ven las cuentas gratis en Inicio. Pega el enlace de YouTube, Vimeo o Google Drive. Déjalo vacío para mostrar "Muy pronto".</p>
+      <form id="wv-form" style="display:flex;gap:8px;flex-wrap:wrap"><input type="url" id="wv-url" placeholder="https://" value="${esc(CM.config.welcomeVideo||'')}" style="flex:1;min-width:220px"><button class="btn btn-primary btn-sm">Guardar</button></form></section>
   </div>`;
 };
 
@@ -1528,11 +1591,18 @@ function bindView(){
   const md=$('#mark-done');if(md)md.onclick=()=>{const lv=LEVELS.find(l=>l.id===S.level);const les=lv.modules[S.lesson[0]].lessons[S.lesson[1]];const nv=!les.done;md.disabled=true;CM.setDone(lkey(),nv).then(()=>{les.done=nv;refreshDerived();render(false);toast(nv?'Clase marcada como vista':'Clase marcada como no vista')}).catch(e=>{md.disabled=false;fail(e)})};
   const nx=$('#next-les');if(nx)nx.onclick=()=>{const lv=LEVELS.find(l=>l.id===S.level);let [i,j]=S.lesson;j++;if(j>=lv.modules[i].lessons.length){i++;j=0}if(i>=lv.modules.length){toast('Terminaste las clases de este nivel');return}S.lesson=[i,j];S.openMods[lv.id+i]=true;S.t=0;stopPlay();render()};
   const cp=$('#composer');if(cp)cp.onsubmit=e=>{e.preventDefault();const v=$('#post-in').value.trim();if(!v)return;CM.post(S.ch,v).then(()=>{$('#post-in').value='';toast('Publicado')}).catch(fail)};
-  document.querySelectorAll('form[data-reply]').forEach(f=>f.onsubmit=e=>{e.preventDefault();const inp=f.querySelector('input');const v=inp.value.trim();if(!v)return;CM.reply(f.dataset.reply,v).then(()=>{inp.value=''}).catch(fail)});
+  document.querySelectorAll('form[data-reply]').forEach(f=>f.onsubmit=e=>{e.preventDefault();const inp=f.querySelector('input');const v=inp.value.trim();if(!v)return;CM.reply(f.dataset.reply,v,(POSTS.find(p=>p.id===f.dataset.reply)||{}).ch||S.ch).then(()=>{inp.value=''}).catch(fail)});
   const rl=$('#rlvl');if(rl)rl.onchange=()=>{S.resLvl=rl.value;render(false)};
   const rq=$('#rq');if(rq)rq.oninput=()=>{S.resQ=rq.value;const pos=rq.selectionStart;render(false);const r2=$('#rq');r2.focus();r2.setSelectionRange(pos,pos)};
   const tk=$('#ticket');if(tk)tk.onsubmit=e=>{e.preventDefault();const m=$('#tk-msg').value.trim();if(!m){toast('Escribe tu mensaje antes de enviarlo');return}CM.ticket($('#tk-topic').value,m).then(()=>{S.sent=true;render(false);toast('Mensaje enviado')}).catch(fail)};
   const sq=$('#sq');if(sq)sq.oninput=()=>{const q=sq.value.toLowerCase().trim();if(!q){render(false);return}const hits=Object.values(FAQ).flatMap(v=>v.q).filter(([a,b])=>(a+b).toLowerCase().includes(q));$('#faq').innerHTML=hits.length?hits.map(([a,b])=>`<details open><summary>${a}</summary><p>${b}</p></details>`).join(''):'<p class="muted" style="padding:14px 4px">No encontramos respuestas. Escríbenos con el formulario.</p>'};
+  const lf=$('#live-form');if(lf){lf.onsubmit=e=>{e.preventDefault();const k=keyLesson(lf.dataset.key);const start=new Date($('#lv-start').value);const url=$('#lv-url').value.trim(),rec=$('#lv-rec').value.trim();
+      if(isNaN(start))return toast('Indica la fecha y la hora de la clase');if((url&&!isHttps(url))||(rec&&!isHttps(rec)))return toast('Los enlaces deben empezar con https://');
+      CM.saveLive(lf.dataset.key,{level:+lf.dataset.level,title:k?k.les.t:'Clase en vivo',start,durationMin:Math.max(15,Math.min(600,+$('#lv-dur').value||90)),url,recordingUrl:rec}).then(()=>{render(false);toast('Clase en vivo guardada')}).catch(fail)};
+    const ld=$('#lv-del');if(ld)ld.onclick=()=>{if(confirm('¿Quitar la clase en vivo de esta lección?'))CM.deleteLive(lf.dataset.key).then(()=>{render(false);toast('Clase en vivo quitada')}).catch(fail)}}
+  document.querySelectorAll('form[data-answer]').forEach(f=>f.onsubmit=e=>{e.preventDefault();const q=CM.pending[+f.dataset.answer];const v=f.querySelector('textarea').value.trim();if(!q||!v)return;const k=keyLesson(q.lessonKey);
+    f.querySelector('button').disabled=true;CM.answer(q,v,k?k.les.t:'tu clase').then(()=>{render(false);toast('Respuesta enviada')}).catch(e=>{f.querySelector('button').disabled=false;fail(e)})});
+  const wv=$('#wv-form');if(wv)wv.onsubmit=e=>{e.preventDefault();const u=$('#wv-url').value.trim();if(u&&!isHttps(u))return toast('El enlace debe empezar con https://');CM.saveConfig({welcomeVideo:u}).then(()=>{render(false);toast('Video de bienvenida guardado')}).catch(fail)};
   const cv=$('#cert-preview');if(cv)cv.onclick=certModal;
   const ap=$('#apply');if(ap)ap.onsubmit=e=>{e.preventDefault();S.applied=true;render();toast('Postulación enviada a Karen')};
   const ar=$('#app-reset');if(ar)ar.onclick=()=>{S.applied=false;render(false)};
@@ -1647,8 +1717,8 @@ window.cmStart=async function(cm){
   renderNotifs();
   if(cm.isAdmin){
     try{
-      const st=await cm.loadStudents();
-      STUDENTS=st.map(u=>{const pay=u.plan==='completo'||(u.plan==='mensual'&&u.paymentStatus==='ok'),grant=Number(u.grantLevel)||0,tot=Number(u.installments)||9;return {n:u.n,ini:u.ini,c:u.c,email:u.email||'',acc:u.plan==='completo'?'full':u.plan==='mensual'?(u.paymentStatus==='overdue'?'overdue':'cuotas'):grant?'grant':'free',grant,cuota:u.plan==='mensual'?(Number(u.paidInstallments)||0)+' de '+tot:u.plan==='completo'?'Pagada':tot!==9?tot+' cuotas asignadas':'',lvl:pay?Math.min(5,Math.max(Number(u.accessLevel)||1,grant+1)):grant,last:u.since||'',next:u.plan==='mensual'&&u.next?(u.cancelAtPeriodEnd?'Termina '+u.next:u.next):'',s:u.paymentStatus==='overdue'?'overdue':u.plan==='completo'?'full':u.plan==='mensual'&&u.paymentStatus==='ok'?'ok':'none'}});
+      const [st]=await Promise.all([cm.loadStudents(),cm.loadQuestions()]);
+      STUDENTS=st.map(u=>{const id=u.id;const pay=u.plan==='completo'||(u.plan==='mensual'&&u.paymentStatus==='ok'),grant=Number(u.grantLevel)||0,tot=Number(u.installments)||9;return {id,n:u.n,ini:u.ini,c:u.c,email:u.email||'',acc:u.plan==='completo'?'full':u.plan==='mensual'?(u.paymentStatus==='overdue'?'overdue':'cuotas'):grant?'grant':'free',grant,cuota:u.plan==='mensual'?(Number(u.paidInstallments)||0)+' de '+tot:u.plan==='completo'?'Pagada':tot!==9?tot+' cuotas asignadas':'',lvl:pay?Math.min(5,Math.max(Number(u.accessLevel)||1,grant+1)):grant,last:u.since||'',next:u.plan==='mensual'&&u.next?(u.cancelAtPeriodEnd?'Termina '+u.next:u.next):'',s:u.paymentStatus==='overdue'?'overdue':u.plan==='completo'?'full':u.plan==='mensual'&&u.paymentStatus==='ok'?'ok':'none'}});
     }catch(e){console.error(e)}
   }
   cm.onPosts=()=>{POSTS=cm.posts;const a=document.activeElement;const typing=a&&/INPUT|TEXTAREA/.test(a.tagName)&&a.value;if(!typing&&['comunidad','inicio'].includes(S.view))render(false)};

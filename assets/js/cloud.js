@@ -4,7 +4,7 @@ import { auth, db } from './firebase.js';
 import { onAuthStateChanged, onIdTokenChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 import {
   doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, addDoc, query, orderBy, limit,
-  onSnapshot, serverTimestamp, writeBatch, increment,
+  onSnapshot, serverTimestamp, writeBatch, increment, where, collectionGroup, Timestamp,
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 
 const COLORS = ['#f2c66d', '#cfe0c4', '#e8c9b8', '#f2e1b5', '#d4dcea', '#efd3c3'];
@@ -125,17 +125,22 @@ const rebuild = () => {
   }));
   CM.onPosts();
 };
-onSnapshot(query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(80)),
+// Sin niveles abiertos solo se ven Preséntate y Testimonios (las reglas de Firestore lo exigen igual)
+const FREE_CHANNELS = ['presentaciones', 'testimonios'];
+CM.free = !isAdmin && CM.lvl === 0;
+CM.freeChannels = FREE_CHANNELS;
+const inFree = CM.free ? [where('ch', 'in', FREE_CHANNELS)] : [];
+onSnapshot(query(collection(db, 'posts'), ...inFree, orderBy('createdAt', 'desc'), limit(80)),
   (s) => { rawPosts = s.docs.map((d) => ({ id: d.id, ...d.data() })); rebuild(); }, (e) => console.warn('posts', e.code));
-onSnapshot(query(collection(db, 'replies'), orderBy('createdAt', 'desc'), limit(400)),
+onSnapshot(query(collection(db, 'replies'), ...inFree, orderBy('createdAt', 'desc'), limit(400)),
   (s) => { rawReplies = s.docs.map((d) => ({ id: d.id, ...d.data() })); rebuild(); }, (e) => console.warn('replies', e.code));
 onSnapshot(mine('likes'), (s) => { CM.likes = new Set(s.docs.map((d) => d.id)); rebuild(); }, (e) => console.warn('likes', e.code));
 
 CM.post = (ch, text) => addDoc(collection(db, 'posts'), {
   ch, text, authorUid: uid, authorName: name, isTeacher: isAdmin, likeCount: 0, createdAt: serverTimestamp(),
 });
-CM.reply = (postId, text) => addDoc(collection(db, 'replies'), {
-  postId, text, authorUid: uid, authorName: name, isTeacher: isAdmin, createdAt: serverTimestamp(),
+CM.reply = (postId, text, ch) => addDoc(collection(db, 'replies'), {
+  postId, ch, text, authorUid: uid, authorName: name, isTeacher: isAdmin, createdAt: serverTimestamp(),
 });
 CM.toggleLike = async (postId) => {
   const b = writeBatch(db), likeRef = me(`likes/${postId}`), postRef = doc(db, 'posts', postId);
@@ -153,6 +158,63 @@ CM.loadStudents = async () => {
     .map((u) => ({ ...u, n: u.displayName || u.email, ...person(u.displayName || u.email, u.id), email: u.email, since: fdate(u.createdAt), next: fdate(u.currentPeriodEnd) }));
   return CM.students;
 };
+
+// ---- Clases en vivo: agenda (la ven todas) y enlaces de sala y grabación (solo con el nivel abierto) ----
+const toLive = (d) => ({ id: d.id, ...d.data() });
+CM.agenda = []; CM.liveLinks = {};
+CM.loadLive = async () => {
+  const [ag, links] = await Promise.all([
+    getDocs(query(collection(db, 'agenda'), orderBy('start', 'asc'), limit(200))),
+    isAdmin ? getDocs(collection(db, 'liveLinks'))
+      : CM.lvl > 0 ? getDocs(query(collection(db, 'liveLinks'), where('level', '<=', CM.lvl))) : null,
+  ]);
+  CM.agenda = ag.docs.map(toLive);
+  CM.liveLinks = {};
+  links?.forEach((d) => { CM.liveLinks[d.id] = d.data(); });
+};
+// Solo la Maestra: programa o actualiza la clase en vivo de una lección
+CM.saveLive = async (key, { level, title, start, durationMin, url, recordingUrl }) => {
+  const b = writeBatch(db);
+  b.set(doc(db, 'agenda', key), { level, title, start: Timestamp.fromDate(start), durationMin, updatedAt: serverTimestamp() });
+  b.set(doc(db, 'liveLinks', key), { level, url, recordingUrl, updatedAt: serverTimestamp() });
+  await b.commit();
+  await CM.loadLive();
+};
+CM.deleteLive = async (key) => {
+  const b = writeBatch(db);
+  b.delete(doc(db, 'agenda', key)); b.delete(doc(db, 'liveLinks', key));
+  await b.commit();
+  await CM.loadLive();
+};
+
+// ---- Ajustes del aula (video de bienvenida) ----
+CM.config = {};
+CM.loadConfig = async () => { CM.config = (await getDoc(doc(db, 'config', 'aula'))).data() || {}; };
+CM.saveConfig = async (data) => {
+  await setDoc(doc(db, 'config', 'aula'), { ...data, updatedAt: serverTimestamp() }, { merge: true });
+  await CM.loadConfig();
+};
+
+// ---- Solo Maestra: preguntas de las alumnas para responder desde el panel ----
+CM.pending = [];
+CM.loadQuestions = async () => {
+  if (!isAdmin) return [];
+  const s = await getDocs(query(collectionGroup(db, 'questions'), where('answered', '==', false), orderBy('createdAt', 'desc'), limit(100)));
+  CM.pending = s.docs.map((d) => ({ id: d.id, uid: d.ref.parent.parent.id, ...d.data(), when: ago(d.data().createdAt) }));
+  return CM.pending;
+};
+CM.answer = async (q, reply, lessonTitle) => {
+  const b = writeBatch(db);
+  b.update(doc(db, 'users', q.uid, 'questions', q.id), { reply, answered: true, repliedAt: serverTimestamp() });
+  b.set(doc(collection(db, 'users', q.uid, 'notifications')), {
+    text: `La Maestra respondió tu pregunta en «${lessonTitle}». Ábrela en la pestaña Preguntas de esa clase.`,
+    read: false, createdAt: serverTimestamp(),
+  });
+  await b.commit();
+  CM.pending = CM.pending.filter((x) => x.id !== q.id);
+};
+
+await Promise.all([CM.loadLive(), CM.loadConfig()]).catch((e) => console.warn('aula', e.code || e));
 
 // ---- Suscripción (Stripe): devuelve la URL de pago o del portal para administrarla ----
 CM.billing = async (kind) => {

@@ -14,6 +14,12 @@ service cloud.firestore {
     function changed() { return request.resource.data.diff(resource.data).affectedKeys(); }
     function text(v, max) { return v is string && v.size() > 0 && v.size() <= max; }
     function userDoc(uid) { return get(/databases/$(database)/documents/users/$(uid)).data; }
+    // Nivel abierto (claim lvl que ponen el webhook de Stripe y scripts/admin.mjs)
+    function lvl() { return signedIn() ? request.auth.token.get('lvl', 0) : 0; }
+    function hasAccess() { return isAdmin() || lvl() > 0; }
+    // Canales que ve una cuenta gratis; solo puede escribir en Preséntate
+    function freeChannel(ch) { return ch in ['presentaciones', 'testimonios']; }
+    function canWrite(ch) { return hasAccess() || ch == 'presentaciones'; }
 
     // ---------- Perfil de cada alumna ----------
     match /users/{uid} {
@@ -122,10 +128,11 @@ service cloud.firestore {
     // ---------- Comunidad (espacio compartido a propósito entre alumnas) ----------
     // Solo expone lo que la propia alumna decide publicar y su nombre; nunca su correo.
     match /posts/{postId} {
-      allow read: if signedIn();
+      allow read: if hasAccess() || (signedIn() && freeChannel(resource.data.ch));
       allow create: if signedIn()
         && onlyKeys(['ch', 'text', 'authorUid', 'authorName', 'isTeacher', 'likeCount', 'createdAt'])
         && request.resource.data.ch in ['general', 'presentaciones', 'n1', 'n2', 'n3', 'n4', 'n5', 'testimonios']
+        && canWrite(request.resource.data.ch)
         && text(request.resource.data.text, 3000)
         && request.resource.data.authorUid == request.auth.uid
         && request.resource.data.authorName == userDoc(request.auth.uid).displayName
@@ -151,11 +158,13 @@ service cloud.firestore {
     }
 
     match /replies/{replyId} {
-      allow read: if signedIn();
+      allow read: if hasAccess() || (signedIn() && freeChannel(resource.data.get('ch', '')));
       allow create: if signedIn()
-        && onlyKeys(['postId', 'text', 'authorUid', 'authorName', 'isTeacher', 'createdAt'])
+        && onlyKeys(['postId', 'ch', 'text', 'authorUid', 'authorName', 'isTeacher', 'createdAt'])
         && request.resource.data.postId is string && request.resource.data.postId.size() <= 40
         && exists(/databases/$(database)/documents/posts/$(request.resource.data.postId))
+        && request.resource.data.ch == get(/databases/$(database)/documents/posts/$(request.resource.data.postId)).data.ch
+        && canWrite(request.resource.data.ch)
         && text(request.resource.data.text, 2000)
         && request.resource.data.authorUid == request.auth.uid
         && request.resource.data.authorName == userDoc(request.auth.uid).displayName
@@ -163,6 +172,23 @@ service cloud.firestore {
         && request.resource.data.createdAt == request.time;
       allow update: if false;
       allow delete: if isAdmin() || (signedIn() && resource.data.authorUid == request.auth.uid);
+    }
+
+    // ---------- Clases en vivo ----------
+    // La agenda (título, nivel, fecha) la ven todas; los enlaces de la sala y la grabación, solo quien tiene ese nivel.
+    match /agenda/{key} {
+      allow read: if signedIn();
+      allow write: if isAdmin() && key.matches('^[a-z0-9_-]{1,80}$');
+    }
+    match /liveLinks/{key} {
+      allow read: if isAdmin() || (signedIn() && resource.data.level <= lvl());
+      allow write: if isAdmin() && key.matches('^[a-z0-9_-]{1,80}$');
+    }
+
+    // ---------- Ajustes del aula (video de bienvenida) ----------
+    match /config/{id} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
     }
   }
 }

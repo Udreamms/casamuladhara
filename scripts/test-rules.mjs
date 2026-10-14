@@ -8,7 +8,7 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithCustomToken, signOut } from 'firebase/auth';
 import { setLogLevel } from 'firebase/firestore';
 import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, collection, collectionGroup, getDocs, query,
-  orderBy, limit, serverTimestamp, writeBatch, increment } from 'firebase/firestore';
+  orderBy, limit, serverTimestamp, writeBatch, increment, where } from 'firebase/firestore';
 
 setLogLevel('silent');
 admin.initializeApp({ credential: admin.credential.cert(JSON.parse(readFileSync(keyFile, 'utf8'))) });
@@ -20,7 +20,7 @@ const mk = async (name, claims) => {
   const email = `${name}-${tag}@test.casamuladhara.invalid`;
   const u = await admin.auth().createUser({ email, emailVerified: true, displayName: name });
   if (claims) await admin.auth().setCustomUserClaims(u.uid, claims);
-  return { uid: u.uid, email, name };
+  return { uid: u.uid, email, name, claims };
 };
 const login = async (u) => {
   const app = initializeApp(cfg, u.uid);
@@ -36,10 +36,12 @@ const allowed = async (name, fn) => { try { await fn(); ok(name, true); } catch 
 const denied = async (name, fn) => { try { await fn(); ok(`${name} (debía negarse)`, false); } catch (e) { ok(name, e.code === 'permission-denied'); if (e.code !== 'permission-denied') console.log('     ', e.code, e.message); } };
 const profile = (u, extra = {}) => ({ uid: u.uid, email: u.email, displayName: u.name, photoURL: '', role: 'student_free', accessLevel: 1, plan: 'none', paymentStatus: 'none', createdAt: serverTimestamp(), lastLogin: serverTimestamp(), ...extra });
 
-const A = await mk('ana'), B = await mk('bea'), M = await mk('maestra', { admin: true });
+// A y B tienen el Nivel 1 abierto; F es una cuenta gratis (sin niveles)
+const A = await mk('ana', { lvl: 1 }), B = await mk('bea', { lvl: 1 }), F = await mk('fran'), M = await mk('maestra', { admin: true });
 const created = [];
 try {
-  const a = await login(A), b = await login(B), m = await login({ ...M, claims: { admin: true } });
+  const a = await login(A), b = await login(B), f = await login(F), m = await login(M);
+  await adb.doc(`users/${F.uid}`).set({ uid: F.uid, email: F.email, displayName: F.name, role: 'student_free' });
 
   console.log('\nPerfil');
   await denied('A no puede crearse como admin', () => setDoc(doc(a.db, 'users', A.uid), profile(A, { role: 'admin' })));
@@ -98,9 +100,34 @@ try {
   await allowed('B da like (lote)', async () => { const w = writeBatch(b.db); w.set(doc(b.db, 'users', B.uid, 'likes', pid), { createdAt: serverTimestamp() }); w.update(doc(b.db, 'posts', pid), { likeCount: increment(1) }); await w.commit(); });
   await denied('B NO da un segundo like', async () => { const w = writeBatch(b.db); w.update(doc(b.db, 'posts', pid), { likeCount: increment(1) }); await w.commit(); });
   await denied('B NO lee los likes de A', () => getDocs(collection(b.db, 'users', A.uid, 'likes')));
-  await allowed('B responde', () => addDoc(collection(b.db, 'replies'), { postId: pid, text: 'hola Ana', authorUid: B.uid, authorName: B.name, isTeacher: false, createdAt: serverTimestamp() }));
-  await denied('B NO responde con nombre ajeno', () => addDoc(collection(b.db, 'replies'), { postId: pid, text: 'x', authorUid: B.uid, authorName: A.name, isTeacher: false, createdAt: serverTimestamp() }));
+  await allowed('B responde', () => addDoc(collection(b.db, 'replies'), { postId: pid, ch: 'general', text: 'hola Ana', authorUid: B.uid, authorName: B.name, isTeacher: false, createdAt: serverTimestamp() }));
+  await denied('B NO responde con nombre ajeno', () => addDoc(collection(b.db, 'replies'), { postId: pid, ch: 'general', text: 'x', authorUid: B.uid, authorName: A.name, isTeacher: false, createdAt: serverTimestamp() }));
+  await denied('B NO responde con otro canal', () => addDoc(collection(b.db, 'replies'), { postId: pid, ch: 'presentaciones', text: 'x', authorUid: B.uid, authorName: B.name, isTeacher: false, createdAt: serverTimestamp() }));
   await allowed('A borra su publicación', () => deleteDoc(doc(a.db, 'posts', pid)));
+
+  console.log('\nCuenta gratis');
+  const freeQ = (db, c) => getDocs(query(collection(db, c), where('ch', 'in', ['presentaciones', 'testimonios']), orderBy('createdAt', 'desc'), limit(10)));
+  await allowed('F lee Preséntate y Testimonios', () => freeQ(f.db, 'posts'));
+  await allowed('F lee respuestas de esos canales', () => freeQ(f.db, 'replies'));
+  await denied('F NO lee toda la comunidad', () => getDocs(query(collection(f.db, 'posts'), orderBy('createdAt', 'desc'), limit(10))));
+  await denied('F NO publica en General', () => addDoc(collection(f.db, 'posts'), { ch: 'general', text: 'hola', authorUid: F.uid, authorName: F.name, isTeacher: false, likeCount: 0, createdAt: serverTimestamp() }));
+  await denied('F NO publica en Testimonios', () => addDoc(collection(f.db, 'posts'), { ch: 'testimonios', text: 'hola', authorUid: F.uid, authorName: F.name, isTeacher: false, likeCount: 0, createdAt: serverTimestamp() }));
+  await allowed('F se presenta', () => addDoc(collection(f.db, 'posts'), { ch: 'presentaciones', text: 'Hola, soy Fran', authorUid: F.uid, authorName: F.name, isTeacher: false, likeCount: 0, createdAt: serverTimestamp() }).then((r) => created.push(r)));
+
+  console.log('\nClases en vivo');
+  await allowed('Maestra programa una clase', async () => {
+    const w = writeBatch(m.db);
+    w.set(doc(m.db, 'agenda', 'test_' + tag), { level: 2, title: 'Prueba', start: new Date(), durationMin: 60 });
+    w.set(doc(m.db, 'liveLinks', 'test_' + tag), { level: 2, url: 'https://meet.google.com/x', recordingUrl: '' });
+    await w.commit();
+    created.push(doc(m.db, 'agenda', 'test_' + tag), doc(m.db, 'liveLinks', 'test_' + tag));
+  });
+  await allowed('F ve la agenda', () => getDoc(doc(f.db, 'agenda', 'test_' + tag)));
+  await denied('F NO ve el enlace de la sala', () => getDoc(doc(f.db, 'liveLinks', 'test_' + tag)));
+  await denied('A (Nivel 1) NO ve el enlace del Nivel 2', () => getDoc(doc(a.db, 'liveLinks', 'test_' + tag)));
+  await allowed('A lista los enlaces de su nivel', () => getDocs(query(collection(a.db, 'liveLinks'), where('level', '<=', 1))));
+  await denied('A NO programa clases', () => setDoc(doc(a.db, 'agenda', 'x_' + tag), { level: 1, title: 'x' }));
+  await denied('A NO cambia el video de bienvenida', () => setDoc(doc(a.db, 'config', 'aula'), { welcomeVideo: 'x' }));
 
   console.log('\nMaestra y visitantes');
   await allowed('Maestra lista usuarios', () => getDocs(collection(m.db, 'users')));
@@ -116,13 +143,13 @@ try {
   await denied('Nadie lee colecciones no declaradas', () => getDocs(collection(a.db, 'secretos')));
 } finally {
   for (const r of created) await adb.doc(r.path).delete().catch(() => {});
-  for (const u of [A, B, M]) {
+  for (const u of [A, B, F, M]) {
     await adb.recursiveDelete(adb.doc(`users/${u.uid}`)).catch(() => {});
     await admin.auth().deleteUser(u.uid).catch(() => {});
   }
   const left = await adb.collection('replies').where('authorUid', 'in', [A.uid, B.uid, M.uid]).get();
   for (const d of left.docs) await d.ref.delete();
-  const posts = await adb.collection('posts').where('authorUid', 'in', [A.uid, B.uid, M.uid]).get();
+  const posts = await adb.collection('posts').where('authorUid', 'in', [A.uid, B.uid, F.uid, M.uid]).get();
   for (const d of posts.docs) await d.ref.delete();
 }
 console.log(`\n${pass} correctas, ${fail} con fallas`);
