@@ -1,7 +1,7 @@
 // Capa de datos del aula: sesión + Firestore.
 // Todo lo personal vive en users/{uid}/…; las reglas (firestore.rules) impiden leer lo de otra alumna.
 import { auth, db } from './firebase.js';
-import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
+import { onAuthStateChanged, onIdTokenChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 import {
   doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, addDoc, query, orderBy, limit,
   onSnapshot, serverTimestamp, writeBatch, increment,
@@ -34,6 +34,15 @@ if (!user) {
 // Si cierra sesión en otra pestaña, sale también de esta
 onAuthStateChanged(auth, (u) => { if (!u) location.replace('login.html?mode=login'); });
 
+// El servidor (middleware.js) lee esta cookie para servir el contenido de las clases y sus materiales.
+// Es el mismo token de sesión de Firebase (dura 1 hora y se renueva solo).
+const setSessionCookie = (t) => {
+  document.cookie = t
+    ? `cm_session=${t}; Path=/; Max-Age=3600; SameSite=Lax; Secure`
+    : 'cm_session=; Path=/; Max-Age=0; SameSite=Lax; Secure';
+};
+onIdTokenChanged(auth, async (u) => setSessionCookie(u ? await u.getIdToken() : ''));
+
 const uid = user.uid;
 const me = (path) => doc(db, 'users', uid, ...path.split('/'));
 const mine = (name) => collection(db, 'users', uid, name);
@@ -56,17 +65,21 @@ if (!snap.exists()) {
 snap = await getDoc(userRef);
 const p = snap.data();
 
-const token = await user.getIdTokenResult(true);
+let token = await user.getIdTokenResult(true);
+setSessionCookie(token.token);
 const isAdmin = token.claims.admin === true;
+// member=true lo pone el webhook de Stripe (o la Maestra con scripts/admin.mjs) mientras la suscripción esté al día
+const paid = new URLSearchParams(location.search).get('pago');
+if (paid) history.replaceState(null, '', 'aula.html');
 
 const name = p.displayName || pretty((p.email || '').split('@')[0]);
 const CM = {
-  uid, isAdmin,
+  uid, isAdmin, member: token.claims.member === true, paid,
   profile: { ...p, name, ini: initials(name), c: colorFor(uid), accessLevel: Number(p.accessLevel) || 1, plan: p.plan || 'none', paymentStatus: p.paymentStatus || 'none' },
   progress: {}, doneAt: {}, notes: {}, questions: {}, tickets: [], payments: [], notifications: [],
   posts: [], likes: new Set(), students: [],
   onPosts: () => {},
-  signOut: () => signOut(auth).then(() => location.replace('login.html?mode=login')),
+  signOut: () => signOut(auth).then(() => { setSessionCookie(''); location.replace('login.html?mode=login'); }),
 };
 
 // ---- Carga inicial (solo mis datos) ----
@@ -141,5 +154,22 @@ CM.loadStudents = async () => {
   return CM.students;
 };
 
+// ---- Suscripción (Stripe): devuelve la URL de pago o del portal para administrarla ----
+CM.billing = async () => {
+  const r = await fetch('/api/billing', { method: 'POST', headers: { Authorization: `Bearer ${await user.getIdToken()}` } });
+  const out = await r.json().catch(() => ({}));
+  if (!r.ok || !out.url) throw new Error(out.error || 'No se pudo abrir el pago. Inténtalo de nuevo.');
+  return out.url;
+};
+
 window.CM = CM;
 window.cmStart(CM);
+
+// Al volver de Stripe el webhook puede tardar unos segundos: esperamos el acceso y recargamos el aula
+if (paid === 'ok' && !CM.member && !isAdmin) {
+  for (let i = 0; i < 20; i++) {
+    await new Promise((r) => setTimeout(r, 3000));
+    token = await user.getIdTokenResult(true);
+    if (token.claims.member === true) { location.replace('aula.html'); break; }
+  }
+}
