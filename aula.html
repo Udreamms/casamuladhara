@@ -989,6 +989,14 @@ const N3L2c=C2('Nadis, aura y cuerpos sutiles',[['n3b9','Los tres nadis principa
 const N3L2d=C2('Desequilibrio y evaluación',[['n3b13','Qué genera un desequilibrio'],['n3b14','Cómo se manifiesta el desequilibrio'],['n3b15','Cómo percibimos el estado de la energía'],['n3b16','Evaluar antes de armonizar']]);
 const N3L2e=C2('Mantras y video de apoyo',[['n3b17','Mantras de los chakras','Practica cada mantra paso a paso'],['n3b19','Video de apoyo','Un recorrido visual por los chakras']],C2F);
 const N3L2f=C2('Práctica con péndulo, reflexión y cierre',[['n3b20','Práctica con péndulo','Alineación, chakras y cuerpos'],['n3b21','Reflexión'],['n3b22','Repaso'],['n3b23','Cierre de la clase']],C2F2);
+const C3F=[F('pdf','Gráficos y protocolo de la Clase 3','7 láminas para imprimir',N3P+'print/clase3_graficos_y_protocolo.pdf')];
+const N3L3a=C2('Bienvenida y objetivos',[['n3c1','Bienvenida'],['n3c2','Objetivos de la clase']]);
+const N3L3b=C2('El Yo Superior',[['n3c3','¿Qué es el Yo Superior?'],['n3c4','¿Qué no es el Yo Superior?'],['n3c5','Ego vs. Yo Superior','Compara y practica']]);
+const N3L3c=C2('Preparación energética',[['n3c6','Cómo elevar la frecuencia'],['n3c7','Estados de conciencia']]);
+const N3L3d=C2('Biómetro de Bovis',[['n3c8','Qué aprenderemos'],['n3c9','¿Qué es el Biómetro de Bovis?'],['n3c10','Las Unidades Bovis'],['n3c11','Evaluación energética de chakras','Practica la lectura'],['n3c12','Qué modifica una medición']]);
+const N3L3e=C2('Mapa Guía y Yo Superior',[['n3c13','Mapa Guía Casa Muladhara'],['n3g_mapa','Gráfico: Mapa / Guía'],['n3g_ysc','Gráfico: Yo Superior y Comité Espiritual']],C3F);
+const N3L3f=C2('Preparación y oración de apertura',[['n3p1','Preparación para trabajar en sanación'],['n3p2','Preparación del terapeuta y el espacio'],['n3p3','Oración de apertura']]);
+const N3L3g=C2('Chakras, repaso y cierre',[['n3peq','Gráfico: equilibrio de chakras'],['n3plc','Limpieza de chakras'],['n3c14','Repaso'],['n3c15','Cierre de la clase']]);
 
 const LEVELS=[
  {n:1,id:'pendulo',title:'Péndulo Hebreo Nivel 1',mode:'pres',dur:'1 jornada intensiva · 8 horas',status:'done',
@@ -1050,7 +1058,8 @@ const LEVELS=[
   desc:'Profundizas en la radiestesia terapéutica para trabajar el alma: memorias, emociones y patrones que se repiten.',
   modules:[
    {title:'Clase 1 · Fundamentos de la radiestesia y activación del péndulo',lessons:[N3C1_1,N3C1_2,N3C1_3,N3C1_4,N3C1_5,N3C1_6]},
-   {title:'Clase 2 · Sistema energético humano',lessons:[N3L2a,N3L2b,N3L2c,N3L2d,N3L2e,N3L2f]}
+   {title:'Clase 2 · Sistema energético humano',lessons:[N3L2a,N3L2b,N3L2c,N3L2d,N3L2e,N3L2f]},
+   {title:'Clase 3 · Yo Superior y biómetros',lessons:[N3L3a,N3L3b,N3L3c,N3L3d,N3L3e,N3L3f,N3L3g]}
   ]},
  {n:4,id:'especializaciones',title:'Especializaciones en Radiestesia',mode:'live',dur:'4 especializaciones · 4 clases y 1 mes cada una',status:'locked',
   desc:'Cuatro especializaciones para trabajar temas profundos con la radiestesia. Cada una tiene su propia insignia.',
@@ -1097,6 +1106,7 @@ const RES=[
  {t:'Ficha de registro en blanco',type:'Plantilla',lvl:2,size:'1 hoja',k:'pdf',href:'assets/n2/print/ficha_de_registro.pdf'},
  {t:'Gráficos radiestésicos del Nivel 2',type:'PDF',lvl:2,size:'6 láminas',k:'pdf',href:'assets/n2/print/graficos_radiestesicos.pdf'},
  {t:'Mantras de los chakras',type:'PDF',lvl:3,size:'1 lámina',k:'pdf',href:'assets/n3/print/mantras_chakras.pdf',new:1},
+ {t:'Clase 3 · Gráficos y protocolo',type:'PDF',lvl:3,size:'7 láminas',k:'pdf',href:'assets/n3/print/clase3_graficos_y_protocolo.pdf',new:1},
  {t:'Clase 1 · Ejercicios y reflexión',type:'Plantilla',lvl:3,size:'2 hojas',k:'pdf',href:'assets/n3/print/clase1_ejercicios_y_reflexion.pdf'},
  {t:'Meditación de limpieza del aura',type:'Audio',lvl:3,size:'18 min',k:'mp3'},
  {t:'Ficha de registro de sesión',type:'Plantilla',lvl:0,size:'180 KB',k:'doc'},
@@ -1155,6 +1165,7 @@ document.addEventListener('input',e=>{const t=e.target;if(!t.dataset)return;
  if(t.dataset.n2b!==undefined){RS.n2bv=+t.value;n2bUpd()}
  else if(t.dataset.n2z!==undefined){st('n2z',N2ZI.slice())[+t.dataset.n2z]=+t.value;n2zUpd()}
  else if(t.dataset.n2pc!==undefined){RS.n2pc=+t.value;n2pcUpd()}
+ else if(t.dataset.n3c3bv!==undefined){RS.n3c3bv=+t.value;n3c3bvUpd()}
  else if(t.dataset.n2i!==undefined){FI()[t.dataset.n2i]=t.value;n2fiSync()}});
 
 /* acciones de las clases interactivas */
@@ -1191,6 +1202,8 @@ function rxAct(p,el){const [a,k,v]=p;
  else if(a==='n3rnd'){RS[k]=Math.floor(Math.random()*+v);render(false)}
  else if(a==='n3o'){const o=RS.n3ord;if(!o)return;if(+v===o.n){o.n++;o.msg=''}else o.msg='Ese no es el siguiente cuerpo. Piensa qué viene primero.';render(false)}
  else if(a==='n3or'){delete RS.n3ord;render(false)}
+ else if(a==='n3c3eg'){const z=st('n3c3eg',{});if(z[k]===+v)delete z[k];else z[k]=+v;render(false)}
+ else if(a==='n3c3egr'){delete RS.n3c3eg;render(false)}
  else if(a==='n3cal'){const c=st('n3cal',{});if(c[k]===+v)delete c[k];else c[k]=+v;render(false)}
 
  else if(a==='n3calp'){const P=PND.cal,m=P?N3CALM.indexOf(P.want):-1;if(m<0)RS.n3calmsg='Primero elige arriba el movimiento que hizo tu péndulo.';else{st('n3cal',{})[k]=m;RS.n3calmsg='';delete RS.n3sim}render(false)}
