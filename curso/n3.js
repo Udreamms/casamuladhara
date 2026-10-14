@@ -497,7 +497,7 @@ const N3G={
  chem:{t:'Chakras · bloqueos emocionales',eb:'Protocolo · Chakras',lede:'Ubica el chakra y la emoción que lo bloquea.',how:'Pregunta qué chakra está bloqueado y luego qué emoción lo mantiene así. Más afuera encontrarás otros bloqueos emocionales.',rings:[
   {t:'Chakra',items:q3('Raíz|Sacro|Plexo solar|Corazón|Garganta|Tercer ojo|Corona'),cols:CH7},
   {t:'Principal bloqueo',items:q3('Miedo / Paranoia~Raíz|Culpa / Falta de creatividad~Sacro|Ira / Vergüenza~Plexo solar|Angustia / Duelo~Corazón|Falta de comunicación / Mentiras~Garganta|Ilusión / No querer ver~Tercer ojo|Apego / Ambición / No aceptar~Corona'),cols:CH7},
-  {t:'Otros bloqueos',...n3grp([['Larvas astrales','Culpa|Dependencia|Falta de confianza|Envidia|Odio a la vida|Odio a sí mismo'],['Entidades parasitarias','Frustración|Inestabilidad|Crítica / Celos|Baja autoestima|Mentira'],['Miasmas','Violencia|Egocentrismo|Tristeza|Rechazo|Manipulación|Confusión'],['Lazos o cordones energéticos','Depresión|Inseguridad|Angustia|Sobrepeso|Estreñimiento|Negación|Abandono|Negatividad|Falta de amor propio'],['Otros (fuera del gráfico)','Miedo|Rabia']],N3PAL)}]},
+  {t:'Otros bloqueos',...n3grp([['Larvas astrales','Culpa|Dependencia|Falta de confianza|Envidia|Odio a la vida|Odio a sí mismo'],['Entidades parasitarias','Frustración|Inestabilidad|Crítica / Celos|Baja autoestima|Mentira'],['Miasmas','Violencia|Egocentrismo|Tristeza|Rechazo|Manipulación|Confusión'],['Lazos o cordones energéticos','Depresión|Inseguridad|Angustia|Sobrepeso|Estreñimiento'],['Otros (fuera del gráfico)','Negación|Abandono|Negatividad|Falta de amor propio|Miedo|Rabia']],N3PAL)}]},
  bio:{t:'Biómetro de órganos · chakras',eb:'Protocolo · Chakras',lede:'Relaciona órganos y sistemas con el chakra y la emoción que los afecta.',how:'Pregunta qué órgano o sistema necesita atención y observa el sector. Cada grupo pertenece a un chakra y a una emoción.',rings:[
   {t:'Chakra y emoción',items:q3('Raíz~Miedo / Paranoia|Sacro~Culpa|Plexo solar~Ira / Vergüenza|Corazón~Angustia / Duelo|Garganta~Falta de comunicación|Tercer ojo~No querer ver|Corona~No aceptar / Apego'),cols:CH7},
   {t:'Órganos y sistemas',...n3grp([['Raíz · Miedo / Paranoia','Columna vertebral|Intestino delgado|Próstata|Ano / Recto|Glándulas suprarrenales|Dientes / Uñas|Músculos / Huesos'],['Sacro · Culpa','Cavidad pélvica / Ovarios|Intestino grueso|Riñones / Vejiga|Aparato reproductor F/M · Gónadas|Sistema urinario|Linfa / Bazo'],['Plexo solar · Ira / Vergüenza','Sist. digestivo superior|Hígado|Páncreas|Vesícula|Espalda lumbar|Colon / Estómago'],['Corazón · Angustia / Duelo','Sist. circulatorio|Corazón|Sist. inmunológico|Cavidad torácica y espalda|Bronquios / Esófago|Pulmones'],['Garganta · Falta de comunicación','Tiroides / Amígdalas|Garganta / Voz|Tráquea / Faringe|Oídos|Cervical'],['Tercer ojo · No querer ver','Ojos|Nariz|Cerebelo|Sist. nervioso central|Glándulas pituitarias|Sist. endocrino'],['Corona · No aceptar / Apego','Cerebro|Glándula pineal|Cráneo|Cuerpo energético|Consciencia superior']],CH7)}]},
@@ -877,3 +877,137 @@ const N3Q4=[
  {q:'¿Qué pasos se siguen con los votos?',o:['Identificar, verificar, solicitar autorización, aplicar el protocolo y confirmar','Cortarlos siempre sin preguntar','Ignorarlos'],a:0,e:'Todo voto cumplió un propósito; se libera con respeto, consciencia y autorización.'},
  {q:'Si en Limpieza de aura el Yo Superior responde «Otros (fuera del gráfico)»…',o:['Se termina la sesión','Se continúa investigando con otros gráficos o herramientas','Se repite la misma pregunta hasta que cambie'],a:1,e:'La información no está en este gráfico.'}];
 RICH.n4a27=()=>n3quiz('c4',N3Q4,['Dominas lo esencial de la Clase 4.','Vas muy bien. Repasa lo que falló y sigue practicando.','Vale la pena repasar la clase. Puedes volver cuando quieras.']);
+
+/* ================= CLASE 5 · Aplicación práctica: revisión y desarrollo de la clase ================= */
+Object.assign(IC,{
+ rayo:'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
+ gota:'<path d="M12 3s-6 7-6 11a6 6 0 0 0 12 0c0-4-6-11-6-11z"/>',
+ espiral:'<path d="M12 12a1.5 1.5 0 1 1 1.5-1.5M12 12m-4-1.5a4 4 0 1 1 4 5.5M6 10a6.5 6.5 0 1 1 6 8.5"/>',
+ puno:'<path d="M7 11V7a2 2 0 0 1 4 0v3M11 10V6a2 2 0 0 1 4 0v4M15 10V8a2 2 0 0 1 4 0v5a7 7 0 0 1-7 7h-1a6 6 0 0 1-6-6v-2a2 2 0 0 1 2-2h3"/>',
+ mascara:'<path d="M4 5c5 2 11 2 16 0v6a8 8 0 0 1-16 0zM8 10h2M14 10h2M9 15c2 1 4 1 6 0"/>',
+ xcirc:'<circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/>',
+ hilos:'<path d="M5 3v4M12 3v6M19 3v4M3 7h18M5 7v6M12 9v8M19 7v5"/><circle cx="5" cy="15" r="2"/><circle cx="12" cy="19" r="2"/><circle cx="19" cy="14" r="2"/>',
+ bicho:'<ellipse cx="12" cy="13" rx="4" ry="6"/><path d="M12 7V5M9 4l1.5 2M15 4l-1.5 2M8 11H4M8 15H4M16 11h4M16 15h4M9 19l-2 2M15 19l2 2"/>',
+ puzzle:'<path d="M4 8h4a2 2 0 1 1 4 0h4v4a2 2 0 1 1 0 4v4H4v-4a2 2 0 1 0 0-4z"/>',
+ chat:'<path d="M4 5h16v11H9l-5 4z"/>',
+ puntos:'<circle cx="6" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="18" cy="12" r="1.5"/>'
+});
+const N3C5P=N3P+'c5/';
+const c5img=(f,alt,s)=>`<img src="${N3C5P}${f}" alt="${alt}" loading="lazy" decoding="async" style="display:block;max-width:100%;height:auto;border-radius:20px;justify-self:center;${s||''}">`;
+const c5tags=a=>`<div class="dk-chips">${a.map(x=>`<span class="tg">${x}</span>`).join('')}</div>`;
+const N5REC='Cada información es una guía. Siempre acompañamos desde el amor, el respeto y la conciencia.';
+
+/* ----- 1 · Bienvenida, conexión interior y agenda ----- */
+RICH.n5a1=()=>nbHero('Clase 5','Aplicación práctica','Revisión y desarrollo de la clase','La práctica con conciencia es el puente entre el <b>conocimiento</b> y la <b>transformación</b>.',['Sanación','Consciencia','Propósito'],'Formación en Radiestesia y Sanación',
+ `<div class="nb-pw">${pndSVG('c5hero',{dark:1,mode:'fb',amp:50,len:15,amb:1,cap:0})}</div>`);
+const N5CI=['Cierra tus ojos por un instante.','Respira profundamente tres veces.','Llevo mi atención a mi corazón y aquieto mi mente.','Me conecto con mi Yo Superior, con mi Comité Espiritual y con las energías de luz que acompañan mi camino.','Solicito claridad, discernimiento y sabiduría para interpretar con respeto, amor y conciencia.','Que toda la información que hoy reciba sea para el mayor bien de todos.'];
+RICH.n5a2=()=>dkH('Práctica inicial','Conexión interior','Un ejercicio breve para conectar, centrar y sintonizar nuestra energía antes de comenzar.')+
+ `<div class="dk-split" style="align-items:center">${c5img('loto.webp','Flor de loto dorada sobre el agua irradiando luz','max-height:380px')}<div style="display:grid;gap:12px">${n3pray('n5ci',N5CI)}</div></div>`;
+const N5AG=[['diana','Práctica inicial','Ejercicio breve para conectar, centrar y sintonizar nuestra energía.'],['grupo','Revisión de tarea','Compartimos experiencias, aprendizajes y descubrimientos.'],['libro','Desarrollo de la Clase 5','Interpretación terapéutica y evaluación energética integral.'],['loto','Integración','Conectamos todo lo aprendido con la sanación y la conciencia.'],['corazon','Cierre y reflexión','Agradecemos, integramos y sembramos nuestra intención.']];
+RICH.n5a3=()=>dkH('Clase 5','¿Qué haremos hoy?','Recorre los cinco momentos de la clase.')+n3sel('n5ag',N5AG,{eb:'Momento',nav:1});
+
+/* ----- 2 · Revisión de tarea y cambio de mirada ----- */
+RICH.n5a4=()=>dkH('Revisión de tarea','Revisión de Guía N.° 1','Hoy revisaremos juntas su primera evaluación completa realizada con la <b>Guía de Trabajo N.° 1</b>.')+
+ `<div class="dk-call">Este espacio es para compartir, observar y comprender. <i>Cada práctica nos fortalece y nos acerca a una interpretación más consciente y precisa.</i></div>
+ <div class="dk-grid c2" style="align-items:start"><div style="display:grid;gap:8px"><div class="dk-sub">¿Qué haremos hoy? · marca lo que ya hiciste</div>${n3ck('n5gu',[['grupo','Compartiremos sus experiencias durante la práctica.'],['lupa','Revisaremos cada área de la evaluación realizada.'],['diana','Analizaremos los resultados obtenidos.'],['libro','Aclararemos conceptos clave para fortalecer su comprensión.'],['loto','Integraremos lo aprendido para seguir avanzando.']])}</div>
+ <div style="display:grid;gap:10px">${n3area('n5gx','¿Qué te sorprendió de tu primera evaluación completa?','Lo que descubrí…')}${n3area('n5gd','¿Qué duda quieres llevar a la clase?','Mi duda es…')}</div></div>`+n3priv+
+ n3quote('Cada evaluación es un <mark>mapa</mark> que nos muestra dónde estamos y hacia dónde podemos <mark>sanar y transformar</mark>.');
+const N5MI=[['lupa','Observar','Detectamos el desequilibrio energético a través de los gráficos y la respuesta del péndulo.'],['puzzle','Relacionar','Conectamos la información entre distintos gráficos para entender el porqué del bloqueo.'],['diana','Priorizar','Identificamos qué es lo más importante de abordar según el origen y el impacto energético encontrado.'],['loto','Intervenir','Aplicamos la limpieza o armonización adecuada en el orden correcto para lograr transformación.']];
+RICH.n5a5=()=>dkH('Metodología Casa Muladhara®','Un cambio de mirada en la práctica radiestésica','Hasta ahora hemos utilizado el péndulo para obtener respuestas. Desde hoy damos un paso más profundo.')+
+ `<div class="dk-call"><b>Vamos a investigar para comprender el origen del bloqueo</b> y así poder acompañar con claridad y efectividad.</div>
+ <div class="dk-sub">Los cuatro pasos · toca cada uno</div>`+n3flip('n5mi',N5MI,'c4',190)+
+ n3quote('El péndulo no hace el trabajo por nosotras. Nuestra capacidad de <mark>preguntar, interpretar y conectar</mark> la información es lo que marca la diferencia en una sesión.');
+
+/* ----- 3 · Gráfico de chakras y bloqueos emocionales ----- */
+RICH.n5a6=()=>dkH('Gráfico de chakras','Gráfico de chakras y bloqueos emocionales','Este gráfico nos ayuda a identificar el chakra que requiere atención, reconocer la <b>emoción principal</b> asociada y orientar la investigación hacia el posible origen del desequilibrio energético.')+
+ `<div class="dk-grid c2" style="align-items:start">${c4box('Importante','<p>No entrega un diagnóstico definitivo. Nos ofrece un <b>punto de partida</b> para comprender qué necesita ser observado antes de intervenir.</p>')}
+ <div style="display:grid;gap:8px"><div class="dk-sub">En esta clase aprenderemos a</div>${c4li([['loto','Identificar el chakra que necesita atención.'],['corazon','Comprender la emoción relacionada con ese centro energético.'],['lupa','Relacionar la información obtenida con los demás gráficos de investigación.'],['espiral','Interpretar los resultados desde una mirada terapéutica e integral.']])}</div></div>`+
+ c4pri('«El péndulo señala un camino de investigación. Nuestra labor es observar, relacionar e interpretar la información con respeto, claridad y conciencia.»')+
+ `<div class="dk-sub">Practica sobre el gráfico</div>`+n3graph('chem');
+const c5dot=c=>`<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${c};margin-right:6px;vertical-align:middle"></span>`;
+const N5NV=[[0,'Raíz','Es nuestra base, seguridad y supervivencia. Los bloqueos aquí se relacionan con el <b>miedo</b>, la <b>paranoia</b>, la <b>culpa</b> y la sensación de inseguridad.'],
+ [1,'Sacro','Se vincula con la creatividad, la sexualidad, el placer y las relaciones. Los bloqueos se expresan como <b>culpa</b>, <b>falta de creatividad</b> o dificultades en el disfrute.'],
+ [2,'Plexo solar','Está relacionado con el poder personal, la autoestima y la voluntad. Aquí emergen la <b>ira</b> y la <b>vergüenza</b>, que afectan nuestra confianza y dirección de vida.'],
+ ['espiral','Larvas astrales','Son patrones energéticos que pueden adherirse a nuestro campo emocional. Generan bloqueos como <b>inestabilidad</b>, <b>frustración</b>, <b>odio a sí mismo</b>, <b>envidia</b> y <b>falta de confianza</b>.'],
+ ['bicho','Entidades parasitarias','Corresponden a influencias externas que drenan nuestra energía. Pueden provocar <b>dependencia</b>, <b>odio a la vida</b> y <b>culpa</b> constante.']];
+RICH.n5a7=()=>dkH('Chakras · bloqueos emocionales','Nuestra base y nuestra conexión con la vida','En esta sección exploramos los primeros niveles del gráfico. Toca cada nivel.')+
+ n3sel('n5nv',N5NV.map(x=>[typeof x[0]==='number'?'':x[0],x[1],x[2],typeof x[0]==='number'?`<p>${c5dot(CH7[x[0]])}Chakra ${CHAKRAS[x[0]].n} · <i>${CHAKRAS[x[0]].s}</i></p>`:'']),{eb:'Nivel',nav:1});
+const N5CO=[['rayo','Angustia','Dolor emocional acumulado que genera cierres.'],['espiral','Duelo','Pérdidas no elaboradas que siguen activas.'],['puno','Violencia','Energía agresiva o experiencias de daño.'],['mascara','Egocentrismo','Falta de empatía, centrarse sólo en uno mismo.'],['hilos','Manipulación','Controlar o influir en otros desde el interés propio.'],['gota','Tristeza','Pesimismo, desánimo o sensación de vacío.'],['xcirc','Rechazo','Sentirse excluido, no aceptado o no valorado.']];
+RICH.n5a8=()=>dkH('Chakras · bloqueos emocionales','El pétalo del Chakra Corazón','<b>Anahata</b> · Centro de amor, compasión y conexión. Toca cada bloqueo para ver su significado.')+
+ n3flip('n5co',N5CO,'c4',170)+
+ `<div class="dk-call">El Chakra Corazón nos conecta con el <b>amor propio</b>, el <b>perdón</b> y la capacidad de <b>dar y recibir amor</b>. <i>Cuando estos bloqueos se liberan, el corazón se abre y fluye la armonía.</i></div>`;
+const N5GT=[[4,'Comunicación, expresión y verdad.',['Falta de comunicación / Mentiras','Ilusión / No querer ver','Confusión']],[5,'Intuición, percepción y sabiduría interior.',['Egocentrismo','Tristeza','Rechazo']],[6,'Conexión espiritual, conciencia y propósito.',['Manipulación','Apegos / Ambición / No aceptar','Falta de amor propio']]];
+const N5OF=[['nudo','Lazos o cordones energéticos','Conexiones que nos atan a energías o situaciones que ya no nos benefician.'],['bicho','Entidades parasitarias','Influencias externas que drenan y afectan nuestra energía.'],['espiral','Larvas astrales','Patrones energéticos que se adhieren a nuestro campo emocional.'],['puntos','Otros bloqueos','Cargas, memorias o situaciones que impactan diferentes áreas de la vida.']];
+RICH.n5a9=()=>dkH('Chakras · bloqueos emocionales','Garganta, Tercer Ojo, Corona y «Otros fuera del gráfico»','Profundicemos en estos tres pétalos y en la sección «Otros fuera del gráfico».')+
+ n3sel('n5gt',N5GT.map(x=>['',`Chakra ${CHAKRAS[x[0]].n}`,`<i>${x[1]}</i>`,`<p>${c5dot(CH7[x[0]])}<i>${CHAKRAS[x[0]].s}</i></p><div class="dk-sub">Bloqueos asociados</div>${c4li(x[2])}`]),{eb:'Chakra'})+
+ `<div class="dk-sub">Otros fuera del gráfico</div>`+n3flip('n5of',N5OF,'c4',170)+
+ n3quote('Cada nivel nos entrega una pieza importante del rompecabezas. <mark>Observar, comprender e integrar es el camino hacia la sanación.</mark>');
+
+/* ----- 4 · Biómetro de órganos ----- */
+const N5EMO=['Miedo / Paranoia','Culpa','Ira / Vergüenza','Angustia / Duelo','Falta de comunicación','No querer ver','No aceptar / Apego'];
+const N5ORG=[
+ ['estructuras relacionadas con la supervivencia, la estabilidad y el sostén físico del cuerpo','Columna vertebral|Intestino delgado|Próstata / Útero|Ano / Recto|Glándulas suprarrenales|Dientes y uñas|Músculos','El cuerpo muchas veces expresa aquello que la energía aún no ha podido resolver.'],
+ ['los órganos y sistemas relacionados con la energía sexual, la creatividad, el placer, las emociones y la reproducción','Sistema reproductor|Riñones|Vejiga|Páncreas|Intestino grueso|Órganos sexuales|Zona lumbar baja y sacro','La energía fluye donde hay conciencia. El equilibrio se construye desde el interior.'],
+ ['los órganos y sistemas relacionados con nuestro poder personal, la digestión, la energía vital y la acción','Estómago|Hígado|Vesícula biliar|Páncreas|Bazo|Intestino delgado|Plexo solar|Glándulas suprarrenales|Sistema digestivo / Absorción de nutrientes','La energía fluye donde hay conciencia. El equilibrio se construye desde el interior.'],
+ ['los órganos y sistemas relacionados con el amor, la conexión, la circulación y el equilibrio emocional','Corazón|Pulmones|Sistema circulatorio|Timo|Sistema inmunológico|Columna dorsal|Esófago|Estómago (parte superior)|Piel|Brazos y manos','El amor consciente armoniza, equilibra y sana el sistema completo.'],
+ ['los órganos y sistemas relacionados con la comunicación, la expresión, la escucha y la verdad','Tiroides / Amígdalas|Laringe / Cuerdas vocales|Tráquea / Bronquios|Pulmones|Boca / Lengua|Oídos|Cervicales|Ojos|Hombros / Brazos / Manos|Sistema auditivo / Expresión','La verdad que expresamos y la que guardamos impactan directamente en nuestro bienestar.'],
+ ['los órganos y sistemas relacionados con la intuición, la percepción, la claridad mental y la sabiduría','Cerebro|Glándula pineal|Hipófisis|Ojos|Oídos|Nariz / Senos paranasales|Sistema límbico|Sistema nervioso central|Memoria / Conexión intuitiva|Intuición / Conexión interior','La claridad interior nos permite ver más allá de lo evidente y tomar decisiones conscientes.'],
+ ['los órganos y sistemas relacionados con la conexión espiritual, la conciencia superior y la unidad','Cerebro|Glándula pineal|Sistema nervioso superior|Sistema endócrino superior|Conexión espiritual / Yo Superior|Conciencia superior|Cuerpo energético (integración)|Unidad / Luz (Plan Divino)|Alma / Propósito de vida','La conciencia que despertamos en lo sutil, se refleja en la armonía del todo.']];
+RICH.n5a10=()=>dkH('Biómetro de órganos','Biómetro de órganos · Chakras','Relaciona órganos y sistemas con el chakra y la emoción que los afecta.')+
+ `<div class="dk-sub">¿Para qué se utiliza?</div>`+n3flip('n5bu',[['hoja','Identificar','El órgano o sistema relacionado con el desequilibrio.'],['persona','Relacionar','La información energética con el cuerpo físico.'],['pend','Orientar','La investigación radiestésica.']],'c3',150)+
+ `<div class="dk-sub">Cada chakra y su emoción</div>${c5tags(CHAKRAS.map((c,i)=>`${c5dot(c.c)}${c.n} · ${N5EMO[i]}`))}
+ <div class="dk-sub">Practica sobre el gráfico</div>`+n3graph('bio')+
+ n3quote('Observar · Comprender · Integrar · <mark>Intervenir</mark>');
+RICH.n5a11=()=>{const s=n3clamp(st('n5or',0),0,6),c=CHAKRAS[s],o=N5ORG[s];
+ const items=CHAKRAS.map((x,i)=>({l:x.n,c:x.c}));
+ return dkH('Biómetro de órganos','Los órganos de cada chakra','Toca un pétalo del abanico o un chakra de la lista para ver qué observamos en él.')+
+ `<div class="dk-grid c2" style="align-items:start"><div style="display:grid;gap:10px">${n2semi({key:'n5or',items,sel:s,fs:11,wrap:10,label:'Abanico de chakras: '+c.n})}${chipRow('n5or',CHAKRAS.map(x=>x.n),s)}</div>
+ <div class="detail"><span class="eyebrow">Chakra ${s+1} de 7 · ${N5EMO[s]}</span><h3 style="color:${c.c}">Chakra ${c.n}</h3><p style="letter-spacing:.3em;text-transform:uppercase;font-size:.85rem">${c.s}</p>
+ <p><b>¿Qué observamos en este pétalo?</b> El Chakra ${c.n} nos orienta hacia ${o[0]}.</p>${c5tags(o[1].split('|'))}</div></div>
+ <div class="dk-grid c2" style="align-items:start">${c4box('¿Qué nos indica?',c4li([['pend','Cuando el péndulo señala alguno de estos órganos, investigamos si existe un desequilibrio energético relacionado con esa zona.'],['check','No significa necesariamente enfermedad.'],['lupa','Es una invitación a profundizar en el origen energético antes de intervenir.']]))}
+ <div style="display:grid;gap:10px">${c4pri(o[2])}<div class="dk-call warn"><b>Recuerda.</b> ${N5REC}</div></div></div>
+ <p class="dk-note">La evaluación energética no reemplaza la consulta con un profesional de la salud.</p>`};
+
+/* ----- 5 · Energías discordantes ----- */
+RICH.n5a12=()=>dkH('Energías discordantes','Comprendiendo las memorias que alteran nuestro equilibrio','Antes de intervenir energéticamente, necesitamos comprender qué energía está sosteniendo el desequilibrio.')+
+ `<div class="dk-grid c2" style="align-items:start">${c4box('¿Qué son?','<p>Son patrones energéticos de baja vibración que pueden permanecer activos en el campo energético de una persona, influyendo en sus emociones, pensamientos, decisiones y forma de vivir determinadas experiencias.</p>')}
+ ${c4box('¿Cuál puede ser su origen?',c4li(['Experiencias de la vida actual.','Memorias transgeneracionales.','Registros de vidas pasadas.','Traumas o pérdidas no resueltas.','Votos, promesas o contratos del alma.']))}</div>
+ <div class="dk-sub">¿Qué nos permite observar este gráfico? · toca cada punto</div>`+
+ n3flip('n5dp',[['lupa','Identificar','La emoción o memoria que está interfiriendo.'],['persona','Relacionar','El bloqueo con la historia de la persona.'],['grupo','Reconocer','Si el origen pertenece a la vida actual, al sistema familiar o a vidas pasadas.'],['pend','Orientar','La limpieza o armonización energética más adecuada.']],'c4',170)+
+ `<div class="dk-grid c2" style="align-items:start">${c4box('¿Cómo pueden influir?',c4li(['Mantienen bloqueos emocionales.','Generan patrones repetitivos.','Debilitan el flujo energético.','Favorecen el desgaste físico, emocional y espiritual.','Dificultan los procesos de transformación.']))}
+ <div style="display:grid;gap:10px">${c4pri('Las energías discordantes no definen a la persona. Son información energética que nos orienta hacia aquello que necesita ser observado, comprendido y transformado durante el proceso terapéutico.')}
+ <div class="dk-call warn"><b>Cada emoción es una señal.</b> Este gráfico no busca encontrar culpables. Nos ayuda a identificar la energía predominante para comprender su origen y acompañar un proceso de sanación consciente.</div></div></div>
+ <div class="dk-sub">Practica sobre el gráfico</div>`+n3graph('disc');
+const N5DG=[
+ {t:'Autoestima y valor personal',s:'Cuando dejamos de reconocer nuestro propio valor.',ic:'persona',e:'Culpa|Baja autoestima|Odio hacia sí mismo|Falta de amor propio|Vergüenza|Fracaso',f:'Disminuyen la confianza.|Favorecen el autosabotaje.|Limitan el crecimiento personal.|Dificultan reconocer el propio valor.',d:'No buscamos culpables. Buscamos comprender: <b>¿cuál es su origen?</b> y <b>¿qué aprendizaje necesita integrar?</b>',r:'Toda energía discordante puede transformarse cuando es comprendida desde la conciencia.'},
+ {t:'Miedo e inseguridad',s:'Cuando la energía de la protección se desequilibra.',ic:'escudo',e:'Miedo|Pánico|Angustia|Inseguridad|Estrés|Soledad',f:'Generan tensión y desgaste energético.|Bloquean la toma de decisiones.|Limitan la confianza y el movimiento en la vida.|Mantienen al cuerpo en alerta.',d:'Investigamos su origen y comprendemos su mensaje.',r:'Toda energía discordante puede transformarse cuando es comprendida y liberada con conciencia.'},
+ {t:'Relaciones y vínculos',s:'Cuando los vínculos duelen más de lo que sanan.',ic:'enlace',e:'Dependencia|Apegos|Abandono|Traición|Celos|Posesividad|Manipulación',f:'Generan dependencia emocional.|Mantienen patrones repetitivos en las relaciones.|Dificultan la confianza y la entrega sana.|Pueden producir dolor emocional profundo y desgaste energético.',d:'Investigamos su origen y comprendemos el mensaje que esta energía trae para la persona.',r:'Los vínculos son una oportunidad de aprendizaje. Comprender lo que duele, libera y transforma.'},
+ {t:'Tristeza',s:'Cuando el corazón guarda dolores que aún no ha soltado.',ic:'gota',e:'Tristeza|Soledad|Separación|Decepción|Arrepentimiento|Humillación',f:'Generan desmotivación y falta de alegría.|Pueden aislar a la persona y cerrarle el corazón.|Bloquean la expresión emocional y creativa.|Dificultan avanzar y confiar nuevamente.',d:'Indagamos su origen, el contexto en que se activó y qué aprendizaje trae para integrar.',r:'La tristeza pide ser sentida para poder transformarse.'},
+ {t:'Angustia / Duelo',s:'El dolor no expresado se convierte en carga.',ic:'corazon',e:'Angustia|Duelo emocional|Separación|Pánico|Estrés',f:'Genera tristeza y vacío.|Dificulta soltar y seguir adelante.|Afecta el bienestar emocional y físico.|Puede mantenerse en el cuerpo y el aura.',d:'Indagamos su origen para comprender, integrar y liberar.'}];
+RICH.n5a13=()=>{const s=n3clamp(st('n5dg',0),0,N5DG.length-1),g=N5DG[s];
+ return dkH('Energías discordantes','Las energías por temas','Agrupamos las energías discordantes según el área de la vida que afectan. Toca cada tema.')+
+ chipRow('n5dg',N5DG.map(x=>x.t),s)+
+ `<div class="detail"><span class="eyebrow">Tema ${s+1} de ${N5DG.length}</span><h3>${ic(g.ic,26)} ${g.t}</h3><p style="font-family:var(--f-display);font-style:italic;font-size:1.1rem">${g.s}</p></div>
+ <div class="dk-grid c2" style="align-items:start"><div style="display:grid;gap:8px"><div class="dk-sub">¿Qué energías encontramos? · marca las que aparecieron en tu práctica</div>${n3ck('n5dk'+s,g.e.split('|').map(x=>['hoja',x]))}</div>
+ <div style="display:grid;gap:10px">${c4box('¿Cómo pueden influir?',c4li(g.f.split('|')))}${c4box('Durante la evaluación…','<p>'+g.d+'</p>')}</div></div>`+
+ (g.r?n3quote(g.r):'')};
+
+/* ----- 6 · Integración, cierre y repaso ----- */
+RICH.n5a14=()=>`<div class="dk-split" style="align-items:center">${c5img('medita.webp','Silueta en meditación dentro de un círculo con una flor de loto','max-height:420px')}
+ <div style="display:grid;gap:12px">${dkH('Integración','Integración de la Clase 5','Hoy aprendimos a… Marca lo que ya sientes integrado.')}
+ ${n3ck('n5in',[['loto','Interpretar el gráfico de Chakras.'],['persona','Relacionar órganos y sistemas con la información energética.'],['espiral','Comprender el mapa de Energías Discordantes.'],['lupa','Identificar el origen probable de un conflicto antes de intervenir.']],['Repasa las lecciones que aún no sientes integradas.','¡Hermoso! Has integrado lo esencial de esta clase.'])}</div></div>`+
+ n3quote('La radiestesia no busca etiquetas; busca <mark>comprender el origen</mark> para acompañar un proceso de transformación consciente.');
+RICH.n5a15=()=>nbHero('Cierre y reflexión','Agradecemos, integramos','y sembramos nuestra intención','Con conciencia, claridad y respeto guiamos procesos de transformación.',['Observar','Comprender','Integrar','Intervenir'],'Casa Muladhara · Sanación y Bienestar')+
+ n3area('n5rf','¿Qué te llevas de esta clase?','Tu reflexión…')+n3area('n5it','Siembra tu intención para la próxima práctica','Mi intención es…')+n3priv;
+const N3Q5=[
+ {q:'¿Qué cambio de mirada propone esta clase?',o:['Usar el péndulo solo para obtener respuestas','Investigar para comprender el origen del bloqueo','Intervenir lo antes posible'],a:1,e:'Desde hoy investigamos para comprender el origen y acompañar con claridad y efectividad.'},
+ {q:'¿Cuál es el orden de los cuatro pasos?',o:['Observar, relacionar, priorizar, intervenir','Intervenir, observar, priorizar, relacionar','Relacionar, intervenir, observar, priorizar'],a:0,e:'Intervenimos al final, en el orden correcto, tras observar, relacionar y priorizar.'},
+ {q:'El gráfico de chakras y bloqueos emocionales…',o:['Entrega un diagnóstico definitivo','Ofrece un punto de partida para la investigación','Reemplaza los demás gráficos'],a:1,e:'Nos indica qué necesita ser observado antes de intervenir.'},
+ {q:'¿Qué emoción principal se asocia al Chakra Plexo solar?',o:['Angustia / Duelo','Ira / Vergüenza','Miedo / Paranoia'],a:1,e:'El Plexo solar se relaciona con el poder personal, la autoestima y la voluntad.'},
+ {q:'¿Qué bloqueos aparecen en el pétalo del Chakra Corazón?',o:['Angustia, duelo, violencia, egocentrismo, manipulación, tristeza y rechazo','Culpa y falta de creatividad','Confusión y mentiras'],a:0,e:'Cuando se liberan, el corazón se abre y fluye la armonía.'},
+ {q:'Los lazos o cordones energéticos son…',o:['Patrones que se adhieren al campo emocional','Conexiones que nos atan a energías o situaciones que ya no nos benefician','Influencias externas que drenan la energía'],a:1,e:'Forman parte de la sección «Otros fuera del gráfico».'},
+ {q:'Si el péndulo señala un órgano en el biómetro…',o:['Significa que hay una enfermedad','Investigamos si existe un desequilibrio energético relacionado con esa zona','Lo ignoramos'],a:1,e:'No significa necesariamente enfermedad: es una invitación a profundizar en el origen energético.'},
+ {q:'¿A qué chakra pertenecen la tiroides y la laringe?',o:['Corazón','Garganta','Tercer ojo'],a:1,e:'El Chakra Garganta se relaciona con la comunicación, la expresión, la escucha y la verdad.'},
+ {q:'Las energías discordantes…',o:['Definen a la persona','Son información energética que nos orienta','Siempre vienen de vidas pasadas'],a:1,e:'Pueden venir de la vida actual, memorias transgeneracionales, vidas pasadas, traumas o votos.'},
+ {q:'Durante la evaluación de las energías discordantes buscamos…',o:['Culpables','Comprender su origen y el aprendizaje que traen','Etiquetar a la persona'],a:1,e:'La radiestesia no busca etiquetas; busca comprender el origen.'}];
+RICH.n5a16=()=>n3quiz('c5',N3Q5,['Dominas lo esencial de la Clase 5.','Vas muy bien. Repasa lo que falló y sigue practicando.','Vale la pena repasar la clase. Puedes volver cuando quieras.']);
