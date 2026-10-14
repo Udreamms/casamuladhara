@@ -989,12 +989,6 @@ const N3L2c=C2('Nadis, aura y cuerpos sutiles',[['n3b9','Los tres nadis principa
 const N3L2d=C2('Desequilibrio y evaluación',[['n3b13','Qué genera un desequilibrio'],['n3b14','Cómo se manifiesta el desequilibrio'],['n3b15','Cómo percibimos el estado de la energía'],['n3b16','Evaluar antes de armonizar']]);
 const N3L2e=C2('Mantras y video de apoyo',[['n3b17','Mantras de los chakras','Practica cada mantra paso a paso'],['n3b19','Video de apoyo','Un recorrido visual por los chakras']],C2F);
 const N3L2f=C2('Práctica con péndulo, reflexión y cierre',[['n3b20','Práctica con péndulo','Alineación, chakras y cuerpos'],['n3b21','Reflexión'],['n3b22','Repaso'],['n3b23','Cierre de la clase']],C2F2);
-const N3PML=[
- DKf('Protocolo · Preparación y apertura',[['n3p1','Preparación para trabajar en sanación'],['n3p2','Preparación del terapeuta y el espacio'],['n3g_ysc','Gráfico: Yo Superior y Comité Espiritual'],['n3g_mapa','Gráfico: Mapa / Guía'],['n3p3','Oración de apertura']],[F('pdf','Protocolo Casa Muladhara · gráficos de sanación','29 láminas',N3P+'print/protocolo_casa_muladhara.pdf')],0),
- DK('Protocolo · Chakras y aura',[['n3peq','Equilibrio de chakras'],['n3plc','Limpieza de chakras'],['n3g_aura','Gráfico: limpieza de aura'],['n3g_pct','Gráfico de porcentajes'],['n3g_chem','Gráfico: bloqueos emocionales por chakra'],['n3g_bio','Gráfico: biómetro de órganos']],0),
- DK('Protocolo · Bloqueos e interferencias',[['n3g_disc','Gráfico: energías discordantes'],['n3g_bloq','Gráfico: bloqueos e interferencias'],['n3g_ego','Gráfico: mecanismos del ego'],['n3g_pos','Gráfico: bloqueo a las expresiones positivas']],0),
- DK('Protocolo · Áreas de vida',[['n3g_afec','Gráfico: vida afectiva'],['n3g_col','Gráfico: columna vertebral'],['n3g_salud','Gráfico: salud y bienestar'],['n3g_min','Gráfico: minerales y vitaminas'],['n3g_act','Gráfico: actitud de vida'],['n3g_vis','Gráfico: visión de vida'],['n3g_intel','Gráfico: vida intelectual'],['n3g_esp','Gráfico: vida espiritual'],['n3g_dinb','Gráfico: dinero y trabajo (bloqueos)'],['n3g_dina','Gráfico: dinero y trabajo (activación)']],0),
- DK('Protocolo · Cromoterapia, arcángeles y cierre',[['n3g_cro','Gráfico: cromoterapia'],['n3g_arc','Gráfico: arcángeles'],['n3parcT','Tabla de arcángeles'],['n3pchk','Chequeos finales'],['n3pquiz','Repaso del Protocolo']],0)];
 
 const LEVELS=[
  {n:1,id:'pendulo',title:'Péndulo Hebreo Nivel 1',mode:'pres',dur:'1 jornada intensiva · 8 horas',status:'done',
@@ -1056,16 +1050,7 @@ const LEVELS=[
   desc:'Profundizas en la radiestesia terapéutica para trabajar el alma: memorias, emociones y patrones que se repiten.',
   modules:[
    {title:'Clase 1 · Fundamentos de la radiestesia y activación del péndulo',lessons:[N3C1_1,N3C1_2,N3C1_3,N3C1_4,N3C1_5,N3C1_6]},
-   {title:'Clase 2 · Sistema energético humano',lessons:[N3L2a,N3L2b,N3L2c,N3L2d,N3L2e,N3L2f]},
-   {title:'Clases 3 y 4 · Bases de la radiestesia terapéutica',lessons:[
-     L('Clase 3 · Lectura del alma y su propósito','1:29:00',[T('00:00','El alma en la terapia holística',''),T('50:00','Preguntas correctas al péndulo','')],[F('doc','Banco de preguntas','220 KB')],1),
-     L('Clase 4 · Lectura del campo áurico','1:36:00',[T('00:00','Capas del aura','Cómo se ve y cómo se mide cada capa.'),T('24:30','Medición con péndulo y gráfico','Práctica guiada en vivo con una voluntaria.'),T('52:10','Fugas y parches energéticos','Cómo detectarlos y repararlos.'),T('1:14:00','Preguntas de las alumnas','Resolvemos dudas de la práctica.')],[F('pdf','Gráfico del campo áurico','1,1 MB'),F('mp3','Meditación de limpieza del aura','18 MB'),F('doc','Ficha de registro de sesión','180 KB')],1)]},
-   {title:'Mes 2 · Sanación del alma',lessons:[
-     L('Clase 5 · Liberación de memorias','En vivo 11 oct',[T('00:00','Memorias celulares',''),T('40:00','Protocolo de liberación','')],[F('pdf','Lectura previa','700 KB')]),
-     L('Clase 6 · Cortes de lazos y contratos','En vivo 18 oct',[T('00:00','Lazos que atan',''),T('45:00','Corte con el péndulo','')]),
-     L('Clase 7 · Recuperación de fragmentos del alma','En vivo 25 oct',[T('00:00','Qué es la fragmentación','')]),
-     L('Clase 8 · Integración y caso final','En vivo 1 nov',[T('00:00','Presentación de casos','')])]},
-   {title:'Material de trabajo · Protocolo Casa Muladhara',lessons:N3PML}
+   {title:'Clase 2 · Sistema energético humano',lessons:[N3L2a,N3L2b,N3L2c,N3L2d,N3L2e,N3L2f]}
   ]},
  {n:4,id:'especializaciones',title:'Especializaciones en Radiestesia',mode:'live',dur:'4 especializaciones · 4 clases y 1 mes cada una',status:'locked',
   desc:'Cuatro especializaciones para trabajar temas profundos con la radiestesia. Cada una tiene su propia insignia.',
@@ -1111,11 +1096,8 @@ const RES=[
  {t:'Etiquetas hebreas del Nivel 2',type:'PDF',lvl:2,size:'3 hojas',k:'pdf',href:'assets/n2/print/etiquetas_hebreas_nivel2.pdf'},
  {t:'Ficha de registro en blanco',type:'Plantilla',lvl:2,size:'1 hoja',k:'pdf',href:'assets/n2/print/ficha_de_registro.pdf'},
  {t:'Gráficos radiestésicos del Nivel 2',type:'PDF',lvl:2,size:'6 láminas',k:'pdf',href:'assets/n2/print/graficos_radiestesicos.pdf'},
- {t:'Protocolo Casa Muladhara · gráficos de sanación',type:'PDF',lvl:3,size:'29 láminas',k:'pdf',href:'assets/n3/print/protocolo_casa_muladhara.pdf',new:1},
  {t:'Mantras de los chakras',type:'PDF',lvl:3,size:'1 lámina',k:'pdf',href:'assets/n3/print/mantras_chakras.pdf',new:1},
  {t:'Clase 1 · Ejercicios y reflexión',type:'Plantilla',lvl:3,size:'2 hojas',k:'pdf',href:'assets/n3/print/clase1_ejercicios_y_reflexion.pdf'},
- {t:'Gráfico del campo áurico',type:'PDF',lvl:3,size:'1,1 MB',k:'pdf'},
- {t:'Gráfico de memorias celulares',type:'PDF',lvl:3,size:'980 KB',k:'pdf'},
  {t:'Meditación de limpieza del aura',type:'Audio',lvl:3,size:'18 min',k:'mp3'},
  {t:'Ficha de registro de sesión',type:'Plantilla',lvl:0,size:'180 KB',k:'doc'},
  {t:'Consentimiento informado para consultantes',type:'Plantilla',lvl:0,size:'120 KB',k:'doc'},
