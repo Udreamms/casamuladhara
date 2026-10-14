@@ -2,10 +2,12 @@
 //
 //   node scripts/admin.mjs make-admin  <correo>                 Da el rol de Maestra (ve el panel y modera)
 //   node scripts/admin.mjs enroll      <correo> [--level 1-5] [--plan mensual|completo|none] [--pay none|ok|overdue]
+//                                     (con plan y pago al día abre las clases; sirve para regalar acceso)
 //   node scripts/admin.mjs payment     <correo> <monto> "<detalle>"  [--failed]   Registra un pago en su historial
 //   node scripts/admin.mjs notify      <correo> "<mensaje>"            Aviso en su campana de notificaciones
 //   node scripts/admin.mjs answer      <correo> <preguntaId> "<respuesta>"   Responde una pregunta de clase
 //   node scripts/admin.mjs list                                   Lista de alumnas
+//   node scripts/admin.mjs sync-members                           Abre las clases a quien ya tiene plan al día (una vez, al activar Stripe)
 //   node scripts/admin.mjs welcome                                Publica el mensaje de bienvenida en # General
 //
 // Las alumnas NO pueden cambiar nivel, plan, pago ni rol: las reglas de Firestore lo impiden.
@@ -19,6 +21,7 @@ const db = getFirestore(admin.app(), DATABASE);
 const [cmd, ...rest] = process.argv.slice(2);
 const flag = (n, d) => { const i = rest.indexOf(`--${n}`); return i >= 0 ? rest[i + 1] : d; };
 const pos = rest.filter((a, i) => !a.startsWith('--') && !rest[i - 1]?.startsWith('--'));
+const isMember = (p) => p.plan === 'completo' || (p.plan === 'mensual' && p.paymentStatus === 'ok');
 const byEmail = async (email) => {
   const u = await admin.auth().getUserByEmail(email.trim().toLowerCase());
   return u;
@@ -39,8 +42,12 @@ switch (cmd) {
     if (flag('plan')) data.plan = flag('plan');
     if (flag('pay')) data.paymentStatus = flag('pay');
     if (!Object.keys(data).length) throw new Error('Indica --level, --plan o --pay');
-    await db.doc(`users/${u.uid}`).set(data, { merge: true });
-    console.log(`✔ ${u.email}:`, data);
+    const ref = db.doc(`users/${u.uid}`);
+    await ref.set(data, { merge: true });
+    // El acceso a las clases lo da el claim member (lo mismo que hace el webhook de Stripe al pagar)
+    const member = isMember((await ref.get()).data());
+    await admin.auth().setCustomUserClaims(u.uid, { ...(u.customClaims || {}), member });
+    console.log(`✔ ${u.email}:`, data, member ? '· clases abiertas' : '· clases bloqueadas');
     break;
   }
   case 'payment': {
@@ -70,6 +77,17 @@ switch (cmd) {
     console.log(`${s.size} cuenta(s)`);
     break;
   }
+  case 'sync-members': {
+    const s = await db.collection('users').get();
+    for (const d of s.docs) {
+      const member = isMember(d.data());
+      const u = await admin.auth().getUser(d.id).catch(() => null);
+      if (!u || (u.customClaims?.member === true) === member) continue;
+      await admin.auth().setCustomUserClaims(u.uid, { ...(u.customClaims || {}), member });
+      console.log(`✔ ${u.email}: ${member ? 'clases abiertas' : 'clases bloqueadas'}`);
+    }
+    break;
+  }
   case 'welcome': {
     await db.collection('posts').add({
       ch: 'general', text: 'Bienvenidas al aula virtual de Casa Muladhara. Este es un espacio para compartir prácticas, dudas y avances con cariño y respeto. Lo que se comparte aquí, se queda aquí.',
@@ -79,6 +97,6 @@ switch (cmd) {
     break;
   }
   default:
-    console.log(readFileSync(new URL(import.meta.url), 'utf8').split('\n').slice(0, 12).join('\n'));
+    console.log(readFileSync(new URL(import.meta.url), 'utf8').split('\n').slice(0, 14).join('\n'));
 }
 process.exit(0);

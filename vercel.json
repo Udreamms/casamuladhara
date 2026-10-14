@@ -9,7 +9,13 @@
     {
       "source": "/assets/n(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=604800, s-maxage=31536000, stale-while-revalidate=86400" }
+        { "key": "Cache-Control", "value": "private, max-age=604800" }
+      ]
+    },
+    {
+      "source": "/curso/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "private, no-cache" }
       ]
     }
   ]
