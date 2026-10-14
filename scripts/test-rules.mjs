@@ -34,7 +34,7 @@ let pass = 0, fail = 0;
 const ok = (name, cond) => { cond ? pass++ : fail++; console.log(`${cond ? '  ✔' : '  ✘ FALLA'} ${name}`); };
 const allowed = async (name, fn) => { try { await fn(); ok(name, true); } catch (e) { ok(`${name}  → ${e.code}`, false); } };
 const denied = async (name, fn) => { try { await fn(); ok(`${name} (debía negarse)`, false); } catch (e) { ok(name, e.code === 'permission-denied'); if (e.code !== 'permission-denied') console.log('     ', e.code, e.message); } };
-const profile = (u, extra = {}) => ({ uid: u.uid, email: u.email, displayName: u.name, photoURL: '', role: 'student', accessLevel: 1, plan: 'none', paymentStatus: 'none', createdAt: serverTimestamp(), lastLogin: serverTimestamp(), ...extra });
+const profile = (u, extra = {}) => ({ uid: u.uid, email: u.email, displayName: u.name, photoURL: '', role: 'student_free', accessLevel: 1, plan: 'none', paymentStatus: 'none', createdAt: serverTimestamp(), lastLogin: serverTimestamp(), ...extra });
 
 const A = await mk('ana'), B = await mk('bea'), M = await mk('maestra', { admin: true });
 const created = [];
@@ -43,6 +43,7 @@ try {
 
   console.log('\nPerfil');
   await denied('A no puede crearse como admin', () => setDoc(doc(a.db, 'users', A.uid), profile(A, { role: 'admin' })));
+  await denied('A no puede crearse con suscripción', () => setDoc(doc(a.db, 'users', A.uid), profile(A, { role: 'student_subscribed' })));
   await denied('A no puede crearse con nivel 5', () => setDoc(doc(a.db, 'users', A.uid), profile(A, { accessLevel: 5 })));
   await denied('A no puede crearse con plan pagado', () => setDoc(doc(a.db, 'users', A.uid), profile(A, { plan: 'completo' })));
   await denied('A no puede crear el perfil de B', () => setDoc(doc(a.db, 'users', B.uid), profile(B)));
@@ -54,6 +55,7 @@ try {
   await denied('A NO lista usuarios', () => getDocs(collection(a.db, 'users')));
   await denied('A NO se sube de nivel', () => updateDoc(doc(a.db, 'users', A.uid), { accessLevel: 5 }));
   await denied('A NO se cambia el rol', () => updateDoc(doc(a.db, 'users', A.uid), { role: 'admin' }));
+  await denied('A NO se pone suscripción sola', () => updateDoc(doc(a.db, 'users', A.uid), { role: 'student_subscribed' }));
   await denied('A NO se pone el plan', () => updateDoc(doc(a.db, 'users', A.uid), { plan: 'completo' }));
   await denied('A NO borra el estado de pago pendiente', () => updateDoc(doc(a.db, 'users', A.uid), { paymentStatus: 'ok' }));
   await denied('A NO edita el perfil de B', () => updateDoc(doc(a.db, 'users', B.uid), { displayName: 'hackeada' }));

@@ -56,7 +56,7 @@ if (!snap.exists()) {
     email: (user.email || '').trim().toLowerCase(),
     displayName: user.displayName || pretty((user.email || '').split('@')[0]),
     photoURL: user.photoURL || '',
-    role: 'student', accessLevel: 1, plan: 'none', paymentStatus: 'none',
+    role: 'student_free', accessLevel: 1, plan: 'none', paymentStatus: 'none',
     createdAt: serverTimestamp(), lastLogin: serverTimestamp(),
   });
 } else {
@@ -149,8 +149,8 @@ CM.deletePost = (id) => deleteDoc(doc(db, 'posts', id));
 CM.loadStudents = async () => {
   if (!isAdmin) return [];
   const s = await getDocs(query(collection(db, 'users'), orderBy('createdAt', 'desc')));
-  CM.students = s.docs.map((d) => ({ id: d.id, ...d.data() })).filter((u) => u.role === 'student')
-    .map((u) => ({ ...u, n: u.displayName || u.email, ...person(u.displayName || u.email, u.id), email: u.email, since: fdate(u.createdAt) }));
+  CM.students = s.docs.map((d) => ({ id: d.id, ...d.data() })).filter((u) => u.role !== 'admin')
+    .map((u) => ({ ...u, n: u.displayName || u.email, ...person(u.displayName || u.email, u.id), email: u.email, since: fdate(u.createdAt), next: fdate(u.currentPeriodEnd) }));
   return CM.students;
 };
 

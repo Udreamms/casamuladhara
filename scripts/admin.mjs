@@ -7,7 +7,7 @@
 //   node scripts/admin.mjs notify      <correo> "<mensaje>"            Aviso en su campana de notificaciones
 //   node scripts/admin.mjs answer      <correo> <preguntaId> "<respuesta>"   Responde una pregunta de clase
 //   node scripts/admin.mjs list                                   Lista de alumnas
-//   node scripts/admin.mjs sync-members                           Abre las clases a quien ya tiene plan al día (una vez, al activar Stripe)
+//   node scripts/admin.mjs sync-members                           Pone rol y acceso a todas según su plan (una vez, al activar Stripe)
 //   node scripts/admin.mjs welcome                                Publica el mensaje de bienvenida en # General
 //
 // Las alumnas NO pueden cambiar nivel, plan, pago ni rol: las reglas de Firestore lo impiden.
@@ -45,8 +45,10 @@ switch (cmd) {
     const ref = db.doc(`users/${u.uid}`);
     await ref.set(data, { merge: true });
     // El acceso a las clases lo da el claim member (lo mismo que hace el webhook de Stripe al pagar)
-    const member = isMember((await ref.get()).data());
+    const p = (await ref.get()).data();
+    const member = isMember(p);
     await admin.auth().setCustomUserClaims(u.uid, { ...(u.customClaims || {}), member });
+    if (p.role !== 'admin') await ref.set({ role: member ? 'student_subscribed' : 'student_free' }, { merge: true });
     console.log(`✔ ${u.email}:`, data, member ? '· clases abiertas' : '· clases bloqueadas');
     break;
   }
@@ -81,9 +83,11 @@ switch (cmd) {
     const s = await db.collection('users').get();
     for (const d of s.docs) {
       const member = isMember(d.data());
+      const role = d.data().role === 'admin' ? 'admin' : member ? 'student_subscribed' : 'student_free';
       const u = await admin.auth().getUser(d.id).catch(() => null);
-      if (!u || (u.customClaims?.member === true) === member) continue;
+      if (!u || ((u.customClaims?.member === true) === member && d.data().role === role)) continue;
       await admin.auth().setCustomUserClaims(u.uid, { ...(u.customClaims || {}), member });
+      await d.ref.set({ role }, { merge: true });
       console.log(`✔ ${u.email}: ${member ? 'clases abiertas' : 'clases bloqueadas'}`);
     }
     break;

@@ -1482,13 +1482,13 @@ V.pagos=()=>{
 V.maestra=()=>{
   if(!CM.isAdmin)return '<div class="card empty">Este panel es solo para la Maestra.</div>';
   const n=k=>STUDENTS.filter(s=>s.s===k).length;
-  const mrr=STUDENTS.filter(s=>s.plan==='Mensual'&&s.s!=='paused').length*55;
-  return `<div class="view-head"><div><span class="eyebrow">Solo para la Maestra Holística</span><h1>Pagos de tus alumnas</h1><p>Aquí ves a las alumnas registradas, su plan y su nivel. El plan, el nivel y el estado de pago se cambian desde el administrador (scripts/admin.mjs).</p></div></div>
-  <div class="kpis"><div><b>${STUDENTS.length}</b><span>alumnas activas</span></div><div><b>${n('ok')+n('full')}</b><span>al día</span></div><div><b>${n('none')}</b><span>sin plan</span></div><div><b>${n('overdue')+n('retry')+n('paused')}</b><span>con pago pendiente</span></div></div>
+  const mrr=STUDENTS.filter(s=>s.plan==='Mensual'&&s.s==='ok').length*55;
+  return `<div class="view-head"><div><span class="eyebrow">Solo para la Maestra Holística</span><h1>Pagos de tus alumnas</h1><p>Aquí ves quién pagó y quién no. El acceso lo cambia Stripe solo: al pagar pasa a <b>Con suscripción</b> y si cancela o falla el cobro vuelve a <b>Gratis</b>. Para regalar acceso o subir de nivel usa el administrador (scripts/admin.mjs).</p></div></div>
+  <div class="kpis"><div><b>${STUDENTS.length}</b><span>cuentas registradas</span></div><div><b>${n('ok')+n('full')}</b><span>con suscripción</span></div><div><b>${n('none')}</b><span>gratis</span></div><div><b>${n('overdue')+n('retry')+n('paused')}</b><span>con pago pendiente</span></div></div>
   <div class="cols" style="grid-template-columns:1fr">
     <section class="card panel"><div class="panel-h"><h3>Alumnas</h3><span class="muted" style="font-size:.82rem">Ingreso mensual recurrente: <b style="color:var(--fg)">${mrr} USD</b></span></div>
-      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Alumna</th><th>Correo</th><th>Plan</th><th>Nivel</th><th>Desde</th><th>Estado</th></tr></thead><tbody>
-      ${STUDENTS.map(s=>`<tr><td><span style="display:flex;gap:10px;align-items:center">${av(s)}${esc(s.n)}</span></td><td>${esc(s.email)}</td><td>${s.plan}</td><td>${s.lvl}</td><td>${s.last}</td><td>${STP[s.s]||STP.none}</td></tr>`).join('')||'<tr><td colspan="6" class="muted">Todavía no hay alumnas registradas.</td></tr>'}
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Alumna</th><th>Correo</th><th>Acceso</th><th>Plan</th><th>Nivel</th><th>Próximo cobro</th><th>Desde</th><th>Estado</th></tr></thead><tbody>
+      ${STUDENTS.map(s=>`<tr><td><span style="display:flex;gap:10px;align-items:center">${av(s)}${esc(s.n)}</span></td><td>${esc(s.email)}</td><td>${s.sub?'<span class="pill done">Con suscripción</span>':'<span class="pill lock">Gratis</span>'}</td><td>${s.plan}</td><td>${s.lvl}</td><td>${esc(s.next)||'—'}</td><td>${s.last}</td><td>${STP[s.s]||STP.none}</td></tr>`).join('')||'<tr><td colspan="8" class="muted">Todavía no hay alumnas registradas.</td></tr>'}
       </tbody></table></div></section>
   </div>`;
 };
@@ -1646,7 +1646,7 @@ window.cmStart=async function(cm){
   if(cm.isAdmin){
     try{
       const st=await cm.loadStudents();
-      STUDENTS=st.map(u=>({n:u.n,ini:u.ini,c:u.c,email:u.email||'',plan:u.plan==='completo'?'Pago completo':u.plan==='mensual'?'Mensual':'Sin plan',lvl:u.accessLevel||1,last:u.since||'',s:u.paymentStatus==='overdue'?'overdue':u.plan==='completo'?'full':u.plan==='mensual'?'ok':'none'}));
+      STUDENTS=st.map(u=>({n:u.n,ini:u.ini,c:u.c,email:u.email||'',sub:u.plan==='completo'||(u.plan==='mensual'&&u.paymentStatus==='ok'),plan:u.plan==='completo'?'Pago completo':u.plan==='mensual'?'Mensual':'Sin plan',lvl:u.accessLevel||1,last:u.since||'',next:u.plan==='mensual'&&u.next?(u.cancelAtPeriodEnd?'Termina '+u.next:u.next):'',s:u.paymentStatus==='overdue'?'overdue':u.plan==='completo'?'full':u.plan==='mensual'&&u.paymentStatus==='ok'?'ok':'none'}));
     }catch(e){console.error(e)}
   }
   cm.onPosts=()=>{POSTS=cm.posts;const a=document.activeElement;const typing=a&&/INPUT|TEXTAREA/.test(a.tagName)&&a.value;if(!typing&&['comunidad','inicio'].includes(S.view))render(false)};

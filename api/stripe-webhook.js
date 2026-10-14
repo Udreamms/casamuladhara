@@ -1,8 +1,8 @@
 // POST /api/stripe-webhook  (lo llama Stripe; se valida la firma con STRIPE_WEBHOOK_SECRET)
 // Mantiene al día la cuenta de cada alumna según su suscripción:
-//   activa             -> plan 'mensual', pago 'ok', claim member=true (abre las clases)
-//   pago atrasado      -> pago 'overdue', member=false (acceso pausado, conserva su avance)
-//   cancelada/expirada -> plan 'none', pago 'none', member=false
+//   activa             -> rol 'student_subscribed', plan 'mensual', pago 'ok', claim member=true (abre las clases)
+//   pago atrasado      -> rol 'student_free', pago 'overdue', member=false (acceso pausado, conserva su avance)
+//   cancelada/expirada -> rol 'student_free', plan 'none', pago 'none', member=false
 // Además registra cada factura en users/{uid}/payments.
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { auth, db, json, stripe, webhookSecret } from './_lib/server.js';
@@ -41,7 +41,10 @@ async function syncSubscription(subscriptionId, hint) {
 
   const end = sub.current_period_end ?? sub.items?.data?.[0]?.current_period_end;
   const full = profile.plan === 'completo';
+  const member = full || active;
   await ref.set({
+    // la Maestra conserva su rol; las alumnas pasan a 'con suscripción' o vuelven a 'gratis'
+    ...(profile.role === 'admin' ? {} : { role: member ? 'student_subscribed' : 'student_free' }),
     stripeCustomerId: customer,
     stripeSubscriptionId: sub.id,
     stripeStatus: sub.status,
@@ -53,7 +56,7 @@ async function syncSubscription(subscriptionId, hint) {
       paymentStatus: active ? 'ok' : overdue ? 'overdue' : 'none',
     }),
   }, { merge: true });
-  await setMember(uid, full || active);
+  await setMember(uid, member);
 }
 
 async function recordInvoice(inv, paid) {

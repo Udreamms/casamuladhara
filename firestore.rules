@@ -21,7 +21,8 @@ service cloud.firestore {
       allow list: if isAdmin();
 
       // La alumna crea su propio perfil una sola vez, con valores iniciales fijos.
-      // Rol, nivel, plan y estado de pago NO los puede escoger ella.
+      // Toda cuenta nace como estudiante gratis. Rol, nivel, plan y estado de pago NO los puede escoger ella:
+      // 'student_subscribed' lo pone solo el webhook de Stripe (o la Maestra con scripts/admin.mjs).
       allow create: if isOwner(uid)
         && onlyKeys(['uid', 'email', 'displayName', 'photoURL', 'role', 'accessLevel', 'plan', 'paymentStatus', 'createdAt', 'lastLogin'])
         && hasKeys(['uid', 'email', 'displayName', 'photoURL', 'role', 'accessLevel', 'plan', 'paymentStatus', 'createdAt', 'lastLogin'])
@@ -30,7 +31,7 @@ service cloud.firestore {
         && request.resource.data.email == request.auth.token.email.lower()
         && request.resource.data.displayName is string && request.resource.data.displayName.size() <= 120
         && request.resource.data.photoURL is string && request.resource.data.photoURL.size() <= 600
-        && request.resource.data.role == 'student'
+        && request.resource.data.role == 'student_free'
         && request.resource.data.accessLevel == 1
         && request.resource.data.plan == 'none'
         && request.resource.data.paymentStatus == 'none'

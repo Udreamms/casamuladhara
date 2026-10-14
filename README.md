@@ -12,12 +12,13 @@ Sitio estático (Vercel, sin build) con aula virtual conectada a Firebase (proye
 - `firestore.rules`, `storage.rules`, `firestore.indexes.json`: seguridad e índices.
 
 ## Suscripción (Stripe, 55 USD al mes)
+- Tres roles en `users/{uid}.role`: `admin` (la Maestra), `student_free` y `student_subscribed`. Nadie elige su rol: el webhook de Stripe lo cambia según el pago y las reglas de Firestore impiden ponérselo desde el navegador.
 - Toda cuenta nueva es **gratis**: entra al aula, ve el programa, la comunidad y su perfil, pero las clases, videos y materiales están bloqueados con un botón "Suscribirme".
 - El botón abre Stripe Checkout (`/api/billing`). Si ya tiene suscripción, abre el portal de Stripe para cambiar tarjeta, pagar una cuota pendiente o cancelar.
 - Stripe avisa a `/api/stripe-webhook`, que deja la cuenta en `plan: mensual` + `paymentStatus: ok` y le da el claim `member` (abre las clases). Si un cobro falla queda `overdue` (acceso pausado, conserva su avance); si cancela vuelve a `none`. Cada factura queda en `users/{uid}/payments`.
 - El contenido no viaja al navegador sin acceso: `middleware.js` revisa el token de Firebase (cookie `cm_session`) y exige `member` o `admin` antes de servir `curso/` y `assets/n2`, `assets/n3`.
 - Dentro de la suscripción, los niveles se siguen abriendo con `accessLevel` (lo sube la Maestra).
-- Al activar esto, corre una vez `node scripts/admin.mjs sync-members` para que las alumnas que ya tienen plan al día no pierdan el acceso.
+- Al activar esto, publica las reglas (`node scripts/deploy-backend.mjs`) y corre una vez `node scripts/admin.mjs sync-members` para que las alumnas que ya tienen plan al día no pierdan el acceso.
 - Regalar acceso sin pago: `node scripts/admin.mjs enroll correo --plan mensual --pay ok` (o `--plan completo`). Quitarlo: `--plan none --pay none`.
 
 Variables de entorno en Vercel: ver `.env.example` (`STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID`, `STRIPE_WEBHOOK_SECRET`, `FIREBASE_SERVICE_ACCOUNT`).
