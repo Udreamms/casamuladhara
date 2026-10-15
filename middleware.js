@@ -21,6 +21,8 @@ const deny = (status, text) => new Response(text, {
 const levelOf = (path) => Number(path.match(/^\/(?:curso\/n|assets\/n)(\d+)(?:\.js$|\/)/)?.[1]) || 99;
 
 export default async function middleware(request) {
+  // Vista previa de la rama valentina: el contenido se abre sin sesión para poder revisarlo (nunca en producción)
+  if (process.env.VERCEL_ENV === 'preview' && process.env.VERCEL_GIT_COMMIT_REF === 'valentina') return next();
   const token = (request.headers.get('cookie') || '').match(/(?:^|;\s*)cm_session=([^;]+)/)?.[1];
   if (!token) return deny(401, 'Inicia sesión en el aula para ver este contenido.');
   let payload;

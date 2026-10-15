@@ -1,6 +1,7 @@
 // Capa de datos del aula: sesión + Firestore.
 // Todo lo personal vive en users/{uid}/…; las reglas (firestore.rules) impiden leer lo de otra alumna.
 import { auth, db } from './firebase.js';
+import { PREVIEW, startPreview } from './preview.js';
 import { onAuthStateChanged, onIdTokenChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 import {
   doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, addDoc, query, orderBy, limit,
@@ -25,6 +26,12 @@ const person = (name, uid) => ({ who: name, ini: initials(name), c: colorFor(uid
 
 // Clave estable de cada clase: nivel_módulo_clase
 export const lessonKey = (levelId, i, j) => `${levelId}_${i}_${j}`;
+
+// Vista previa de la rama valentina: entra sin sesión (ver preview.js)
+if (PREVIEW) {
+  startPreview();
+  await new Promise(() => {});
+}
 
 const user = await new Promise((res) => { const off = onAuthStateChanged(auth, (u) => { off(); res(u); }); });
 if (!user) {
