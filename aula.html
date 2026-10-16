@@ -906,6 +906,14 @@ input[type=range].n2-range{width:100%;accent-color:var(--forest);padding:0;backg
 @keyframes c2fl{50%{opacity:.15}}
 @media (prefers-reduced-motion:reduce){.c2-live svg *{animation:none!important}}
 .c2-mud{margin:0;display:grid;gap:8px;justify-items:center;text-align:center}.c2-mud img{width:min(100%,260px);background:#fbf3e4;border-radius:16px;padding:8px;box-shadow:0 0 0 2px var(--c),0 6px 18px color-mix(in srgb,var(--c) 35%,transparent)}.c2-mud figcaption{font-size:.92rem}
+/* especialidades */
+.sp-card{grid-template-columns:minmax(0,220px) minmax(0,1fr);align-items:stretch;gap:22px;border-top:3px solid var(--sp)}
+.sp-card>img{width:100%;height:100%;min-height:220px;max-height:300px;object-fit:cover;border-radius:999px 999px 18px 18px;border:3px solid #e9e4d0;box-shadow:0 10px 30px -18px rgba(0,0,0,.5)}
+.sp-les{margin:4px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px;counter-reset:sp}
+.sp-les li{counter-increment:sp;font-size:.8rem;padding:5px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.sp-les li::before{content:counter(sp) " · ";opacity:.6}
+.sp-les li.on{border-color:var(--sp);background:color-mix(in srgb,var(--sp) 14%,transparent)}
+@media (max-width:640px){.sp-card{grid-template-columns:1fr}.sp-card>img{max-height:240px;max-width:240px;justify-self:center}}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -1096,6 +1104,25 @@ const LEVELS=[
    {title:'Mes 4 · Tarot en la consulta',lessons:['Tiradas terapéuticas','La pregunta sanadora','Práctica supervisada','Cierre y certificación'].map((t,i)=>L('Clase '+(i+13)+' · '+t,'',[]))}
   ]}
 ];
+/* especialidades aparte: no son parte de los cinco niveles. Su contenido (file) solo lo abre la Maestra por ahora (middleware.js) */
+const SPECS=[
+ {n:1,spec:1,id:'nino',title:'Niño interior',sub:'Especialización Niño Interno',img:'assets/esp/nino-abrazo.webp',hue:'#7a5aa6',file:'curso/esp/nino.js',mode:'live',dur:'Clase 1 · 8 bloques interactivos',status:'locked',
+  desc:'Las cinco heridas de la infancia, sus máscaras y las figuras de madre y padre, leídas en el gráfico del niño interno con mayor profundidad. Continuación de tu camino en Radiestesia y Sanación del Alma.',
+  modules:[
+   {title:'Clase 1 · Lo que el niño interno nos enseña a sanar',lessons:[
+    C2('Bienvenida y agenda',[['ni1','Lo que el niño interno nos enseña a sanar'],['ni2','Agenda y objetivo de hoy']]),
+    C2('El niño interno',[['ni3','¿Qué es el niño interno?'],['ni4','¿Cómo se forma?'],['ni5','¿Qué podemos sanar con él?']]),
+    C2('Cómo se forma una herida',[['ni6','De la necesidad al patrón adulto'],['ni7','Las cinco heridas de un vistazo']]),
+    C2('Las cinco heridas, una por una',[['ni8','Herida de rechazo','Máscara evasiva'],['ni9','Herida de abandono','Máscara dependiente'],['ni10','Herida de humillación','Máscara masoquista'],['ni11','Herida de traición','Máscara controladora'],['ni12','Herida de injusticia','Máscara rígida']]),
+    C2('Rechazo y abandono',[['ni13','No son lo mismo']]),
+    C2('La madre y el padre en el gráfico',[['ni14','La madre en el gráfico'],['ni15','El padre en el gráfico']]),
+    C2('Lectura profunda y sanación',[['ni16','De la lectura a la comprensión','Arma una lectura'],['ni17','El camino de sanación']]),
+    C2('Meditación, práctica y cierre',[['ni18','Encuentro con mi niño interior','Meditación guiada'],['ni19','Práctica: reconoce la herida'],['ni20','Reglas de oro del facilitador'],['ni21','Repaso'],['ni22','Tarea de la semana']])
+   ]}
+  ]}
+];
+const lvOf=id=>LEVELS.find(l=>l.id===id)||SPECS.find(l=>l.id===id);
+const lvTag=lv=>lv.spec?'Especialidad':'Nivel '+lv.n;
 const allLessons=lv=>lv.modules.flatMap(m=>m.lessons);
 const pct=lv=>{const a=allLessons(lv);return Math.round(a.filter(x=>x.done).length/a.length*100)};
 
@@ -1164,6 +1191,7 @@ const S={overdue:false,plan:'none',paying:false,lvl:0,view:'inicio',level:'radie
 const NAV=[
  ['inicio','Inicio','<path d="M4 11 12 4l8 7v9h-5v-6H9v6H4z"/>'],
  ['formacion','Mi formación','<path d="M3 8 12 4l9 4-9 4z"/><path d="M7 10v5c3 2 7 2 10 0v-5"/>'],
+ ['especialidades','Especialidades','<path d="M12 3c1.5 3.5 4.5 5 8 5-1 6-4 10-8 13-4-3-7-7-8-13 3.5 0 6.5-1.5 8-5z"/><circle cx="12" cy="12" r="2.2"/>'],
  ['insignias','Insignias','<circle cx="12" cy="9" r="6"/><path d="m9 14-2 7 5-3 5 3-2-7"/>'],
  ['comunidad','Comunidad','<path d="M4 5h16v11H9l-5 4z"/>'],
  ['calendario','Calendario','<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'],
@@ -1230,6 +1258,7 @@ function rxAct(p,el){const [a,k,v]=p;
  else if(a==='n3simask'){const c=st('n3cal',{}),ks=Object.keys(c).map(Number),s=st('n3sim',{});let t;do{t=ks[Math.floor(Math.random()*ks.length)]}while(ks.length>1&&t===s.t);
   RS.n3sim={t,n:s.n||0,ok:s.ok||0};const P=PND.sim;if(P){P.want=N3CALM[c[t]];if(P.cur==='free')P.cur='rest'}render(false)}
  else if(a==='n3simpick'){const s=st('n3sim',{}),c=st('n3cal',{});if(s.pick===undefined&&s.t!==undefined){s.pick=+k;s.n=(s.n||0)+1;if(c[+k]===c[s.t])s.ok=(s.ok||0)+1;render(false)}}
+ else if(window.RX&&RX[a])RX[a](k,v,el); // acciones propias de cada especialidad (curso/esp/*.js)
  else if(a==='n3yn'){const [i,x]=v.split('_');const o=st(k,{});o[i]=o[i]===+x?undefined:+x;render(false)}
 }
 document.addEventListener('click',e=>{const r=e.target.closest('[data-rx]');if(r)rxAct(r.dataset.rx.split('|'),r)});
@@ -1279,7 +1308,7 @@ const liveState=a=>{const n=Date.now();return n<a.start.toMillis()-LIVE_OPEN_MIN
 const fmtWhen=a=>a.start.toDate().toLocaleString('es',{weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
 const fmtHour=ms=>new Date(ms).toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
 const isHttps=u=>/^https:\/\/[^\s"<>]+$/i.test(u||'');
-const keyLesson=key=>{const [id,i,j]=String(key).split('_');const lv=LEVELS.find(l=>l.id===id);const les=lv&&lv.modules[+i]&&lv.modules[+i].lessons[+j];return les?{lv,i:+i,j:+j,les}:null};
+const keyLesson=key=>{const [id,i,j]=String(key).split('_');const lv=lvOf(id);const les=lv&&lv.modules[+i]&&lv.modules[+i].lessons[+j];return les?{lv,i:+i,j:+j,les}:null};
 // YouTube, Vimeo y Google Drive se ven dentro del aula; cualquier otro enlace se abre aparte
 function embedURL(u){try{const x=new URL(u);const h=x.hostname.replace(/^www\./,'');
   if(h==='youtu.be')return 'https://www.youtube-nocookie.com/embed/'+x.pathname.slice(1);
@@ -1352,18 +1381,33 @@ V.formacion=()=>`
   <section style="display:grid;gap:14px">${LEVELS.map(lv=>`<article class="card panel" style="grid-template-columns:minmax(0,1fr) auto;align-items:center">
     <div style="display:grid;gap:8px;min-width:0"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="eyebrow">Nivel ${lv.n}</span>${modePill(lv)}${statusPill(lv)}</div>
     <h3 style="font-size:1.35rem">${lv.title}</h3>${detailOpen(lv)?`<p class="muted" style="font-size:.9rem;max-width:60em">${lv.desc}</p><span class="muted" style="font-size:.8rem">${lv.dur} · ${allLessons(lv).length} clases</span>`:`<span class="muted" style="font-size:.8rem">${lv.dur}</span>`}</div>
-    ${detailOpen(lv)?`<button class="btn ${lv.status==='locked'?'btn-ghost':'btn-primary'}" data-open-level="${lv.id}">${lv.status==='done'?'Repasar':lv.status==='progress'?'Continuar':'Ver programa'}</button>`:`<button class="btn btn-ghost" data-go="pagos">Inscríbete para ver el programa</button>`}</article>`).join('')}</section>`;
+    ${detailOpen(lv)?`<button class="btn ${lv.status==='locked'?'btn-ghost':'btn-primary'}" data-open-level="${lv.id}">${lv.status==='done'?'Repasar':lv.status==='progress'?'Continuar':'Ver programa'}</button>`:`<button class="btn btn-ghost" data-go="pagos">Inscríbete para ver el programa</button>`}</article>`).join('')}</section>
+  <section class="card panel" style="grid-template-columns:minmax(0,1fr) auto;align-items:center"><div style="display:grid;gap:6px"><span class="eyebrow">Aparte de los cinco niveles</span><h3 style="font-size:1.25rem">Especialidades</h3><p class="muted" style="margin:0;font-size:.9rem">Formaciones para profundizar en un tema. La primera es <b>Niño interior</b>.</p></div><button class="btn btn-ghost" data-go="especialidades">Ver especialidades</button></section>`;
+
+const crumbsHTML=lv=>lv.spec?`<button data-go="especialidades">Especialidades</button><span>/</span><span>${lv.title}</span>`:`<button data-go="formacion">Mi formación</button><span>/</span><span>Nivel ${lv.n} · ${lv.title}</span>`;
+V.especialidades=()=>`
+  <div class="view-head"><div><span class="eyebrow">Escuela de Formación Holística</span><h1>Especialidades</h1><p>Formaciones para profundizar en un tema, aparte del camino de cinco niveles. Cada una tiene sus propias clases, prácticas y materiales.</p></div></div>
+  <section style="display:grid;gap:14px">${SPECS.map(sp=>`<article class="card panel sp-card" style="--sp:${sp.hue}">
+    <img src="${sp.img}" alt="" loading="lazy" decoding="async">
+    <div style="display:grid;gap:8px;min-width:0;align-content:center"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="eyebrow">${sp.sub}</span>${modePill(sp)}${sp.status==='locked'?'<span class="pill lock">Muy pronto</span>':statusPill(sp)}</div>
+    <h3 style="font-size:1.45rem">${sp.title}</h3><p class="muted" style="font-size:.9rem;max-width:60em;margin:0">${sp.desc}</p>
+    <span class="muted" style="font-size:.8rem">${sp.dur}</span>
+    ${sp.status!=='locked'?`<div class="bar"><i style="width:${pct(sp)}%"></i></div>`:''}
+    <ol class="sp-les">${allLessons(sp).map(l=>`<li class="${l.done?'on':''}">${esc(l.t)}</li>`).join('')}</ol>
+    <div><button class="btn ${sp.status==='locked'?'btn-ghost':'btn-primary'}" data-open-level="${sp.id}">${sp.status==='done'?'Repasar':sp.status==='locked'?'Ver detalle':pct(sp)?'Continuar':'Comenzar'}</button></div></div></article>`).join('')}</section>`;
 
 V.curso=()=>{
-  const lv=LEVELS.find(l=>l.id===S.level);const [mi,li]=S.lesson;const les=lv.modules[mi].lessons[li];
+  const lv=lvOf(S.level);const [mi,li]=S.lesson;const les=lv.modules[mi].lessons[li];
   const locked=lv.status==='locked';
   const flat=allLessons(lv);const doneN=flat.filter(l=>l.done).length;
   const upcoming=!locked&&!les.done&&/En vivo/.test(les.len);
   const isSl=!!les.slides;
-  if(!detailOpen(lv))return `<div class="crumbs"><button data-go="formacion">Mi formación</button><span>/</span><span>Nivel ${lv.n} · ${lv.title}</span></div>
-  <div style="max-width:900px">${playerMsg(`<span class="pill pres">Nivel ${lv.n}</span><b style="font:400 clamp(1.2rem,3vw,1.8rem)/1.2 var(--f-display)">${lv.title}</b><span style="color:#b9c4b5;font-size:.9rem">${lv.dur}</span><span style="color:#b9c4b5;font-size:.9rem;max-width:30em">El programa de este nivel se muestra al inscribirte en la formación.</span><button ${lightBtn} data-go="pagos">${CTA_TXT}</button>`)}</div>`;
+  if(!detailOpen(lv))return `<div class="crumbs">${crumbsHTML(lv)}</div>
+  <div style="max-width:900px">${playerMsg(`<span class="pill pres">${lvTag(lv)}</span><b style="font:400 clamp(1.2rem,3vw,1.8rem)/1.2 var(--f-display)">${lv.title}</b><span style="color:#b9c4b5;font-size:.9rem">${lv.dur}</span><span style="color:#b9c4b5;font-size:.9rem;max-width:30em">El programa de este nivel se muestra al inscribirte en la formación.</span><button ${lightBtn} data-go="pagos">${CTA_TXT}</button>`)}</div>`;
+  if(lv.spec&&locked)return `<div class="crumbs">${crumbsHTML(lv)}</div>
+  <div style="max-width:900px">${playerMsg(`<span class="pill pres">Especialidad</span><b style="font:400 clamp(1.2rem,3vw,1.8rem)/1.2 var(--f-display)">${lv.title}</b><span style="color:#b9c4b5;font-size:.9rem;max-width:30em">Esta especialidad todavía no está abierta en tu aula. La Maestra te avisará cuando puedas comenzar.</span><button ${lightBtn} data-go="especialidades">Ver especialidades</button>`)}</div>`;
   const live=!locked&&liveHTML(lv.id+'_'+mi+'_'+li,les);
-  if(S.overdue&&locked&&!CM.isAdmin)return `<div class="crumbs"><button data-go="formacion">Mi formación</button><span>/</span><span>Nivel ${lv.n} · ${lv.title}</span></div>
+  if(S.overdue&&locked&&!CM.isAdmin)return `<div class="crumbs">${crumbsHTML(lv)}</div>
   <div class="player" style="max-width:900px"><svg class="motif"><use href="#mark"/></svg><div style="position:relative;display:grid;gap:12px;justify-items:center;text-align:center;padding:20px"><span class="pill bad" style="background:rgba(239,138,115,.2);color:#ffd2c7">Acceso pausado</span><b style="font:400 clamp(1.2rem,3vw,1.8rem)/1.2 var(--f-display)">${esc(les.t)}</b><span style="color:#b9c4b5;font-size:.9rem;max-width:30em">Esta clase vuelve a estar disponible en cuanto se registre el pago de tu cuota. No pierdes tu avance.</span><button class="btn btn-sm" style="background:#e9e4d0;color:#1f3f32" data-checkout="portal">Actualizar mi pago</button></div></div>`;
   const tabs=[['temas','Temas de la clase'],['materiales','Materiales'],['preguntas','Preguntas'],['notas','Mis notas']];
   const key=lv.id+'_'+mi+'_'+li;
@@ -1378,13 +1422,13 @@ V.curso=()=>{
     notas:`<textarea id="notes" placeholder="Tus apuntes de esta clase. Solo tú los ves.">${esc(CM.notes[key]||'')}</textarea><div><button class="btn btn-ghost btn-sm" id="save-notes">Guardar notas</button></div>`
   };
   return `
-  <div class="crumbs"><button data-go="formacion">Mi formación</button><span>/</span><span>Nivel ${lv.n} · ${lv.title}</span></div>
+  <div class="crumbs">${crumbsHTML(lv)}</div>
   <div class="course">
     <div style="display:grid;gap:20px;min-width:0">
-      ${locked?`<div class="player"><svg class="motif"><use href="#mark"/></svg><div style="position:relative;display:grid;gap:12px;justify-items:center;text-align:center;padding:20px"><span class="pill pres">Nivel ${lv.n}</span><b style="font:400 clamp(1.2rem,3vw,1.8rem)/1.2 var(--f-display)">${lv.title}</b>${S.paying?`<span style="color:#b9c4b5;font-size:.9rem">Se desbloquea al completar el Nivel ${lv.n-1}</span><button class="btn btn-primary btn-sm" style="background:#e9e4d0;color:#1f3f32" data-go="pagos">Ver mi plan</button>`:`<span style="color:#b9c4b5;font-size:.9rem;max-width:30em">Esta clase es parte de la formación completa. Inscríbete para abrir las clases, videos y materiales nivel a nivel.</span><button class="btn btn-primary btn-sm" style="background:#e9e4d0;color:#1f3f32" data-go="pagos">Ver cómo inscribirme</button>`}</div></div>`:
-      live&&!isSl?live:upcoming?`<div class="player"><svg class="motif"><use href="#mark"/></svg><div class="cap"><div><small>Nivel ${lv.n} · Próxima clase en vivo</small><b>${esc(les.t)}</b></div></div><div style="position:relative;display:grid;gap:12px;justify-items:center;text-align:center"><span class="pill live" style="color:#ece7d3;border-color:rgba(236,231,211,.4)">${les.len.replace('En vivo','En vivo el')}</span><span style="color:#b9c4b5;font-size:.88rem">La Maestra publicará aquí la fecha y el enlace de la sala.</span><span style="color:#b9c4b5;font-size:.82rem">La grabación queda aquí al terminar</span></div></div>`:
+      ${locked?`<div class="player"><svg class="motif"><use href="#mark"/></svg><div style="position:relative;display:grid;gap:12px;justify-items:center;text-align:center;padding:20px"><span class="pill pres">${lvTag(lv)}</span><b style="font:400 clamp(1.2rem,3vw,1.8rem)/1.2 var(--f-display)">${lv.title}</b>${S.paying?`<span style="color:#b9c4b5;font-size:.9rem">Se desbloquea al completar el Nivel ${lv.n-1}</span><button class="btn btn-primary btn-sm" style="background:#e9e4d0;color:#1f3f32" data-go="pagos">Ver mi plan</button>`:`<span style="color:#b9c4b5;font-size:.9rem;max-width:30em">Esta clase es parte de la formación completa. Inscríbete para abrir las clases, videos y materiales nivel a nivel.</span><button class="btn btn-primary btn-sm" style="background:#e9e4d0;color:#1f3f32" data-go="pagos">Ver cómo inscribirme</button>`}</div></div>`:
+      live&&!isSl?live:upcoming?`<div class="player"><svg class="motif"><use href="#mark"/></svg><div class="cap"><div><small>${lvTag(lv)} · Próxima clase en vivo</small><b>${esc(les.t)}</b></div></div><div style="position:relative;display:grid;gap:12px;justify-items:center;text-align:center"><span class="pill live" style="color:#ece7d3;border-color:rgba(236,231,211,.4)">${les.len.replace('En vivo','En vivo el')}</span><span style="color:#b9c4b5;font-size:.88rem">La Maestra publicará aquí la fecha y el enlace de la sala.</span><span style="color:#b9c4b5;font-size:.82rem">La grabación queda aquí al terminar</span></div></div>`:
       isSl?(live||'')+deckHTML(les,si):`<div class="player" id="player"><svg class="motif"><use href="#mark"/></svg>
-        <div class="cap"><div><small>Nivel ${lv.n} · ${esc(lv.modules[mi].title)}</small><b>${esc(les.t)}</b></div></div>
+        <div class="cap"><div><small>${lvTag(lv)} · ${esc(lv.modules[mi].title)}</small><b>${esc(les.t)}</b></div></div>
         <button class="play" id="play" aria-label="${S.playing?'Pausar':'Reproducir'}">${S.playing?'<svg viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>':'<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>'}</button>
         ${les.topics.length?`<span class="chapter-now" id="chap-now">${esc(les.topics[curChapter(les)].t)}</span>`:''}
         <div class="controls"><button id="play2" aria-label="Reproducir o pausar">${S.playing?'<svg viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>':'<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>'}</button>
@@ -1395,13 +1439,13 @@ V.curso=()=>{
       `<div class="tabs" role="tablist">${tabs.map(([k,n])=>`<button role="tab" aria-selected="${S.tab===k}" data-tab="${k}">${n}${k==='preguntas'&&qa.length?` (${qa.length})`:''}</button>`).join('')}</div><div>${body[S.tab]}</div>`}
     </div>
     <aside class="card syllabus">
-      <div class="syl-top"><span class="eyebrow">Nivel ${lv.n}</span><h3>${lv.title}</h3>${statusPill(lv)}<div class="bar"><i style="width:${pct(lv)}%"></i></div><div class="row"><span>${doneN} de ${flat.length} clases</span><span>${pct(lv)}%</span></div></div>
+      <div class="syl-top"><span class="eyebrow">${lvTag(lv)}</span><h3>${lv.title}</h3>${statusPill(lv)}<div class="bar"><i style="width:${pct(lv)}%"></i></div><div class="row"><span>${doneN} de ${flat.length} clases</span><span>${pct(lv)}%</span></div></div>
       ${lv.modules.map((m,i)=>{const open=S.openMods[lv.id+i]!==undefined?S.openMods[lv.id+i]:i===mi;const md=m.lessons.filter(l=>l.done).length;
         return `<div class="mod"><button class="mod-h" aria-expanded="${open}" data-mod="${i}"><b>${esc(m.title)}</b><small>${md}/${m.lessons.length}</small><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
         <div ${open?'':'hidden'}>${m.lessons.map((l,j)=>`<button class="les ${i===mi&&j===li?'cur':''} ${locked?'locked':''}" data-les="${i},${j}" ${locked?'aria-disabled="true"':''}><span class="chk ${l.done?'on':''} ${locked?'lk':''}">${locked?icLock:''}</span><span>${esc(l.t)}</span><small>${esc(l.len)}</small></button>`).join('')}</div></div>`}).join('')}
       ${!S.paying&&!CM.isAdmin?`<div style="padding:18px;display:grid;gap:10px;border-top:1px solid var(--line)"><p class="muted" style="margin:0;font-size:.88rem">Las clases, videos y materiales se abren al inscribirte en la formación completa.</p><button class="btn btn-primary btn-sm" data-go="pagos">${CTA_TXT}</button></div>`:''}
     </aside>
-  </div>${CM.isAdmin&&!locked?liveEditor(lv,mi,li):''}`;
+  </div>${CM.isAdmin&&!locked&&!lv.spec?liveEditor(lv,mi,li):''}`;
 };
 // Solo la Maestra: programa la clase en vivo de esta lección y agrega la grabación
 function liveEditor(lv,mi,li){const key=lv.id+'_'+mi+'_'+li,a=liveOf(key),L=CM.liveLinks[key]||{};
@@ -1413,8 +1457,8 @@ function liveEditor(lv,mi,li){const key=lv.id+'_'+mi+'_'+li,a=liveOf(key),L=CM.l
     <label class="n2-f"><span>Grabación (YouTube, Vimeo o Drive)</span><input type="url" id="lv-rec" placeholder="https://" value="${esc(L.recordingUrl||'')}"></label>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn btn-primary btn-sm">Guardar</button>${a?'<button type="button" class="btn btn-ghost btn-sm" id="lv-del">Quitar esta clase en vivo</button>':''}</div>
   </form><p class="muted" style="margin:0;font-size:.82rem">Las alumnas con este nivel ven la fecha y el botón para entrar ${LIVE_OPEN_MIN} minutos antes. Al terminar, si agregas la grabación, la ven en esta misma clase.</p></details>`}
-function curLesson(){const lv=LEVELS.find(l=>l.id===S.level);return lv.modules[S.lesson[0]].lessons[S.lesson[1]]}
-function goSlide(v){const lv=LEVELS.find(l=>l.id===S.level),les=curLesson();if(!les.slides)return;
+function curLesson(){const lv=lvOf(S.level);return lv.modules[S.lesson[0]].lessons[S.lesson[1]]}
+function goSlide(v){const lv=lvOf(S.level),les=curLesson();if(!les.slides)return;
   if(v==='nextles'){S.full=0;document.body.style.overflow='';const nx=$('#next-les');nx&&nx.click();return}
   if(v==='zoom'){S.full=!S.full;document.body.style.overflow=S.full?'hidden':'';render(false);return}
   const key=lv.id+'_'+S.lesson[0]+'_'+S.lesson[1];const n=les.slides.length;let i=S.sl[key]||0;
@@ -1584,27 +1628,27 @@ async function checkout(kind,btn){
 /* ---------- render + events ---------- */
 let timer;
 function render(scrollTop=true){
-  $('#nav').innerHTML=NAV.filter(x=>x[0]!=='maestra'||CM.isAdmin).map(([k,n,ic,c])=>`${k==='maestra'?'<span class="nav-label">Solo para la Maestra</span>':''}<button data-go="${k}" ${(S.view===k||(S.view==='curso'&&k==='formacion'))?'aria-current="page"':''}><svg viewBox="0 0 24 24">${ic}</svg>${n}${c?`<span class="count">${c}</span>`:''}</button>`).join('');
+  $('#nav').innerHTML=NAV.filter(x=>x[0]!=='maestra'||CM.isAdmin).map(([k,n,ic,c])=>`${k==='maestra'?'<span class="nav-label">Solo para la Maestra</span>':''}<button data-go="${k}" ${(S.view===k||(S.view==='curso'&&k===(lvOf(S.level).spec?'especialidades':'formacion')))?'aria-current="page"':''}><svg viewBox="0 0 24 24">${ic}</svg>${n}${c?`<span class="count">${c}</span>`:''}</button>`).join('');
   $('#view').innerHTML=(S.overdue&&S.view!=='maestra'?`<div class="alert"><div><b>Tu cuota está pendiente</b><p>Tu acceso a clases, grabaciones y materiales está pausado. Se reactiva apenas se registre el pago.</p></div><button class="btn btn-sm" data-checkout="portal">Actualizar mi pago</button></div>`:'')+V[S.view]();
   if(scrollTop)window.scrollTo(0,0);
   bindView();if(typeof pndMount==='function')pndMount();
 }
 function go(v){S.view=v;stopPlay();closeSide();render()}
-function openLevel(id){const lv=LEVELS.find(l=>l.id===id);S.level=id;let pos=[0,0];
+function openLevel(id){const lv=lvOf(id);S.level=id;let pos=[0,0];
   outer:for(let i=0;i<lv.modules.length;i++)for(let j=0;j<lv.modules[i].lessons.length;j++){if(!lv.modules[i].lessons[j].done){pos=[i,j];break outer}}
   S.lesson=pos;S.tab='temas';S.t=0;stopPlay();S.view='curso';closeSide();render()}
 function stopPlay(){S.playing=false;clearInterval(timer)}
 function bindView(){
-  const play=()=>{const lv=LEVELS.find(l=>l.id===S.level);const les=lv.modules[S.lesson[0]].lessons[S.lesson[1]];const dur=toSec(les.len);
+  const play=()=>{const lv=lvOf(S.level);const les=lv.modules[S.lesson[0]].lessons[S.lesson[1]];const dur=toSec(les.len);
     S.playing=!S.playing;clearInterval(timer);
     if(S.playing)timer=setInterval(()=>{S.t=Math.min(dur,S.t+dur/90);updPlayer(les,dur);if(S.t>=dur){stopPlay();render(false)}},500);
     render(false)};
   $('#play')&&($('#play').onclick=play);$('#play2')&&($('#play2').onclick=play);
-  const tr=$('#track');if(tr)tr.onclick=e=>{const r=tr.getBoundingClientRect();const lv=LEVELS.find(l=>l.id===S.level);const les=lv.modules[S.lesson[0]].lessons[S.lesson[1]];S.t=(e.clientX-r.left)/r.width*toSec(les.len);render(false)};
+  const tr=$('#track');if(tr)tr.onclick=e=>{const r=tr.getBoundingClientRect();const lv=lvOf(S.level);const les=lv.modules[S.lesson[0]].lessons[S.lesson[1]];S.t=(e.clientX-r.left)/r.width*toSec(les.len);render(false)};
   const n=$('#notes');if(n){n.oninput=()=>{CM.notes[lkey()]=n.value};$('#save-notes').onclick=()=>CM.saveNote(lkey(),n.value).then(()=>toast('Notas guardadas')).catch(fail)}
   const qf=$('#qa-form');if(qf)qf.onsubmit=e=>{e.preventDefault();const v=$('#qa-in').value.trim();if(!v)return;CM.ask(lkey(),v).then(()=>{render(false);toast('Pregunta enviada a la Maestra Holística')}).catch(fail)};
-  const md=$('#mark-done');if(md)md.onclick=()=>{const lv=LEVELS.find(l=>l.id===S.level);const les=lv.modules[S.lesson[0]].lessons[S.lesson[1]];const nv=!les.done;md.disabled=true;CM.setDone(lkey(),nv).then(()=>{les.done=nv;refreshDerived();render(false);toast(nv?'Clase marcada como vista':'Clase marcada como no vista')}).catch(e=>{md.disabled=false;fail(e)})};
-  const nx=$('#next-les');if(nx)nx.onclick=()=>{const lv=LEVELS.find(l=>l.id===S.level);let [i,j]=S.lesson;j++;if(j>=lv.modules[i].lessons.length){i++;j=0}if(i>=lv.modules.length){toast('Terminaste las clases de este nivel');return}S.lesson=[i,j];S.openMods[lv.id+i]=true;S.t=0;stopPlay();render()};
+  const md=$('#mark-done');if(md)md.onclick=()=>{const lv=lvOf(S.level);const les=lv.modules[S.lesson[0]].lessons[S.lesson[1]];const nv=!les.done;md.disabled=true;CM.setDone(lkey(),nv).then(()=>{les.done=nv;refreshDerived();render(false);toast(nv?'Clase marcada como vista':'Clase marcada como no vista')}).catch(e=>{md.disabled=false;fail(e)})};
+  const nx=$('#next-les');if(nx)nx.onclick=()=>{const lv=lvOf(S.level);let [i,j]=S.lesson;j++;if(j>=lv.modules[i].lessons.length){i++;j=0}if(i>=lv.modules.length){toast('Terminaste las clases de este nivel');return}S.lesson=[i,j];S.openMods[lv.id+i]=true;S.t=0;stopPlay();render()};
   const cp=$('#composer');if(cp)cp.onsubmit=e=>{e.preventDefault();const v=$('#post-in').value.trim();if(!v)return;CM.post(S.ch,v).then(()=>{$('#post-in').value='';toast('Publicado')}).catch(fail)};
   document.querySelectorAll('form[data-reply]').forEach(f=>f.onsubmit=e=>{e.preventDefault();const inp=f.querySelector('input');const v=inp.value.trim();if(!v)return;CM.reply(f.dataset.reply,v,(POSTS.find(p=>p.id===f.dataset.reply)||{}).ch||S.ch).then(()=>{inp.value=''}).catch(fail)});
   const rl=$('#rlvl');if(rl)rl.onchange=()=>{S.resLvl=rl.value;render(false)};
@@ -1693,6 +1737,7 @@ function resumePoint(){
 function refreshDerived(){
   S.paying=CM.isAdmin||CM.profile.plan==='completo'||(CM.profile.plan==='mensual'&&CM.profile.paymentStatus==='ok');
   LEVELS.forEach(lv=>{lv.status=lv.n>S.lvl?'locked':(pct(lv)===100?'done':'progress')});
+  SPECS.forEach(sp=>{sp.status=!sp.ready?'locked':(pct(sp)===100?'done':'progress')});
   const lastDone=lv=>{let t=0;lv.modules.forEach((m,i)=>m.lessons.forEach((l,j)=>{const d=CM.doneAt[lv.id+'_'+i+'_'+j];if(d&&d.toMillis)t=Math.max(t,d.toMillis())}));return t?fmtDay(new Date(t)):'hoy'};
   BADGES.forEach(b=>{
     const lv=LEVELS.find(l=>l.n===b.lvl);
@@ -1722,9 +1767,11 @@ window.cmStart=async function(cm){
   $('#me-av').textContent=ME.ini;$('#me-av').style.setProperty('--c',ME.c);
   $('#me-name').textContent=ME.name;
   // los datos de ejemplo del diseño original no se muestran: todo parte en blanco y se llena con su avance real
-  LEVELS.forEach(lv=>lv.modules.forEach((m,i)=>m.lessons.forEach((l,j)=>{l.done=!!cm.progress[lv.id+'_'+i+'_'+j]})));
+  LEVELS.concat(SPECS).forEach(lv=>lv.modules.forEach((m,i)=>m.lessons.forEach((l,j)=>{l.done=!!cm.progress[lv.id+'_'+i+'_'+j]})));
   // el contenido de las clases solo se descarga con acceso (middleware.js lo exige en el servidor)
   if(cm.lvl>0)S.lvl=await loadCourse(cm.lvl);
+  // las especialidades usan las piezas de los niveles 1 a 3; por ahora solo la Maestra las abre (middleware.js)
+  if(cm.isAdmin&&S.lvl>=COURSE_FILES)for(const sp of SPECS)sp.ready=await loadScript(sp.file);
   refreshDerived();
   if(S.lvl<cm.lvl)toast('No se pudo cargar el contenido de las clases. Recarga la página.');
   if(cm.paid==='ok')toast('¡Gracias! Estamos confirmando tu pago; tu aula se actualiza en unos segundos.');

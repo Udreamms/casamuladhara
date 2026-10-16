@@ -2,6 +2,7 @@
 // Pide la cookie cm_session con un token válido de Firebase (proyecto casamuladhara). El claim lvl
 // (lo pone el webhook de Stripe o scripts/admin.mjs) dice hasta qué nivel puede abrir; la Maestra (admin) abre todo.
 //   /curso/n2.js, /assets/n2/...  -> requiere lvl >= 2   (igual para cada nivel)
+//   /curso/esp/... (especialidades) -> por ahora solo la Maestra
 import { next } from '@vercel/functions';
 import { createRemoteJWKSet, jwtVerify } from 'jose';
 
