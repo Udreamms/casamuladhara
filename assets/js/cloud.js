@@ -1,10 +1,11 @@
 // Capa de datos del aula: sesión + Firestore.
 // Todo lo personal vive en users/{uid}/…; las reglas (firestore.rules) impiden leer lo de otra alumna.
 import { auth, db } from './firebase.js';
-import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
+import { PREVIEW, startPreview } from './preview.js';
+import { onAuthStateChanged, onIdTokenChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 import {
   doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, addDoc, query, orderBy, limit,
-  onSnapshot, serverTimestamp, writeBatch, increment,
+  onSnapshot, serverTimestamp, writeBatch, increment, where, collectionGroup, Timestamp,
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 
 const COLORS = ['#f2c66d', '#cfe0c4', '#e8c9b8', '#f2e1b5', '#d4dcea', '#efd3c3'];
@@ -26,6 +27,12 @@ const person = (name, uid) => ({ who: name, ini: initials(name), c: colorFor(uid
 // Clave estable de cada clase: nivel_módulo_clase
 export const lessonKey = (levelId, i, j) => `${levelId}_${i}_${j}`;
 
+// Vista previa de la rama valentina: entra sin sesión (ver preview.js)
+if (PREVIEW) {
+  startPreview();
+  await new Promise(() => {});
+}
+
 const user = await new Promise((res) => { const off = onAuthStateChanged(auth, (u) => { off(); res(u); }); });
 if (!user) {
   location.replace('login.html?mode=login&next=aula.html');
@@ -33,6 +40,15 @@ if (!user) {
 }
 // Si cierra sesión en otra pestaña, sale también de esta
 onAuthStateChanged(auth, (u) => { if (!u) location.replace('login.html?mode=login'); });
+
+// El servidor (middleware.js) lee esta cookie para servir el contenido de las clases y sus materiales.
+// Es el mismo token de sesión de Firebase (dura 1 hora y se renueva solo).
+const setSessionCookie = (t) => {
+  document.cookie = t
+    ? `cm_session=${t}; Path=/; Max-Age=3600; SameSite=Lax; Secure`
+    : 'cm_session=; Path=/; Max-Age=0; SameSite=Lax; Secure';
+};
+onIdTokenChanged(auth, async (u) => setSessionCookie(u ? await u.getIdToken() : ''));
 
 const uid = user.uid;
 const me = (path) => doc(db, 'users', uid, ...path.split('/'));
@@ -47,7 +63,7 @@ if (!snap.exists()) {
     email: (user.email || '').trim().toLowerCase(),
     displayName: user.displayName || pretty((user.email || '').split('@')[0]),
     photoURL: user.photoURL || '',
-    role: 'student', accessLevel: 1, plan: 'none', paymentStatus: 'none',
+    role: 'student_free', accessLevel: 1, plan: 'none', paymentStatus: 'none',
     createdAt: serverTimestamp(), lastLogin: serverTimestamp(),
   });
 } else {
@@ -57,16 +73,20 @@ snap = await getDoc(userRef);
 const p = snap.data();
 
 const token = await user.getIdTokenResult(true);
+setSessionCookie(token.token);
 const isAdmin = token.claims.admin === true;
+// lvl (hasta qué nivel puede abrir) lo pone el webhook de Stripe o la Maestra con scripts/admin.mjs
+const paid = new URLSearchParams(location.search).get('pago');
+if (paid) history.replaceState(null, '', 'aula.html');
 
 const name = p.displayName || pretty((p.email || '').split('@')[0]);
 const CM = {
-  uid, isAdmin,
+  uid, isAdmin, lvl: isAdmin ? 5 : Number(token.claims.lvl) || 0, paid,
   profile: { ...p, name, ini: initials(name), c: colorFor(uid), accessLevel: Number(p.accessLevel) || 1, plan: p.plan || 'none', paymentStatus: p.paymentStatus || 'none' },
   progress: {}, doneAt: {}, notes: {}, questions: {}, tickets: [], payments: [], notifications: [],
   posts: [], likes: new Set(), students: [],
   onPosts: () => {},
-  signOut: () => signOut(auth).then(() => location.replace('login.html?mode=login')),
+  signOut: () => signOut(auth).then(() => { setSessionCookie(''); location.replace('login.html?mode=login'); }),
 };
 
 // ---- Carga inicial (solo mis datos) ----
@@ -112,17 +132,22 @@ const rebuild = () => {
   }));
   CM.onPosts();
 };
-onSnapshot(query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(80)),
+// Sin niveles abiertos solo se ven Preséntate y Testimonios (las reglas de Firestore lo exigen igual)
+const FREE_CHANNELS = ['presentaciones', 'testimonios'];
+CM.free = !isAdmin && CM.lvl === 0;
+CM.freeChannels = FREE_CHANNELS;
+const inFree = CM.free ? [where('ch', 'in', FREE_CHANNELS)] : [];
+onSnapshot(query(collection(db, 'posts'), ...inFree, orderBy('createdAt', 'desc'), limit(80)),
   (s) => { rawPosts = s.docs.map((d) => ({ id: d.id, ...d.data() })); rebuild(); }, (e) => console.warn('posts', e.code));
-onSnapshot(query(collection(db, 'replies'), orderBy('createdAt', 'desc'), limit(400)),
+onSnapshot(query(collection(db, 'replies'), ...inFree, orderBy('createdAt', 'desc'), limit(400)),
   (s) => { rawReplies = s.docs.map((d) => ({ id: d.id, ...d.data() })); rebuild(); }, (e) => console.warn('replies', e.code));
 onSnapshot(mine('likes'), (s) => { CM.likes = new Set(s.docs.map((d) => d.id)); rebuild(); }, (e) => console.warn('likes', e.code));
 
 CM.post = (ch, text) => addDoc(collection(db, 'posts'), {
   ch, text, authorUid: uid, authorName: name, isTeacher: isAdmin, likeCount: 0, createdAt: serverTimestamp(),
 });
-CM.reply = (postId, text) => addDoc(collection(db, 'replies'), {
-  postId, text, authorUid: uid, authorName: name, isTeacher: isAdmin, createdAt: serverTimestamp(),
+CM.reply = (postId, text, ch) => addDoc(collection(db, 'replies'), {
+  postId, ch, text, authorUid: uid, authorName: name, isTeacher: isAdmin, createdAt: serverTimestamp(),
 });
 CM.toggleLike = async (postId) => {
   const b = writeBatch(db), likeRef = me(`likes/${postId}`), postRef = doc(db, 'posts', postId);
@@ -136,10 +161,93 @@ CM.deletePost = (id) => deleteDoc(doc(db, 'posts', id));
 CM.loadStudents = async () => {
   if (!isAdmin) return [];
   const s = await getDocs(query(collection(db, 'users'), orderBy('createdAt', 'desc')));
-  CM.students = s.docs.map((d) => ({ id: d.id, ...d.data() })).filter((u) => u.role === 'student')
-    .map((u) => ({ ...u, n: u.displayName || u.email, ...person(u.displayName || u.email, u.id), email: u.email, since: fdate(u.createdAt) }));
+  CM.students = s.docs.map((d) => ({ id: d.id, ...d.data() })).filter((u) => u.role !== 'admin')
+    .map((u) => ({ ...u, n: u.displayName || u.email, ...person(u.displayName || u.email, u.id), email: u.email, since: fdate(u.createdAt), next: fdate(u.currentPeriodEnd) }));
   return CM.students;
+};
+
+// ---- Clases en vivo: agenda (la ven todas) y enlaces de sala y grabación (solo con el nivel abierto) ----
+const toLive = (d) => ({ id: d.id, ...d.data() });
+CM.agenda = []; CM.liveLinks = {};
+CM.loadLive = async () => {
+  const [ag, links] = await Promise.all([
+    getDocs(query(collection(db, 'agenda'), orderBy('start', 'asc'), limit(200))),
+    isAdmin ? getDocs(collection(db, 'liveLinks'))
+      : CM.lvl > 0 ? getDocs(query(collection(db, 'liveLinks'), where('level', '<=', CM.lvl))) : null,
+  ]);
+  CM.agenda = ag.docs.map(toLive);
+  CM.liveLinks = {};
+  links?.forEach((d) => { CM.liveLinks[d.id] = d.data(); });
+};
+// Solo la Maestra: programa o actualiza la clase en vivo de una lección
+CM.saveLive = async (key, { level, title, start, durationMin, url, recordingUrl }) => {
+  const b = writeBatch(db);
+  b.set(doc(db, 'agenda', key), { level, title, start: Timestamp.fromDate(start), durationMin, updatedAt: serverTimestamp() });
+  b.set(doc(db, 'liveLinks', key), { level, url, recordingUrl, updatedAt: serverTimestamp() });
+  await b.commit();
+  await CM.loadLive();
+};
+CM.deleteLive = async (key) => {
+  const b = writeBatch(db);
+  b.delete(doc(db, 'agenda', key)); b.delete(doc(db, 'liveLinks', key));
+  await b.commit();
+  await CM.loadLive();
+};
+
+// ---- Ajustes del aula (video de bienvenida) ----
+CM.config = {};
+CM.loadConfig = async () => { CM.config = (await getDoc(doc(db, 'config', 'aula'))).data() || {}; };
+CM.saveConfig = async (data) => {
+  await setDoc(doc(db, 'config', 'aula'), { ...data, updatedAt: serverTimestamp() }, { merge: true });
+  await CM.loadConfig();
+};
+
+// ---- Solo Maestra: preguntas de las alumnas para responder desde el panel ----
+CM.pending = [];
+CM.loadQuestions = async () => {
+  if (!isAdmin) return [];
+  const s = await getDocs(query(collectionGroup(db, 'questions'), where('answered', '==', false), orderBy('createdAt', 'desc'), limit(100)));
+  CM.pending = s.docs.map((d) => ({ id: d.id, uid: d.ref.parent.parent.id, ...d.data(), when: ago(d.data().createdAt) }));
+  return CM.pending;
+};
+CM.answer = async (q, reply, lessonTitle) => {
+  const b = writeBatch(db);
+  b.update(doc(db, 'users', q.uid, 'questions', q.id), { reply, answered: true, repliedAt: serverTimestamp() });
+  b.set(doc(collection(db, 'users', q.uid, 'notifications')), {
+    text: `La Maestra respondió tu pregunta en «${lessonTitle}». Ábrela en la pestaña Preguntas de esa clase.`,
+    read: false, createdAt: serverTimestamp(),
+  });
+  await b.commit();
+  CM.pending = CM.pending.filter((x) => x.id !== q.id);
+};
+
+await Promise.all([CM.loadLive(), CM.loadConfig()]).catch((e) => console.warn('aula', e.code || e));
+
+// ---- Suscripción (Stripe): devuelve la URL de pago o del portal para administrarla ----
+CM.billing = async (kind) => {
+  const r = await fetch('/api/billing', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${await user.getIdToken()}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ kind }),
+  });
+  const out = await r.json().catch(() => ({}));
+  if (!r.ok || !out.url) throw new Error(out.error || 'No se pudo abrir el pago. Inténtalo de nuevo.');
+  return out.url;
 };
 
 window.CM = CM;
 window.cmStart(CM);
+
+// Al volver de Stripe el webhook puede tardar unos segundos: esperamos a que se registre y recargamos el aula
+if (paid === 'ok' && !isAdmin) {
+  const before = JSON.stringify([p.plan, p.paymentStatus, p.paidInstallments || 0]);
+  for (let i = 0; i < 20; i++) {
+    await new Promise((r) => setTimeout(r, 3000));
+    const now = (await getDoc(userRef)).data();
+    if (JSON.stringify([now.plan, now.paymentStatus, now.paidInstallments || 0]) !== before) {
+      await user.getIdToken(true);
+      location.replace('aula.html');
+      break;
+    }
+  }
+}

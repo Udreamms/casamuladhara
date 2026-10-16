@@ -1,0 +1,12 @@
+{
+  "name": "casamuladhara",
+  "private": true,
+  "type": "module",
+  "description": "Sitio estático + funciones de Vercel para la suscripción del aula (Stripe).",
+  "dependencies": {
+    "@vercel/functions": "^3.1.0",
+    "firebase-admin": "^13.5.0",
+    "jose": "^6.1.0",
+    "stripe": "^23.0.0"
+  }
+}

@@ -158,6 +158,7 @@ form{width:100%;max-width:24rem;margin:0 auto;display:flex;flex-direction:column
 
 <script type="module">
 import { auth } from './assets/js/firebase.js';
+import { PREVIEW } from './assets/js/preview.js';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider,
   sendPasswordResetEmail, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 
@@ -239,6 +240,7 @@ function go() { if (!leaving) { leaving = true; location.replace(NEXT); } }
 $('#auth-form').onsubmit = async (e) => {
   e.preventDefault(); if (busy) return;
   const email = $('#email').value.trim(), pass = $('#password').value;
+  if (PREVIEW) return go(); // vista previa de la rama valentina: entra sin iniciar sesión
   if (!email || !pass) return say('Escribe tu correo y contraseña.', true);
   lock(true); $('#submit').textContent = 'Sincronizando...';
   try {
@@ -249,7 +251,9 @@ $('#auth-form').onsubmit = async (e) => {
 };
 
 $('#google').onclick = async () => {
-  if (busy) return; lock(true);
+  if (busy) return;
+  if (PREVIEW) return go(); // vista previa de la rama valentina: entra sin iniciar sesión
+  lock(true);
   try { await signInWithPopup(auth, new GoogleAuthProvider()); go(); }
   catch (err) { say(msg(err), true); }
   finally { lock(false); }
