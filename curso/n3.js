@@ -1262,3 +1262,261 @@ const N3Q7=[
  {q:'En los chequeos finales, ¿en qué % debe estar Yo Superior de acuerdo con la limpieza?',o:['50 %','80 %','100 %'],a:2,e:'De lo contrario, pedimos un barrido completo hasta que sea al 100 %.'},
  {q:'¿Cómo terminamos la sesión?',o:['Damos las gracias y pedimos que cierren sesión y todos los portales abiertos','Guardamos el péndulo','Volvemos al Mapa'],a:0,e:'Así cerramos la sesión en armonía.'}];
 RICH.n7a17=()=>n3quiz('c7',N3Q7,['Dominas lo esencial de la Clase 7.','Vas muy bien. Repasa lo que falló y sigue practicando.','Vale la pena repasar la clase. Puedes volver cuando quieras.']);
+
+/* ================= CLASE 8 · Integración y profundización ================= */
+const N3C8P=N3P+'c8/';
+const c8img=(f,alt,s)=>`<img src="${N3C8P}${f}" alt="${alt}" loading="lazy" decoding="async" style="display:block;max-width:100%;height:auto;border-radius:20px;justify-self:center;${s||''}">`;
+const c8n=(a,b,f)=>[...Array(b-a+1).keys()].map(i=>[f?f(a+i):String(a+i)]);
+const C8MES='Enero|Febrero|Marzo|Abril|Mayo|Junio|Julio|Agosto|Septiembre|Octubre|Noviembre|Diciembre';
+const C8ROM='V|VI|VII|VIII|IX|X|XI|XII|XIII|XIV|XV|XVI|XVII|XVIII|XIX|XX|XXI|XXII|XXIII';
+const C8DEC_LIN='Pido a mi Yo Superior, maestros ascendidos y seres de luz de la más alta vibración, que por favor limpien todo mi linaje ancestral, que corten todos los votos y energías negativas del pasado que ya no sirvan para el desarrollo y evolución de mi Alma en tiempo presente. Hoy reconozco, limpio, sano, libero y agradezco a todos mis ancestros por las experiencias del pasado. Hoy yo ……… con plena consciencia creo mi propia historia. Gracias, gracias, gracias.';
+Object.assign(N3G,{
+ vp:{t:'Vidas pasadas · investigación',eb:'Protocolo · Vidas pasadas',lede:'¿Hubo daño o herida? ¿De qué tipo? ¿Con qué intensidad?',how:'Primero pregunta en el centro si hubo daño o herida en esa vida (SÍ o NO). Si es SÍ, pregunta quién hizo daño a quién, el tipo de daño y luego su intensidad. Si el daño fue mortal, continúa con el gráfico Causas de muerte.',rings:[
+  {t:'¿Hubo daño o herida?',items:q3('SÍ|NO')},
+  {t:'Tipo de daño',items:q3('Físico|Emocional|Mental|Moral|Mortal|Económico|Espiritual')},
+  {t:'Intensidad del daño',items:q3('Daño menor|Daño mayor|Daño mortal~Pregunta si fue por asesinato, suicidio o muerte temprana y ve al gráfico Causas de muerte.')}]},
+ vpa:{t:'Vidas pasadas · anexo de investigación',eb:'Protocolo · Vidas pasadas · Opcional',lede:'Un gráfico opcional para conocer más detalles de esa vida.',how:'Úsalo solo si necesitas más información: sexo, clase social, profesión y el tipo de relación con la otra persona involucrada.',rings:[
+  {t:'Profesión',items:q3('Sanador|Soldado|Político|Religioso|Comerciante|Campesino|Pescador|Cazador / recolector|Marinero|Profesor / Erudito|Artista|Criado, sirviente, esclavo|Músico|Vagabundo|Noble|Artesano / Peón|Brujo(a)|Otro')},
+  {t:'Tipo de relación',items:q3('Familiar|Apoyo mutuo|Amor|Amistad|Laboral|Estudio|Diversión|Sexual|Conflicto|Interés|Indiferente|Vecindad|Karma|Enemistad|Dependencia|Estima|Compromiso|Amantes|Otra')},
+  {t:'Clase social',items:q3('En la miseria|Pobre|Media baja|Media / alta|Rico')},
+  {t:'Sexo',items:q3('Hombre|Mujer')}]},
+ fec:{t:'Gráfico de fechas',eb:'Protocolo · Fechas',lede:'Para ubicar en el tiempo un hecho de esta vida.',how:'Pregunta primero la década, luego el mes y el día. El anillo de números (0 a 9) sirve para precisar el año dígito a dígito, y también tiene SÍ, NO y un asterisco (*) para algo fuera del gráfico.',rings:[
+  {t:'Década',items:q3('1950 a 1960|1961 a 1970|1971 a 1980|1981 a 1990|1991 a 2000|2001 a 2010|2011 a 2020|2021 a 2030')},
+  {t:'Mes',items:q3(C8MES)},
+  {t:'Día',items:c8n(1,31)},
+  {t:'Número y respuesta',items:[...c8n(0,9),...q3('SÍ|NO|*~Fuera del gráfico.')]}]},
+ sig:{t:'Siglos y épocas',eb:'Protocolo · Fechas',lede:'Para ubicar en el tiempo una vida pasada.',how:'Pregunta en qué siglo ocurrió y luego avanza hacia el centro: año aproximado, década, mes y día, solo hasta donde necesites precisar.',rings:[
+  {t:'Siglo',items:[['Anteriores al siglo V'],...q3(C8ROM).map(x=>['Siglo '+x[0]])]},
+  {t:'Año',items:q3('0|1000|1200|1400|1500|1600|1700|1800|1900')},
+  {t:'Década',items:q3('1951 a 1970|1971 a 1980|1981 a 1990|1991 a 2000|2001 a 2010|2011 a 2030')},
+  {t:'Mes',items:q3(C8MES)},
+  {t:'Día',items:c8n(1,31)}]},
+ muer:{t:'Causas de muerte',eb:'Protocolo · Vidas pasadas',lede:'Cuando el daño fue mortal.',how:'Si el gráfico de Vidas pasadas indica daño mortal, pregunta cuál fue la causa de muerte. El anillo exterior (0 a 100) ayuda a ubicar el sector.',rings:[
+  {t:'Causas',items:q3('Muerte natural|Vejez|Complicación de herida|Acto de violencia|Infecciones|Abortos|Parto|Ejecución|Sacrificios rituales|Hambruna|Asesinato|Suicidio|Sobredosis|Envenenamiento|Inquisición|Tortura|En prisión|Enfermedad|Violencia sexual|En terremoto|Por asfixia|En inundación|Quemado|Guerra|Enfermedad|Caída accidental|Peste|Picadura de animal|Animal|Disparo|Accidente|Secuestro|Muerte súbita|Decapitado|Catástrofe|Cirugía|Otro')}]},
+ voto:{t:'Votos o pactos',eb:'Protocolo · Votos',lede:'Identifica el voto o pacto y su intensidad.',how:'Pregunta qué voto o pacto está activo y, en el centro, su intensidad (bajo, medio, alto o muy alto). Luego anúlalo con el decreto, nombrando el voto que apareció.',decreto:'Desde mi amada y divina presencia YO SOY, a todos mis guías y seres de luz que me acompañan, pido el permiso para anular todos los votos kármicos limitantes contraídos en cualquier vida pasada, simultánea, plano o dimensión en que mi ser exista. Yo ……… anulo y cancelo todos los votos de ……… y me libero de ellos para siempre y los transformo, recuperando así mi poder personal y mi voluntad. Gracias, gracias, gracias.',rings:[
+  {t:'Votos',items:q3('Maldiciones (conocidas o no conocidas)|Votos de pobreza|Depresiones y adicciones|Seguir a un fallecido|Votos de castidad|Votos de obediencia|Secretos|Idealización|Votos de ansiedad|Votos de enfermedad|No recibir ayuda o regalos|Votos de miedo a Dios|Compromisos convertidos en votos|Creencias limitantes|Votos de sufrimiento|Seguir a un salvador|Votos de silencio|Votos de celibato|Votos religiosos de cualquier tipo|Renunciar al amor|Votos de soledad|Votos de separación|Votos de silencio|Votos de sacrificio|Condena eterna|Deseos de muerte|Desbalance emocional|Otros votos')},
+  {t:'Intensidad',items:q3('Bajo|Medio|Alto|Muy alto'),cols:['#e6dcf5','#d6c4f0','#c3a8ea','#ab86e2']}]},
+ trans:{t:'Transgeneracional',eb:'Protocolo · Linaje',lede:'Cargas que se transmiten de generación en generación.',how:'Pregunta primero si la información viene del linaje materno o paterno (centro). Luego busca el tema en el anillo exterior o en el interior. «Votos» te lleva a su propio gráfico.',decreto:C8DEC_LIN,rings:[
+  {t:'Temas del linaje',items:q3('Abuso de la jerarquía|Enfermedades mentales|Madre soltera|Matrimonio forzado|Doble por el nombre|Exclusión de un miembro familiar|Abortos / gemelos|Divorcio / separación|Niños no reconocidos|Hijo no deseado|Discriminación racial|Abusos / tortura|Electra / Edipo / Pederastia|Votos~Ir al gráfico de votos.|Cambio de sexo / Homosexualidad|Accidentes y tragedias|Enfermedad / pandemia|Narcisismo / Psicopatía / Machismo|Esclavitud / terrorismo / prisión|Pérdidas / asuntos financieros|Deportaciones / inmigraciones|Muertes cataclismos|Intolerancia a la felicidad|Obligaciones religiosas|Deudas transgeneracionales|Muertes tempranas')},
+  {t:'Anillo interior',items:q3('Secretos|Adulterio|Poligamia|Adopciones|Esterilidad|Guerras|Inanición|Violaciones|Crímenes|Asesinatos|Incestos')},
+  {t:'Linaje',items:q3('Linaje materno|Linaje paterno'),cols:['#f3c6ee','#bcbcf4']}]},
+ cons:{t:'Constelación familiar',eb:'Protocolo · Linaje',lede:'Limpiar directo · Energías discordantes. Investigar en el Mapa o en Transgeneracional.',how:'Pregunta si la información pertenece al linaje materno o paterno, luego qué aspecto aparece y en qué generación. Puedes limpiar directo con Energías discordantes o investigar más en el Mapa o en Transgeneracional.',decreto:C8DEC_LIN,rings:[
+  {t:'Aspectos',items:q3('Ser hijo bastón|Excluidos en el árbol|Herencias|Muertes tempranas|Abortos o abusos|Abundancia / dinero|Divorcios / separaciones|Éxitos|Heredero universal|Problemas con la familia|Migración|Yacente|Guerras|Bloqueos con madre|Bloqueos con padre|Repetición de patrones|Doble|Lealtades inconscientes|Lealtades conscientes|Roles cambiados|Recuperar mi lugar en el clan|Enfermedades (depresiones / adicciones)|Vínculos disfuncionales|Cargas emocionales|Votos~Ir al gráfico de votos.|Transgeneracional~Ir al gráfico transgeneracional.')},
+  {t:'Generación',items:q3('1.ª generación~0 a 20|2.ª generación~20 a 50|3.ª generación~50 a 80|4.ª generación~80 a 100')},
+  {t:'Linaje',items:q3('Linaje materno|Linaje paterno'),cols:['#e0b3e6','#a9b4f2']}]},
+ nino:{t:'Niño interno',eb:'Protocolo · Niño interno',lede:'Se limpian con Energías discordantes.',how:'Recorre los anillos en orden: la edad en que se originó la herida, quién la provocó, el tipo de herida (con su máscara) y cuándo sucedió. Luego limpia con Energías discordantes y haz el decreto.',decreto:'Pido por favor a Yo Superior que el niño interno sea reconocido y sanado en totalidad. Gracias, gracias, gracias.',rings:[
+  {t:'Edad',items:[...Array(21).keys()].map(i=>[i*5+' años'])},
+  {t:'¿Quién la provocó?',items:q3('Niño interno|Adulto|Padre|Madre|Grupo|Familia|Soñador|Tutor|Femenino|Masculino|Amigo(a)|Otro reparto')},
+  {t:'Tipo de herida',items:q3('Herida de rechazo~Máscara huidiza.|Herida de abandono~Máscara dependiente.|Herida de humillación~Máscara masoquista.|Herida de traición~Máscara controladora.|Herida de injusticia~Máscara rígida.')},
+  {t:'Máscara',items:q3('Máscara huidizo/a|Máscara dependiente|Máscara masoquista|Máscara controlador|Máscara rígido/a'),cols:['#eadcf3','#e3d0ef','#dcc4eb','#d4b8e6','#ccace2']},
+  {t:'¿Cuándo?',items:q3('Vientre|Nacimiento|Días|Semanas|Meses|Años')}]},
+ ute:{t:'Limpieza uterina',eb:'Protocolo · Útero',lede:'Limpiar directo · Energías discordantes. Investigar desde el Mapa.',how:'Pregunta qué memoria necesita limpieza, en qué generación del linaje femenino se originó (1 a 7) y el porcentaje. Limpia directo y termina con el decreto.',decreto:'Hoy limpio, sano y bendigo mi linaje femenino, a mi madre, a mis abuelas y a todas las que precedieron mi camino, las perdono por no amarse, por no sentirse fuertes y no atreverse a cambiar su destino. Las libero y me libero de sus ataduras y anclajes y me uno a ellas con un sagrado hilo que nos vincula en amor, en perdón, en sabiduría y en equilibrio. Hoy de mi espíritu borro las memorias de dolor y tristeza que mi linaje trajo consigo y las reemplazo por la energía del amor, de respeto y el poder de mis ancestros femeninos.',rings:[
+  {t:'Qué limpiar',items:q3('Limpiar memorias ancestrales de dolor|Memorias de abusos|Limpiar impactos de abortos|Limpiar ansiedades|Limpiar dolor físico|Memorias de tristeza|Sexualidad|Limpiar victimismo|Manifestar creatividad|Recuperar virtudes|Recuperar fuerza|Honrar las experiencias|Respetar|Perdonar|Memorias de miedos|Memorias de inseguridad|Falta de autoestima|Memorias de ira|Memorias de asco|Memorias de frustración|Memorias de rencor|Miomas|Memorias de odio|Soltar, confiar y dejar ir|Exceso de energía masculina|Fertilidad')},
+  {t:'Generación',items:c8n(1,7,n=>n+'.ª generación')},
+  {t:'Porcentaje',items:[...Array(11).keys()].map(i=>[i*10+' %'])}]},
+ ter:{t:'Terapias y sanación',eb:'Protocolo · Cierre',lede:'¿Qué terapia complementa el proceso?',how:'Pregunta qué terapia ayuda al consultante y si corresponde aplicarla tú o recomendarla. La «Sanación de las memorias uterinas» lleva asterisco: se trabaja con el gráfico de Limpieza uterina.',rings:[
+  {t:'Terapias',items:q3('Kinesiología|Terapia de respuesta espiritual|Flores de Bach|Sanación con cristales|Sanación vibracional|Dieta balanceada|Osteopatía|Terapia de liberación|Constelaciones familiares|Activación del ADN|Biomagnetismo|Thetahealing|Sanación pránica|Biodecodificación|Sanación con arquetipos|Acupuntura|Yoga|Meditación|Medicina herbaria|Reflexología|Quantum Vortex|Reiki|Homeopatía|* Sanación de las memorias uterinas *~Ir al gráfico de Limpieza uterina.|Analgesia cuántica|Terapia angelical|Registros akáshicos|Tarot evolutivo|Psicoterapia|Otras')},
+  {t:'¿Aplicar o recomendar?',items:q3('Aplicar~La terapia la realizas tú.|Recomendar~Sugieres al consultante un terapeuta de esa disciplina.')}]},
+ sim:{t:'Símbolos y protección',eb:'Protocolo · Protección',lede:'Activa el símbolo o la protección que el consultante necesita.',how:'Pregunta qué símbolo o protección necesita la persona y el porcentaje. Los sectores con asterisco (*) se trabajan con su propia lámina: los símbolos de radiestesia, la Oración de implantes y el Protocolo de magia.',decreto:'Pedir a Yo Superior que active el símbolo o protección por el tiempo correcto, perfecto y adecuado en ……… (nombre completo). Gracias, gracias, gracias.',rings:[
+  {t:'Símbolos y protecciones',items:q3('Armadura y espada del Arcángel Miguel|Escudo de amor|Comité de protección contra las energías oscuras|Activación del Antakarana|* Símbolo Doble Decágono *|* Símbolo Cruz Atlante *|* Símbolo Pirámide plana *|* Símbolo 9 Círculos *|* Símbolo Phath *|* Símbolo Crístico *|Flor de la Vida|* Símbolo Cuadrado Mágico *|Metatrón|* Símbolo Anti-Magia *|Otro símbolo (libro)|* Realizar Oración de implantes|* Realizar Protocolo de magia')},
+  {t:'Porcentaje',items:[...Array(11).keys()].map(i=>[i*10+' %'])}]}});
+['vp','vpa','fec','sig','muer','voto','trans','cons','nino','ute','ter','sim'].forEach(id=>{RICH['n3g_'+id]=()=>n3graph(id)});
+
+/* ----- 1 · Bienvenida ----- */
+RICH.n8a1=()=>nbHero('Clase 8','<span style="font-size:.82em">Integración</span>','y profundización','Una clase para integrar herramientas de investigación profunda que nos permiten <b>comprender, identificar y trabajar</b> en los diferentes niveles del Ser.',['Identificar','Comprender','Liberar','Sanar'],'Radiestesia y Sanación del Alma · Clase final',
+ `<div class="nb-pw">${pndSVG('c8hero',{dark:1,mode:'cw',amp:44,len:15,amb:1,cap:0})}</div>`);
+const N8TE=[['espiral','Vidas pasadas','Exploramos información simbólica de otras vidas con un <b>protocolo de diez preguntas</b> y sus gráficos.'],
+ ['enlace','Votos o pactos','Acuerdos energéticos que el alma hizo de manera consciente o inconsciente. Los identificamos y los <b>liberamos con decretos</b>.'],
+ ['arbol','Transgeneracional','Cargas, creencias y experiencias que se <b>transmiten de generación en generación</b> por el linaje materno y paterno.'],
+ ['grupo','Constelación familiar','Dinámicas ocultas del sistema familiar. Investigamos el linaje <b>pétalo por pétalo</b>.'],
+ ['nino','Niño interno','La edad, quién provocó la herida, qué <b>herida y máscara</b> se formaron y cuándo sucedió.'],
+ ['utero','Limpieza uterina','Memorias guardadas en el útero y en el <b>linaje femenino</b> que pueden limpiarse y sanarse.']];
+RICH.n8a2=()=>dkH('Clase 8','Hoy cerramos un ciclo de aprendizaje','Esta última clase está dedicada a <b>integrar herramientas de investigación energética</b> que nos permiten profundizar en el origen de determinados bloqueos y patrones.')+
+ `<div class="dk-call">${ic('pend',18)} Trabajaremos con <b>diferentes gráficos</b> como <b>herramientas complementarias</b> dentro de la práctica radiestésica.</div>
+ <div class="dk-sub">¿Qué vamos a aprender hoy? · recorre los seis temas</div>`+n3sel('n8te',N8TE,{eb:'Tema',nav:1})+
+ `<div class="dk-call"><b>Objetivo.</b> Aprender a <b>investigar</b>, <b>identificar</b> y abordar información energética de manera <b>ordenada</b> y <b>consciente</b>.</div>`+c7pil(['Investigar','Comprender','Identificar','Transformar']);
+
+/* ----- 2 · Vidas pasadas ----- */
+RICH.n8a3=()=>dkH('Investigación radiestésica','Vidas pasadas','La radiestesia puede utilizarse como herramienta de exploración para identificar <b>información simbólica</b> relacionada con experiencias de otras vidas.')+
+ `<div class="dk-call">${ic('loto',18)} El objetivo <b>no es generar temor ni dependencia</b>, sino <b>observar</b> posibles <b>patrones</b> que puedan estar relacionados con <b>experiencias del presente</b>.</div>
+ <div class="dk-sub">Cuatro pasos · toca cada uno</div>`+n3flip('n8vq',[['lupa','Identificar','Con el péndulo y los gráficos reconocemos qué vida, qué personas y qué hechos aparecen.'],['libro','Comprender','Observamos el patrón y cómo se relaciona con lo que vive hoy la persona.'],['limpia','Liberar','Limpiamos las energías discordantes que se trajeron a esta vida.'],['corazon','Sanar','Cerramos con el decreto para que el alma integre la experiencia en paz.']],'c4',150)+
+ `<div class="dk-sub">Gráficos que usaremos</div>`+c4li([['persona','Personajes: quién fui y quién más estuvo involucrado.'],['ola','Vidas pasadas (investigación): daño, tipo e intensidad.'],['libro','Anexo de investigación (opcional): profesión, relación, clase social y sexo.'],['reloj','Fechas y siglos: para ubicar la vida en el tiempo.'],['xcirc','Causas de muerte: cuando el daño fue mortal.'],['limpia','Energías discordantes: lo que se trajo cada persona a esta vida.']]);
+const N8VP=[['Quién fui','¿Quién fui yo en esa vida pasada?','pers','Gráfico de Personajes'],
+ ['Alguien más','¿Hay alguien más involucrado? Si la respuesta es SÍ, ¿quién es y qué rol cumplía en esa vida?','pers','Gráfico de Personajes'],
+ ['Hoy en mi vida','¿A esta segunda persona la conozco en esta vida actual? Si la respuesta es SÍ, ¿quién es hoy en mi vida?','pers','Gráfico de Personajes'],
+ ['¿Hubo daño?','¿Hubo daño o herida en esa vida pasada? Si la respuesta es SÍ, ¿quién hizo daño a quién?','vp','Gráfico Vidas pasadas'],
+ ['Tipo','¿Tipo de daño?','vp','Gráfico Vidas pasadas'],
+ ['Intensidad','¿Intensidad del daño? ¿Fue menor, mayor o mortal?','vp','Gráfico Vidas pasadas'],
+ ['Causa','Si indican daño mortal, pregunta si fue por asesinato, suicidio o muerte temprana.','muer','Gráfico Causas de muerte'],
+ ['Mis energías','¿Qué energías me traje yo a esta vida a causa de este acontecimiento?','disc','Gráfico Energías discordantes'],
+ ['Las suyas','¿Qué energías se trajo la otra persona?','disc','Gráfico Energías discordantes'],
+ ['¿Suficiente?','¿Hay suficiente información para limpiar la vida pasada? Tiene que responder que sí; en caso contrario se procede a una nueva investigación y tendrás que ir al gráfico Mapa a continuar investigando.','','']];
+const N8VPD=['Yo Superior, por favor, limpia todos los programas desde la raíz hasta el corazón de Espíritu,','por todos los tiempos y espacios,','corta todos los lazos negativos y todas las pre programaciones negativas que mi Alma tenga','en un 100 % en forma permanente.','Gracias, gracias, gracias.'];
+RICH.n8a4=()=>{const s=n3clamp(st('n8vp',0),0,9),x=N8VP[s],r=st('n8vr',-1);
+ return dkH('Vidas pasadas','Protocolo de investigación','Diez preguntas en orden. Cada paso te indica qué gráfico usar; practícalo aquí mismo.')+
+ `<div class="tl" style="grid-template-columns:repeat(5,minmax(0,1fr));row-gap:16px">${N8VP.map((y,i)=>`<button ${rxa('set','n8vp',i)} ${pressed(i===s)}><span class="n">${i+1}</span><span class="t">${y[0]}</span></button>`).join('')}</div>
+ <div class="detail"><span class="eyebrow">Pregunta ${s+1} de 10${x[3]?' · '+x[3]:''}</span><h3>${x[1]}</h3>
+  <div class="row"><button class="btn btn-ghost btn-sm" ${rxa('set','n8vp',Math.max(0,s-1))} ${s===0?'disabled':''}>Anterior</button><button class="btn btn-primary btn-sm" ${rxa('set','n8vp',Math.min(9,s+1))} ${s===9?'disabled':''}>Siguiente pregunta</button></div></div>`+
+ (s<9?`<div class="dk-sub">${x[3]} · practica este paso</div>`+n3graph(x[2])
+ :`<div class="dk-sub">¿Qué respondió el péndulo?</div>${chipRow('n8vr',['SÍ, hay suficiente información','NO, falta información'],r)}`+
+  (r===0?`<div class="dk-call"><b>Una vez finalizada la investigación de esa vida, repite lo siguiente.</b></div>`+n3pray('n8vd',N8VPD)
+  :r===1?`<div class="dk-call warn"><b>Nueva investigación.</b> Vuelve al gráfico Mapa y continúa investigando antes de limpiar.</div>`+n3graph('mapa'):''))};
+
+/* ----- 3 · Votos y pactos ----- */
+RICH.n8a5=()=>dkH('Entendiendo acuerdos que trascienden','Votos y pactos','Los votos y pactos son <b>acuerdos energéticos</b> que nuestra alma realiza de manera consciente o inconsciente, con nosotros mismos, con otras personas, con grupos, creencias o propósitos. Estos compromisos generan <b>lealtades invisibles</b> que pueden condicionar nuestras emociones, decisiones, relaciones y bienestar.')+
+ c4box('¿Por qué es importante identificarlos?',c4li([['nudo','Porque pueden mantenerte en patrones repetitivos, bloqueos emocionales, enfermedades o dificultades en diferentes áreas de tu vida.'],['candado','Al reconocerlos, puedes liberarlos conscientemente y recuperar tu poder, tu libertad y tu conexión con tu alma.'],['pend','La radiestesia y el trabajo de sanación del alma nos permiten detectarlos, comprender su origen y transformarlos en aprendizaje y evolución.']]))+
+ `<div class="dk-sub">¿Cuándo se pueden generar? · toca cada momento</div>`+n3flip('n8vc',[['persona','En esta vida','A través de promesas, compromisos, lealtades, juramentos o decisiones tomadas en momentos de emoción, miedo, necesidad o amor.'],['grupo','En relaciones','Con parejas, familiares, amigos, jefes, grupos o instituciones.'],['incienso','Religiosos o espirituales','Compromisos con creencias, religiones, órdenes, dogmas o prácticas espirituales.'],['espiral','En vidas pasadas','Pactos de alma, lealtades familiares, juramentos de protección, sacrificio o deudas kármicas.'],['rayo','En momentos críticos','En situaciones de peligro, enfermedad, pérdidas, traumas o para obtener protección o ayuda.']],'c3',160)+
+ n3quote('Libérate de lo que ya no te pertenece y <mark>elige desde tu alma, no desde el miedo</mark>.');
+const N8DC=[['Eliminar votos','loto',['YO SOY, en mi amada y divina presencia,','declaro y decreto que anulo, corto, cancelo y libero de mi campo energético, de mi alma y de mi linaje todos los votos kármicos limitantes contraídos en esta vida, en vidas pasadas o en otras dimensiones.','Libero todo voto consciente o inconsciente que haya realizado por miedo, amor, lealtad, culpa, necesidad, intercambio o promesa.','Estos votos ya no me pertenecen. Los devuelvo a la luz divina para su transmutación.','YO SOY libre, YO SOY luz, YO SOY verdad.','Así es, así será, así ya está hecho. Gracias, gracias, gracias.']],
+ ['Eliminar pactos','espiral',['YO SOY, en mi amada y divina presencia,','declaro y decreto que anulo, corto, cancelo y libero de mi campo energético, de mi alma y de mi linaje todos los pactos kármicos limitantes realizados en esta vida, en vidas pasadas o en otras dimensiones.','Libero todo pacto consciente o inconsciente que haya establecido con personas, entidades, grupos, linajes o energías, por poder, control, protección, intercambio, sobrevivencia o pertenencia.','Rompo toda atadura, contrato o acuerdo que me impida ser libre, plena y en mi poder.','YO SOY soberanía, YO SOY luz, YO SOY mi verdad.','Así es, así será, así ya está hecho. Gracias, gracias, gracias.']],
+ ['Corte de lazo','corazon',['YO SOY, en mi amada y divina presencia,','declaro y decreto que corto, libero y disuelvo todos los lazos energéticos, emocionales, mentales y espirituales que me atan a personas, situaciones, lugares o experiencias que ya no son para mi mayor bien.','Corto toda conexión que se base en dependencia, apego, dolor, manipulación, miedo, culpa o intercambio.','Me libero con amor y en gratitud, recuperando mi energía, mi poder y mi camino.','YO SOY libre, YO SOY luz, YO SOY amor, YO SOY paz.','Así es, así será, así ya está hecho. Gracias, gracias, gracias.']]];
+RICH.n8a6=()=>{const s=n3clamp(st('n8dc',0),0,2),x=N8DC[s];
+ return dkH('Votos y pactos','Decretos de liberación','Elige el decreto y léelo con calma, en voz alta o en tu interior.')+chipRow('n8dc',N8DC.map(d=>d[0]),s)+
+ `<div class="dk-call">${ic(x[1],18)} <b>Decreto para ${x[0].toLowerCase()}.</b></div>`+n3pray('n8dp'+s,x[2])+
+ n3quote('Libérate de lo que ya no te pertenece y <mark>elige desde tu alma, no desde el miedo</mark>.')};
+
+/* ----- 4 · Constelación familiar y transgeneracional ----- */
+const N8CT=[['Constelación familiar','grupo','Es un enfoque sistémico desarrollado por Bert Hellinger que permite observar y representar dinámicas ocultas del sistema familiar. A través de representaciones simbólicas, se hacen visibles los órdenes del amor que han sido alterados.',['Se realiza en grupo o individual.','Se utilizan representantes que simbolizan a los miembros de la familia o situaciones.','El consultante observa y siente los movimientos del sistema.','Se busca restablecer el orden, el amor y el lugar que corresponde a cada uno.'],['Para identificar y ordenar dinámicas familiares ocultas.','Para liberar lealtades inconscientes.','Para sanar vínculos, duelos, exclusiones, roles y repeticiones.','Para abrir el flujo de amor y bienestar en el sistema.']],
+ ['Terapia transgeneracional','arbol','Es un enfoque terapéutico que investiga y libera las cargas, creencias, emociones y experiencias que se han transmitido de generación en generación. Se apoya en la memoria familiar y en el impacto que tiene nuestro linaje en nuestra vida actual.',['Se realiza de forma individual.','Se utilizan herramientas como radiestesia, péndulo, mapas, líneas del tiempo y registros.','Se investiga en profundidad el árbol genealógico y las memorias del linaje.','Se liberan energías, pactos, votos y creencias heredadas que ya no sirven.'],['Para sanar memorias y cargas transgeneracionales.','Para liberar creencias, pactos y emociones heredadas.','Para comprender el origen de ciertas situaciones repetitivas y transformarlas.','Para recuperar tu poder personal y tu propósito de vida.']]];
+RICH.n8a7=()=>{const s=n3clamp(st('n8ct',0),0,2);
+ return dkH('¿Son lo mismo?','Constelación familiar y terapia transgeneracional','Ambas miradas trabajan con el sistema familiar y buscan liberar cargas del pasado, pero su enfoque y herramientas son <b>diferentes y complementarias</b>.')+
+ chipRow('n8ct',['Constelación familiar','Terapia transgeneracional','En común'],s)+
+ (s<2?(x=>`<div class="detail"><span class="eyebrow">¿Qué es?</span><h3>${ic(x[1],26)} ${x[0]}</h3><p>${x[2]}</p></div>
+  <div class="dk-grid c2" style="align-items:start">${c4box('¿Cómo se trabaja?',c4li(x[3]))}${c4box('¿Para qué sirve?',c4li(x[4].map(t=>['check',t])))}</div>`)(N8CT[s])
+ :c4box('En común',c4li([['grupo','Trabajan con el sistema familiar y su historia.'],['lupa','Buscan identificar y liberar patrones heredados.'],['armoniza','Ayudan a sanar y transformar para vivir con más libertad, armonía y bienestar.'],['corazon','Se basan en el amor, el orden y el respeto por la vida.']]))+n3quote('Al sanar mi linaje, <mark>me libero yo y las futuras generaciones también</mark>.'))+
+ `<div class="dk-grid c2"><div class="dk-call"><b>Constelación familiar</b> muestra lo que está sucediendo en el sistema.</div><div class="dk-call"><b>Terapia transgeneracional</b> investiga y libera lo que está en la raíz.</div></div>`+
+ n3quote('Ambas se complementan y juntas son un <mark>camino profundo de sanación y transformación</mark>.')};
+const N8LJ=[{t:'Linaje materno',n:'1',c:'#c98fd2',lt:'#efd9f2',def:'El linaje materno corresponde a la información y experiencias que vienen por la línea de la madre: madre, abuela materna, bisabuela y generaciones anteriores.',
+  b:['Patrones que se repiten entre mujeres de la familia.','Exclusiones o personas olvidadas del árbol.','Duelo, pérdidas o muertes tempranas.','Separaciones o divorcios.','Problemas económicos o de abundancia.','Abortos o pérdidas gestacionales.','Roles familiares que se repiten.','Situaciones que hayan quedado pendientes en el linaje.']},
+ {t:'Linaje paterno',n:'2',c:'#7f8fe0',lt:'#d9def7',def:'El linaje paterno corresponde a la información y experiencias que vienen por la línea del padre: padre, abuelo paterno, bisabuelo y generaciones anteriores.',
+  b:['Patrones que se repiten entre hombres de la familia.','Exclusiones o personas olvidadas del árbol.','Duelo, pérdidas o muertes tempranas.','Migraciones o separaciones.','Problemas con la autoridad, el trabajo o el dinero.','Bloqueos con la figura masculina.','Lealtades inconscientes.','Situaciones que hayan quedado pendientes en el linaje.']}];
+RICH.n8a8=()=>{const s=n3clamp(st('n8lj',0),0,1),L=N8LJ[s];
+ return dkH('Gráfico de constelación familiar',L.n+'. '+L.t,(s?'Segundo':'Primer')+' pétalo del gráfico. '+L.def)+chipRow('n8lj',N8LJ.map(x=>x.n+'. '+x.t),s)+
+ `<div class="dk-grid c2" style="align-items:center"><div>${c6fan({key:'n8lj',rings:[{items:N8LJ.map(x=>x.t),r0:70,r1:190,fs:14,wrap:10}],pick:[[0,0],[0,1]],sel:s,cols:N8LJ.map((x,i)=>i===s?x.c:x.lt),label:'Constelación familiar · linaje materno y paterno'})}<p class="dk-note" style="text-align:center">Toca un linaje.</p></div>
+ <div class="detail" style="border-left:6px solid ${L.c}"><span class="eyebrow">¿Qué investigamos?</span><h3>${ic('pend',24)} Preguntamos al péndulo</h3><p><i>¿La situación que estamos investigando tiene un origen o influencia en el ${L.t.toLowerCase()}?</i></p>
+  <div class="dk-call">Si la respuesta es <b>SÍ</b>, continuamos investigando dentro de este sector.</div></div></div>
+ <div class="dk-sub">Podemos buscar, por ejemplo · marca lo que ya comprendes</div>`+n3ck('n8lb'+s,L.b.map(t=>['hoja',t]))+
+ `<div class="dk-sub">¿Cómo lo trabajamos?</div>`+c4li([['arbol',L.t+'.'],['lupa','¿Hay información para investigar?'],['diana','Identificar qué aspecto aparece.'],['libro','Profundizar en el gráfico correspondiente.']])+
+ c4pri('No asumimos que algo pertenece al '+L.t.toLowerCase()+'. Primero se pregunta y se comprueba radiestésicamente.')+
+ `<div class="dk-call warn"><b>Importante.</b> Este gráfico se utiliza como una herramienta de investigación dentro de tu método radiestésico; no establece por sí mismo que un patrón familiar sea la causa de una situación actual.</div>`};
+const N8PT=[['Ser hijo bastón','¿Hay en mi linaje personas que sintieron la carga de sostener a otros?','Hijas que cuidaron a hermanos, padres o familiares.'],
+ ['Excluidos del árbol','¿Hay personas que fueron excluidas, olvidadas o no reconocidas?','Hijos no reconocidos, abortos no nombrados, personas rechazadas.'],
+ ['Herencias','¿Qué cargas, patrones, historias o creencias heredé de mi linaje?','Creencias limitantes, patrones de sacrificio, miedos, lealtades inconscientes.'],
+ ['Muertes tempranas','¿Hubo muertes tempranas, accidentes o pérdidas significativas?','Niños que murieron, mujeres que partieron jóvenes, duelos no elaborados.'],
+ ['Abortos o abusos','¿Existen abortos, pérdidas gestacionales o situaciones de abuso?','Abortos espontáneos, abusos físicos, emocionales o sexuales.'],
+ ['Abundancia / dinero','¿Cómo ha sido la relación con el dinero, la abundancia y el merecimiento?','Escasez repetida, deudas heredadas, bloqueos para recibir.'],
+ ['Divorcios / separaciones','¿Se repiten patrones de rupturas, separaciones o abandono?','Divorcios repetidos, relaciones que no prosperan, lealtades a parejas sufrientes.'],
+ ['Éxitos','¿Qué dones, talentos, logros y fortalezas han existido en el linaje?','Mujeres exitosas, emprendedoras, sabias, líderes o sanadoras.'],
+ ['Heredero universal','¿Hay alguien que haya cargado con todo el peso de la familia?','Quien asumió la responsabilidad de todos y no tuvo apoyo.'],
+ ['Problemas de familia','¿Hay problemas, conflictos o situaciones no resueltas en mi familia?'],
+ ['Migración','¿Hubo migraciones, cambios de país, desplazamientos o adaptaciones difíciles?'],
+ ['Yacente','¿Hay yacentes, fetos no nacidos o almas que no llegaron a nacer?'],
+ ['Guerras','¿Hubo participación o impacto de guerras, revoluciones o violencia colectiva?'],
+ ['Bloqueos con la madre','¿Existen bloqueos, heridas o conflictos con la madre?'],
+ ['Bloqueos con el padre','¿Existen bloqueos, heridas o conflictos con el padre?'],
+ ['Repetición de patrones','¿Se repiten patrones familiares de conducta, emociones o situaciones?'],
+ ['Doble','¿Existen dobles, personas que cargaron con lo que me corresponde?'],
+ ['Lealtades inconscientes','¿Estoy actuando desde lealtades invisibles o inconscientes hacia mi sistema familiar?'],
+ ['Lealtades conscientes','¿Qué lealtades conscientes he asumido para mantener el equilibrio familiar?'],
+ ['Roles cambiados','¿Se han intercambiado roles en la familia afectando el orden natural?'],
+ ['Recuperar mi lugar en el clan','¿Necesito recuperar mi lugar legítimo dentro del clan familiar?'],
+ ['Enfermedades / depresiones / adicciones','¿Se repiten enfermedades, depresiones o adicciones en el linaje?'],
+ ['Vínculos disfuncionales','¿Existen vínculos que dañan o limitan dentro del sistema familiar?'],
+ ['Cargas emocionales','¿Cargo emociones que pertenecen a otros miembros de mi linaje?'],
+ ['Votos','Ir al gráfico de Votos o pactos.'],
+ ['Transgeneracional','Ir al gráfico Transgeneracional.']];
+RICH.n8a9=()=>{const n=N8PT.length,s=n3clamp(st('n8pt',0),0,n-1),x=N8PT[s];
+ const fig=n2semi({key:'n8pt',items:N8PT.map((y,i)=>({l:y[0],c:i<9?'#e3d7ef':i<17?'#e9ecd3':'#dfe3f4'})),sel:s,mode:'num',fs:10,wrap:15,label:'Pétalos del linaje: '+n+' aspectos'});
+ return dkH('Gráfico de constelación familiar','Pétalos del linaje','<b>Investigamos aspecto por aspecto.</b> Una vez confirmado que la información pertenece al linaje materno o paterno, investigamos cada aspecto con el péndulo y profundizamos según lo que se vaya revelando.')+
+ `<div class="dk-grid c2" style="align-items:start"><div>${fig}<p class="dk-note" style="text-align:center">Toca un pétalo del gráfico o elige de la lista.</p></div>
+ <div class="detail"><span class="eyebrow">Aspecto ${s+1} de ${n}</span><h3><span class="k n2-k">${s+1}</span> ${x[0]}</h3><p><i>${x[1]}</i></p>${x[2]?`<p><b>Ejemplo:</b> ${x[2]}</p>`:''}
+  <div class="row"><button class="btn btn-ghost btn-sm" ${rxa('set','n8pt',Math.max(0,s-1))} ${s===0?'disabled':''}>Anterior</button><button class="btn btn-primary btn-sm" ${rxa('set','n8pt',Math.min(n-1,s+1))} ${s===n-1?'disabled':''}>Siguiente</button><button class="btn btn-ghost btn-sm" ${rxa('n3rnd','n8pt',n)}>Pétalo al azar</button></div></div></div>
+ <div class="dk-chips" role="group" aria-label="Aspectos">${N8PT.map((y,i)=>`<button class="chip" ${rxa('set','n8pt',i)} ${pressed(i===s)}>${i+1}. ${y[0]}</button>`).join('')}</div>`+
+ n3quote('Al reconocer, honrar y liberar lo que ya no nos pertenece, <mark>abrimos espacio para vivir en paz, con amor y plenitud</mark>.')};
+
+/* ----- 5 · Niño interno ----- */
+RICH.n8a10=()=>dkH('Conociendo lo que somos','Niño interno','<b>Sanar para recordar quién eres.</b>')+
+ c4box('¿Qué es el niño interno?','<p>El niño interno es esa parte de ti que guarda tus emociones, recuerdos, experiencias y necesidades de la infancia. Sigue viviendo dentro de ti, influyendo en tus pensamientos, emociones, decisiones y relaciones.</p><p><b>No es tu pasado, es una energía viva que necesita ser vista, escuchada y sanada.</b></p>')+
+ `<div class="dk-sub">¿Por qué es importante trabajar con él?</div>`+c4li(['Porque muchas heridas de la infancia pueden generar bloqueos emocionales, miedos, inseguridades o patrones repetitivos.','Porque al sanar a tu niño interno, te reconectas con tu esencia, tu alegría, tu creatividad y tu poder personal.','Porque te permite soltar cargas emocionales que ya no te pertenecen y vivir desde el amor y la libertad.','Porque al abrazar a tu niño interno, te das a ti mismo(a) lo que tal vez no recibiste, y así te vuelves tu propio cuidador.'])+
+ `<div class="dk-sub">Las cuatro preguntas del gráfico · toca cada una</div>`+n3flip('n8nq',[['reloj','Edad','¿En qué etapa de mi vida se originó esta herida?'],['persona','¿Quién la provocó?','¿Qué figura o persona estuvo involucrada?'],['corazon','Tipo de herida','¿Qué herida o experiencia quedó grabada?'],['camino','¿Cuándo?','¿En qué momento o circunstancia sucedió?']],'c4',150)+
+ n3quote('Sanar a tu niño interno es volver a casa, es elegirte, amarte y darte lo que tanto necesitaste. <mark>Hoy puedes comenzar a escribir una nueva historia.</mark>')+
+ `<div class="dk-call">Tu niño interno no necesita perfección, necesita tu presencia, tu amor y tu compromiso de cuidarlo cada día. <b>Al sanarlo, sanas tu presente y liberas tu futuro.</b></div>`;
+const N8HM=[['Rechazo','Huidizo/a','Miedo a no tener derecho a existir. Tiende a aislarse, pasar desapercibido o huir de lo que le duele.'],
+ ['Abandono','Dependiente','Necesidad de apoyo, atención y compañía. Miedo a la soledad y a ser dejado.'],
+ ['Humillación','Masoquista','Vergüenza y culpa. Tiende a cargar con los demás y a olvidarse de sus propias necesidades.'],
+ ['Traición','Controlador','Dificultad para confiar. Necesidad de controlar, prever y tener la razón.'],
+ ['Injusticia','Rígido/a','Exigencia y perfeccionismo. Se desconecta de lo que siente para no sufrir.']];
+RICH.n8a11=()=>{const s=n3clamp(st('n8hm',0),0,4),x=N8HM[s];
+ return dkH('Niño interno','Heridas y máscaras','En el gráfico, cada herida tiene una máscara que la protege. Toca una herida para ver su máscara.')+chipRow('n8hm',N8HM.map(h=>h[0]),s)+
+ `<div class="dk-grid c2" style="align-items:center"><div>${c6fan({key:'n8hm',rings:[{items:N8HM.map(h=>'Herida de '+h[0].toLowerCase()),r0:128,r1:190,fs:10,wrap:11},{items:N8HM.map(h=>'Máscara '+h[1].toLowerCase()),r0:66,r1:126,fs:9.5,wrap:11}],pick:N8HM.map((h,i)=>[0,i]),sel:s,label:'Heridas y máscaras del niño interno'})}</div>
+ <div class="detail"><span class="eyebrow">Herida ${s+1} de 5</span><h3>${ic('corazon',24)} Herida de ${x[0].toLowerCase()}</h3><p><b>Máscara:</b> ${x[1].toLowerCase()}.</p><p>${x[2]}</p>
+  <div class="row"><button class="btn btn-ghost btn-sm" ${rxa('set','n8hm',Math.max(0,s-1))} ${s===0?'disabled':''}>Anterior</button><button class="btn btn-primary btn-sm" ${rxa('set','n8hm',Math.min(4,s+1))} ${s===4?'disabled':''}>Siguiente</button></div></div></div>
+ <div class="dk-call warn"><b>Recuerda.</b> La máscara no define a la persona: es una protección que el niño creó para no volver a sentir ese dolor. Al reconocerla, puede soltarse con amor.</div>`};
+
+/* ----- 6 · Limpieza uterina ----- */
+RICH.n8a12=()=>`<div class="dk-split" style="align-items:center">${c8img('linaje.webp','Ilustración de tres generaciones de mujeres abrazadas, con los ojos cerrados','max-height:440px')}
+ <div style="display:grid;gap:12px">${dkH('Linaje femenino','Sanación de útero')}
+ <p style="font-family:var(--f-display);font-style:italic;font-size:1.08rem">Estamos conectadas a la historia infantil que vivió nuestra madre, y así también a la de todas las mujeres que la antecedieron. Llevamos las heridas de sus niñas internas en el corazón, y repetimos las corazas que ellas mismas crearon para protegerse de ser heridas nuevamente.</p>
+ <p>Esto ocurre debido a nuestra <b>alta fidelidad al linaje femenino</b>, con el cual nuestro inconsciente se identifica con mayor fuerza.</p></div></div>`+
+ n3quote('No traicionamos a nuestras antepasadas cuando decidimos sanar. <mark>No dejamos de pertenecer a nuestro linaje</mark> cuando elegimos vivir una vida sin la repetición de las cargas familiares.');
+RICH.n8a13=()=>dkH('Conociendo lo que somos','Limpieza uterina','<b>Sanar para liberar, honrar y transformar.</b>')+
+ c4box('¿Qué es la limpieza uterina?','<p>Es un proceso terapéutico y espiritual que busca liberar el útero de memorias, emociones y energías que han quedado almacenadas a lo largo de tu linaje femenino y de tu propia historia.</p><p><b>El útero guarda más que sangre: guarda historias.</b> Allí viven experiencias de amor y también de dolor, alegría y tristeza, heridas y aprendizajes que pueden afectar tu bienestar físico, emocional, mental y espiritual.</p><p>Limpiar tu útero es volver a tu centro, recuperar tu poder creador, tu feminidad y tu derecho a vivir en plenitud.</p>')+
+ `<div class="dk-sub">¿Para qué sirve? · marca lo que resuena contigo</div>`+n3ck('n8ut',[['limpia','Para liberar memorias, traumas y emociones atrapadas en el útero.'],['arbol','Para soltar cargas heredadas de nuestro linaje femenino.'],['corazon','Para sanar relaciones con la madre, abuelas y ancestras.'],['luna','Para equilibrar la energía femenina y reconectar con nuestra esencia.'],['hoja','Para abrir camino a la fertilidad, proyectos y creatividad.'],['loto','Para vivir con más paz, autoestima, amor propio y bienestar integral.']])+
+ `<div class="dk-call">${ic('corazon',18)} <b>¿Cómo se trabaja?</b> A través de técnicas energéticas, meditaciones, péndulo, decretos y rituales de sanación, conectamos con tu útero y tu linaje femenino para limpiar, liberar y transformar lo que ya no te pertenece.</div>`+
+ n3quote('Tu útero es tu altar, tu hogar sagrado y tu fuente de creación. <mark>Al sanarlo, sanas tu vida y transformas tu destino.</mark>')+
+ `<div class="dk-call warn"><i>Hoy limpio, sano y bendigo mi linaje femenino, a mi madre, a mis abuelas y a todas las que precedieron mi camino. Las honro, las libero y me libero. Elijo soltar lo que ya no necesito y abrirme a una vida de amor, salud y plenitud.</i></div>`;
+
+/* ----- 7 · Terapias, símbolos y protección ----- */
+const N8SY=[['decagono','Doble Decágono','Protege y armoniza. Crea un escudo de luz que eleva la vibración y genera estabilidad energética.'],
+ ['atlante','Cruz Atlante','Símbolo de poder y protección. Equilibra energías y actúa como un escudo espiritual.'],
+ ['circulos','9 Círculos','Potente símbolo de protección y limpieza. Disuelve energías negativas y crea un campo de luz.'],
+ ['tetragramaton','Tetragramatón','Símbolo sagrado de alta vibración. Protege, limpia y eleva la energía conectando con la luz divina.'],
+ ['psiquico','Protector Psíquico','Escudo energético que protege el aura, los pensamientos y el campo energético de influencias externas.'],
+ ['cristico','Símbolo Crístico','Conexión con la energía crística. Transmuta, alinea y eleva la conciencia y el propósito del alma.'],
+ ['scap','Scap','Armoniza cuerpo, mente y espíritu. Libera bloqueos y corta lazos energéticos no deseados.'],
+ ['piramide','Pirámide Plana','Aporta equilibrio y estabilidad energética. Ideal para armonizar espacios y personas.'],
+ ['flor','Flor de la Vida','Símbolo de creación y sanación. Armoniza, regenera y eleva la frecuencia vibratoria.'],
+ ['cuadrado','Cuadrado Mágico','Sella, protege y manifiesta intenciones. Atrae prosperidad, equilibrio y protección.'],
+ ['antimagia','Anti-Magia','Corta y disuelve energías negativas, hechizos, mal de ojo o trabajos energéticos.'],
+ ['metatron','Metatrón','Conecta con la sabiduría universal. Equilibra los chakras y activa el cuerpo lumínico.']];
+RICH.n8a14=()=>{const s=n3clamp(st('n8sy',0),0,11),x=N8SY[s];
+ return dkH('Herramientas de armonización, protección y transformación','Símbolos de radiestesia','Los símbolos de radiestesia son formas geométricas y sagradas que, al ser utilizadas de manera consciente, ayudan a <b>equilibrar, proteger, limpiar, armonizar y transformar</b> energías, personas, espacios y situaciones. Se utilizan con el péndulo para detectar, limpiar, potenciar y sanar.')+
+ `<div class="dk-grid c2" style="align-items:center"><div style="background:#fff;border-radius:20px;padding:14px;border:1px solid var(--line)">${c8img('sim_'+x[0]+'.webp','Símbolo '+x[1],'width:100%;max-width:300px;border-radius:0')}</div>
+ <div class="detail"><span class="eyebrow">Símbolo ${s+1} de 12</span><h3>${x[1]}</h3><p>${x[2]}</p>
+  <div class="row"><button class="btn btn-ghost btn-sm" ${rxa('set','n8sy',Math.max(0,s-1))} ${s===0?'disabled':''}>Anterior</button><button class="btn btn-primary btn-sm" ${rxa('set','n8sy',Math.min(11,s+1))} ${s===11?'disabled':''}>Siguiente</button></div></div></div>
+ <div class="kit" style="grid-template-columns:repeat(auto-fill,minmax(92px,1fr))">${N8SY.map((y,i)=>`<button ${rxa('set','n8sy',i)} ${pressed(i===s)} style="justify-items:center;text-align:center;min-height:0;padding:10px"><img src="${N3C8P}sim_${y[0]}.webp" alt="" loading="lazy" style="width:64px;height:64px;background:#fff;border-radius:8px"><b style="font-size:.74rem">${y[1]}</b></button>`).join('')}</div>
+ <div class="dk-call">${ic('pend',18)} <b>¿Cómo se usan?</b> Se trabaja con el péndulo sobre el símbolo impreso o dibujado, formulando la intención según el objetivo. Cada símbolo tiene una frecuencia y propósito específico que actúa en distintos niveles: físico, emocional, mental, espiritual y energético. Encuentras todos los símbolos en las láminas de esta clase.</div>`+
+ n3quote('<i>Pregunta, confía, siente y permite que la Energía Universal actúe.</i>')+
+ n3quote('Cada símbolo es un puente entre lo visible y lo invisible. Al usarlos con amor, intención y respeto, <mark>te conviertes en canal de sanación</mark> para ti, para otros y para todo lo que te rodea.')};
+
+/* ----- 8 · Cierre de la formación ----- */
+const N8ES=[['Péndulo hebreo nivel 1','Inicia','2 jornadas · teórica y práctica',['Formación teórica y práctica.','Herramienta de limpieza, protección y equilibrio.','Base para continuar en otras formaciones.']],
+ ['Limpieza energética de casas y espacios','Equilibra','1 sola jornada · teórica y práctica',['Armoniza, protege y eleva la energía de los espacios.','Jornada completa teórica y práctica.','Requisito: haber cursado Péndulo hebreo nivel 1.']],
+ ['Radiestesia y sanación del alma','Transforma','8 clases · 2 meses',['Formación base de la Metodología Casa Muladhara.','Diagnóstico, armonización y sanación.','8 clases online en vivo.']],
+ ['Especializaciones en radiestesia','Especialízate','4 clases · 1 mes cada especialización',['Vidas pasadas.','Terapia transgeneracional.','Niño interior.','Limpieza uterina.']],
+ ['Tarot terapéutico: el camino del Ser','Integra','12 clases · 3 meses',['Autoconocimiento y desarrollo personal.','Acompañamiento terapéutico.','Tarot como herramienta de transformación.']]];
+RICH.n8a15=()=>{const s=n3clamp(st('n8es',2),0,4),x=N8ES[s];
+ return dkH('Escuela de formación holística','Tu camino de transformación','Formación profesional en terapias energéticas y desarrollo del Ser. <b>Cada formación es un paso en tu Camino del Ser:</b> un camino de aprendizaje, transformación y servicio.')+
+ `<div class="tl" style="grid-template-columns:repeat(5,minmax(0,1fr))">${N8ES.map((y,i)=>`<button ${rxa('set','n8es',i)} ${pressed(i===s)}><span class="n">${i+1}</span><span class="t">${y[1]}</span></button>`).join('')}</div>
+ <div class="detail"><span class="eyebrow">Nivel ${s+1} de 5 · ${x[1]}${s===2?' · ¡Estás aquí!':''}</span><h3>${x[0]}</h3><p><b>${x[2]}</b></p>${c4li(x[3].map(t=>['loto',t]))}</div>
+ <div class="dk-grid c2" style="align-items:start">${c4box('¿Por qué estudiar en Casa Muladhara?',c4li([['loto','Metodología propia: El Camino del Ser.'],['camino','Formación progresiva y estructurada.'],['libro','Material de estudio exclusivo.'],['persona','Prácticas guiadas y supervisadas.'],['corazon','Acompañamiento durante tu aprendizaje.'],['estrella','Formación continua y actualizaciones.'],['grupo','Comunidad consciente y de apoyo.']]))}
+ <div class="detail" style="text-align:center;justify-items:center"><span class="eyebrow">Certificación final</span><p>Al completar tu recorrido formativo recibirás tu certificación como:</p><h3>${ic('arbol',28)} Terapeuta Holístico Integral</h3><small class="dk-sig">Método Casa Muladhara®</small></div></div>`+
+ c7pil(['Participa desde cualquier parte del mundo','Online y presencial','Comunidad consciente','Certificación profesional'])};
+RICH.n8a16=()=>`<div class="dk-split" style="align-items:center">${c8img('pendulo.webp','Vela encendida, ramas verdes, amatista y un péndulo de madera','max-height:420px')}
+ <div style="display:grid;gap:12px">${dkH('Por ser parte de esta hermosa formación','Gracias','<b>Radiestesia & Sanación del Alma.</b> Hoy culminamos un camino que transformó tu mirada, amplió tu conciencia y fortaleció tu conexión interior. Cada aprendizaje, cada práctica y cada experiencia te han acercado más a tu <b>propósito</b> y a tu <b>luz</b>.')}</div></div>`+
+ n3flip('n8gr',[['hoja','Confía en tu intuición','Es tu brújula más sabia.'],['loto','Sigue practicando','Desde el amor y la presencia.'],['corazon','Lleva lo aprendido','A tu vida y al servicio.'],['estrella','Recuerda','Ya eres luz, sólo permite que brille.']],'c4',140)+
+ n3quote('Gracias por tu dedicación, apertura y compromiso. <mark>Que sigas brillando y transformando vidas.</mark>')+
+ `<div class="dk-call">Lo que has aprendido es para ti, para otros y para el mundo. <b>Sigue tu camino con confianza, amor y sabiduría.</b></div>`+
+ n3area('n8rf','¿Qué te llevas de esta formación?','Me llevo…')+n3priv;
+const N3Q8=[
+ {q:'En la investigación de vidas pasadas, el objetivo es…',o:['Generar temor por lo que pasó','Observar posibles patrones relacionados con el presente','Depender del péndulo para decidir'],a:1,e:'No buscamos temor ni dependencia, sino comprender para liberar.'},
+ {q:'¿Con qué gráfico respondes «¿Quién fui yo en esa vida pasada?»',o:['Personajes','Causas de muerte','Terapias y sanación'],a:0,e:'Las tres primeras preguntas del protocolo se trabajan con el gráfico de Personajes.'},
+ {q:'Si el daño en esa vida fue mortal, ¿a qué gráfico vas?',o:['Votos o pactos','Causas de muerte','Niño interno'],a:1,e:'Preguntas si fue por asesinato, suicidio o muerte temprana y usas Causas de muerte.'},
+ {q:'Si no hay suficiente información para limpiar la vida pasada…',o:['Limpias igual','Cierras la sesión','Haces una nueva investigación desde el Mapa'],a:2,e:'Tiene que responder que sí; si no, vuelves al Mapa a continuar investigando.'},
+ {q:'Los votos y pactos son…',o:['Acuerdos energéticos del alma, conscientes o inconscientes','Solo promesas de esta vida','Enfermedades del cuerpo'],a:0,e:'Pueden generarse en esta vida, en relaciones, en lo espiritual, en vidas pasadas o en momentos críticos.'},
+ {q:'¿Qué enfoque investiga y libera lo que está en la raíz del linaje?',o:['Constelación familiar','Terapia transgeneracional','Cromoterapia'],a:1,e:'La constelación muestra lo que sucede en el sistema; la transgeneracional investiga la raíz.'},
+ {q:'En el gráfico de constelación familiar, ¿qué preguntamos primero?',o:['Si la situación tiene origen en el linaje materno o paterno','El color que necesita','La causa de muerte'],a:0,e:'No asumimos: primero se pregunta y se comprueba radiestésicamente.'},
+ {q:'En el gráfico del niño interno, la herida de traición se protege con la máscara…',o:['Dependiente','Controladora','Huidiza'],a:1,e:'Rechazo-huidiza, abandono-dependiente, humillación-masoquista, traición-controladora, injusticia-rígida.'},
+ {q:'En la limpieza uterina, ¿cuántas generaciones recorre el gráfico?',o:['3','5','7'],a:2,e:'El gráfico recorre de la 1.ª a la 7.ª generación del linaje femenino.'},
+ {q:'¿Cómo se usan los símbolos de radiestesia?',o:['Con el péndulo sobre el símbolo, formulando la intención','Guardándolos en un cajón','Solo mirándolos'],a:0,e:'Pregunta, confía, siente y permite que la Energía Universal actúe.'}];
+RICH.n8a17=()=>n3quiz('c8',N3Q8,['Dominas lo esencial de la Clase 8. ¡Felicitaciones por completar la formación!','Vas muy bien. Repasa lo que falló y sigue practicando.','Vale la pena repasar la clase. Puedes volver cuando quieras.']);
