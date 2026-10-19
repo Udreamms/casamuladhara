@@ -14,10 +14,22 @@ const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'holamaestrakaren@gmail.com')
   .split(',').map((e) => e.trim().toLowerCase()).filter(Boolean);
 
 export async function POST(request) {
+  let admin;
+  try {
+    admin = auth();
+  } catch (e) {
+    // Falta o está mal la llave de servicio en Vercel (FIREBASE_SERVICE_ACCOUNT): no es culpa de la sesión
+    console.error('admin config', e);
+    return json({ error: 'El servidor no tiene configurada la llave de Firebase (FIREBASE_SERVICE_ACCOUNT en Vercel).' }, 500);
+  }
   let user;
   try {
-    user = await auth().verifyIdToken((request.headers.get('authorization') || '').replace(/^Bearer\s+/i, ''));
-  } catch {
+    user = await admin.verifyIdToken((request.headers.get('authorization') || '').replace(/^Bearer\s+/i, ''));
+  } catch (e) {
+    console.error('admin token', e.code || e.message);
+    if (/project|aud|credential/i.test(`${e.code} ${e.message}`)) {
+      return json({ error: 'La llave de Firebase en Vercel no es del proyecto casamuladhara. Revisa FIREBASE_SERVICE_ACCOUNT.' }, 500);
+    }
     return json({ error: 'Tu sesión expiró. Vuelve a iniciar sesión.' }, 401);
   }
   const body = await request.json().catch(() => ({}));
