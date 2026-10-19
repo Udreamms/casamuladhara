@@ -77,6 +77,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 .av{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font:700 .8rem/1 var(--f-body);color:#1f3f32;background:var(--c,#f2c66d);flex-shrink:0}
 .av.sm{width:32px;height:32px;font-size:.72rem}
 .av.karen{background:#1f3f32;color:#f2c66d;border:1.5px solid #f2c66d}
+.nav button.locked{opacity:.55;cursor:not-allowed}
+.nav button .lock{width:15px;height:15px;margin-left:auto;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
 .av.ph{background-size:cover;background-position:center;background-repeat:no-repeat;color:transparent}
 .side-foot.edit{cursor:pointer;border-radius:12px;transition:background .15s}
 .side-foot.edit:hover{background:rgba(236,231,211,.08)}
@@ -1404,8 +1406,8 @@ V.inicio=()=>{
     <section class="card panel"><div class="panel-h"><h3>Tus insignias</h3><button class="link" data-go="insignias">Ver todas</button></div>
       <div class="badge-row">${BADGES.slice(0,4).map(b=>`<span title="${b.name}" style="${b.earned?'':'filter:grayscale(1);opacity:.4'}">${badgeSVG(b,!!b.earned)}</span>`).join('')}</div>
       <p class="muted" style="font-size:.88rem">Llevas ${BADGES.filter(b=>b.earned).length} de ${BADGES.length} insignias.${(()=>{const nb=BADGES.find(b=>!b.earned);return nb?' La próxima es <b style="color:var(--fg)">'+nb.name+'</b>, al terminar su nivel.':''})()}</p>
-      <div class="panel-h" style="margin-top:6px"><h3>Nuevo en Recursos</h3><button class="link" data-go="recursos">Biblioteca</button></div>
-      <div class="files">${RES.filter(r=>r.new).map(fileHTML).join('')}</div>
+      ${CM.isAdmin?`<div class="panel-h" style="margin-top:6px"><h3>Nuevo en Recursos</h3><button class="link" data-go="recursos">Biblioteca</button></div>
+      <div class="files">${RES.filter(r=>r.new).map(fileHTML).join('')}</div>`:''}
     </section>
   </div>`;
 };
@@ -1645,13 +1647,18 @@ async function checkout(kind,btn){
 
 /* ---------- render + events ---------- */
 let timer;
+// Secciones cerradas por ahora para las alumnas (la Maestra sí entra)
+const LOCKED_VIEWS=['recursos'];
+const isLockedView=v=>LOCKED_VIEWS.includes(v)&&!CM.isAdmin;
+const LOCK_SVG='<svg class="lock" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
 function render(scrollTop=true){
-  $('#nav').innerHTML=NAV.filter(x=>x[0]!=='maestra'||CM.isAdmin).map(([k,n,ic,c])=>`${k==='maestra'?'<span class="nav-label">Solo para la Maestra</span>':''}<button data-go="${k}" ${(S.view===k||(S.view==='curso'&&k===(lvOf(S.level).spec?'especialidades':'formacion')))?'aria-current="page"':''}><svg viewBox="0 0 24 24">${ic}</svg>${n}${c?`<span class="count">${c}</span>`:''}</button>`).join('');
+  if(isLockedView(S.view))S.view='inicio';
+  $('#nav').innerHTML=NAV.filter(x=>x[0]!=='maestra'||CM.isAdmin).map(([k,n,ic,c])=>`${k==='maestra'?'<span class="nav-label">Solo para la Maestra</span>':''}<button data-go="${k}" ${isLockedView(k)?'class="locked" aria-disabled="true" title="Próximamente"':''} ${(S.view===k||(S.view==='curso'&&k===(lvOf(S.level).spec?'especialidades':'formacion')))?'aria-current="page"':''}><svg viewBox="0 0 24 24">${ic}</svg>${n}${isLockedView(k)?LOCK_SVG:''}${c?`<span class="count">${c}</span>`:''}</button>`).join('');
   $('#view').innerHTML=(CM.blocked?`<div class="alert"><div><b>Tu acceso está pausado</b><p>La Maestra pausó tu acceso a las clases. Escríbenos desde Ayuda si tienes dudas.</p></div></div>`:'')+(S.overdue&&S.view!=='maestra'?`<div class="alert"><div><b>Tu cuota está pendiente</b><p>Tu acceso a clases, grabaciones y materiales está pausado. Se reactiva apenas se registre el pago.</p></div><button class="btn btn-sm" data-checkout="portal">Actualizar mi pago</button></div>`:'')+V[S.view]();
   if(scrollTop)window.scrollTo(0,0);
   bindView();if(typeof pndMount==='function')pndMount();
 }
-function go(v){if(v==='maestra'){location.href='admin.html';return}S.view=v;stopPlay();closeSide();render()}
+function go(v){if(v==='maestra'){location.href='admin.html';return}if(isLockedView(v)){toast('Los recursos estarán disponibles muy pronto.');closeSide();return}S.view=v;stopPlay();closeSide();render()}
 function openLevel(id){const lv=lvOf(id);S.level=id;let pos=[0,0];
   outer:for(let i=0;i<lv.modules.length;i++)for(let j=0;j<lv.modules[i].lessons.length;j++){if(!lv.modules[i].lessons[j].done){pos=[i,j];break outer}}
   S.lesson=pos;S.tab='temas';S.t=0;stopPlay();S.view='curso';closeSide();render()}
