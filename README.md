@@ -38,6 +38,8 @@ Requiere la llave de servicio en `~/.config/casamuladhara/service-account.json` 
 
 ```bash
 cd scripts && npm install && cd ..
+node scripts/admin.mjs create-admin holamaestrakaren@gmail.com 'CONTRASEÑA'   # crea la cuenta de la Maestra (o cambia su contraseña)
+node scripts/admin.mjs remove-admin correo-anterior@gmail.com                # le quita el rol de Maestra
 node scripts/admin.mjs make-admin tu@correo.com
 node scripts/admin.mjs enroll alumna@correo.com --level 2 --plan mensual --pay ok
 node scripts/admin.mjs list

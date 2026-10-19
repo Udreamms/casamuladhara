@@ -1,6 +1,8 @@
 // Administración de Casa Muladhara (corre en tu computador con la llave de servicio).
 //
 //   node scripts/admin.mjs make-admin  <correo>                 Da el rol de Maestra (ve el panel y modera)
+//   node scripts/admin.mjs create-admin <correo> <contraseña>    Crea la cuenta de la Maestra (o le cambia la contraseña) y le da el rol
+//   node scripts/admin.mjs remove-admin <correo>                 Le quita el rol de Maestra a esa cuenta
 //   node scripts/admin.mjs enroll      <correo> [--level 1-5] [--plan mensual|completo|none] [--pay none|ok|overdue]
 //                                     (--level es el nivel abierto mientras paga; con --plan completo regalas la formación)
 //   node scripts/admin.mjs grant       <correo> <nivel>             Acceso permanente hasta ese nivel (ya pagado; 0 lo quita)
@@ -45,6 +47,26 @@ switch (cmd) {
     await admin.auth().setCustomUserClaims(u.uid, { ...(u.customClaims || {}), admin: true });
     await db.doc(`users/${u.uid}`).set({ role: 'admin' }, { merge: true });
     console.log(`✔ ${u.email} ahora es Maestra. Debe cerrar sesión y volver a entrar.`);
+    break;
+  }
+  case 'create-admin': {
+    const email = (pos[0] || '').trim().toLowerCase();
+    const password = pos[1];
+    if (!email || !password || password.length < 6) throw new Error('Indica correo y contraseña (mínimo 6 caracteres)');
+    let u = await admin.auth().getUserByEmail(email).catch(() => null);
+    if (u) u = await admin.auth().updateUser(u.uid, { password, emailVerified: true });
+    else u = await admin.auth().createUser({ email, password, emailVerified: true, displayName: 'Maestra Holística' });
+    await admin.auth().setCustomUserClaims(u.uid, { ...(u.customClaims || {}), admin: true });
+    await db.doc(`users/${u.uid}`).set({ email, role: 'admin' }, { merge: true });
+    console.log(`✔ ${email} es la Maestra y ya puede entrar con esa contraseña.`);
+    break;
+  }
+  case 'remove-admin': {
+    const u = await byEmail(pos[0]);
+    const { admin: _drop, ...claims } = u.customClaims || {};
+    await admin.auth().setCustomUserClaims(u.uid, claims);
+    await db.doc(`users/${u.uid}`).set({ role: 'student_free' }, { merge: true });
+    console.log(`✔ ${u.email} ya no es Maestra ·`, await applyAccess(u.uid));
     break;
   }
   case 'enroll': {
@@ -118,6 +140,6 @@ switch (cmd) {
     break;
   }
   default:
-    console.log(readFileSync(new URL(import.meta.url), 'utf8').split('\n').slice(0, 17).join('\n'));
+    console.log(readFileSync(new URL(import.meta.url), 'utf8').split('\n').slice(0, 19).join('\n'));
 }
 process.exit(0);
