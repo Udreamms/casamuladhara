@@ -32,7 +32,7 @@ const login = async (u) => {
 
 let pass = 0, fail = 0;
 const ok = (name, cond) => { cond ? pass++ : fail++; console.log(`${cond ? '  ✔' : '  ✘ FALLA'} ${name}`); };
-const allowed = async (name, fn) => { try { await fn(); ok(name, true); } catch (e) { ok(`${name}  → ${e.code}`, false); } };
+const allowed = async (name, fn) => { try { await fn(); ok(name, true); } catch (e) { ok(`${name}  → ${e.code} ${e.message}`, false); } };
 const denied = async (name, fn) => { try { await fn(); ok(`${name} (debía negarse)`, false); } catch (e) { ok(name, e.code === 'permission-denied'); if (e.code !== 'permission-denied') console.log('     ', e.code, e.message); } };
 const profile = (u, extra = {}) => ({ uid: u.uid, email: u.email, displayName: u.name, photoURL: '', role: 'student_free', accessLevel: 1, plan: 'none', paymentStatus: 'none', createdAt: serverTimestamp(), lastLogin: serverTimestamp(), ...extra });
 
