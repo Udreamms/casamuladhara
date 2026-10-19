@@ -30,7 +30,7 @@ Para regalar la formación completa: `enroll correo --plan completo`.
 ### Puesta en marcha
 1. En Stripe: un producto con un precio recurrente mensual de 55 USD y otro único de 499 USD; activa el portal de clientes (cambiar tarjeta y cancelar).
 2. En Stripe → Webhooks: el endpoint `https://TU-DOMINIO/api/stripe-webhook` con `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid` e `invoice.payment_failed`.
-3. En Vercel, las variables de `.env.example`: `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID`, `STRIPE_PRICE_FULL_ID`, `STRIPE_WEBHOOK_SECRET`, `FIREBASE_SERVICE_ACCOUNT`.
+3. En Vercel → Settings → Environment Variables, las del archivo `.env.local` de tu computador (no se sube a GitHub): `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID`, `STRIPE_PRICE_FULL_ID`, `STRIPE_WEBHOOK_SECRET`, `FIREBASE_SERVICE_ACCOUNT`, `APP_URL` y `ADMIN_EMAILS`.
 4. Después de publicar: `node scripts/deploy-backend.mjs` (reglas), el `grant` de cada alumna actual y una vez `node scripts/admin.mjs sync-members`.
 
 ## Administración (en tu computador)
