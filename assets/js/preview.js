@@ -10,7 +10,7 @@ export function startPreview() {
   let n = 0;
   const id = () => 'demo' + ++n;
   const CM = {
-    uid: 'preview', isAdmin: true, lvl: 5, paid: null, free: false, freeChannels: ['presentaciones', 'testimonios'],
+    uid: 'preview', isAdmin: true, lvl: 5, lvls: [1, 2, 3, 4, 5], paid: null, free: false, freeChannels: ['presentaciones', 'testimonios'],
     profile: { name, ini: 'MR', c: '#f2c66d', accessLevel: 5, plan: 'completo', paymentStatus: 'ok' },
     progress: {}, doneAt: {}, notes: {}, questions: {}, tickets: [], payments: [], notifications: [],
     posts: [], likes: new Set(), students: [], agenda: [], liveLinks: {}, config: {}, pending: [],

@@ -75,13 +75,16 @@ const p = snap.data();
 const token = await user.getIdTokenResult(true);
 setSessionCookie(token.token);
 const isAdmin = token.claims.admin === true;
-// lvl (hasta qué nivel puede abrir) lo pone el webhook de Stripe o la Maestra con scripts/admin.mjs
+// lvls (los niveles que tiene abiertos, p. ej. [3]) y lvl (el más alto) los ponen el webhook de Stripe y la Maestra desde su portal
 const paid = new URLSearchParams(location.search).get('pago');
 if (paid) history.replaceState(null, '', 'aula.html');
 
 const name = p.displayName || pretty((p.email || '').split('@')[0]);
 const CM = {
   uid, isAdmin, lvl: isAdmin ? 5 : Number(token.claims.lvl) || 0, paid,
+  // tokens antiguos sin lvls: todos los niveles hasta lvl
+  lvls: isAdmin ? [1, 2, 3, 4, 5] : Array.isArray(token.claims.lvls) ? token.claims.lvls : Array.from({ length: Number(token.claims.lvl) || 0 }, (_, i) => i + 1),
+  blocked: p.blocked === true,
   profile: { ...p, name, ini: initials(name), c: colorFor(uid), accessLevel: Number(p.accessLevel) || 1, plan: p.plan || 'none', paymentStatus: p.paymentStatus || 'none' },
   progress: {}, doneAt: {}, notes: {}, questions: {}, tickets: [], payments: [], notifications: [],
   posts: [], likes: new Set(), students: [],
@@ -134,7 +137,7 @@ const rebuild = () => {
 };
 // Sin niveles abiertos solo se ven Preséntate y Testimonios (las reglas de Firestore lo exigen igual)
 const FREE_CHANNELS = ['presentaciones', 'testimonios'];
-CM.free = !isAdmin && CM.lvl === 0;
+CM.free = !isAdmin && CM.lvls.length === 0;
 CM.freeChannels = FREE_CHANNELS;
 const inFree = CM.free ? [where('ch', 'in', FREE_CHANNELS)] : [];
 onSnapshot(query(collection(db, 'posts'), ...inFree, orderBy('createdAt', 'desc'), limit(80)),
@@ -173,11 +176,11 @@ CM.loadLive = async () => {
   const [ag, links] = await Promise.all([
     getDocs(query(collection(db, 'agenda'), orderBy('start', 'asc'), limit(200))),
     isAdmin ? getDocs(collection(db, 'liveLinks'))
-      : CM.lvl > 0 ? getDocs(query(collection(db, 'liveLinks'), where('level', '<=', CM.lvl))) : null,
+      : Promise.all(CM.lvls.map((n) => getDocs(query(collection(db, 'liveLinks'), where('level', '==', n))))),
   ]);
   CM.agenda = ag.docs.map(toLive);
   CM.liveLinks = {};
-  links?.forEach((d) => { CM.liveLinks[d.id] = d.data(); });
+  [links].flat().forEach((s) => s.forEach((d) => { CM.liveLinks[d.id] = d.data(); }));
 };
 // Solo la Maestra: programa o actualiza la clase en vivo de una lección
 CM.saveLive = async (key, { level, title, start, durationMin, url, recordingUrl }) => {

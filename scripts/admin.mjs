@@ -3,9 +3,9 @@
 //   node scripts/admin.mjs make-admin  <correo>                 Da el rol de Maestra (ve el panel y modera)
 //   node scripts/admin.mjs create-admin <correo> <contraseña>    Crea la cuenta de la Maestra (o le cambia la contraseña) y le da el rol
 //   node scripts/admin.mjs remove-admin <correo>                 Le quita el rol de Maestra a esa cuenta
-//   node scripts/admin.mjs enroll      <correo> [--level 1-5] [--plan mensual|completo|none] [--pay none|ok|overdue]
-//                                     (--level es el nivel abierto mientras paga; con --plan completo regalas la formación)
-//   node scripts/admin.mjs grant       <correo> <nivel>             Acceso permanente hasta ese nivel (ya pagado; 0 lo quita)
+//   node scripts/admin.mjs enroll      <correo> [--levels 1,2] [--plan mensual|completo|none] [--pay none|ok|overdue]
+//                                     (--levels son los niveles del programa desbloqueados; con --plan completo regalas la formación)
+//   node scripts/admin.mjs grant       <correo> <niveles>           Niveles comprados aparte, p. ej. 3 o 1,2 (permanentes; 0 los quita)
 //   node scripts/admin.mjs cuotas      <correo> <n>                 Cuántas cuotas paga esta alumna (por defecto 9)
 //   node scripts/admin.mjs payment     <correo> <monto> "<detalle>"  [--failed]   Registra un pago en su historial
 //   node scripts/admin.mjs notify      <correo> "<mensaje>"            Aviso en su campana de notificaciones
@@ -18,7 +18,7 @@
 import admin from 'firebase-admin';
 import { readFileSync } from 'node:fs';
 import { keyFile, DATABASE } from './_auth.mjs';
-import { accessFor } from '../api/_lib/access.js';
+import { accessFor, cleanLevels, ownedOf, unlockedOf } from '../api/_lib/access.js';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 
 admin.initializeApp({ credential: admin.credential.cert(JSON.parse(readFileSync(keyFile, 'utf8'))) });
@@ -30,11 +30,11 @@ const pos = rest.filter((a, i) => !a.startsWith('--') && !rest[i - 1]?.startsWit
 const applyAccess = async (uid) => {
   const ref = db.doc(`users/${uid}`);
   const p = (await ref.get()).data() || {};
-  const { role, lvl } = accessFor(p);
+  const { role, lvls, lvl } = accessFor(p);
   if (p.role !== role) await ref.set({ role }, { merge: true });
   const u = await admin.auth().getUser(uid);
-  await admin.auth().setCustomUserClaims(uid, { ...(u.customClaims || {}), lvl, member: lvl > 0 });
-  return lvl ? `abre hasta el Nivel ${lvl}` : 'todo bloqueado';
+  await admin.auth().setCustomUserClaims(uid, { ...(u.customClaims || {}), lvl, lvls, member: lvl > 0 });
+  return lvls.length ? `abre el Nivel ${lvls.join(', ')}` : 'todo bloqueado';
 };
 const byEmail = async (email) => {
   const u = await admin.auth().getUserByEmail(email.trim().toLowerCase());
@@ -72,20 +72,20 @@ switch (cmd) {
   case 'enroll': {
     const u = await byEmail(pos[0]);
     const data = {};
-    if (flag('level')) data.accessLevel = Math.min(5, Math.max(1, Number(flag('level'))));
+    if (flag('levels')) data.unlockedLevels = cleanLevels(flag('levels').split(',')) || [];
     if (flag('plan')) data.plan = flag('plan');
     if (flag('pay')) data.paymentStatus = flag('pay');
-    if (!Object.keys(data).length) throw new Error('Indica --level, --plan o --pay');
+    if (!Object.keys(data).length) throw new Error('Indica --levels, --plan o --pay');
     await db.doc(`users/${u.uid}`).set(data, { merge: true });
     console.log(`✔ ${u.email}:`, data, '·', await applyAccess(u.uid));
     break;
   }
   case 'grant': {
     const u = await byEmail(pos[0]);
-    const level = Math.min(5, Math.max(0, Number(pos[1])));
-    if (Number.isNaN(level)) throw new Error('Indica el nivel: 0 a 5');
-    await db.doc(`users/${u.uid}`).set({ grantLevel: level }, { merge: true });
-    console.log(`✔ ${u.email}: acceso permanente hasta el Nivel ${level} ·`, await applyAccess(u.uid));
+    const levels = cleanLevels(String(pos[1] ?? '').split(','));
+    if (!pos[1] || !levels) throw new Error('Indica los niveles: 3, 1,2 o 0 para quitarlos');
+    await db.doc(`users/${u.uid}`).set({ ownedLevels: levels }, { merge: true });
+    console.log(`✔ ${u.email}: niveles comprados ${levels.join(', ') || 'ninguno'} ·`, await applyAccess(u.uid));
     break;
   }
   case 'cuotas': {
@@ -119,7 +119,7 @@ switch (cmd) {
   }
   case 'list': {
     const s = await db.collection('users').get();
-    s.forEach((d) => { const x = d.data(); console.log(`${x.email}\t${x.role}\tnivel ${x.accessLevel}\tpermanente ${x.grantLevel || 0}\tplan ${x.plan}\tpago ${x.paymentStatus}\tcuotas ${x.paidInstallments || 0}/${x.installments || 9}`); });
+    s.forEach((d) => { const x = d.data(); console.log(`${x.email}\t${x.role}\tabiertos ${accessFor(x).lvls.join(',') || '-'}\tcomprados ${ownedOf(x).join(',') || '-'}\tdesbloqueados ${unlockedOf(x).join(',')}${x.blocked ? '\tBLOQUEADA' : ''}\tplan ${x.plan}\tpago ${x.paymentStatus}\tcuotas ${x.paidInstallments || 0}/${x.installments || 9}`); });
     console.log(`${s.size} cuenta(s)`);
     break;
   }

@@ -16,14 +16,14 @@ Sitio estático (Vercel, sin build) con aula virtual conectada a Firebase (proye
 Una sola inscripción para la formación completa de cinco niveles: **9 cuotas de 55 USD** (Stripe deja de cobrar sola después de la novena) o **499 USD al contado**. Quien paga en cuotas puede pagar lo que le falta al contado cuando quiera.
 
 - **Roles** (`users/{uid}.role`): `admin` (la Maestra), `student_free` (toda cuenta nueva: ve el programa y la comunidad, todo bloqueado), `student_subscribed` (paga en cuotas al día o ya pagó todo) y `student_permanent` (alumnas que pagaron niveles antes de la plataforma). Nadie elige su rol: lo ponen el webhook de Stripe o la Maestra, y las reglas de Firestore impiden cambiarlo desde el navegador.
-- **Nivel abierto** (claim `lvl` en el token): el mayor entre el acceso permanente (`grantLevel`) y, si paga al día, el nivel de avance (`accessLevel`, que sube la Maestra; como mínimo el siguiente al permanente). `middleware.js` lo exige antes de servir el contenido de cada nivel.
+- **Niveles abiertos** (claims `lvls` y `lvl` en el token): cada alumna tiene los suyos, no necesariamente en orden. Se suman los niveles que compró aparte (`ownedLevels`, alumnas antiguas, permanentes) y, si el programa está pagado o al día, los que la Maestra le desbloqueó (`unlockedLevels`). `blocked: true` la bloquea. Se cambian desde el portal de la Maestra (`admin.html`). `middleware.js` y las reglas los exigen antes de servir el contenido de cada nivel.
 - **Cuota atrasada**: se pausa lo que no tenía; conserva su acceso permanente y su avance. Cada pago queda en `users/{uid}/payments`.
 
 ### Tus alumnas actuales
 ```bash
-node scripts/admin.mjs grant ana@correo.com 2      # acceso permanente hasta el Nivel 2, sin cobro
+node scripts/admin.mjs grant ana@correo.com 3      # compró solo el Nivel 3 (permanente, sin cobro)
 node scripts/admin.mjs cuotas ana@correo.com 4     # si quiere seguir, paga solo 4 cuotas (o 220 USD al contado)
-node scripts/admin.mjs enroll ana@correo.com --level 3   # sube el nivel abierto mientras paga
+node scripts/admin.mjs enroll ana@correo.com --levels 1,2   # niveles del programa desbloqueados mientras paga
 ```
 Para regalar la formación completa: `enroll correo --plan completo`.
 
@@ -41,7 +41,7 @@ cd scripts && npm install && cd ..
 node scripts/admin.mjs create-admin holamaestrakaren@gmail.com 'CONTRASEÑA'   # crea la cuenta de la Maestra (o cambia su contraseña)
 node scripts/admin.mjs remove-admin correo-anterior@gmail.com                # le quita el rol de Maestra
 node scripts/admin.mjs make-admin tu@correo.com
-node scripts/admin.mjs enroll alumna@correo.com --level 2 --plan mensual --pay ok
+node scripts/admin.mjs enroll alumna@correo.com --levels 1,2 --plan mensual --pay ok
 node scripts/admin.mjs list
 node scripts/deploy-backend.mjs     # publica reglas (e índices, si la cuenta tiene permiso)
 node scripts/test-rules.mjs         # prueba de aislamiento (crea y borra cuentas de prueba)

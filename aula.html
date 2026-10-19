@@ -1214,11 +1214,9 @@ const FAQ={
 
 /* ---------- state ---------- */
 let PAYMENTS=[];
-let STUDENTS=[];
-const ACC={free:()=>'<span class="pill lock">Gratis</span>',cuotas:()=>'<span class="pill pres">En cuotas</span>',overdue:()=>'<span class="pill bad">Cuota pendiente</span>',full:()=>'<span class="pill done">Pagado completo</span>',grant:s=>`<span class="pill done">Acceso permanente · Nivel ${s.grant}</span>`};
 const STP={none:'<span class="pill lock">Sin plan</span>',ok:'<span class="pill done">Al día</span>',full:'<span class="pill done">Pagado completo</span>',retry:'<span class="pill prog">Reintentando cobro</span>',overdue:'<span class="pill bad">Pago pendiente</span>',paused:'<span class="pill bad">Acceso pausado</span>'};
 let ME={name:'',ini:'',c:'#f2c66d'};
-const S={overdue:false,plan:'none',paying:false,lvl:0,view:'inicio',level:'radiestesia',lesson:[1,0],tab:'temas',ch:'n3',resType:'Todos',resLvl:'0',resQ:'',supTopic:'clases',openMods:{},playing:false,t:0,notes:{},qa:{},sent:false,sl:{},anim:0};
+const S={overdue:false,plan:'none',paying:false,lvl:0,lvls:new Set(),view:'inicio',level:'radiestesia',lesson:[1,0],tab:'temas',ch:'n3',resType:'Todos',resLvl:'0',resQ:'',supTopic:'clases',openMods:{},playing:false,t:0,notes:{},qa:{},sent:false,sl:{},anim:0};
 const NAV=[
  ['inicio','Inicio','<path d="M4 11 12 4l8 7v9h-5v-6H9v6H4z"/>'],
  ['formacion','Mi formación','<path d="M3 8 12 4l9 4-9 4z"/><path d="M7 10v5c3 2 7 2 10 0v-5"/>'],
@@ -1230,7 +1228,7 @@ const NAV=[
  ['trabaja','Trabaja con nosotras','<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/>'],
  ['pagos','Mis pagos','<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h4"/>'],
  ['soporte','Soporte','<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5V14M12 17.5v.01"/>'],
- ['maestra','Panel de la Maestra','<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>']
+ ['maestra','Portal de la Maestra','<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>']
 ];
 
 /* ---------- Contenido de las clases: curso/clases.js (protegido, se carga solo con acceso) ---------- */
@@ -1330,7 +1328,9 @@ function pathHTML(){
 
 /* ---------- vista gratis, clases en vivo y videos ---------- */
 // Sin inscripción se ven los títulos del Nivel 1; de los demás niveles, solo nombre y duración
-const detailOpen=lv=>CM.isAdmin||S.paying||lv.n<=Math.max(1,S.lvl);
+// cada alumna tiene sus propios niveles abiertos (p. ej. solo el Nivel 3)
+const hasLv=n=>CM.isAdmin||S.lvls.has(n);
+const detailOpen=lv=>CM.isAdmin||S.paying||lv.n===1||hasLv(lv.n);
 const CTA_TXT='Comienza tu formación: 9 cuotas de 55 USD';
 const LIVE_OPEN_MIN=15;
 const liveOf=key=>CM.agenda.find(a=>a.id===key);
@@ -1364,7 +1364,7 @@ function liveHTML(key,les){const a=liveOf(key);if(!a)return '';const L=CM.liveLi
 const gcalLink=a=>{const f=ms=>new Date(ms).toISOString().replace(/[-:]|\.\d{3}/g,'');return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(a.title+' · Casa Muladhara')+'&dates='+f(a.start.toMillis())+'/'+f(liveEnd(a))};
 function liveDate(a){const d=a.start.toDate();return `<div class="date"><small>${d.toLocaleDateString('es',{weekday:'short'}).replace('.','')}</small><b>${d.getDate()}</b><small>${d.toLocaleDateString('es',{month:'short'}).replace('.','')}</small></div>`}
 function liveActs(a){const k=keyLesson(a.id),L=CM.liveLinks[a.id]||{},open=liveState(a)==='open';
-  if(!(CM.isAdmin||S.lvl>=a.level))return `<button class="btn btn-ghost btn-sm" data-go="pagos">Inscríbete</button>`;
+  if(!hasLv(a.level))return `<button class="btn btn-ghost btn-sm" data-go="pagos">Inscríbete</button>`;
   return (open&&isHttps(L.url)?`<a class="btn btn-primary btn-sm" href="${esc(L.url)}" target="_blank" rel="noopener">Entrar</a>`:'')
     +(k?`<button class="btn btn-ghost btn-sm" data-open-lesson="${k.lv.id},${k.i},${k.j}">Ver clase</button>`:'');}
 const upcomingLive=()=>CM.agenda.filter(a=>liveEnd(a)>=Date.now());
@@ -1403,7 +1403,7 @@ V.inicio=()=>{
     </section>
   </div>`;
 };
-function fileHTML(f){const k=f.k||f.type;return `<div class="file"><span class="ficon ${k}">${k.toUpperCase()}</span><div class="fx"><b>${esc(f.t||f.name)}</b><small>${f.size}</small></div>${f.href&&f.lvl>S.lvl?`<button class="btn btn-ghost btn-sm" data-go="pagos">Inscríbete</button>`:f.href?`<a class="btn btn-ghost btn-sm" href="${f.href}" target="_blank" rel="noopener">Abrir PDF</a>`:`<button class="btn btn-ghost btn-sm" data-toast="En la plataforma real esto descarga el archivo">${k==='mp3'||k==='mp4'?'Reproducir':'Descargar'}</button>`}</div>`}
+function fileHTML(f){const k=f.k||f.type;return `<div class="file"><span class="ficon ${k}">${k.toUpperCase()}</span><div class="fx"><b>${esc(f.t||f.name)}</b><small>${f.size}</small></div>${f.href&&f.lvl>0&&!hasLv(f.lvl)?`<button class="btn btn-ghost btn-sm" data-go="pagos">Inscríbete</button>`:f.href?`<a class="btn btn-ghost btn-sm" href="${f.href}" target="_blank" rel="noopener">Abrir PDF</a>`:`<button class="btn btn-ghost btn-sm" data-toast="En la plataforma real esto descarga el archivo">${k==='mp3'||k==='mp4'?'Reproducir':'Descargar'}</button>`}</div>`}
 
 V.formacion=()=>`
   <div class="view-head"><div><span class="eyebrow">Escuela de Formación Holística</span><h1>Mi formación</h1><p>Cinco niveles que te llevan a la certificación de Terapeuta Holístico Integral. Toca un nivel para ver sus clases, videos y materiales.</p></div>
@@ -1545,7 +1545,7 @@ V.recursos=()=>{
   <div class="filters">${types.map(t=>`<button class="chip" aria-pressed="${S.resType===t}" data-rtype="${t}">${t}</button>`).join('')}
     <select id="rlvl" aria-label="Filtrar por nivel"><option value="0">Todos los niveles</option>${[1,2,3,4,5].map(n=>`<option value="${n}" ${S.resLvl==n?'selected':''}>Nivel ${n}</option>`).join('')}<option value="g" ${S.resLvl==='g'?'selected':''}>Para tu consulta</option></select>
     <input type="text" id="rq" placeholder="Buscar recurso" value="${esc(S.resQ)}" style="width:auto;flex:1;min-width:160px;border-radius:999px;padding:8px 14px;background:var(--surface)" aria-label="Buscar recurso"></div>
-  <div class="res-grid">${list.length?list.map(r=>`<article class="card res"><div class="top"><span class="ficon ${r.k}">${r.k.toUpperCase()}</span><div><b>${r.t}</b><small>${r.lvl?'Nivel '+r.lvl:'Para tu consulta'} · ${r.type}</small></div></div><div class="foot"><span>${r.size}</span>${r.href&&r.lvl>S.lvl?`<button class="btn btn-ghost btn-sm" data-go="pagos">Inscríbete</button>`:r.href?`<a class="btn btn-ghost btn-sm" href="${r.href}" target="_blank" rel="noopener">Abrir PDF</a>`:`<button class="btn btn-ghost btn-sm" data-toast="En la plataforma real esto ${r.k==='mp3'||r.k==='mp4'?'reproduce':'descarga'} el archivo">${r.k==='mp3'||r.k==='mp4'?'Reproducir':'Descargar'}</button>`}</div></article>`).join(''):`<div class="card empty" style="grid-column:1/-1">No hay recursos con esos filtros.</div>`}</div>`;
+  <div class="res-grid">${list.length?list.map(r=>`<article class="card res"><div class="top"><span class="ficon ${r.k}">${r.k.toUpperCase()}</span><div><b>${r.t}</b><small>${r.lvl?'Nivel '+r.lvl:'Para tu consulta'} · ${r.type}</small></div></div><div class="foot"><span>${r.size}</span>${r.href&&r.lvl>0&&!hasLv(r.lvl)?`<button class="btn btn-ghost btn-sm" data-go="pagos">Inscríbete</button>`:r.href?`<a class="btn btn-ghost btn-sm" href="${r.href}" target="_blank" rel="noopener">Abrir PDF</a>`:`<button class="btn btn-ghost btn-sm" data-toast="En la plataforma real esto ${r.k==='mp3'||r.k==='mp4'?'reproduce':'descarga'} el archivo">${r.k==='mp3'||r.k==='mp4'?'Reproducir':'Descargar'}</button>`}</div></article>`).join(''):`<div class="card empty" style="grid-column:1/-1">No hay recursos con esos filtros.</div>`}</div>`;
 };
 
 V.soporte=()=>{
@@ -1627,27 +1627,8 @@ V.pagos=()=>{
   </div>`;
 };
 
-V.maestra=()=>{
-  if(!CM.isAdmin)return '<div class="card empty">Este panel es solo para la Maestra.</div>';
-  const n=k=>STUDENTS.filter(s=>s.s===k).length;
-  const mrr=STUDENTS.filter(s=>s.acc==='cuotas').length*55;
-  return `<div class="view-head"><div><span class="eyebrow">Solo para la Maestra Holística</span><h1>Pagos de tus alumnas</h1><p>Aquí ves quién pagó y quién no. Stripe actualiza solo las cuotas y el pago completo. El acceso permanente de tus alumnas actuales, las cuotas a medida y el nivel abierto los cambias con el administrador (scripts/admin.mjs).</p></div></div>
-  <div class="kpis"><div><b>${STUDENTS.length}</b><span>cuentas registradas</span></div><div><b>${n('ok')+n('full')}</b><span>pagando o pagadas</span></div><div><b>${STUDENTS.filter(s=>s.acc==='grant').length}</b><span>con acceso permanente</span></div><div><b>${n('overdue')+n('retry')+n('paused')}</b><span>con pago pendiente</span></div></div>
-  <div class="cols" style="grid-template-columns:1fr">
-    <section class="card panel"><div class="panel-h"><h3>Alumnas</h3><span class="muted" style="font-size:.82rem">Ingreso mensual recurrente: <b style="color:var(--fg)">${mrr} USD</b></span></div>
-      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Alumna</th><th>Correo</th><th>Acceso</th><th>Cuota</th><th>Nivel abierto</th><th>Próximo cobro</th><th>Desde</th></tr></thead><tbody>
-      ${STUDENTS.map(s=>`<tr><td><span style="display:flex;gap:10px;align-items:center">${av(s)}${esc(s.n)}</span></td><td>${esc(s.email)}</td><td>${ACC[s.acc](s)}</td><td>${esc(s.cuota)||'—'}</td><td>${s.lvl?'Hasta el Nivel '+s.lvl:'Ninguno'}</td><td>${esc(s.next)||'—'}</td><td>${s.last}</td></tr>`).join('')||'<tr><td colspan="7" class="muted">Todavía no hay alumnas registradas.</td></tr>'}
-      </tbody></table></div></section>
-    <section class="card panel"><div class="panel-h"><h3>Preguntas por responder${CM.pending.length?' ('+CM.pending.length+')':''}</h3></div>
-      ${CM.pending.length?CM.pending.map((q,ix)=>{const k=keyLesson(q.lessonKey),st=STUDENTS.find(s=>s.id===q.uid);return `<article style="display:grid;gap:8px;padding:14px 0;border-top:1px solid var(--line)">
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">${st?av(st):''}<b>${esc(st?st.n:'Alumna')}</b><span class="muted" style="font-size:.84rem">${k?'Nivel '+k.lv.n+' · '+esc(k.les.t)+' · ':''}${esc(q.when)}</span>${k?`<button class="link" data-open-lesson="${k.lv.id},${k.i},${k.j}">Ver clase</button>`:''}</div>
-        <p style="margin:0">${esc(q.text)}</p>
-        <form data-answer="${ix}" style="display:grid;gap:8px"><textarea placeholder="Tu respuesta. La alumna la ve debajo de la clase y recibe un aviso." aria-label="Respuesta"></textarea><button class="btn btn-primary btn-sm" style="justify-self:start">Responder</button></form></article>`}).join(''):'<p class="muted" style="margin:0">No tienes preguntas pendientes. Cuando una alumna pregunte en una clase, aparecerá aquí.</p>'}
-    </section>
-    <section class="card panel"><h3>Video de bienvenida</h3><p class="muted" style="margin:0;font-size:.88rem">Lo ven las cuentas gratis en Inicio. Pega el enlace de YouTube, Vimeo o Google Drive. Déjalo vacío para mostrar "Muy pronto".</p>
-      <form id="wv-form" style="display:flex;gap:8px;flex-wrap:wrap"><input type="url" id="wv-url" placeholder="https://" value="${esc(CM.config.welcomeVideo||'')}" style="flex:1;min-width:220px"><button class="btn btn-primary btn-sm">Guardar</button></form></section>
-  </div>`;
-};
+// El panel de la Maestra vive en su propio portal (admin.html)
+V.maestra=()=>'<div class="card empty">Abriendo el portal de la Maestra…</div>';
 
 // Suscripción mensual: Stripe Checkout para suscribirse, portal de Stripe para tarjeta y cancelación
 async function checkout(kind,btn){
@@ -1660,11 +1641,11 @@ async function checkout(kind,btn){
 let timer;
 function render(scrollTop=true){
   $('#nav').innerHTML=NAV.filter(x=>x[0]!=='maestra'||CM.isAdmin).map(([k,n,ic,c])=>`${k==='maestra'?'<span class="nav-label">Solo para la Maestra</span>':''}<button data-go="${k}" ${(S.view===k||(S.view==='curso'&&k===(lvOf(S.level).spec?'especialidades':'formacion')))?'aria-current="page"':''}><svg viewBox="0 0 24 24">${ic}</svg>${n}${c?`<span class="count">${c}</span>`:''}</button>`).join('');
-  $('#view').innerHTML=(S.overdue&&S.view!=='maestra'?`<div class="alert"><div><b>Tu cuota está pendiente</b><p>Tu acceso a clases, grabaciones y materiales está pausado. Se reactiva apenas se registre el pago.</p></div><button class="btn btn-sm" data-checkout="portal">Actualizar mi pago</button></div>`:'')+V[S.view]();
+  $('#view').innerHTML=(CM.blocked?`<div class="alert"><div><b>Tu acceso está pausado</b><p>La Maestra pausó tu acceso a las clases. Escríbenos desde Ayuda si tienes dudas.</p></div></div>`:'')+(S.overdue&&S.view!=='maestra'?`<div class="alert"><div><b>Tu cuota está pendiente</b><p>Tu acceso a clases, grabaciones y materiales está pausado. Se reactiva apenas se registre el pago.</p></div><button class="btn btn-sm" data-checkout="portal">Actualizar mi pago</button></div>`:'')+V[S.view]();
   if(scrollTop)window.scrollTo(0,0);
   bindView();if(typeof pndMount==='function')pndMount();
 }
-function go(v){S.view=v;stopPlay();closeSide();render()}
+function go(v){if(v==='maestra'){location.href='admin.html';return}S.view=v;stopPlay();closeSide();render()}
 function openLevel(id){const lv=lvOf(id);S.level=id;let pos=[0,0];
   outer:for(let i=0;i<lv.modules.length;i++)for(let j=0;j<lv.modules[i].lessons.length;j++){if(!lv.modules[i].lessons[j].done){pos=[i,j];break outer}}
   S.lesson=pos;S.tab='temas';S.t=0;stopPlay();S.view='curso';closeSide();render()}
@@ -1767,7 +1748,7 @@ function resumePoint(){
 // estados de nivel e insignias salen del avance real de la alumna
 function refreshDerived(){
   S.paying=CM.isAdmin||CM.profile.plan==='completo'||(CM.profile.plan==='mensual'&&CM.profile.paymentStatus==='ok');
-  LEVELS.forEach(lv=>{lv.status=lv.n>S.lvl?'locked':(pct(lv)===100?'done':'progress')});
+  LEVELS.forEach(lv=>{lv.status=!hasLv(lv.n)?'locked':(pct(lv)===100?'done':'progress')});
   SPECS.forEach(sp=>{sp.status=!sp.ready?'locked':(pct(sp)===100?'done':'progress')});
   const lastDone=lv=>{let t=0;lv.modules.forEach((m,i)=>m.lessons.forEach((l,j)=>{const d=CM.doneAt[lv.id+'_'+i+'_'+j];if(d&&d.toMillis)t=Math.max(t,d.toMillis())}));return t?fmtDay(new Date(t)):'hoy'};
   BADGES.forEach(b=>{
@@ -1800,7 +1781,9 @@ window.cmStart=async function(cm){
   // los datos de ejemplo del diseño original no se muestran: todo parte en blanco y se llena con su avance real
   LEVELS.concat(SPECS).forEach(lv=>lv.modules.forEach((m,i)=>m.lessons.forEach((l,j)=>{l.done=!!cm.progress[lv.id+'_'+i+'_'+j]})));
   // el contenido de las clases solo se descarga con acceso (middleware.js lo exige en el servidor)
+  // el código de cada nivel usa piezas de los anteriores: se carga hasta el más alto, pero solo se abren los suyos
   if(cm.lvl>0)S.lvl=await loadCourse(cm.lvl);
+  S.lvls=new Set(cm.lvls.filter(n=>n<=S.lvl));
   // las especialidades usan las piezas de los niveles 1 a 3; por ahora solo la Maestra las abre (middleware.js)
   if(cm.isAdmin&&S.lvl>=COURSE_FILES)for(const sp of SPECS)sp.ready=await loadScript(sp.file);
   refreshDerived();
@@ -1808,12 +1791,6 @@ window.cmStart=async function(cm){
   if(cm.paid==='ok')toast('¡Gracias! Estamos confirmando tu pago; tu aula se actualiza en unos segundos.');
   $('#me-sub').textContent=cm.isAdmin?'Maestra Holística':'Estudiante · Nivel '+Math.max(1,...LEVELS.filter(l=>l.status!=='locked').map(l=>l.n));
   renderNotifs();
-  if(cm.isAdmin){
-    try{
-      const [st]=await Promise.all([cm.loadStudents(),cm.loadQuestions()]);
-      STUDENTS=st.map(u=>{const id=u.id;const pay=u.plan==='completo'||(u.plan==='mensual'&&u.paymentStatus==='ok'),grant=Number(u.grantLevel)||0,tot=Number(u.installments)||9;return {id,n:u.n,ini:u.ini,c:u.c,email:u.email||'',acc:u.plan==='completo'?'full':u.plan==='mensual'?(u.paymentStatus==='overdue'?'overdue':'cuotas'):grant?'grant':'free',grant,cuota:u.plan==='mensual'?(Number(u.paidInstallments)||0)+' de '+tot:u.plan==='completo'?'Pagada':tot!==9?tot+' cuotas asignadas':'',lvl:pay?Math.min(5,Math.max(Number(u.accessLevel)||1,grant+1)):grant,last:u.since||'',next:u.plan==='mensual'&&u.next?(u.cancelAtPeriodEnd?'Termina '+u.next:u.next):'',s:u.paymentStatus==='overdue'?'overdue':u.plan==='completo'?'full':u.plan==='mensual'&&u.paymentStatus==='ok'?'ok':'none'}});
-    }catch(e){console.error(e)}
-  }
   cm.onPosts=()=>{POSTS=cm.posts;const a=document.activeElement;const typing=a&&/INPUT|TEXTAREA/.test(a.tagName)&&a.value;if(!typing&&['comunidad','inicio'].includes(S.view))render(false)};
   POSTS=cm.posts;
   $('#login').hidden=true;

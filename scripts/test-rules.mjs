@@ -38,9 +38,11 @@ const profile = (u, extra = {}) => ({ uid: u.uid, email: u.email, displayName: u
 
 // A y B tienen el Nivel 1 abierto; F es una cuenta gratis (sin niveles)
 const A = await mk('ana', { lvl: 1 }), B = await mk('bea', { lvl: 1 }), F = await mk('fran'), M = await mk('maestra', { admin: true });
+// J es una alumna antigua que compró solo el Nivel 3
+const J = await mk('juana', { lvl: 3, lvls: [3] });
 const created = [];
 try {
-  const a = await login(A), b = await login(B), f = await login(F), m = await login(M);
+  const a = await login(A), b = await login(B), f = await login(F), m = await login(M), j = await login(J);
   await adb.doc(`users/${F.uid}`).set({ uid: F.uid, email: F.email, displayName: F.name, role: 'student_free' });
 
   console.log('\nPerfil');
@@ -126,6 +128,8 @@ try {
   await denied('F NO ve el enlace de la sala', () => getDoc(doc(f.db, 'liveLinks', 'test_' + tag)));
   await denied('A (Nivel 1) NO ve el enlace del Nivel 2', () => getDoc(doc(a.db, 'liveLinks', 'test_' + tag)));
   await allowed('A lista los enlaces de su nivel', () => getDocs(query(collection(a.db, 'liveLinks'), where('level', '<=', 1))));
+  await denied('J (solo Nivel 3) NO ve el enlace del Nivel 2', () => getDoc(doc(j.db, 'liveLinks', 'test_' + tag)));
+  await allowed('J lista los enlaces del Nivel 3', () => getDocs(query(collection(j.db, 'liveLinks'), where('level', '==', 3))));
   await denied('A NO programa clases', () => setDoc(doc(a.db, 'agenda', 'x_' + tag), { level: 1, title: 'x' }));
   await denied('A NO cambia el video de bienvenida', () => setDoc(doc(a.db, 'config', 'aula'), { welcomeVideo: 'x' }));
 
@@ -143,7 +147,7 @@ try {
   await denied('Nadie lee colecciones no declaradas', () => getDocs(collection(a.db, 'secretos')));
 } finally {
   for (const r of created) await adb.doc(r.path).delete().catch(() => {});
-  for (const u of [A, B, F, M]) {
+  for (const u of [A, B, F, M, J]) {
     await adb.recursiveDelete(adb.doc(`users/${u.uid}`)).catch(() => {});
     await admin.auth().deleteUser(u.uid).catch(() => {});
   }

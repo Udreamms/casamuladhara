@@ -14,8 +14,12 @@ service cloud.firestore {
     function changed() { return request.resource.data.diff(resource.data).affectedKeys(); }
     function text(v, max) { return v is string && v.size() > 0 && v.size() <= max; }
     function userDoc(uid) { return get(/databases/$(database)/documents/users/$(uid)).data; }
-    // Nivel abierto (claim lvl que ponen el webhook de Stripe y scripts/admin.mjs)
+    // Niveles abiertos (claims que ponen el webhook de Stripe, el portal de la Maestra y scripts/admin.mjs):
+    // lvls = lista de niveles abiertos (p. ej. [3]); lvl = el más alto
     function lvl() { return signedIn() ? request.auth.token.get('lvl', 0) : 0; }
+    function hasLevel(n) {
+      return signedIn() && (request.auth.token.get('lvls', null) == null ? n <= lvl() : n in request.auth.token.lvls);
+    }
     function hasAccess() { return isAdmin() || lvl() > 0; }
     // Canales que ve una cuenta gratis; solo puede escribir en Preséntate
     function freeChannel(ch) { return ch in ['presentaciones', 'testimonios']; }
@@ -181,7 +185,7 @@ service cloud.firestore {
       allow write: if isAdmin() && key.matches('^[a-z0-9_-]{1,80}$');
     }
     match /liveLinks/{key} {
-      allow read: if isAdmin() || (signedIn() && resource.data.level <= lvl());
+      allow read: if isAdmin() || hasLevel(resource.data.level);
       allow write: if isAdmin() && key.matches('^[a-z0-9_-]{1,80}$');
     }
 

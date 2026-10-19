@@ -1,7 +1,10 @@
 // Vercel Routing Middleware: protege en el servidor el contenido de las clases y sus materiales, nivel por nivel.
-// Pide la cookie cm_session con un token válido de Firebase (proyecto casamuladhara). El claim lvl
-// (lo pone el webhook de Stripe o scripts/admin.mjs) dice hasta qué nivel puede abrir; la Maestra (admin) abre todo.
-//   /curso/n2.js, /assets/n2/...  -> requiere lvl >= 2   (igual para cada nivel)
+// Pide la cookie cm_session con un token válido de Firebase (proyecto casamuladhara). El claim lvls
+// (lo ponen el webhook de Stripe, el portal de la Maestra o scripts/admin.mjs) dice qué niveles tiene abiertos,
+// p. ej. [3]; lvl es el más alto. La Maestra (admin) abre todo.
+//   /assets/n2/...  (materiales)  -> requiere el Nivel 2 abierto
+//   /curso/n2.js    (código)      -> requiere lvl >= 2: el código de cada nivel usa piezas de los anteriores,
+//                                    así que se descargan juntos; el aula solo muestra los niveles abiertos
 //   /curso/esp/... (especialidades) -> por ahora solo la Maestra
 import { next } from '@vercel/functions';
 import { createRemoteJWKSet, jwtVerify } from 'jose';
@@ -32,7 +35,11 @@ export default async function middleware(request) {
   } catch {
     return deny(401, 'Tu sesión expiró. Vuelve a entrar al aula.');
   }
-  const need = levelOf(new URL(request.url).pathname);
-  if (payload.admin === true || (Number(payload.lvl) || 0) >= need) return next();
+  const path = new URL(request.url).pathname;
+  const need = levelOf(path);
+  if (payload.admin === true) return next();
+  const lvl = Number(payload.lvl) || 0;
+  const open = Array.isArray(payload.lvls) ? payload.lvls.includes(need) : lvl >= need; // tokens antiguos: solo lvl
+  if (path.startsWith('/curso/n') ? lvl >= need : open) return next();
   return deny(403, 'Este contenido se abre cuando tengas acceso a este nivel.');
 }
