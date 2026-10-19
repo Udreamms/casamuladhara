@@ -254,7 +254,9 @@ $('#google').onclick = async () => {
   if (busy) return;
   if (PREVIEW) return go(); // vista previa de la rama valentina: entra sin iniciar sesión
   lock(true);
-  try { await signInWithPopup(auth, new GoogleAuthProvider()); go(); }
+  // select_account: Google siempre pregunta con qué cuenta entrar (útil si el equipo tiene varias sesiones)
+  const google = new GoogleAuthProvider(); google.setCustomParameters({ prompt: 'select_account' });
+  try { await signInWithPopup(auth, google); go(); }
   catch (err) { say(msg(err), true); }
   finally { lock(false); }
 };
