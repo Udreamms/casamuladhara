@@ -48,12 +48,17 @@ service cloud.firestore {
         && request.resource.data.createdAt == request.time
         && request.resource.data.lastLogin == request.time;
 
+      // La alumna edita su nombre, foto y datos de contacto. Nada de rol, nivel, plan ni pago.
       allow update: if isAdmin()
         || (isOwner(uid)
-            && changed().hasOnly(['displayName', 'photoURL', 'lastLogin'])
-            && request.resource.data.displayName is string && request.resource.data.displayName.size() <= 120
-            && request.resource.data.photoURL is string && request.resource.data.photoURL.size() <= 600
-            && request.resource.data.lastLogin == request.time);
+            && changed().hasOnly(['displayName', 'photoURL', 'lastLogin', 'phone', 'country', 'bio'])
+            && (!changed().hasAny(['displayName']) || text(request.resource.data.displayName, 120))
+            && (!changed().hasAny(['photoURL']) || (request.resource.data.photoURL is string && request.resource.data.photoURL.size() <= 600
+                  && (request.resource.data.photoURL == '' || request.resource.data.photoURL.matches('^https://[^ ]+$'))))
+            && (!changed().hasAny(['phone']) || (request.resource.data.phone is string && request.resource.data.phone.size() <= 40))
+            && (!changed().hasAny(['country']) || (request.resource.data.country is string && request.resource.data.country.size() <= 60))
+            && (!changed().hasAny(['bio']) || (request.resource.data.bio is string && request.resource.data.bio.size() <= 500))
+            && (!changed().hasAny(['lastLogin']) || request.resource.data.lastLogin == request.time));
 
       allow delete: if isAdmin();
 
@@ -134,12 +139,13 @@ service cloud.firestore {
     match /posts/{postId} {
       allow read: if hasAccess() || (signedIn() && freeChannel(resource.data.ch));
       allow create: if signedIn()
-        && onlyKeys(['ch', 'text', 'authorUid', 'authorName', 'isTeacher', 'likeCount', 'createdAt'])
+        && onlyKeys(['ch', 'text', 'authorUid', 'authorName', 'authorPhoto', 'isTeacher', 'likeCount', 'createdAt'])
         && request.resource.data.ch in ['general', 'presentaciones', 'n1', 'n2', 'n3', 'n4', 'n5', 'testimonios']
         && canWrite(request.resource.data.ch)
         && text(request.resource.data.text, 3000)
         && request.resource.data.authorUid == request.auth.uid
         && request.resource.data.authorName == userDoc(request.auth.uid).displayName
+        && request.resource.data.get('authorPhoto', '') == userDoc(request.auth.uid).get('photoURL', '')
         && request.resource.data.isTeacher == isAdmin()
         && request.resource.data.likeCount == 0
         && request.resource.data.createdAt == request.time;
@@ -164,7 +170,7 @@ service cloud.firestore {
     match /replies/{replyId} {
       allow read: if hasAccess() || (signedIn() && freeChannel(resource.data.get('ch', '')));
       allow create: if signedIn()
-        && onlyKeys(['postId', 'ch', 'text', 'authorUid', 'authorName', 'isTeacher', 'createdAt'])
+        && onlyKeys(['postId', 'ch', 'text', 'authorUid', 'authorName', 'authorPhoto', 'isTeacher', 'createdAt'])
         && request.resource.data.postId is string && request.resource.data.postId.size() <= 40
         && exists(/databases/$(database)/documents/posts/$(request.resource.data.postId))
         && request.resource.data.ch == get(/databases/$(database)/documents/posts/$(request.resource.data.postId)).data.ch
@@ -172,6 +178,7 @@ service cloud.firestore {
         && text(request.resource.data.text, 2000)
         && request.resource.data.authorUid == request.auth.uid
         && request.resource.data.authorName == userDoc(request.auth.uid).displayName
+        && request.resource.data.get('authorPhoto', '') == userDoc(request.auth.uid).get('photoURL', '')
         && request.resource.data.isTeacher == isAdmin()
         && request.resource.data.createdAt == request.time;
       allow update: if false;

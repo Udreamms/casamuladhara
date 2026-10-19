@@ -15,6 +15,13 @@ export function startPreview() {
     progress: {}, doneAt: {}, notes: {}, questions: {}, tickets: [], payments: [], notifications: [],
     posts: [], likes: new Set(), students: [], agenda: [], liveLinks: {}, config: {}, pending: [],
     onPosts: () => {},
+    // edición de perfil en el modo revisión: solo en memoria
+    editor: { hasGoogle: false, api: {
+      save: async (d) => ({ displayName: String(d.displayName || '').trim() || name, phone: d.phone || '', country: d.country || '', bio: d.bio || '' }),
+      setPhoto: async (file) => URL.createObjectURL(file),
+      useGoogle: async () => '', remove: async () => '',
+    } },
+    applyProfile: (P) => { const n = P.displayName || name; Object.assign(CM.profile, { name: n, displayName: n, ini: n.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase() || 'A', photoURL: P.photoURL || '', phone: P.phone || '', country: P.country || '', bio: P.bio || '' }); },
     fdate: (ts) => (ts?.toDate ? ts.toDate().toLocaleDateString('es', { day: 'numeric', month: 'short', year: 'numeric' }) : ''),
     signOut: async () => location.replace('login.html?mode=login'),
     loadStudents: async () => [], loadQuestions: async () => [],

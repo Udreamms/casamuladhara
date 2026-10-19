@@ -77,6 +77,10 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 .av{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font:700 .8rem/1 var(--f-body);color:#1f3f32;background:var(--c,#f2c66d);flex-shrink:0}
 .av.sm{width:32px;height:32px;font-size:.72rem}
 .av.karen{background:#1f3f32;color:#f2c66d;border:1.5px solid #f2c66d}
+.av.ph{background-size:cover;background-position:center;background-repeat:no-repeat;color:transparent}
+.side-foot.edit{cursor:pointer;border-radius:12px;transition:background .15s}
+.side-foot.edit:hover{background:rgba(236,231,211,.08)}
+.side-foot .edit-hint{display:block;color:var(--on-brand-muted);font-size:.7rem;text-decoration:underline;text-underline-offset:2px}
 
 .main{min-width:0;display:flex;flex-direction:column}
 .topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:15;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:12px clamp(16px,3vw,36px)}
@@ -933,9 +937,9 @@ input[type=range].n2-range{width:100%;accent-color:var(--forest);padding:0;backg
   <aside class="side" id="side">
     <a class="brand" href="index.html" style="text-decoration:none" aria-label="Volver al sitio de Casa Muladhara"><svg><use href="#mark"/></svg><div><b>CASA MULADHARA</b><small>AULA VIRTUAL</small></div></a>
     <nav class="nav" id="nav" aria-label="Secciones"></nav>
-    <div class="side-foot">
+    <div class="side-foot edit" id="me-card" role="button" tabindex="0" title="Editar mi perfil y mi foto">
       <span class="av" id="me-av" style="--c:#f2c66d"></span>
-      <div class="who"><b id="me-name"></b><small id="me-sub"></small></div>
+      <div class="who"><b id="me-name"></b><small id="me-sub"></small><span class="edit-hint">Editar mi perfil</span></div>
     </div>
     <a class="logout" href="index.html" style="text-decoration:none"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7M5 10v10h14V10"/></svg>Volver al sitio</a>
     <button class="logout" id="logout"><svg viewBox="0 0 24 24"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/></svg>Cerrar sesión</button>
@@ -1215,7 +1219,7 @@ const FAQ={
 /* ---------- state ---------- */
 let PAYMENTS=[];
 const STP={none:'<span class="pill lock">Sin plan</span>',ok:'<span class="pill done">Al día</span>',full:'<span class="pill done">Pagado completo</span>',retry:'<span class="pill prog">Reintentando cobro</span>',overdue:'<span class="pill bad">Pago pendiente</span>',paused:'<span class="pill bad">Acceso pausado</span>'};
-let ME={name:'',ini:'',c:'#f2c66d'};
+let ME={name:'',ini:'',c:'#f2c66d',photo:''};
 const S={overdue:false,plan:'none',paying:false,lvl:0,lvls:new Set(),view:'inicio',level:'radiestesia',lesson:[1,0],tab:'temas',ch:'n3',resType:'Todos',resLvl:'0',resQ:'',supTopic:'clases',openMods:{},playing:false,t:0,notes:{},qa:{},sent:false,sl:{},anim:0};
 const NAV=[
  ['inicio','Inicio','<path d="M4 11 12 4l8 7v9h-5v-6H9v6H4z"/>'],
@@ -1314,7 +1318,9 @@ function summitSVG(){return `<svg viewBox="0 0 120 120" aria-hidden="true"><circ
 const modePill=lv=>lv.mode==='pres'?'<span class="pill pres">Presencial</span>':'<span class="pill live">Online en vivo</span>';
 const statusPill=lv=>({done:'<span class="pill done">Completado</span>',progress:'<span class="pill prog">En curso</span>',locked:'<span class="pill lock">Por desbloquear</span>'})[lv.status];
 const icLock='<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
-const av=(p)=>p.karen?`<span class="av sm karen">MH</span>`:`<span class="av sm" style="--c:${p.c||'#f2c66d'}">${p.ini}</span>`;
+const photoCss=u=>typeof u==='string'&&/^https:\/\/[^\s"'()\\]+$/.test(u)?`background-image:url('${u}')`:'';
+const av=(p,big)=>{const ph=photoCss(p.photo);const sz=big?'':' sm';
+  return p.karen?`<span class="av${sz} karen${ph?' ph':''}" style="${ph}">${ph?'':'MH'}</span>`:`<span class="av${sz}${ph?' ph':''}" style="--c:${p.c||'#f2c66d'};${ph}">${ph?'':esc(p.ini||'')}</span>`};
 const totalPct=()=>{const a=LEVELS.flatMap(allLessons);return Math.round(a.filter(x=>x.done).length/a.length*100)};
 
 function pathHTML(){
@@ -1442,7 +1448,7 @@ V.curso=()=>{
   <div class="player" style="max-width:900px"><svg class="motif"><use href="#mark"/></svg><div style="position:relative;display:grid;gap:12px;justify-items:center;text-align:center;padding:20px"><span class="pill bad" style="background:rgba(239,138,115,.2);color:#ffd2c7">Acceso pausado</span><b style="font:400 clamp(1.2rem,3vw,1.8rem)/1.2 var(--f-display)">${esc(les.t)}</b><span style="color:#b9c4b5;font-size:.9rem;max-width:30em">Esta clase vuelve a estar disponible en cuanto se registre el pago de tu cuota. No pierdes tu avance.</span><button class="btn btn-sm" style="background:#e9e4d0;color:#1f3f32" data-checkout="portal">Actualizar mi pago</button></div></div>`;
   const tabs=[['temas','Temas de la clase'],['materiales','Materiales'],['preguntas','Preguntas'],['notas','Mis notas']];
   const key=lv.id+'_'+mi+'_'+li;
-  const qa=(CM.questions[key]||[]).flatMap(q=>[{...person(ME.name),who:ME.name,ini:ME.ini,c:ME.c,txt:q.text}].concat(q.reply?[{who:'Maestra Holística',karen:1,ini:'MH',txt:q.reply,reply:1}]:[]));
+  const qa=(CM.questions[key]||[]).flatMap(q=>[{who:ME.name,ini:ME.ini,c:ME.c,photo:ME.photo,txt:q.text}].concat(q.reply?[{who:'Maestra Holística',karen:1,ini:'MH',txt:q.reply,reply:1}]:[]));
   const dur=toSec(les.len)||1;
   const si=isSl?Math.min(S.sl[key]||0,les.slides.length-1):0;
   const body={
@@ -1517,7 +1523,7 @@ V.comunidad=()=>{
   <div class="comm">
     <nav class="card channels" aria-label="Canales"><span class="nav-label">Canales</span>${chans.map(c=>{const n=POSTS.filter(p=>p.ch===c.id).length;return `<button class="ch" aria-current="${c.id===S.ch}" data-ch="${c.id}"># ${c.name}${n?`<small>${n}</small>`:''}</button>`}).join('')}</nav>
     <div style="display:grid;gap:14px;min-width:0">
-      ${canWrite?`<form class="card composer" id="composer"><div class="top"><span class="av" style="--c:${ME.c}">${esc(ME.ini)}</span><textarea id="post-in" placeholder="Comparte algo en # ${ch.name}" aria-label="Nueva publicación"></textarea></div>
+      ${canWrite?`<form class="card composer" id="composer"><div class="top">${av({ini:ME.ini,c:ME.c,photo:ME.photo},1)}<textarea id="post-in" placeholder="Comparte algo en # ${ch.name}" aria-label="Nueva publicación"></textarea></div>
         <div class="act"><span class="muted" style="font-size:.78rem">Publicas como ${esc(ME.name)}</span><button class="btn btn-primary btn-sm">Publicar</button></div></form>`:''}
       <div class="feed">${list.length?list.map(p=>`<article class="card post"><div class="post-h">${av(p)}<div><b>${esc(p.who)}</b>${p.karen?'<span class="tag-k">Maestra Holística</span>':''}<small>${p.when} · # ${ch.name}</small></div></div><p>${esc(p.txt)}</p>
         <div class="post-a"><button aria-pressed="${!!p.liked}" data-like="${p.i}"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>${p.likes}</button><button data-focus-reply="${p.i}"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>${p.replies.length} respuestas</button>${(p.mine||CM.isAdmin)?`<button data-delpost="${p.id}" style="margin-left:auto">Eliminar</button>`:''}</div>
@@ -1525,7 +1531,7 @@ V.comunidad=()=>{
         ${canWrite?`<form class="reply-form" data-reply="${p.i}"><input type="text" id="r${p.i}" placeholder="Responder" aria-label="Responder"><button class="btn btn-ghost btn-sm">Enviar</button></form>`:''}</article>`).join(''):`<div class="card empty">Este canal se abre cuando comience el nivel. Mientras tanto, conversa en # General.</div>`}</div>
     </div>
     <aside class="right" style="display:grid;gap:14px">
-      <section class="card panel"><h3 style="font-size:1.1rem">Tu perfil</h3><div class="member">${av({ini:ME.ini,c:ME.c})}<div><b>${esc(ME.name)}</b><small>${CM.isAdmin?'Maestra':'Estudiante'}</small></div></div></section>
+      <section class="card panel"><h3 style="font-size:1.1rem">Tu perfil</h3><div class="member">${av({ini:ME.ini,c:ME.c,photo:ME.photo})}<div><b>${esc(ME.name)}</b><small>${CM.isAdmin?'Maestra':'Estudiante'}</small></div></div><button class="btn btn-ghost btn-sm" id="edit-profile" style="justify-self:start">Editar mi perfil</button></section>
       <section class="card panel"><h3 style="font-size:1.1rem">Acuerdos de la comunidad</h3><ul class="rules"><li>Habla desde el respeto y el cariño.</li><li>Lo que se comparte aquí, se queda aquí.</li><li>No publiques datos de tus consultantes.</li><li>Las dudas de clase van en la pestaña Preguntas de cada clase.</li></ul></section>
     </aside>
   </div>`;
@@ -1774,10 +1780,27 @@ const COURSE_FILES=3;
 const loadScript=src=>new Promise(res=>{const s=document.createElement('script');s.src=src;s.onload=()=>res(true);s.onerror=()=>res(false);document.head.appendChild(s)});
 async function loadCourse(lvl){for(let n=1;n<=Math.min(lvl,COURSE_FILES);n++)if(!await loadScript('curso/n'+n+'.js'))return n-1;return lvl}
 
-window.cmStart=async function(cm){
-  ME={name:cm.profile.name,ini:cm.profile.ini,c:cm.profile.c};
-  $('#me-av').textContent=ME.ini;$('#me-av').style.setProperty('--c',ME.c);
+// nombre y foto de la cuenta en el menú y en el resto del aula
+function syncMe(){
+  const p=CM.profile;ME={name:p.name,ini:p.ini,c:p.c,photo:p.photoURL||''};
+  const a=$('#me-av'),ph=photoCss(ME.photo);
+  a.className='av'+(ph?' ph':'');a.style.cssText='--c:'+ME.c+';'+ph;a.textContent=ph?'':ME.ini;
   $('#me-name').textContent=ME.name;
+}
+async function openProfile(){
+  openModal('<span class="eyebrow">Mi cuenta</span><h3>Mi perfil</h3><p class="muted" style="margin:0">Cambia tu nombre, tus datos y tu foto. Se ven en la comunidad. El correo no se puede cambiar.</p><div id="pf-box" style="margin-top:12px"></div>');
+  const {mountProfileEditor}=await import('./assets/js/profile.js');
+  const p=CM.profile;
+  mountProfileEditor($('#pf-box'),{profile:{displayName:p.displayName||p.name,photoURL:p.photoURL||'',phone:p.phone||'',country:p.country||'',bio:p.bio||'',color:p.c},
+    api:CM.editor.api,hasGoogle:CM.editor.hasGoogle,toast,
+    onChange:P=>{CM.applyProfile(P);syncMe();render(false)}});
+}
+$('#me-card').onclick=openProfile;
+$('#me-card').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openProfile()}};
+document.addEventListener('click',e=>{if(e.target.closest('#edit-profile'))openProfile()});
+
+window.cmStart=async function(cm){
+  syncMe();
   // los datos de ejemplo del diseño original no se muestran: todo parte en blanco y se llena con su avance real
   LEVELS.concat(SPECS).forEach(lv=>lv.modules.forEach((m,i)=>m.lessons.forEach((l,j)=>{l.done=!!cm.progress[lv.id+'_'+i+'_'+j]})));
   // el contenido de las clases solo se descarga con acceso (middleware.js lo exige en el servidor)

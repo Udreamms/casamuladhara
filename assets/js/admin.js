@@ -2,14 +2,14 @@
 // Entra con correo y contraseña. La primera vez la cuenta se activa al verificar el Gmail (ver api/admin.js).
 // Lo que se ve aquí lo protegen las reglas de Firestore: solo una cuenta con el claim admin puede leerlo.
 import { auth, db } from './firebase.js';
-import { PREVIEW } from './preview.js';
+import { profileApi, mountProfileEditor, googlePhoto } from './profile.js';
 import {
   signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail,
   onAuthStateChanged, onIdTokenChanged, signOut,
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 import {
   doc, getDoc, setDoc, updateDoc, deleteDoc, collection, collectionGroup, getDocs, query, orderBy, where, limit,
-  writeBatch, serverTimestamp,
+  writeBatch, serverTimestamp, onSnapshot,
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 
 const $ = (s) => document.querySelector(s);
@@ -104,7 +104,7 @@ const data = {
 // ---------- Vista ----------
 const S = { view: 'alumnas', q: '', open: null, filter: 'todas' };
 const NAV = [
-  ['alumnas', 'Alumnas', '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5a6.5 6.5 0 0 1 3.5 5.5"/>'],
+  ['alumnas', 'Alumnas', '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5a6.5 6.5 0 0 1 3.5 5.5"/>', () => A.students.filter(isNew).length],
   ['pagos', 'Pagos', '<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h4"/>'],
   ['mensajes', 'Mensajes', '<path d="M4 5h16v11H9l-5 4z"/>'],
   ['preguntas', 'Preguntas de clase', '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5V14M12 17.5v.01"/>', () => A.questions.length],
@@ -113,7 +113,8 @@ const NAV = [
   ['ajustes', 'Ajustes del aula', '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'],
 ];
 const nameOf = (u) => u?.displayName || u?.email || 'Alumna';
-const av = (u) => `<span class="av sm" style="--c:${colorFor(u?.id || nameOf(u))}">${esc(initials(nameOf(u)))}</span>`;
+const photoCss = (u) => (typeof u === 'string' && /^https:\/\/[^\s"'()\\]+$/.test(u) ? `background-image:url('${u}')` : '');
+const av = (u) => { const ph = photoCss(u?.photoURL); return `<span class="av sm${ph ? ' ph' : ''}" style="--c:${colorFor(u?.id || nameOf(u))};${ph}">${ph ? '' : esc(initials(nameOf(u)))}</span>`; };
 const student = (uid) => A.students.find((s) => s.id === uid);
 const levelPills = (u) => (u.blocked ? '<span class="pill bad">Bloqueada</span>'
   : openOf(u).map((n) => `<span class="pill done">Nivel ${n}</span>`).join(' ') || '<span class="pill lock">Ninguno</span>');
@@ -128,11 +129,11 @@ V.alumnas = () => {
     && (S.filter === 'todas' || (S.filter === 'bloqueadas' ? u.blocked : S.filter === 'pendientes' ? u.paymentStatus === 'overdue' : openOf(u).length > 0)));
   const chip = (k, t) => `<button class="chip" data-filter="${k}" aria-pressed="${S.filter === k}">${t}</button>`;
   return `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>Tus alumnas</h1><p>Cada alumna tiene sus propios niveles. Abre su ficha para desbloquearle niveles del programa a medida que avanza, o marcar los que compró aparte.</p></div></div>
-  <div class="kpis"><div><b>${A.students.length}</b><span>cuentas registradas</span></div><div><b>${A.students.filter((u) => openOf(u).length > 0).length}</b><span>con niveles abiertos</span></div><div><b>${A.students.filter((u) => u.paymentStatus === 'overdue').length}</b><span>con cuota pendiente</span></div><div><b>${A.students.filter((u) => u.blocked).length}</b><span>bloqueadas</span></div></div>
+  <div class="kpis"><div><b>${A.students.length}</b><span>cuentas registradas</span></div><div><b>${A.students.filter(isNew).length}</b><span>nuevas esta semana</span></div><div><b>${A.students.filter((u) => openOf(u).length > 0).length}</b><span>con niveles abiertos</span></div><div><b>${A.students.filter((u) => u.paymentStatus === 'overdue').length}</b><span>con cuota pendiente</span></div><div><b>${A.students.filter((u) => u.blocked).length}</b><span>bloqueadas</span></div></div>
   <section class="card panel">
     <div class="filters"><input type="text" id="sq" placeholder="Buscar por nombre o correo" value="${esc(S.q)}" style="flex:1;min-width:200px;border-radius:999px">${chip('todas', 'Todas')}${chip('abiertas', 'Con acceso')}${chip('pendientes', 'Cuota pendiente')}${chip('bloqueadas', 'Bloqueadas')}</div>
     <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Alumna</th><th>Pago</th><th>Niveles abiertos</th><th></th><th></th></tr></thead><tbody>
-    ${list.map((u) => { const [k, t] = payState(u); return `<tr><td><span style="display:flex;gap:10px;align-items:center">${av(u)}<span><b style="display:block">${esc(nameOf(u))}</b><small class="muted">${esc(u.email)}</small></span></span></td><td><span class="pill ${k}">${t}</span></td><td>${levelPills(u)}</td><td>${blockBtn(u)}</td><td><button class="link" data-open="${u.id}">Ver ficha</button></td></tr>`; }).join('') || '<tr><td colspan="5" class="muted">No hay alumnas con ese filtro.</td></tr>'}
+    ${list.map((u) => { const [k, t] = payState(u); return `<tr><td><span style="display:flex;gap:10px;align-items:center">${av(u)}<span><b style="display:block">${esc(nameOf(u))}${isNew(u) ? ' <span class="pill pres">Nueva</span>' : ''}</b><small class="muted">${esc(u.email)}</small></span></span></td><td><span class="pill ${k}">${t}</span></td><td>${levelPills(u)}</td><td>${blockBtn(u)}</td><td><button class="link" data-open="${u.id}">Ver ficha</button></td></tr>`; }).join('') || '<tr><td colspan="5" class="muted">No hay alumnas con ese filtro.</td></tr>'}
     </tbody></table></div>
   </section>`;
 };
@@ -148,6 +149,9 @@ V.ficha = () => {
       <dl class="kv"><dt>Abiertos ahora</dt><dd>${levelPills(u)}</dd><dt>Pago</dt><dd><span class="pill ${k}">${t}</span></dd>${u.plan === 'mensual' ? `<dt>Cuotas</dt><dd>${Number(u.paidInstallments) || 0} de ${total}</dd>` : ''}${u.currentPeriodEnd?.toDate ? `<dt>Próximo cobro</dt><dd>${fdate(u.currentPeriodEnd)}</dd>` : ''}</dl>
       <div style="display:grid;gap:6px"><b style="font-size:.88rem">Desbloqueados en el programa completo</b>${levelBoxes(u, 'unlockedLevels', unlockedOf(u))}<small class="muted">Se abren mientras su programa esté pagado o con las cuotas al día.${paying(u) ? '' : ' <b>Ahora no tiene el programa pagado</b>, así que estos niveles quedan cerrados.'}</small></div>
       <div style="display:grid;gap:6px"><b style="font-size:.88rem">Comprados aparte (alumna antigua)</b>${levelBoxes(u, 'ownedLevels', ownedOf(u))}<small class="muted">Quedan abiertos siempre, pague o no el programa.</small></div>
+    </section>
+    <section class="card panel"><div class="panel-h"><h3>Datos de la alumna</h3><button class="btn btn-ghost btn-sm" data-edit-student="${u.id}">Editar</button></div>
+      <dl class="kv"><dt>Nombre</dt><dd>${esc(nameOf(u))}</dd><dt>Correo</dt><dd>${esc(u.email)}</dd><dt>Teléfono</dt><dd>${esc(u.phone) || '<span class="muted">—</span>'}</dd><dt>País o ciudad</dt><dd>${esc(u.country) || '<span class="muted">—</span>'}</dd>${u.bio ? `<dt>Sobre ella</dt><dd>${esc(u.bio)}</dd>` : ''}<dt>Desde</dt><dd>${fdate(u.createdAt) || '—'}</dd></dl>
     </section>
     <section class="card panel"><h3>Escribirle un mensaje</h3><p class="muted" style="font-size:.86rem">Le llega a la campana de avisos del aula.</p>
       <form data-msg-one="${u.id}" style="display:grid;gap:10px"><textarea maxlength="1900" placeholder="Hola ${esc(nameOf(u).split(' ')[0])}, …" aria-label="Mensaje"></textarea><button class="btn btn-primary btn-sm" style="justify-self:start">Enviar mensaje</button></form>
@@ -190,8 +194,11 @@ V.ajustes = () => `<div class="view-head"><div><span class="eyebrow">Portal de l
     <form id="wv-form" style="display:flex;gap:8px;flex-wrap:wrap"><input type="url" id="wv-url" placeholder="https://" value="${esc(A.config.welcomeVideo || '')}" style="flex:1;min-width:220px"><button class="btn btn-primary btn-sm">Guardar</button></form></section>
   <section class="card panel"><h3>Clases en vivo</h3><p class="muted" style="margin:0;font-size:.88rem">Las clases en vivo y sus grabaciones se programan dentro de cada clase del aula, donde ves el contenido.</p><a class="btn btn-ghost btn-sm" style="justify-self:start" href="aula.html">Ir al aula</a></section>`;
 
-function render(top = true) {
+function paintNav() {
   $('#nav').innerHTML = NAV.map(([k, n, ic, c]) => { const cnt = c ? c() : 0; return `<button data-go="${k}" ${S.view === k || (S.view === 'ficha' && k === 'alumnas') ? 'aria-current="page"' : ''}><svg viewBox="0 0 24 24">${ic}</svg>${n}${cnt ? `<span class="count">${cnt}</span>` : ''}</button>`; }).join('');
+}
+function render(top = true) {
+  paintNav();
   $('#view').innerHTML = V[S.view]();
   if (top) scrollTo(0, 0);
   bind();
@@ -206,6 +213,15 @@ function bind() {
   document.querySelectorAll('[data-open]').forEach((b) => (b.onclick = () => openStudent(b.dataset.open)));
   document.querySelectorAll('[data-filter]').forEach((b) => (b.onclick = () => { S.filter = b.dataset.filter; render(false); }));
   const sq = $('#sq'); if (sq) sq.oninput = () => { S.q = sq.value; const p = sq.selectionStart; render(false); const s2 = $('#sq'); s2.focus(); s2.setSelectionRange(p, p); };
+  document.querySelectorAll('[data-edit-student]').forEach((b) => (b.onclick = () => {
+    const u = student(b.dataset.editStudent);
+    dialog(`<span class="eyebrow">Alumna</span><h3>Editar datos</h3><p class="muted" style="margin:0 0 12px;font-size:.88rem">Cambia el nombre y los datos de contacto de ${esc(nameOf(u))}. La foto la elige ella.</p><div id="pf-box"></div>`);
+    mountProfileEditor($('#pf-box'), {
+      profile: { displayName: u.displayName || nameOf(u), phone: u.phone || '', country: u.country || '', bio: u.bio || '' },
+      api: papi(u.id), toast, photo: false,
+      onChange: (P) => { Object.assign(u, { displayName: P.displayName, phone: P.phone, country: P.country, bio: P.bio }); render(false); },
+    });
+  }));
   document.querySelectorAll('[data-block]').forEach((b) => (b.onclick = async () => {
     const u = student(b.dataset.block), blocked = !u.blocked;
     if (blocked && !confirm(`¿Bloquear a ${nameOf(u)}? No podrá abrir ningún nivel hasta que la desbloquees.`)) return;
@@ -253,39 +269,33 @@ function bind() {
     try { await data.saveConfig({ welcomeVideo: u }); toast('Video de bienvenida guardado'); } catch (err) { fail(err); }
   };
 }
+const papi = (uid) => profileApi(uid);
+function dialog(html) { $('#dlg-body').innerHTML = html; const d = $('#dlg'); if (!d.open) d.showModal(); }
+$('#dlg-x').onclick = () => $('#dlg').close();
+$('#dlg').addEventListener('click', (e) => { if (e.target.id === 'dlg') $('#dlg').close(); });
+function paintMe() {
+  const m = A.me, ph = photoCss(m?.photoURL), a = $('#me-av');
+  $('#me-name').textContent = nameOf(m);
+  a.className = 'av karen' + (ph ? ' ph' : ''); a.style.cssText = ph; a.textContent = ph ? '' : initials(nameOf(m));
+}
+function openMyProfile() {
+  dialog('<span class="eyebrow">Mi cuenta</span><h3>Mi perfil</h3><p class="muted" style="margin:0 0 12px;font-size:.88rem">Tu nombre y tu foto se ven en la comunidad y en las respuestas a las alumnas.</p><div id="pf-box"></div>');
+  const m = A.me;
+  mountProfileEditor($('#pf-box'), {
+    profile: { displayName: m.displayName || nameOf(m), photoURL: m.photoURL || '', phone: m.phone || '', country: m.country || '', bio: m.bio || '' },
+    api: papi(m.id), toast, hasGoogle: !!googlePhoto(),
+    onChange: (P) => { Object.assign(m, { displayName: P.displayName, photoURL: P.photoURL || '', phone: P.phone, country: P.country, bio: P.bio }); paintMe(); },
+  });
+}
+$('#me-card').onclick = openMyProfile;
+$('#me-card').onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openMyProfile(); } };
 $('#menu-btn').onclick = () => { $('#side').classList.add('open'); $('#scrim').hidden = false; };
 $('#scrim').onclick = () => { $('#side').classList.remove('open'); $('#scrim').hidden = true; };
 
 function start(me) {
-  $('#me-name').textContent = me.name; $('#me-av').textContent = initials(me.name);
+  A.me = me; paintMe();
   $('#login').hidden = true; $('#app').hidden = false;
   render();
-}
-
-// ---------- Vista previa de la rama valentina: datos de ejemplo, nada se guarda ----------
-if (PREVIEW) {
-  const ts = (d) => ({ toDate: () => new Date(Date.now() - d * 864e5), toMillis: () => Date.now() - d * 864e5 });
-  A.students = [
-    { id: 'demo1', displayName: 'Camila Rojas', email: 'camila@gmail.com', plan: 'mensual', paymentStatus: 'ok', accessLevel: 2, paidInstallments: 3, installments: 9, currentPeriodEnd: ts(-12), createdAt: ts(90) },
-    { id: 'demo2', displayName: 'Paula Fuentes', email: 'paula@gmail.com', plan: 'completo', paymentStatus: 'ok', accessLevel: 3, createdAt: ts(200) },
-    { id: 'demo3', displayName: 'Andrea Soto', email: 'andrea@correo.com', plan: 'mensual', paymentStatus: 'overdue', accessLevel: 1, paidInstallments: 1, createdAt: ts(40) },
-    { id: 'demo4', displayName: 'Juanita Pérez', email: 'juanita@gmail.com', plan: 'none', paymentStatus: 'none', ownedLevels: [3], createdAt: ts(300) },
-    { id: 'demo6', displayName: 'María González', email: 'maria@correo.com', plan: 'none', paymentStatus: 'none', ownedLevels: [2], createdAt: ts(280) },
-    { id: 'demo5', displayName: 'Josefa Muñoz', email: 'josefa@gmail.com', plan: 'none', paymentStatus: 'none', createdAt: ts(3) },
-  ];
-  A.questions = [{ id: 'q1', uid: 'demo1', lessonKey: 'espacios_0_1', text: '¿Puedo hacer la limpieza de un espacio a distancia?', createdAt: ts(1) }];
-  A.tickets = [{ id: 't1', uid: 'demo3', topic: 'Pagos', message: 'Cambié de tarjeta y no sé cómo actualizarla.', createdAt: ts(2) }];
-  A.posts = [{ id: 'p1', ch: 'general', authorName: 'Camila Rojas', text: '¡Hoy terminé el Nivel 1! Gracias Maestra.', createdAt: ts(1) }];
-  api = async () => {};
-  data.payments = async (uid) => (A.payments[uid] ||= uid === 'demo1' ? [{ id: 'x', concept: 'Cuota 3 de 9', amount: 55, status: 'paid', createdAt: ts(18) }] : []);
-  data.notify = async () => {};
-  data.answer = async (q) => { A.questions = A.questions.filter((x) => x.id !== q.id); };
-  data.closeTicket = async (t) => { A.tickets = A.tickets.filter((x) => x.id !== t.id); };
-  data.deletePost = async (id) => { A.posts = A.posts.filter((p) => p.id !== id); };
-  data.saveConfig = async (d) => Object.assign(A.config, d);
-  $('#ribbon').hidden = false;
-  start({ name: 'Modo revisión' });
-  await new Promise(() => {});
 }
 
 // ---------- Sesión de la Maestra ----------
@@ -312,6 +322,21 @@ const ERR = {
 const say = (m, ok) => { const el = $('#lg-msg'); el.textContent = m; el.className = ok ? 'bye' : 'muted'; el.hidden = !m; };
 const lock = (v) => document.querySelectorAll('#lg-form button').forEach((b) => (b.disabled = v));
 
+// Alumnas en vivo: apenas alguien se registra aparece aquí sin recargar
+const DAY = 864e5;
+const isNew = (u) => u.createdAt?.toMillis && Date.now() - u.createdAt.toMillis() < 7 * DAY;
+let liveReady = false, liveOff = null;
+function watchStudents() {
+  liveOff?.();
+  liveOff = onSnapshot(query(collection(db, 'users'), orderBy('createdAt', 'desc')), (snap) => {
+    A.students = snap.docs.map((d) => ({ id: d.id, ...d.data() })).filter((u) => u.role !== 'admin');
+    if (liveReady) snap.docChanges().filter((c) => c.type === 'added' && c.doc.data().role !== 'admin').forEach((c) => toast(`Nueva alumna registrada: ${nameOf({ ...c.doc.data() })}`));
+    liveReady = true;
+    const a = document.activeElement, typing = a && /INPUT|TEXTAREA|SELECT/.test(a.tagName) && a.value && a.id !== 'sq';
+    if (!typing && !$('#dlg').open && ['alumnas', 'pagos', 'mensajes'].includes(S.view)) render(false);
+    else paintNav();
+  }, (e) => console.warn('alumnas', e.code));
+}
 async function enter(u) {
   say('Abriendo tu portal…', true);
   try {
@@ -324,8 +349,9 @@ async function enter(u) {
     if (!me.admin) { await signOut(auth); return say('Esta cuenta no es la de la Maestra. Las alumnas entran por el aula.'); }
     await u.getIdToken(true);
     await loadAll();
+    watchStudents();
     const p = (await getDoc(doc(db, 'users', u.uid))).data() || {};
-    start({ name: p.displayName || 'Maestra Holística' });
+    start({ id: u.uid, ...p, displayName: p.displayName || 'Maestra Holística' });
   } catch (e) { console.error(e); say(e.message || 'No pudimos abrir el portal. Inténtalo de nuevo.'); }
 }
 $('#lg-form').onsubmit = async (e) => {

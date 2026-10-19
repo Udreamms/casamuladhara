@@ -3,6 +3,7 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
 import { getAuth } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 import { getFirestore } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
+import { getStorage } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-storage.js';
 
 export const firebaseConfig = {
   apiKey: 'AIzaSyDG8ariC_HJCIXUamYcXuLsKvZnlmGxl3A',
@@ -17,3 +18,4 @@ export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 // La base de datos del proyecto se llama "casamuladhara" (no "(default)")
 export const db = getFirestore(app, 'casamuladhara');
+export const storage = getStorage(app);

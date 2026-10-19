@@ -2,6 +2,7 @@
 // Todo lo personal vive en users/{uid}/…; las reglas (firestore.rules) impiden leer lo de otra alumna.
 import { auth, db } from './firebase.js';
 import { PREVIEW, startPreview } from './preview.js';
+import { profileApi, googlePhoto } from './profile.js';
 import { onAuthStateChanged, onIdTokenChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 import {
   doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, addDoc, query, orderBy, limit,
@@ -22,7 +23,7 @@ const ago = (ts) => {
   return ts.toDate().toLocaleDateString('es', { day: 'numeric', month: 'short' });
 };
 const fdate = (ts) => (ts?.toDate ? ts.toDate().toLocaleDateString('es', { day: 'numeric', month: 'short', year: 'numeric' }) : '');
-const person = (name, uid) => ({ who: name, ini: initials(name), c: colorFor(uid || name) });
+const person = (name, uid, photo) => ({ who: name, ini: initials(name), c: colorFor(uid || name), photo: photo || '' });
 
 // Clave estable de cada clase: nivel_módulo_clase
 export const lessonKey = (levelId, i, j) => `${levelId}_${i}_${j}`;
@@ -85,6 +86,7 @@ const CM = {
   // tokens antiguos sin lvls: todos los niveles hasta lvl
   lvls: isAdmin ? [1, 2, 3, 4, 5] : Array.isArray(token.claims.lvls) ? token.claims.lvls : Array.from({ length: Number(token.claims.lvl) || 0 }, (_, i) => i + 1),
   blocked: p.blocked === true,
+  editor: { api: profileApi(uid), hasGoogle: !!googlePhoto() },
   profile: { ...p, name, ini: initials(name), c: colorFor(uid), accessLevel: Number(p.accessLevel) || 1, plan: p.plan || 'none', paymentStatus: p.paymentStatus || 'none' },
   progress: {}, doneAt: {}, notes: {}, questions: {}, tickets: [], payments: [], notifications: [],
   posts: [], likes: new Set(), students: [],
@@ -123,14 +125,19 @@ CM.ticket = async (topic, message) => {
   CM.tickets.unshift({ id: ref.id, topic, message, status: 'open' });
 };
 CM.fdate = fdate;
+// Tras guardar el perfil: refresca el nombre y la foto que usa el aula
+CM.applyProfile = (P) => {
+  const n = P.displayName || CM.profile.name;
+  Object.assign(CM.profile, { name: n, ini: initials(n), displayName: P.displayName, photoURL: P.photoURL || '', phone: P.phone || '', country: P.country || '', bio: P.bio || '' });
+};
 
 // ---- Comunidad (publicaciones compartidas entre alumnas, sin correos ni datos privados) ----
 let rawPosts = [], rawReplies = [];
 const rebuild = () => {
   const byPost = {};
-  rawReplies.slice().reverse().forEach((r) => (byPost[r.postId] ||= []).push({ ...person(r.authorName, r.authorUid), karen: r.isTeacher, txt: r.text, id: r.id, mine: r.authorUid === uid }));
+  rawReplies.slice().reverse().forEach((r) => (byPost[r.postId] ||= []).push({ ...person(r.authorName, r.authorUid, r.authorPhoto), karen: r.isTeacher, txt: r.text, id: r.id, mine: r.authorUid === uid }));
   CM.posts = rawPosts.map((x) => ({
-    id: x.id, ch: x.ch, ...person(x.authorName, x.authorUid), karen: x.isTeacher, when: ago(x.createdAt), txt: x.text,
+    id: x.id, ch: x.ch, ...person(x.authorName, x.authorUid, x.authorPhoto), karen: x.isTeacher, when: ago(x.createdAt), txt: x.text,
     likes: x.likeCount || 0, liked: CM.likes.has(x.id), replies: byPost[x.id] || [], mine: x.authorUid === uid,
   }));
   CM.onPosts();
@@ -147,10 +154,10 @@ onSnapshot(query(collection(db, 'replies'), ...inFree, orderBy('createdAt', 'des
 onSnapshot(mine('likes'), (s) => { CM.likes = new Set(s.docs.map((d) => d.id)); rebuild(); }, (e) => console.warn('likes', e.code));
 
 CM.post = (ch, text) => addDoc(collection(db, 'posts'), {
-  ch, text, authorUid: uid, authorName: name, isTeacher: isAdmin, likeCount: 0, createdAt: serverTimestamp(),
+  ch, text, authorUid: uid, authorName: CM.profile.displayName || CM.profile.name, authorPhoto: CM.profile.photoURL || '', isTeacher: isAdmin, likeCount: 0, createdAt: serverTimestamp(),
 });
 CM.reply = (postId, text, ch) => addDoc(collection(db, 'replies'), {
-  postId, ch, text, authorUid: uid, authorName: name, isTeacher: isAdmin, createdAt: serverTimestamp(),
+  postId, ch, text, authorUid: uid, authorName: CM.profile.displayName || CM.profile.name, authorPhoto: CM.profile.photoURL || '', isTeacher: isAdmin, createdAt: serverTimestamp(),
 });
 CM.toggleLike = async (postId) => {
   const b = writeBatch(db), likeRef = me(`likes/${postId}`), postRef = doc(db, 'posts', postId);

@@ -7,6 +7,7 @@ import { getFirestore as adminDb } from 'firebase-admin/firestore';
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithCustomToken, signOut } from 'firebase/auth';
 import { setLogLevel } from 'firebase/firestore';
+import { getStorage, ref as sref, uploadBytes, deleteObject, getBytes } from 'firebase/storage';
 import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, collection, collectionGroup, getDocs, query,
   orderBy, limit, serverTimestamp, writeBatch, increment, where } from 'firebase/firestore';
 
@@ -33,7 +34,7 @@ const login = async (u) => {
 let pass = 0, fail = 0;
 const ok = (name, cond) => { cond ? pass++ : fail++; console.log(`${cond ? '  ✔' : '  ✘ FALLA'} ${name}`); };
 const allowed = async (name, fn) => { try { await fn(); ok(name, true); } catch (e) { ok(`${name}  → ${e.code} ${e.message}`, false); } };
-const denied = async (name, fn) => { try { await fn(); ok(`${name} (debía negarse)`, false); } catch (e) { ok(name, e.code === 'permission-denied'); if (e.code !== 'permission-denied') console.log('     ', e.code, e.message); } };
+const denied = async (name, fn) => { try { await fn(); ok(`${name} (debía negarse)`, false); } catch (e) { const dn = e.code === 'permission-denied' || e.code === 'storage/unauthorized'; ok(name, dn); if (!dn) console.log('     ', e.code, e.message); } };
 const profile = (u, extra = {}) => ({ uid: u.uid, email: u.email, displayName: u.name, photoURL: '', role: 'student_free', accessLevel: 1, plan: 'none', paymentStatus: 'none', createdAt: serverTimestamp(), lastLogin: serverTimestamp(), ...extra });
 
 // A y B tienen el Nivel 1 abierto; F es una cuenta gratis (sin niveles)
@@ -64,6 +65,35 @@ try {
   await denied('A NO borra el estado de pago pendiente', () => updateDoc(doc(a.db, 'users', A.uid), { paymentStatus: 'ok' }));
   await denied('A NO edita el perfil de B', () => updateDoc(doc(a.db, 'users', B.uid), { displayName: 'hackeada' }));
   await allowed('A actualiza su último ingreso', () => updateDoc(doc(a.db, 'users', A.uid), { lastLogin: serverTimestamp() }));
+
+  console.log('\nEditar perfil y foto');
+  const long = (n) => 'x'.repeat(n);
+  await allowed('A edita nombre, teléfono, país y bio', () => updateDoc(doc(a.db, 'users', A.uid), { displayName: 'Ana María', phone: '+56 9 1234 5678', country: 'Chile', bio: 'Hola' }));
+  await allowed('A pone su foto (https)', () => updateDoc(doc(a.db, 'users', A.uid), { photoURL: 'https://example.com/ana.jpg' }));
+  await denied('A NO pone una foto no https', () => updateDoc(doc(a.db, 'users', A.uid), { photoURL: 'javascript:alert(1)' }));
+  await denied('A NO pone una foto http', () => updateDoc(doc(a.db, 'users', A.uid), { photoURL: 'http://example.com/a.jpg' }));
+  await denied('A NO deja el nombre vacío', () => updateDoc(doc(a.db, 'users', A.uid), { displayName: '' }));
+  await denied('A NO pone un nombre de 121 letras', () => updateDoc(doc(a.db, 'users', A.uid), { displayName: long(121) }));
+  await denied('A NO pone una bio de 501 letras', () => updateDoc(doc(a.db, 'users', A.uid), { bio: long(501) }));
+  await denied('A NO pone un teléfono de 41 caracteres', () => updateDoc(doc(a.db, 'users', A.uid), { phone: long(41) }));
+  await denied('A NO cambia su correo', () => updateDoc(doc(a.db, 'users', A.uid), { email: 'otra@x.com' }));
+  await denied('A NO edita junto con el rol', () => updateDoc(doc(a.db, 'users', A.uid), { bio: 'x', role: 'admin' }));
+  await denied('A NO edita los datos de B', () => updateDoc(doc(a.db, 'users', B.uid), { phone: '1' }));
+  let fid;
+  await allowed('A publica con su foto actual', async () => { fid = (await addDoc(collection(a.db, 'posts'), { ch: 'presentaciones', text: 'hola con foto', authorUid: A.uid, authorName: 'Ana María', authorPhoto: 'https://example.com/ana.jpg', isTeacher: false, likeCount: 0, createdAt: serverTimestamp() })).id; });
+  await denied('A NO publica con la foto de otra', () => addDoc(collection(a.db, 'posts'), { ch: 'presentaciones', text: 'x', authorUid: A.uid, authorName: 'Ana María', authorPhoto: 'https://example.com/otra.jpg', isTeacher: false, likeCount: 0, createdAt: serverTimestamp() }));
+  await allowed('A borra esa publicación', () => deleteDoc(doc(a.db, 'posts', fid)));
+  await allowed('A restaura su nombre y foto', () => updateDoc(doc(a.db, 'users', A.uid), { displayName: A.name, photoURL: '', phone: '', country: '', bio: '' }));
+  const st = (u) => getStorage(u.app, 'gs://casamuladhara.firebasestorage.app');
+  const jpg = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0, 16, 0x4a, 0x46, 0x49, 0x46]);
+  const apath = `users/${A.uid}/avatar-test.jpg`;
+  await allowed('A sube su foto a su carpeta', () => uploadBytes(sref(st(a.db), apath), jpg, { contentType: 'image/jpeg' }));
+  await allowed('A lee su foto', () => getBytes(sref(st(a.db), apath)));
+  await denied('B NO lee la foto de A', () => getBytes(sref(st(b.db), apath)));
+  await denied('B NO sube a la carpeta de A', () => uploadBytes(sref(st(b.db), `users/${A.uid}/x.jpg`), jpg, { contentType: 'image/jpeg' }));
+  await denied('A NO sube un archivo que no es imagen', () => uploadBytes(sref(st(a.db), `users/${A.uid}/x.txt`), new Uint8Array([104, 105]), { contentType: 'text/plain' }));
+  await denied('A NO sube al material del curso', () => uploadBytes(sref(st(a.db), 'courses/x.jpg'), jpg, { contentType: 'image/jpeg' }));
+  await allowed('A borra su foto', () => deleteObject(sref(st(a.db), apath)));
 
   console.log('\nAvance y notas');
   await allowed('A guarda avance propio', () => setDoc(doc(a.db, 'users', A.uid, 'progress', 'pendulo_0_0'), { done: true, updatedAt: serverTimestamp() }));

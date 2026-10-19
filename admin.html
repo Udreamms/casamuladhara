@@ -81,6 +81,15 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 .av{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font:700 .8rem/1 var(--f-body);color:#1f3f32;background:var(--c,#f2c66d);flex-shrink:0}
 .av.sm{width:32px;height:32px;font-size:.72rem}
 .av.karen{background:#1f3f32;color:#f2c66d;border:1.5px solid #f2c66d}
+.av.ph{background-size:cover;background-position:center;background-repeat:no-repeat;color:transparent}
+.side-foot.edit{cursor:pointer;border-radius:12px;transition:background .15s}
+.side-foot.edit:hover{background:rgba(236,231,211,.08)}
+.side-foot .edit-hint{display:block;color:var(--on-brand-muted);font-size:.7rem;text-decoration:underline;text-underline-offset:2px}
+dialog{border:1px solid var(--line);border-radius:20px;background:var(--surface);color:var(--fg);padding:26px 24px;width:min(460px,92vw);max-height:90vh;overflow:auto}
+dialog::backdrop{background:rgba(10,20,16,.55)}
+dialog h3{margin:0 0 4px}
+dialog .x{float:right;background:none;border:0;font-size:1.5rem;line-height:1;color:var(--muted);cursor:pointer}
+dialog label input,dialog label textarea{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px;width:100%}
 
 .main{min-width:0;display:flex;flex-direction:column}
 .topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:15;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:12px clamp(16px,3vw,36px)}
@@ -177,14 +186,13 @@ table.tbl{width:100%;border-collapse:collapse;font-size:.88rem;min-width:520px}
         <path d="M-2.6 -20 C-9 -24 -14 -31 -17 -39 C-12 -33 -7 -27 -3.4 -24 Z M2.6 -20 C9 -24 14 -31 17 -39 C12 -33 7 -27 3.4 -24 Z M-3.6 -20.5 L3.6 -20.5 L2.2 6 L1.2 30 L-1.2 30 L-2.2 6 Z"/>
       </g>
     </symbol></defs></svg>
-<div class="ribbon" id="ribbon" hidden>Modo revisión · datos de ejemplo, nada se guarda</div>
 <div class="app" id="app" hidden>
   <aside class="side" id="side">
     <a class="brand" href="index.html" style="text-decoration:none" aria-label="Volver al sitio de Casa Muladhara"><svg><use href="#mark"/></svg><div><b>CASA MULADHARA</b><small>MAESTRA</small></div></a>
     <nav class="nav" id="nav" aria-label="Secciones"></nav>
-    <div class="side-foot">
+    <div class="side-foot edit" id="me-card" role="button" tabindex="0" title="Editar mi perfil y mi foto">
       <span class="av karen" id="me-av">MH</span>
-      <div class="who"><b id="me-name"></b><small>Maestra Holística</small></div>
+      <div class="who"><b id="me-name"></b><small>Maestra Holística</small><span class="edit-hint">Editar mi perfil</span></div>
     </div>
     <a class="logout" href="aula.html" style="text-decoration:none"><svg viewBox="0 0 24 24"><path d="M4 6h7v13H4zM13 6h7v13h-7"/></svg>Ver el aula</a>
     <button class="logout" id="logout"><svg viewBox="0 0 24 24"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/></svg>Cerrar sesión</button>
@@ -212,6 +220,7 @@ table.tbl{width:100%;border-collapse:collapse;font-size:.88rem;min-width:520px}
     <a class="forgot" href="login.html" style="text-align:center">¿Eres alumna? Entra por el aula</a>
   </form>
 </div>
+<dialog id="dlg"><button class="x" id="dlg-x" aria-label="Cerrar">×</button><div id="dlg-body"></div></dialog>
 <div class="toast" id="toast" role="status" hidden></div>
 
 <script>
