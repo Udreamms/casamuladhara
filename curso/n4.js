@@ -514,7 +514,7 @@ const niFan=o=>{const cx=300,cy=292,P=(r,a)=>[cx+r*Math.cos(a),cy-r*Math.sin(a)]
    const txt=L.map(([t,c],j)=>{const d=(j-mid)*lh,x=tx-d*Math.sin(rr),y=ty+d*Math.cos(rr);return `<text class="${c}" x="${F(x)}" y="${F(y)}" transform="rotate(${F(rot)} ${F(x)} ${F(y)})" font-size="${c?(R.fs||10)-1.5:R.fs||10}" fill="${on?'#fff':'#1f3f32'}">${t}</text>`}).join('');
    g+=`<g class="nig-s${on?' on':''}${h===1?' hot':h===-1?' cold':''}${R.st?' st':''}" ${R.st?'':`${rxa(o.act,R.k,i)} role="button" tabindex="0" aria-label="${it.t.replace('\n',' ')}" aria-pressed="${!!on}"`}><path d="${seg(R.r0,R.r1,a1,a2)}" fill="${on?it.on||R.on:it.c||R.fill}"/>${txt}</g>`})});
  return `<figure class="nig"><svg viewBox="0 0 600 334" role="group" aria-label="${o.label}">${g}${o.inner?`<path d="M${cx-o.inner} ${cy}A${o.inner} ${o.inner} 0 0 1 ${cx+o.inner} ${cy}" fill="none" stroke="#a89a6e" stroke-width="1.5"/>`:''}<path d="M${cx-282} ${cy}A282 282 0 0 1 ${cx+282} ${cy}" fill="none" stroke="#a89a6e" stroke-width="5"/><circle cx="${cx}" cy="${cy}" r="40" fill="#1f3f32"/><svg x="${cx-26}" y="${cy-34}" width="52" height="52" style="color:#ece7d3"><use href="#mark"/></svg></svg>${o.cap?`<figcaption>${o.cap}</figcaption>`:''}</figure>`};
-const niOrig=(k,src,alt,html)=>{const v=st(k,0);return (v?`<img class="ni-orig ni-in" src="${N4P}nino/${src}" alt="${alt}">`:html)+`<div class="dk-cta" style="justify-content:center"><button class="btn btn-ghost btn-sm" ${rxa('set',k,v?0:1)}>${v?'Ver el gráfico interactivo':'Ver la lámina original'}</button></div>`};
+const niOrig=(k,src,alt,html)=>{const v=st(k,0);return (v?`<img class="ni-orig ni-in" src="${N4P}${src.includes('/')?src:'nino/'+src}" alt="${alt}">`:html)+`<div class="dk-cta" style="justify-content:center"><button class="btn btn-ghost btn-sm" ${rxa('set',k,v?0:1)}>${v?'Ver el gráfico interactivo':'Ver la lámina original'}</button></div>`};
 const njGo=(off,t,cls)=>`<button class="btn ${cls||'btn-primary'} btn-sm" data-les="${S.lesson[0]},${S.lesson[1]+off}">${t}</button>`;
 
 /* ----- 1 · Bienvenida, agenda y oración ----- */
@@ -1128,7 +1128,7 @@ RICH.ta10=()=>dkH('La formación','Los tres gráficos de la formación','Una pue
 
 /* ----- 7 · El gráfico de Constelación Familiar ----- */
 RICH.ta11=()=>dkH('Constelación Familiar','El gráfico de Constelación Familiar','Explóralo: toca el linaje, un tema, la generación y la escala.')+
- `<div class="ni tgx nj-two"><div class="nj-fig">${niOrig('ta11O','constelacion.webp','Lámina original del gráfico de Constelación Familiar de Casa Muladhara',tgChart())}</div>${tgReadRow()}
+ `<div class="ni tgx nj-two"><div class="nj-fig">${niOrig('ta11O','trans/constelacion.webp','Lámina original del gráfico de Constelación Familiar de Casa Muladhara',tgChart())}</div>${tgReadRow()}
  <p class="tg-pr">${TG_PRAY}</p></div>`;
 RICH.ta12=()=>{const l=st('tgl',-1);
  return dkH('Paso 1','El centro: ¿de qué linaje viene?','Toca un linaje en el centro del gráfico o aquí.')+
@@ -1404,3 +1404,168 @@ RICH.tb19=()=>dkH('Repaso en voz alta','Comprobemos lo aprendido','Respondan en 
 RICH.tb20=()=>dkH('Cierre de la clase','Tarea para la próxima clase','Una lealtad o repetición en tu árbol.')+
  `<div class="ni dk-grid c2" style="align-items:start"><div class="ni-task">${n3ck('tbta',[['lupa','Elige una lealtad o una repetición que reconozcas en tu árbol'],['diana','Léela en el gráfico de Constelación: linaje, generación, escala y tema'],['limpia','Limpia directo o investiga en el Mapa'],['paloma','Cierra con la oración del linaje'],['libro','Completa la ficha y anota lo que sentiste durante la semana']],['Marca cada punto cuando lo tengas.','¡Listo! Trae tu ficha a la Clase 3.'])}</div>
  <div style="display:grid;gap:10px">${niBox('d','Importante','Si el tema que aparece es Votos o Transgeneracional, anótalo y no lo trabajes todavía: lo veremos en la Clase 3. Trae tu ficha.')}<div class="dk-cta" style="flex-wrap:wrap"><button class="btn btn-ghost btn-sm" data-les="${S.lesson[0]},6">Abrir el gráfico de Constelación</button><button class="btn btn-ghost btn-sm" data-les="${S.lesson[0]},${S.lesson[1]-1}">Volver a la ficha</button></div></div></div>`;
+
+/* ---------- Nivel 4 · Formación Transgeneracional · Clase 3 ---------- */
+(function(){const c=document.createElement('style');c.id='tc-css';c.textContent=`
+.tc-mem{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-content:start}
+.tc-mem button{all:unset;box-sizing:border-box;cursor:pointer;display:grid;gap:6px;align-content:start;padding:14px;border-radius:16px;border:1px solid var(--nb-line);background:var(--nb-paper);color:var(--nb-ink);animation:niUp .45s both;transition:transform .25s,background .25s,box-shadow .25s}
+.tc-mem button.i{background:var(--ni-lil);border-color:var(--ni-lil)}
+.tc-mem small{font:600 .56rem/1 var(--f-caps);letter-spacing:.16em;text-transform:uppercase;color:var(--ni-lil2)}
+.tc-mem b{font:400 1.08rem/1.2 var(--f-display)}
+.tc-mem span{font-size:.84rem;line-height:1.45;color:var(--nb-soft)}
+.tc-mem em{font-style:normal;font-size:.7rem;color:var(--ni-lil2)}
+.tc-mem button[aria-pressed="true"]{transform:translateY(-3px);box-shadow:0 0 0 2px var(--ni-lil2)}
+.tc-mem button.seen:not([aria-pressed="true"]) b::after{content:" ✓";color:#5c7a32}
+.tc-side{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:16px;align-items:start}
+.tc-r3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.tc-vow{display:grid;gap:8px}
+.tc-vow button{all:unset;box-sizing:border-box;cursor:pointer;padding:12px 16px;border-radius:12px;border:1px solid var(--nb-line);background:var(--nb-paper);font:italic 400 1.08rem/1.35 var(--f-display);color:var(--nb-ink);animation:niUp .45s both;transition:transform .25s,background .25s}
+.tc-vow button[aria-pressed="true"]{background:var(--ni-olv);color:#fff;transform:translateX(5px)}
+.tc-name{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+.tc-name label{display:grid;gap:4px;font-size:.8rem;color:var(--nb-soft);flex:1 1 200px}
+.tc-name input{all:unset;box-sizing:border-box;width:100%;padding:8px 2px;border-bottom:1.5px dashed var(--ni-lil2);font:400 1.1rem var(--f-display);color:var(--nb-ink)}
+@media (max-width:760px){.tc-side>.nj-fig{order:-1}.tc-mem{grid-template-columns:1fr}.tc-side{grid-template-columns:1fr}.tc-r3{grid-template-columns:1fr}}
+`;document.head.appendChild(c)})();
+
+/* el gráfico Transgeneracional: linaje al centro, 11 memorias profundas y 26 memorias del linaje */
+const TR_I=['Secretos','Adulterio','Poligamia','Adopciones','Esterilidad','Guerras','Inanición','Violaciones','Crímenes','Asesinatos','Incestos'];
+const TR_O=['Abuso de la\nJerarquía','Enfermedades\nMentales','Madre soltera','Matrimonio\nforzado','Doble por el\nnombre','Exclusión de un\nmiembro familiar','Abortos /\ngemelos','Divorcio /\nSeparación','Niños no\nreconocidos','Hijo no deseado','Discriminación\nracial','Abusos / tortura','Electra / Edipo','Pederastia','Votos\n(ir a Votos)','Accidentes y\ntragedias','Enfermedad /\npandemia','Narcisismo / Psico-\npatía / Machismo','Esclavitud / terro-\nrismo / prisión','Pérdidas / Asuntos\nfinancieros','Deportaciones /\ninmigraciones','Muertes por\ncataclismos','Intolerancia a\nla felicidad','Obligaciones\nreligiosas','Deudas transge-\nneracionales','Muertes\ntempranas'];
+const tcClean=t=>t.replace(/-\n/,'').replace(/\n/g,' ');
+RX.trc=(k,v)=>{const K='tr'+k;RS[K]=RS[K]===+v?-1:+v;render(false)};
+const trChart=o=>{o=o||{};const H=o.hot&&[].concat(o.hot);return niFan({label:'Gráfico Transgeneracional',act:'trc',inner:50,
+ sel:(k,i)=>o.sel!==undefined?o.sel===k+i:st('tr'+k,-1)===i,
+ hot:H||o.ring?(k,i)=>o.ring?(k===o.ring?0:-1):(k==='l'?0:H.includes(k+i)?1:-1):0,
+ rings:[{k:'l',r0:62,r1:118,items:[{t:'Linaje\nMaterno',c:'#f6d3ef',on:'#b0589a'},{t:'Linaje\nPaterno',c:'#c9c9f5',on:'#5a5ab0'}],m:'tan',fs:11},
+  {k:'i',r0:118,r1:172,items:TR_I,fill:'#f8f5ec',on:'#7a5aa6',m:'rad',fs:8.6},
+  {k:'o',r0:172,r1:280,items:TR_O,fill:'#ffffff',on:'#3f7d6e',m:'rad',fs:7.4}],cap:o.cap===0?'':o.cap||'Toca el linaje, una memoria del anillo interior y una del exterior.'})};
+const trRead=()=>{const l=st('trl',-1),i=st('tri',-1),e=st('tro',-1);return [l>=0?TG_L[l]:'',i>=0?TR_I[i]:'',e>=0?tcClean(TR_O[e]):'']};
+const tcRow=(L,r)=>`<div class="ni-read tc-r3 ni-st">${L.map((x,i)=>`<div><small>${i+1} · ${x}</small><span>${r[i]||'—'}</span></div>`).join('')}</div>`;
+
+/* el gráfico de Votos o Pactos: nivel al centro, 27 votos y la escala de 0 a 100 */
+const TV_N=['Bajo','Medio','Alto','Muy alto'];
+const TV_V=['Maldiciones (cono-\ncidas o no conocidas)','Votos de pobreza','Depresiones y\nadicciones','Seguir a un\nfallecido','Votos de castidad','Votos de obediencia','Secretos','Idealización','Votos de ansiedad','Votos de enfermedad','No recibir ayuda\no regalos','Votos de miedo\na Dios','Compromisos con-\nvertidos en votos','Creencias limitantes','Votos de sufrimiento','Seguir a un salvador','Votos de silencio','Votos de celibato','Votos religiosos\nde cualquier tipo','Renunciar al amor','Votos de soledad','Votos de separación','Votos de sacrificio','Condena eterna','Deseos de muerte','Desbalance\nemocional','Otros votos'];
+RX.tvc=(k,v)=>{const K='tv'+k;RS[K]=RS[K]===+v?-1:+v;render(false)};
+const tvChart=o=>{o=o||{};const H=o.hot&&[].concat(o.hot);return niFan({label:'Gráfico de Votos o Pactos',act:'tvc',inner:50,sel:(k,i)=>st('tv'+k,-1)===i,
+ hot:H||o.ring?(k,i)=>o.ring?(k===o.ring?0:-1):(k==='v'?(H.includes(i)?1:-1):0):0,
+ rings:[{k:'n',r0:62,r1:125,items:TV_N.map((t,i)=>({t,c:['#efeafa','#e1d8f7','#cfc3f4','#b9a3f1'][i]})),on:'#6a4aa6',m:'tan',fs:11},
+  {k:'v',r0:125,r1:258,items:TV_V,fill:'#ffffff',on:'#3f7d6e',m:'rad',fs:7.4},
+  {k:'e',r0:258,r1:280,items:Array.from({length:21},(_,i)=>String(i*5)),fill:'#efe4f3',on:'#7a5aa6',m:'tan',fs:7.5}],cap:o.cap===0?'':o.cap||'Toca el voto, el nivel y la escala.'})};
+const tvRead=()=>{const v=st('tvv',-1),n=st('tvn',-1),e=st('tve',-1);return [v>=0?tcClean(TV_V[v]):'',n>=0?TV_N[n]:'',e>=0?String(e*5):'']};
+const tvDe=t=>t?t.replace(/^Votos (de |religiosos )?/,m=>m==='Votos religiosos '?'religiosos ':'').toLowerCase():'';
+
+/* ----- 1 · Bienvenida y agenda ----- */
+RICH.tc1=()=>`<div class="ni tgx">${nbHero('Formación Transgeneracional · Clase 3','Memorias y votos','del linaje','Dos gráficos para profundizar: el Transgeneracional, con las memorias del linaje, y Votos o Pactos, para medir un voto heredado y anularlo con su oración.',['Transgeneracional','Memorias','Votos o Pactos','Oraciones'],'Karen Oyarce · Maestra Holística',
+ `<div class="ni-ph"><img src="${N4P}trans/c3-portada.webp" alt="Unas manos sostienen una fotografía antigua de una familia: un padre, una madre y una niña"><svg class="ni-arc" viewBox="0 0 200 104" aria-hidden="true"><path pathLength="1" d="M10 100a90 90 0 0 1 180 0" stroke="#f3ecd8" stroke-width="16"/><path pathLength="1" d="M34 100a66 66 0 0 1 132 0" stroke="#e6dcf2" stroke-width="16"/><path pathLength="1" d="M58 100a42 42 0 0 1 84 0" stroke="#b9a3f1" stroke-width="16"/><circle cx="100" cy="100" r="18" fill="#3b4a24"/></svg></div>`)}</div>`;
+RICH.tc2=()=>niAgenda('Clase 3',['Revisión de la tarea y ronda','El gráfico Transgeneracional','Las memorias del linaje','Memorias de violencia: leer con cuidado','La oración del linaje','El gráfico de Votos o Pactos','La oración para anular votos','Ejemplo, práctica, repaso y tarea'],
+ ['Leer el gráfico Transgeneracional','Reconocer los grupos de memorias del linaje','Leer con cuidado las memorias de violencia','Medir un voto heredado y anularlo con la oración']);
+
+/* ----- 2 · Revisión de la tarea y ronda ----- */
+const TC_RV=['¿Qué tema apareció en el gráfico de Constelación?','¿Limpiaste directo o investigaste en el Mapa?','¿Qué notaste durante la semana?','¿A quién le apareció Votos o Transgeneracional? Lo trabajamos hoy','¿Qué duda te quedó?'];
+RICH.tc3=()=>{const s=st('tc3',-1),t=st('tgt',-1),r=tgRead();
+ return dkH('Lo que trajiste','Revisemos la tarea de la semana','La lealtad o repetición que limpiaste. Toca una pregunta para anotar tu respuesta.')+
+ `<div class="ni tgx" style="display:grid;gap:14px"><div class="dk-grid c2" style="align-items:start">
+ <div style="display:grid;gap:10px">${tgReadRow()}${t>=24?niBox('d','Tu tema: '+tgT(t),'Es justo lo que trabajamos hoy. '+(t===24?'Lo verás en el gráfico de Votos o Pactos.':'Lo verás en el gráfico Transgeneracional.')):r.every(Boolean)?niBox('l','Tu lectura de la semana','Linaje '+r[0].toLowerCase()+', '+r[1]+', escala '+r[2]+': '+r[3].toLowerCase()+'.'):niNote('Aquí aparece la lectura que marcaste en el gráfico de Constelación.')}</div>
+ <div style="display:grid;gap:10px">${tbList('tc3',TC_RV)}${s>=0?`<div class="ni-in">${n3area('tc3a'+s,TC_RV[s],'Lo que noté…')}</div>`:''}</div></div>
+ ${niQ('Compartir es voluntario. Lo que se dice en el grupo, queda en el grupo.')}</div>`};
+const TC_RO=[['lupa','Lo que comprendí','Algo de mi historia familiar que hoy miro distinto.'],['luna','Lo que cambió','Algo que sentí, soñé o noté distinto durante la semana.'],['chat','Lo que me pregunto','Una historia de mi árbol que todavía quiero mirar.']];
+RICH.tc4=()=>{const s=st('tc4',-1);
+ return dkH('La ronda','Ronda de descubrimientos','Elige una tarjeta y prepara tu frase.')+
+ `<div class="ni tgx" style="display:grid;gap:14px"><div class="nk-cards">${TC_RO.map((x,i)=>`<button ${rxa('set','tc4',s===i?-1:i)} ${pressed(s===i)} style="animation-delay:${i*.08}s${i===2&&s!==i?';background:var(--ni-lil)':''}">${ic(x[0],24)}<b>${x[1]}</b><span>${x[2]}</span>${st('tc4a'+i,'')?'<small>Ya la anotaste</small>':''}</button>`).join('')}</div>
+ ${s>=0?`<div class="ni-in">${n3area('tc4a'+s,TC_RO[s][1],'Una o dos frases…')}</div>`:niNote('Una o dos frases por persona.')}</div>`};
+
+/* ----- 3 · El gráfico Transgeneracional ----- */
+const TC_ST=[['l','Linaje','Materno o paterno, en el centro.'],['i','Anillo interior','11 memorias profundas del clan.'],['o','Anillo exterior','26 memorias del linaje.']];
+RICH.tc5=()=>{const s=st('tc5',-1),r=trRead();
+ return dkH('Transgeneracional','El gráfico Transgeneracional','Se lee de adentro hacia afuera. Toca cada paso o explora el gráfico.')+
+ `<div class="ni tgx" style="display:grid;gap:14px"><div class="tc-side"><div class="nj-fig">${niOrig('tc5O','trans/transgeneracional.webp','Lámina original del gráfico Transgeneracional de Casa Muladhara',trChart({ring:s>=0?TC_ST[s][0]:null,cap:s>=0?0:undefined}))}</div>
+ <div style="display:grid;gap:10px">${niBox('l','Cuándo','Cuando Constelación marca «Transgeneracional».')}${tbList('tc5',TC_ST.map(x=>`<b>${x[1]}</b> · ${x[2]}`))}${tcRow(['Linaje','Interior','Exterior'],r)}</div></div>
+ ${r.every(Boolean)?`<div class="ni-hyp ni-in"><span class="ni-tag">Tu lectura</span><p>Linaje <mark>${r[0].toLowerCase()}</mark>, memoria profunda de <mark>${r[1].toLowerCase()}</mark> y, en el anillo exterior, <mark>${r[2].toLowerCase()}</mark>.</p></div>`:''}
+ ${niQ('Se lee de adentro hacia afuera y se cierra con la oración del linaje.')}</div>`};
+
+/* ----- 4 · Las memorias del linaje ----- */
+const tcMem=(key,eb,ti,sub,items,ask)=>{const s=st(key,-1),o=st(key+'v',{}),n=Object.keys(o).length;RX['tcm_'+key]=v=>{const O=st(key+'v',{});O[v]=1;RS[key+'v']=O;RS[key]=RS[key]===+v?-1:+v;render(false)};
+ return dkH(eb,ti,sub+' Toca cada memoria para verla en el gráfico.')+
+ `<div class="ni tgx" style="display:grid;gap:14px"><div class="tc-side"><div class="tc-mem">${items.map((x,i)=>`<button class="${x[0]}${o[i]?' seen':''}" ${rxa('tcm_'+key,i)} ${pressed(s===i)} style="animation-delay:${i*.06}s"><small>Anillo ${x[0]==='i'?'interior':'exterior'}</small><b>${x[2]}</b>${s===i||o[i]?`<span${s===i?' class="ni-in"':''}>${x[3]}</span>`:'<em>Toca para ver</em>'}</button>`).join('')}</div>
+ <div class="nj-fig">${trChart({hot:s>=0?items[s][0]+items[s][1]:items.map(x=>x[0]+x[1]),sel:s>=0?items[s][0]+items[s][1]:'',cap:n===items.length?'Viste todas las memorias de este grupo.':`${n} de ${items.length} memorias vistas.`})}</div></div>
+ ${ask?tbAsk(ask):''}</div>`};
+RICH.tc6=()=>tcMem('tc6','Memorias del linaje','Lo que se ocultó','Historias que la familia calló y que siguen buscando ser vistas.',[['i',0,'Secretos','Lo que se escondió para proteger el honor o evitar el dolor.'],['i',1,'Adulterio','Relaciones paralelas, hijos o amores escondidos.'],['o',8,'Niños no reconocidos','Hijos sin el apellido o sin el lugar de su padre o su madre.'],['o',9,'Hijo no deseado','Un embarazo que llegó en un momento difícil o no fue recibido.']],'¿Qué historia de tu árbol se cuenta en voz baja?');
+RICH.tc7=()=>tcMem('tc7','Memorias del linaje','Las uniones','Cómo se unieron y se separaron nuestros ancestros marca cómo vivimos la pareja hoy.',[['o',3,'Matrimonio forzado','Uniones por obligación, conveniencia o presión familiar.'],['i',2,'Poligamia','Más de una pareja o familia al mismo tiempo.'],['o',2,'Madre soltera','Mujeres que criaron solas, a veces con vergüenza o rechazo.'],['o',7,'Divorcio / separación','Rupturas y lo que quedó pendiente entre las partes.']],'¿Qué forma de unirse o separarse se repite en tu familia?');
+RICH.tc8=()=>tcMem('tc8','Memorias del linaje','Fertilidad y nacimientos','Lo que pasó con los hijos que llegaron, los que no llegaron y los que se criaron en otro hogar.',[['i',4,'Esterilidad','Dificultad para tener hijos en una o varias generaciones.'],['o',6,'Abortos / gemelos','Embarazos que no llegaron a término y gemelos que no nacieron.'],['i',3,'Adopciones','Hijos criados por otra familia, o que llegaron por adopción.']],'¿Qué historias de nacimientos conoces en tu árbol?');
+RICH.tc9=()=>tcMem('tc9','Memorias del linaje','Exclusión y poder','Cuando alguien quedó fuera o alguien usó su lugar para dominar a otros.',[['o',5,'Exclusión de un miembro','Alguien rechazado, borrado o al que no se nombra.'],['o',0,'Abuso de la jerarquía','Autoridad usada para someter o controlar.'],['o',17,'Narcisismo / Psicopatía / Machismo','Formas de dominio que dañaron el clan.'],['o',10,'Discriminación racial','Rechazo por origen, color o pueblo.'],['o',23,'Obligaciones religiosas','Mandatos de fe impuestos o cumplidos por miedo.'],['o',4,'Doble por el nombre','Llevar el nombre de otro y parte de su destino.']]);
+RICH.tc10=()=>tcMem('tc10','Memorias del linaje','La historia colectiva','Lo que el clan vivió junto a su pueblo, su país o su época.',[['i',5,'Guerras','Combates, persecuciones y lo que se perdió en ellos.'],['i',6,'Inanición','Hambre y escasez extrema.'],['o',18,'Esclavitud / terrorismo / prisión','Pérdida de la libertad o de la seguridad.'],['o',20,'Deportaciones / inmigraciones','Dejar o perder la tierra, la lengua y la familia.'],['o',21,'Muertes por cataclismos','Terremotos, inundaciones, incendios.'],['o',16,'Enfermedad / pandemia','Epidemias que golpearon a la familia.']]);
+RICH.tc11=()=>tcMem('tc11','Memorias del linaje','Pérdidas, deudas y muertes','Lo que se perdió, lo que quedó debiendo y quienes partieron antes de tiempo.',[['o',19,'Pérdidas / asuntos financieros','Ruinas, quiebras o bienes perdidos.'],['o',24,'Deudas transgeneracionales','Lo que un ancestro quedó debiendo, material o emocionalmente.'],['o',22,'Intolerancia a la felicidad','Sentir que estar bien no está permitido.'],['o',25,'Muertes tempranas','Niños, jóvenes o padres que murieron antes de tiempo.'],['o',15,'Accidentes y tragedias','Hechos repentinos que marcaron a la familia.'],['o',1,'Enfermedades mentales','Sufrimiento psíquico que atravesó generaciones.']]);
+
+/* ----- 5 · Memorias de violencia ----- */
+const TC_CL=['Se nombra la memoria sin buscar detalles','Nunca se afirma que le pasó a una persona concreta','No se pregunta por lo que ocurrió','Si la consultante relata algo propio, se detiene la lectura, se acompaña y se sugiere apoyo profesional'];
+const TC_VQ=[['«El gráfico muestra una posible memoria de violencia en el linaje paterno.»',0],['«¿Qué le pasó exactamente a tu abuela?»',1],['La consultante cuenta algo que vivió ella: detengo la lectura y la acompaño.',0],['«A tu bisabuelo lo asesinaron.»',1]];
+RX.tcq=(k,v)=>{const [key,i]=k.split('.'),o=st(key,{});o[i]=+v;RS[key]=o;render(false)};
+RICH.tc12=()=>{const s=n3clamp(st('tc12',0),0,4),o=st('tc12q',{}),ok=TC_VQ.filter((q,i)=>o[i]===q[1]).length;
+ return dkH('Leer con cuidado','Memorias de violencia: leer con cuidado','Primero la forma de leerlas. Después, decide qué sí y qué no.')+
+ `<div class="ni tgx" style="display:grid;gap:14px"><div class="dk-grid c2" style="align-items:start"><div style="display:grid;gap:10px">
+ <div class="tb-c w"><h3>Electra / Edipo</h3><p style="font-size:.92rem">Una dinámica familiar: la hija o el hijo ocupa, en lo emocional, el lugar de pareja de su padre o su madre.</p></div>
+ <div class="tb-c" style="background:var(--ni-lil);color:#3b2a5a"><h3>Memorias de violencia</h3><p style="font-size:.92rem">Abusos / tortura · Pederastia · Violaciones · Crímenes · Asesinatos · Incestos. Hechos graves que pudo vivir el clan y que hoy pueden pesar como miedo, vergüenza o silencio.</p></div></div>
+ <div class="tb-c d"><h3 style="color:#fff">Cómo se leen</h3><div class="tb-ls">${TC_CL.map((x,i)=>i<s?`<button style="cursor:default;background:rgba(236,231,211,.1);border-color:transparent;color:#ece7d3;animation-delay:${i===s-1?0:0}s" tabindex="-1"><i>${i+1}</i><span>${x}</span></button>`:'').join('')}</div>
+ ${s<4?`<div><button class="btn btn-ghost btn-sm" style="color:#ece7d3;border-color:#d9c9ef" ${rxa('set','tc12',s+1)}>${s?'Siguiente':'Ver cómo se leen'}</button></div>`:''}</div></div>
+ <div class="tb-warn">${ic('escudo',22)}<span>Ante cualquier riesgo actual para alguien, se contacta a los servicios de emergencia.</span></div>
+ ${s>=4?`<div class="dk-sub">¿Así se lee?</div><div class="tb-quiz ni-in">${TC_VQ.map((q,i)=>{const a=o[i],r=a===undefined?'':a===q[1]?'ok':'no';return `<div class="${r}"><span>${q[0]}</span><div class="dk-chips">${['Sí','No'].map((d,j)=>`<button class="chip" ${rxa('tcq','tc12q.'+i,j)} ${pressed(a===j)}>${d}</button>`).join('')}</div></div>`}).join('')}</div>
+ ${ok===4?niQ('Así es: se nombra la memoria, nunca se afirma ni se pregunta qué pasó, y se acompaña a la persona.'):niNote(`${ok} de 4 respondidas bien.`)}`:''}
+ <div class="nj-fig" style="max-width:560px">${trChart({hot:['i7','i8','i9','i10','o11','o12','o13'],cap:'Las memorias de violencia y Electra / Edipo en el gráfico.'})}</div></div>`};
+
+/* ----- 6 · La oración del linaje ----- */
+const tcName=()=>`<div class="tc-name"><label>Tu nombre, para decir la oración<input type="text" data-rsin="tcnm" value="${esc(st('tcnm',''))}" placeholder="Escribe tu nombre"></label><button class="btn btn-ghost btn-sm" ${rxa('set','tcnmk',st('tcnmk',0)+1)}>Ponerlo en la oración</button></div>`;
+RICH.tc13=()=>{const n=esc(st('tcnm',''))||'…………';
+ return dkH('Cierre de la lectura','La oración del linaje','Escribe tu nombre y dila frase a frase.')+`<div class="ni" style="display:grid;gap:12px">${tcName()}${n3pray('tcor',['Pido a mi Yo Superior, maestros ascendidos y seres de luz de la más alta vibración,','que por favor limpien todo mi linaje ancestral, que corten todos los votos y energías negativas del pasado que ya no sirvan para el desarrollo y evolución de mi Alma en tiempo presente.','Hoy reconozco, limpio, sano, libero y agradezco a todos mis ancestros por las experiencias del pasado.',`Hoy yo ${n} con plena consciencia creo mi propia historia.`,'Gracias, gracias, gracias.'])}</div>`};
+
+/* ----- 7 · El gráfico de Votos o Pactos ----- */
+const TC_VS=['Nunca más volveré a amar.','Juro no ser como mi padre.','Dedicaré mi vida a Dios.','De esto no se hablará jamás.'];
+RICH.tc14=()=>{const d=st('tc14',-1),o=st('tc14v',{});
+ return dkH('Votos o Pactos','Cuándo se va al gráfico de Votos','Un voto es una promesa, un juramento o un pacto que alguien hizo y que sigue actuando en el clan.')+
+ `<div class="ni tgx" style="display:grid;gap:14px"><div class="dk-grid c2" style="align-items:start">
+ <div class="tb-c d"><h3 style="color:#fff">Se llega desde</h3><div class="tb-dec" style="grid-template-columns:1fr">${[['Constelación Familiar','El sector «Votos (ir al gráfico)».'],['Transgeneracional','El sector «Votos (ir a Votos)».']].map((x,i)=>`<button ${rxa('set','tc14',d===i?-1:i)} ${pressed(d===i)}><b>${x[0]}</b><span>${x[1]}</span></button>`).join('')}</div></div>
+ <div style="display:grid;gap:10px"><div class="dk-sub">Cómo puede sonar un voto</div><div class="tc-vow">${TC_VS.map((x,i)=>`<button ${rxa('tog','tc14v',i)} ${pressed(!!o[i])} style="animation-delay:${i*.1}s">«${x}»</button>`).join('')}</div></div></div>
+ ${d>=0?`<div class="ni-in nj-fig" style="max-width:600px">${d?trChart({hot:'o14',sel:'o14',cap:'En el Transgeneracional: Votos (ir a Votos).'}):tgChart({hot:[24],cap:'En Constelación Familiar: Votos (ir al gráfico).'})}</div>`:''}
+ ${tbAsk('¿Qué promesa crees que hizo alguien de tu familia y aún pesa?')}${n3area('tc14a','Anótala como la diría esa persona','«Nunca…»')}</div>`};
+const TC_VP=[['v','Voto','Cuál de los 27 votos está activo.'],['n','Nivel','Bajo, medio, alto o muy alto.'],['e','Escala','De 0 a 100: cuánto pesa hoy.']];
+RICH.tc15=()=>{const s=st('tc15',-1),r=tvRead();
+ return dkH('Votos o Pactos','El gráfico de Votos o Pactos','Tres medidas. Toca cada una o explora el gráfico.')+
+ `<div class="ni tgx" style="display:grid;gap:14px"><div class="tc-side"><div class="nj-fig">${niOrig('tc15O','trans/votos.webp','Lámina original del gráfico de Votos o Pactos de Casa Muladhara',tvChart({ring:s>=0?TC_VP[s][0]:null,cap:s>=0?0:undefined}))}</div>
+ <div style="display:grid;gap:10px">${tbList('tc15',TC_VP.map(x=>`<b>${x[1]}</b> · ${x[2]}`))}${tcRow(['Voto','Nivel','Escala'],r)}${niBox('l','Se anula con la oración de Votos','La verás más adelante en esta clase.')}</div></div>
+ ${r.every(Boolean)?`<div class="ni-hyp ni-in"><span class="ni-tag">Tu medida</span><p>El voto activo es <mark>${r[0].toLowerCase()}</mark>, de nivel <mark>${r[1].toLowerCase()}</mark>, con una escala de <mark>${r[2]}</mark>.</p></div>`:''}</div>`};
+const TC_FR=[[1,'Votos de pobreza','El dinero llega y no se queda.'],[5,'Votos de obediencia','Cuesta decir que no.'],[16,'Votos de silencio','No poder expresar lo que siento.'],[22,'Votos de sacrificio','Darlo todo y no recibir.'],[18,'Votos religiosos','Culpa ante el placer o la abundancia.'],[19,'Renunciar al amor','Relaciones que no llegan a concretarse.'],[4,'Votos de castidad','Bloqueo para disfrutar del cuerpo y la pareja.'],[20,'Votos de soledad','Sentirse sola aun acompañada.']];
+RICH.tc16=()=>{const s=st('tc16',-1),o=st('tc16v',{}),n=Object.keys(o).length,ef=st('tc16e',0);RX.tcfr=v=>{const O=st('tc16v',{});O[v]=1;RS.tc16v=O;RS.tc16=RS.tc16===+v?-1:+v;RS.tc16e=0;render(false)};
+ return dkH('Votos o Pactos','Votos frecuentes en el linaje','Toca cada voto para ver cómo se nota y dónde está en el gráfico.')+
+ `<div class="ni tgx" style="display:grid;gap:14px"><div class="tc-side"><div class="tc-mem">${TC_FR.map((x,i)=>`<button class="${i%3===0?'i':''}${o[i]?' seen':''}" ${rxa('tcfr',i)} ${pressed(s===i)} style="animation-delay:${i*.05}s"><b>${x[1]}</b>${s===i||o[i]?`<span${s===i?' class="ni-in"':''}>${x[2]}</span>`:'<em>Toca para ver</em>'}</button>`).join('')}</div>
+ <div class="nj-fig">${tvChart({hot:ef?[13,2]:s>=0?[TC_FR[s][0]]:TC_FR.map(x=>x[0]),cap:ef?'Creencias limitantes · Depresiones y adicciones.':`${n} de 8 votos vistos.`})}</div></div>
+ <div class="tb-c d"><p><b style="color:#fff">También aparecen efectos de un voto:</b> creencias limitantes, depresiones y adicciones. Al encontrarlos, se busca el voto que los origina.</p><div><button class="btn btn-ghost btn-sm" style="color:#ece7d3;border-color:#d9c9ef" ${rxa('set','tc16e',ef?0:1)} ${pressed(!!ef)}>${ef?'Volver a los votos':'Ver los efectos en el gráfico'}</button></div></div></div>`};
+RICH.tc17=()=>{const s=st('tc17',-1);
+ return dkH('Votos o Pactos','Votos del linaje y votos de vidas pasadas','Toca cada tarjeta.')+
+ `<div class="ni tgx" style="display:grid;gap:14px"><div class="tg-two">${[['En esta formación','Votos heredados del linaje','Promesas y pactos de padres, abuelos o bisabuelos que siguen actuando en el clan. Se llega desde Constelación o Transgeneracional.','d'],['En Vidas pasadas','Votos de otras vidas','Votos que el alma trae de vidas anteriores. Se profundizan en la formación de Vidas Pasadas.','w']].map((x,i)=>`<button class="tb-c ${x[3]}" style="all:unset;box-sizing:border-box;cursor:pointer;border-radius:18px;padding:20px;display:grid;gap:10px;align-content:start;${i?'background:var(--nb-paper);border:1px solid var(--nb-line)':'background:var(--ni-olv);color:#ece7d3'};${s===i?'box-shadow:0 0 0 3px var(--ni-lil2);transform:translateY(-3px)':''};transition:transform .3s" ${rxa('set','tc17',s===i?-1:i)} ${pressed(s===i)}><span class="ni-tag"${i?'':' style="color:#d9c9ef"'}>${x[0]}</span><h3 style="margin:0;font:400 1.35rem/1.2 var(--f-display)${i?'':';color:#fff'}">${x[1]}</h3>${s===i?`<p class="ni-in" style="margin:0;line-height:1.55${i?'':';color:#dfe3cf'}">${x[2]}</p>`:`<em style="font-style:normal;font-size:.75rem;opacity:.75">Toca para ver</em>`}</button>`).join('')}</div>
+ ${niQ('La oración de Votos sirve para ambos: nombra las vidas pasadas y también lo heredado del linaje.')}</div>`};
+
+/* ----- 8 · La oración para anular votos ----- */
+RICH.tc18=()=>{const n=esc(st('tcnm',''))||'…………',v=st('tvv',-1),vt=v>=0?tvDe(tcClean(TV_V[v])):'………';
+ return dkH('Anular un voto','La oración de Votos','Escribe tu nombre, elige el voto y dila frase a frase.')+`<div class="ni" style="display:grid;gap:12px">${tcName()}
+ <div><div class="dk-sub">El voto que vas a anular</div>${chipRow('tvv',TV_V.map(tcClean),v)}</div>
+ ${n3pray('tcvo',['Desde mi amada y divina presencia YO SOY, a todos mis guías y seres de luz que me acompañan,','pido permiso para anular todos los votos kármicos limitantes contraídos en cualquier vida pasada, simultánea, plano o dimensión en que mi ser exista, o heredados de mi linaje.',`Yo ${n} anulo y cancelo todos los votos de ${esc(vt)},`,'me libero de ellos para siempre y los transformo, recuperando así mi poder personal y mi voluntad.','Gracias, gracias, gracias.'])}</div>`};
+
+/* ----- 9 · Ejemplo, práctica, repaso y tarea ----- */
+const TC_EJ=[['Constelación','Materno · 4ta · 60 · Votos'],['Votos','Renunciar al amor'],['Nivel y escala','Alto · 70'],['Cierre','Oración de Votos y del linaje']];
+RX.tcex=()=>{RS.tgl=0;RS.tgg=3;RS.tge=12;RS.tgt=24;RS.tvv=19;RS.tvn=2;RS.tve=14;RS.tc19c=1;render(false)};
+RICH.tc19=()=>{const s=n3clamp(st('tc19',0),0,5),c=st('tc19c',0);
+ return dkH('Ejemplo','Ejemplo de lectura','Consultante: L. M., sus relaciones no prosperan.')+
+ `<div class="ni tgx" style="display:grid;gap:14px"><div class="nj-flow">${TC_EJ.map((x,i)=>`<div class="${i<s?'lit':''}"${i===0?' style="background:#f6d3ef;border-color:#f6d3ef"':i===1?' style="background:var(--ni-lil);border-color:var(--ni-lil)"':''}><small>${x[0]}</small><b>${x[1]}</b></div>`).join('')}</div>
+ ${s>=5?`<div class="ni-box d ni-in"><b>Comprensión posible</b><p>Una bisabuela materna se prometió no volver a amar tras perder a su esposo.</p></div>
+ ${c?`<div class="dk-grid c2 ni-in"><div>${tgChart({cap:'Constelación: materno, 4ta generación, 60, Votos.'})}</div><div>${tvChart({cap:'Votos: renunciar al amor, alto, 70.'})}</div></div>`:''}
+ <div class="dk-cta" style="justify-content:center">${c?'':`<button class="btn btn-primary btn-sm" ${rxa('tcex',0)}>Verlo en los gráficos</button>`}<button class="btn btn-ghost btn-sm" ${rxa('set','tc19',0)}>Ver de nuevo</button></div>`:
+ `<div class="dk-cta" style="justify-content:center"><button class="btn btn-primary btn-sm" ${rxa('set','tc19',s+1)}>${s===0?'Empezar':s===4?'Ver la comprensión':'Siguiente'}</button></div>`}</div>`+niNote('Ejemplo ficticio.')};
+const TC_PS=[['Lean en Constelación','El tema que anotaste en la tarea.'],['Si es Transgeneracional','Lean linaje, anillo interior y anillo exterior.'],['Si es Votos','Midan el voto, su nivel y la escala, y digan la oración de Votos.'],['Cierren','Con la oración del linaje, completen la ficha y cambien de rol.']];
+RICH.tc20=()=>{const s=n3clamp(st('tc20',0),0,3);
+ return dkH('Práctica en parejas','Ahora en parejas','Cuatro pasos. Anota en la ficha lo que aparece.')+
+ `<div class="ni tgx" style="display:grid;gap:14px"><div class="nj-steps h tg-st4">${TC_PS.map((x,i)=>`<div class="${i<s?'ok':i===s?'cur':''}" style="cursor:pointer" ${rxa('set','tc20',i)}><span class="n">${i<s?'✓':i+1}</span><div><b>${x[0]}</b><p>${x[1]}</p></div></div>`).join('')}</div>
+ ${s<3?`<div class="dk-cta" style="justify-content:center"><button class="btn btn-primary btn-sm" ${rxa('set','tc20',s+1)}>Siguiente paso</button></div>`:''}
+ ${niFicha('tcf',['Fecha','Consultante','Motivo','Constelación','Transgeneracional','Voto','Nivel · Escala','Oraciones','Verificada'],['Ej.: 18/11','L. M.','Sus relaciones no prosperan','Materno · 4ta · 60 · Votos','—','Renunciar al amor','Alto · 70','Votos y linaje','Sí'],()=>{const g=tgRead(),t=trRead(),v=tvRead();return [tbHoy(),'','',g.filter(Boolean).join(' · '),t.filter(Boolean).join(' · '),v[0],[v[1],v[2]].filter(Boolean).join(' · '),'','']},1100)}</div>`+n3priv};
+RICH.tc21=()=>dkH('Repaso en voz alta','Comprobemos lo aprendido','Respondan en voz alta y compartan cómo llegaron a su respuesta. Después toquen cada tarjeta.')+
+ `<div class="ni ni-cp">${n3flip('tccp',[['diana','1 · ¿En qué orden se lee el gráfico Transgeneracional?','<b>De adentro hacia afuera:</b> primero el linaje en el centro, después el anillo interior con sus 11 memorias profundas y luego el anillo exterior con sus 26 memorias. Se cierra con la oración del linaje.'],['escudo','2 · ¿Cómo se lee una memoria de violencia?','<b>Con cuidado:</b> se nombra sin buscar detalles, nunca se afirma que le pasó a una persona concreta y no se pregunta por lo que ocurrió. Si la consultante relata algo propio, se detiene la lectura, se acompaña y se sugiere apoyo profesional.'],['enlace','3 · ¿Desde qué gráficos se llega a Votos?','<b>Desde Constelación Familiar</b>, en el sector «Votos (ir al gráfico)», <b>y desde el Transgeneracional</b>, en el sector «Votos (ir a Votos)».']],'c4',290)}</div>`;
+RICH.tc22=()=>dkH('Cierre de la clase','Tarea para la Clase 4','Una memoria y un voto de tu linaje.')+
+ `<div class="ni dk-grid c2" style="align-items:start"><div class="ni-task">${n3ck('tcta',[['lupa','Investiga en tu linaje una memoria del Transgeneracional y un voto'],['diana','Mide linaje y anillos; y el voto con su nivel y escala'],['limpia','Limpia, di la oración de Votos y cierra con la oración del linaje'],['libro','Completa la ficha y tráela a la Clase 4']],['Marca cada punto cuando lo tengas.','¡Listo! Trae tu ficha a la Clase 4.'])}</div>
+ <div style="display:grid;gap:10px">${niBox('d','Recuerda','Lee siempre en hipótesis y con cuidado. Si aparece una memoria de violencia, nómbrala sin buscar detalles.')}<div class="dk-cta" style="flex-wrap:wrap"><button class="btn btn-ghost btn-sm" data-les="${S.lesson[0]},${S.lesson[1]-6}">Abrir el Transgeneracional</button><button class="btn btn-ghost btn-sm" data-les="${S.lesson[0]},${S.lesson[1]-2}">Abrir Votos o Pactos</button><button class="btn btn-ghost btn-sm" data-les="${S.lesson[0]},${S.lesson[1]-1}">Oración de Votos</button></div></div></div>`;
