@@ -403,3 +403,265 @@ RICH.ni22=()=>dkH('Cierre de la clase','Tarea de la semana')+
  ${niBox('l','Para la próxima clase','Trae tu carta y lo que descubriste en tu gráfico. Compartir la carta es voluntario.')}</div>
  <div style="display:grid;gap:8px">${n3area('nicarta','Empieza aquí tu carta','Querida niña, querido niño…')}${n3priv}</div></div>`+
  nbQuote('Te veo, estoy aquí.');
+
+/* ---------- Nivel 4 · Especialización Niño Interno · Clase 2 ---------- */
+(function(){const c=document.createElement('style');c.id='nj-css';c.textContent=`
+.nj-two{display:grid;gap:14px}.nj-two>.nj-fig{width:100%;max-width:780px;justify-self:center}
+.nj-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start}
+.nj-steps.h{grid-template-columns:repeat(3,minmax(0,1fr))}
+.nj-three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.nig-s.hot path{stroke:#7a5aa6;stroke-width:2.2;animation:njHot 1.8s ease-in-out infinite}
+.nig-s.cold{opacity:.42}
+.nig-s.st{cursor:default}
+.nig-s text.sub{font-weight:400;opacity:.75}
+@keyframes njHot{0%,100%{filter:none}50%{filter:brightness(.88)}}
+.nj-proto{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+.nj-proto button{all:unset;box-sizing:border-box;cursor:pointer;position:relative;display:grid;gap:6px;align-content:start;padding:14px 12px;border-radius:16px;border:1px solid var(--nb-line);background:var(--nb-paper);color:var(--nb-ink);min-height:150px;transition:transform .3s,box-shadow .3s;animation:niUp .5s both}
+.nj-proto button.new{background:var(--ni-olv);border-color:var(--ni-olv);color:#ece7d3}
+.nj-proto button.new span{color:#dfe3cf}.nj-proto button.new small{color:#d9c9ef}
+.nj-proto button[aria-pressed="true"]{transform:translateY(-6px);box-shadow:0 16px 30px -18px rgba(28,58,43,.75);outline:2px solid var(--ni-lil2);outline-offset:2px}
+.nj-proto small{font:600 .56rem/1 var(--f-caps);letter-spacing:.16em;text-transform:uppercase;color:var(--ni-lil2)}
+.nj-proto b{font:400 1.05rem/1.2 var(--f-display)}
+.nj-proto span{font-size:.82rem;line-height:1.45;color:var(--nb-soft)}
+.nj-proto i{position:absolute;top:10px;right:10px;font:600 .5rem/1 var(--f-caps);letter-spacing:.12em;text-transform:uppercase;font-style:normal;background:var(--ni-lil);color:#3b2a5a;padding:4px 6px;border-radius:999px}
+.nj-proto button:not(:last-child)::after{content:"";position:absolute;right:-12px;top:50%;width:0;height:0;border:6px solid transparent;border-left:8px solid var(--ni-lil2);margin-top:-6px;animation:njArr 1.6s ease-in-out infinite}
+@keyframes njArr{0%,100%{transform:translateX(-2px);opacity:.5}50%{transform:translateX(2px);opacity:1}}
+.nj-det{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;border-radius:16px;padding:14px 18px;background:var(--ni-lil);color:#3b2a5a;animation:niUp .4s both}
+.nj-det b{font:400 1.1rem/1.2 var(--f-display)}.nj-det p{margin:2px 0 0;font-size:.9rem;line-height:1.5}
+.nj-card{border-radius:18px;padding:16px;display:grid;gap:10px;align-content:start}
+.nj-card.l{background:var(--ni-lil);color:#3b2a5a}.nj-card.t{background:var(--ni-tea);color:#1f3f32}.nj-card.b{background:#efe6d6;color:#4a3a1f}
+.nj-card h3{margin:0;font:400 1.15rem/1.2 var(--f-display)}.nj-card>p{margin:0;font-size:.86rem;opacity:.85}
+.nj-card .sel-list{gap:6px}.nj-card .ck{background:rgba(255,255,255,.55)}
+.nj-ronda{display:grid;gap:10px}
+.nj-ronda>div{display:grid;grid-template-columns:38px 1fr;gap:12px;align-items:start;padding:14px 16px;border-radius:16px;background:var(--nb-paper);border:1px solid var(--nb-line);animation:niUp .5s both}
+.nj-ronda>div:nth-child(2){animation-delay:.1s}.nj-ronda>div:nth-child(3){animation-delay:.2s}
+.nj-ronda .n{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--ni-lil2);color:#fff;font:600 .9rem/1 var(--f-caps)}
+.nj-ronda b{font:400 1.1rem/1.25 var(--f-display);color:var(--nb-ink)}
+.nj-ronda small{display:block;color:var(--nb-soft);font-size:.8rem;margin:2px 0 8px}
+.nj-ronda input{all:unset;box-sizing:border-box;width:100%;font:400 1.02rem/1.3 var(--f-display);font-style:italic;color:var(--nb-ink);border-bottom:1px dashed var(--nb-line);padding:4px 0}
+.nj-ronda .dk-chips{gap:4px}.nj-ronda .chip{padding:5px 10px;font-size:.8rem}
+.nj-steps{display:grid;gap:8px;counter-reset:s}
+.nj-steps>div{display:grid;grid-template-columns:32px 1fr;gap:10px;align-items:start;padding:12px 14px;border-radius:14px;background:var(--nb-paper);border:1px solid var(--nb-line);opacity:.5;transition:opacity .3s,background .3s}
+.nj-steps>div.cur{opacity:1;background:var(--ni-lil);border-color:var(--ni-lil2)}
+.nj-steps>div.ok{opacity:1}
+.nj-steps .n{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--ni-lil2);color:#fff;font:600 .8rem/1 var(--f-caps)}
+.nj-steps>div.ok .n{background:var(--ni-tea2)}
+.nj-steps b{font-weight:600;font-size:.92rem;color:var(--nb-ink)}
+.nj-steps p{margin:2px 0 0;font-size:.82rem;line-height:1.45;color:var(--nb-soft)}
+.nj-steps .ans{font:400 1.05rem/1.2 var(--f-display);color:var(--ni-lil2);margin-top:4px;animation:niPop .35s both}
+.nj-sort{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.nj-sort .nj-card{min-height:200px}
+.nj-sort .nj-card.d{background:var(--ni-olv);color:#ece7d3}.nj-sort .nj-card.d>p{color:#dfe3cf}
+.nj-sort ul{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+.nj-sort li{padding:8px 12px;border-radius:10px;font-size:.88rem;line-height:1.4;background:rgba(255,255,255,.6);animation:niPop .4s both}
+.nj-sort .nj-card.d li{background:rgba(236,231,211,.12)}
+.nj-sort li.e{background:none;border:1px dashed currentColor;opacity:.35;animation:none;min-height:20px}
+.nj-pile{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.nj-pile>div{display:grid;gap:8px;padding:12px;border-radius:14px;background:var(--nb-paper);border:1px solid var(--nb-line);animation:niUp .4s both;align-content:space-between}
+.nj-pile>div.no{animation:niShake .4s;border-color:#c0392b}
+.nj-pile span{font-size:.88rem;line-height:1.4;color:var(--nb-ink)}
+.nj-pile .row{display:flex;gap:6px;flex-wrap:wrap}
+.nj-sec{display:grid;gap:6px}
+.nj-sec button{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:minmax(150px,.32fr) 1fr;gap:12px;align-items:center;padding:11px 14px;border-radius:12px;color:#2b2b22;transition:transform .2s}
+.nj-sec button:hover{transform:translateX(4px)}
+.nj-sec b{font-weight:600;font-size:.92rem}
+.nj-sec .em{display:flex;gap:6px;flex-wrap:wrap}
+.nj-sec .em span{padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.7);font-size:.82rem;animation:niPop .35s both}
+.nj-sec .em em{font-size:.78rem;opacity:.6}
+.nj-pend{position:relative;width:120px;height:150px;justify-self:center}
+.nj-pend i{position:absolute;left:50%;top:6px;width:2px;height:104px;margin-left:-1px;background:#a89a6e;transform-origin:50% 0;animation:njSw 2.4s ease-in-out infinite}
+.nj-pend i::after{content:"";position:absolute;left:50%;bottom:-20px;width:22px;height:28px;margin-left:-11px;background:var(--ni-lil2);clip-path:polygon(50% 100%,0 30%,50% 0,100% 30%)}
+.nj-pend::before{content:"";position:absolute;left:50%;top:0;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:#1f3f32}
+.nj-pend.yes i{animation:njYes 1s ease-in-out infinite}
+.nj-pend.cl i{animation:njCl 1.4s linear infinite}
+@keyframes njSw{0%,100%{transform:rotate(-16deg)}50%{transform:rotate(16deg)}}
+@keyframes njYes{0%,100%{transform:rotate(0) scaleY(1)}50%{transform:rotate(0) scaleY(.88)}}
+@keyframes njCl{0%{transform:rotate(-14deg)}25%{transform:rotate(0) scaleY(.9)}50%{transform:rotate(14deg)}75%{transform:rotate(0) scaleY(.9)}100%{transform:rotate(-14deg)}}
+.nj-lim{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:16px;align-items:start}
+.nj-act{display:grid;gap:12px;justify-items:center;text-align:center;padding:18px;border-radius:18px;background:var(--nb-paper);border:1px solid var(--nb-line);min-height:300px;align-content:center}
+.nj-act h3{margin:0;font:400 1.3rem/1.2 var(--f-display);color:var(--nb-ink)}
+.nj-act p{margin:0;line-height:1.55;color:var(--nb-soft);max-width:44ch}
+.nj-act q{font:italic 400 1.15rem/1.45 var(--f-display);color:var(--ni-lil2)}
+.nj-act .row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.nj-flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.nj-flow>div{position:relative;display:grid;gap:6px;align-content:start;padding:14px;border-radius:16px;border:1px solid var(--nb-line);background:var(--nb-paper);min-height:130px;opacity:.25;transition:opacity .45s,transform .45s}
+.nj-flow>div.lit{opacity:1;transform:translateY(-4px)}
+.nj-flow>div:last-child{background:var(--ni-olv);border-color:var(--ni-olv);color:#ece7d3}
+.nj-flow>div:last-child span{color:#dfe3cf}.nj-flow>div:last-child small{color:#d9c9ef}
+.nj-flow small{font:600 .56rem/1 var(--f-caps);letter-spacing:.16em;text-transform:uppercase;color:var(--ni-lil2)}
+.nj-flow b{font:400 1.15rem/1.2 var(--f-display)}
+.nj-flow span{font-size:.84rem;color:var(--nb-soft);line-height:1.45}
+.nj-flow>div:not(:last-child)::after{content:"";position:absolute;right:-14px;top:50%;border:6px solid transparent;border-left:9px solid var(--ni-lil2);margin-top:-6px}
+.nj-lect{background:var(--ni-lil);color:#3b2a5a;border-radius:18px;padding:16px 20px;display:grid;gap:6px;animation:niUp .5s both}
+.nj-lect p{margin:0;font:400 1.1rem/1.55 var(--f-display)}
+.nj-ficha{min-width:760px}
+.nj-ficha td{padding:4px 6px}
+.nj-ficha td:nth-child(2){color:var(--nb-ink);font-weight:400}
+.nj-ficha input{all:unset;box-sizing:border-box;width:100%;padding:6px 4px;font-size:.86rem;color:var(--nb-ink);border-bottom:1px dashed var(--nb-line)}
+.nj-ficha tr.ex td{font-style:italic;color:var(--nb-soft);font-weight:400;padding:9px 8px}
+@media (max-width:760px){.nj-lim,.nj-sort,.nj-row,.nj-steps.h{grid-template-columns:1fr}.nj-three,.nj-pile{grid-template-columns:1fr}.nj-proto,.nj-flow{grid-template-columns:1fr;gap:10px}.nj-proto button{min-height:0}.nj-proto button::after,.nj-flow>div::after{display:none}.nj-sec button{grid-template-columns:1fr;gap:6px}.nj-flow>div{min-height:0}.nj-det{grid-template-columns:1fr}}
+`;document.head.appendChild(c)})();
+
+// abanico genérico: anillos de adentro hacia afuera; cada sector es un botón (o.act|anillo|índice)
+const niFan=o=>{const cx=300,cy=292,P=(r,a)=>[cx+r*Math.cos(a),cy-r*Math.sin(a)],F=v=>v.toFixed(1);
+ const seg=(r0,r1,a1,a2)=>{const [x1,y1]=P(r1,a1),[x2,y2]=P(r1,a2),[x3,y3]=P(r0,a2),[x4,y4]=P(r0,a1);return `M${F(x1)} ${F(y1)}A${r1} ${r1} 0 0 1 ${F(x2)} ${F(y2)}L${F(x3)} ${F(y3)}A${r0} ${r0} 0 0 0 ${F(x4)} ${F(y4)}Z`};
+ let g='';
+ o.rings.forEach(R=>{const n=R.items.length;
+  R.items.forEach((it,i)=>{if(typeof it==='string')it={t:it};const a1=Math.PI-i*Math.PI/n,a2=Math.PI-(i+1)*Math.PI/n,am=(a1+a2)/2,deg=am*180/Math.PI,rm=(R.r0+R.r1)/2+(R.dr||0),[tx,ty]=P(rm,am);
+   const on=o.sel&&o.sel(R.k,i),h=o.hot?o.hot(R.k,i,it.t):0,rot=R.m==='rad'?(deg<=90?-deg:180-deg):90-deg,rr=rot*Math.PI/180;
+   const L=it.t.split('\n').map(t=>[t,'']);if(it.sub)L.push([it.sub,'sub']);const lh=(R.fs||10)*1.15,mid=(L.length-1)/2;
+   const txt=L.map(([t,c],j)=>{const d=(j-mid)*lh,x=tx-d*Math.sin(rr),y=ty+d*Math.cos(rr);return `<text class="${c}" x="${F(x)}" y="${F(y)}" transform="rotate(${F(rot)} ${F(x)} ${F(y)})" font-size="${c?(R.fs||10)-1.5:R.fs||10}" fill="${on?'#fff':'#1f3f32'}">${t}</text>`}).join('');
+   g+=`<g class="nig-s${on?' on':''}${h===1?' hot':h===-1?' cold':''}${R.st?' st':''}" ${R.st?'':`${rxa(o.act,R.k,i)} role="button" tabindex="0" aria-label="${it.t.replace('\n',' ')}" aria-pressed="${!!on}"`}><path d="${seg(R.r0,R.r1,a1,a2)}" fill="${on?it.on||R.on:it.c||R.fill}"/>${txt}</g>`})});
+ return `<figure class="nig"><svg viewBox="0 0 600 334" role="group" aria-label="${o.label}">${g}${o.inner?`<path d="M${cx-o.inner} ${cy}A${o.inner} ${o.inner} 0 0 1 ${cx+o.inner} ${cy}" fill="none" stroke="#a89a6e" stroke-width="1.5"/>`:''}<path d="M${cx-282} ${cy}A282 282 0 0 1 ${cx+282} ${cy}" fill="none" stroke="#a89a6e" stroke-width="5"/><circle cx="${cx}" cy="${cy}" r="40" fill="#1f3f32"/><svg x="${cx-26}" y="${cy-34}" width="52" height="52" style="color:#ece7d3"><use href="#mark"/></svg></svg>${o.cap?`<figcaption>${o.cap}</figcaption>`:''}</figure>`};
+const niOrig=(k,src,alt,html)=>{const v=st(k,0);return (v?`<img class="ni-orig ni-in" src="${N4P}nino/${src}" alt="${alt}">`:html)+`<div class="dk-cta" style="justify-content:center"><button class="btn btn-ghost btn-sm" ${rxa('set',k,v?0:1)}>${v?'Ver el gráfico interactivo':'Ver la lámina original'}</button></div>`};
+const njGo=(off,t,cls)=>`<button class="btn ${cls||'btn-primary'} btn-sm" data-les="${S.lesson[0]},${S.lesson[1]+off}">${t}</button>`;
+
+/* ----- 1 · Bienvenida, agenda y oración ----- */
+RICH.nj1=()=>`<div class="ni">${nbHero('Especialización Niño Interno · Clase 2','De la herida','a la limpieza','Los cinco pasos del protocolo de Casa Muladhara: leer la herida, encontrar la energía discordante que la acompaña, investigarla en el Mapa, limpiarla y verificar.',['Protocolo','Energías Discordantes','Mapa de Emociones','Limpieza'],'Karen Oyarce · Maestra Holística',
+ `<div class="ni-ph"><img src="${N4P}nino/c2-portada.webp" alt="Una mujer arrodillada toma las manos de una niña y se miran sonriendo"><svg class="ni-arc" viewBox="0 0 200 104" aria-hidden="true"><path pathLength="1" d="M10 100a90 90 0 0 1 180 0" stroke="#f3ecd8" stroke-width="16"/><path pathLength="1" d="M34 100a66 66 0 0 1 132 0" stroke="#cfe3dc" stroke-width="16"/><path pathLength="1" d="M58 100a42 42 0 0 1 84 0" stroke="#e6dcf2" stroke-width="16"/><circle cx="100" cy="100" r="18" fill="#3f7d6e"/></svg></div>`)}</div>`;
+const NJ_AG=['Oración de conexión','Revisión de la tarea','El protocolo de Casa Muladhara','Paso 2: leer la herida','Paso 3: Energías Discordantes','Paso 4: limpiar directo o investigar en el Mapa','Paso 5: la limpieza','Ejemplo y práctica en parejas','Reglas de oro, repaso y tarea'];
+const NJ_OBJ=['Seguir los 5 pasos del protocolo','Encontrar la energía discordante de una herida','Investigar una emoción en el Mapa','Limpiar y verificar la energía encontrada'];
+RICH.nj2=()=>dkH('Clase 2','Agenda de la clase','Nueve momentos. Toca uno para ir directo a él.')+
+ `<div class="ni dk-split" style="align-items:stretch"><div class="ni-agenda ni-st">${NJ_AG.map((x,i)=>`<button data-les="${S.lesson[0]},${S.lesson[1]+i+1}"><b>${i+1}</b><span>${x}</span><small>Ir</small></button>`).join('')}</div>
+ <div class="ni-obj"><span class="ni-tag" style="color:#d9c9ef">Objetivo de hoy</span><h3>Al terminar la clase podrás</h3><ul class="ni-st" style="margin:0;padding-left:18px;display:grid;gap:8px;color:#dfe3cf;line-height:1.5">${NJ_OBJ.map(x=>`<li>${x}</li>`).join('')}</ul></div></div>`;
+RICH.nj3=()=>dkH('Apertura','Oración de conexión','La decimos juntas para abrir el espacio. Avanza frase a frase o lee el texto completo.')+`<div class="ni">${n3pray('njor',NI_OR)}</div>`;
+
+/* ----- 2 · Revisión de la tarea ----- */
+RICH.nj4=()=>dkH('Lo que trajiste','Revisemos la tarea de la semana','Marca las preguntas a medida que las conversan.')+
+ `<div class="ni dk-grid c2" style="align-items:stretch"><div class="nj-card l ni-in"><h3>1 · Mi herida principal y mi máscara</h3><p>Leíste tu propio gráfico del Niño Interno.</p>${n3ck('njt1',[['chat','¿Qué herida apareció como principal?'],['chat','¿Qué máscara reconoces en tu vida diaria?'],['chat','¿Qué edad y qué figura marcó el péndulo?'],['chat','¿Te sorprendió algo de lo que salió?']])}</div>
+ <div class="nj-card t ni-in" style="animation-delay:.12s"><h3>2 · Carta a mi niño interno</h3><p>Le escribiste dándole lo que necesitaba.</p>${n3ck('njt2',[['chat','¿Cómo te sentiste al escribirla?'],['chat','¿Qué fue lo más difícil de decirle?'],['chat','¿Qué le prometiste?'],['chat','¿Quieres leer una parte? Es voluntario.']])}</div></div>`+
+ niNote('Compartir es voluntario. Lo que se dice en el grupo, queda en el grupo.');
+RICH.nj5=()=>{const h=st('njrh',-1);
+ return dkH('Lo que trajiste','Ronda de descubrimientos','Cada alumna completa en voz alta:')+
+ `<div class="ni nj-ronda"><div><span class="n">1</span><div><b>Mi herida principal es…</b><small>Rechazo, abandono, humillación, traición o injusticia.</small>${chipRow('njrh',NI_H.map(x=>x.n),h)}${h>=0?`<small class="ni-in" style="margin:8px 0 0">Su máscara: <b style="font-size:.95rem">${NI_H[h].m}</b></small>`:''}</div></div>
+ <div><span class="n">2</span><div><b>Mi máscara aparece cuando…</b><small>Una situación concreta de esta semana.</small><input type="text" data-rsin="njr2" placeholder="Por ejemplo: cuando me piden algo en el trabajo…" value="${esc(st('njr2',''))}"></div></div>
+ <div><span class="n">3</span><div><b>Lo que descubrí de mi niño interno es…</b><small>Una frase, una imagen o una emoción.</small><input type="text" data-rsin="njr3" placeholder="Escribe tu frase" value="${esc(st('njr3',''))}"></div></div></div>`+n3priv};
+
+/* ----- 3 · El protocolo ----- */
+const NJ_PR=[['Oración de conexión','Abrir el espacio y pedir la presencia de nuestro comité espiritual.',-2],['Gráfico del Niño Interno','Leer edad, quién la provocó, herida, máscara y cuándo.',1],['Energías Discordantes','Preguntar qué energía acompaña a esa herida.',2],['Limpiar o investigar','Limpiar directo o investigar la emoción en el Mapa.',3],['Verificar y cerrar','Confirmar con el péndulo, agradecer y registrar.',4]];
+RICH.nj6=()=>{const s=n3clamp(st('njpr',2),0,4),x=NJ_PR[s];
+ return dkH('El protocolo','El protocolo de Casa Muladhara','Cinco pasos, siempre en el mismo orden. Toca uno para verlo.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="nj-proto">${NJ_PR.map((p,i)=>`<button class="${i>=2?'new':''}" ${rxa('set','njpr',i)} ${pressed(i===s)} style="animation-delay:${i*.08}s">${i>=2?'<i>Nuevo</i>':''}<small>Paso ${i+1}</small><b>${p[0]}</b><span>${p[1]}</span></button>`).join('')}</div>
+ <div class="nj-det"><div><span class="ni-tag">Paso ${s+1}</span><br><b>${x[0]}</b><p>${x[1]}</p></div>${njGo(x[2],'Ir a este paso','btn-ghost')}</div>
+ ${niBox('l','Hoy nos enfocamos en los pasos 3, 4 y 5: lo nuevo de esta clase.')}</div>`};
+
+/* ----- 4 · Paso 2: leer la herida ----- */
+const NJ_AN=[['cu','1 · Edad','Del vientre a los años.'],['ma','2 · Máscara','La forma en que aprendió a protegerse.'],['he','3 · Herida','Rechazo, abandono, humillación, traición o injusticia.'],['qu','4 · Quién la provocó','Madre, padre u otra figura.']];
+RICH.nj7=()=>{const s=n3clamp(st('njan',2),0,3),h=n3clamp(nigSel('he'),0,4),H=NI_H[h];
+ return dkH('Gráfico del niño interno','Paso 2: leer la herida','Los anillos, de adentro hacia afuera. Toca un anillo para verlo y luego marca tu lectura en el gráfico.')+
+ `<div class="ni nj-two"><div class="nj-fig">${niOrig('njanO','grafico.webp','Lámina original del gráfico del niño interno de Casa Muladhara',niChart({hl:NJ_AN[s][0]}))}</div>
+ <div class="ni-rings ni-st">${NJ_AN.map((x,i)=>`<button class="ni-ring" ${rxa('set','njan',i)} ${pressed(i===s)}><b>${x[1]}</b><span>${x[2]}</span></button>`).join('')}</div>
+ <div class="nj-row"><div class="ni-read" style="grid-template-columns:1fr 1fr"><div><small>Edad</small><span>${nigSel('ed')*5} · ${NIG[0].items[nigSel('cu')]}</span></div><div><small>Quién</small><span>${NIG[3].items[nigSel('qu')]}</span></div><div style="grid-column:1/-1"><small>Herida y máscara</small><span>${H.n} · ${H.m}</span></div></div>
+ <div class="ni-hyp"><span class="ni-tag">«Se limpian con E-Discordantes»</span><p style="font-size:.98rem">Una vez leída la herida, pasamos al gráfico de Energías Discordantes.</p><div>${njGo(1,'Ir al Paso 3')}</div></div></div></div>`};
+
+/* ----- 5 · Paso 3: Energías Discordantes ----- */
+const NJ_EDO=['Culpa','Decepción','Dependencia','Conflicto','Dudas','Envidia','Odio a la vida','Odio a sí mismo','Frustración','Inestabilidad','Crítica/Celos','Baja autoestima','Mentira','Violencia','Separación','Autocastigo','Egocentrismo','Tristeza','Rechazo','Manipulación','Confusión','Depresión','Votos/Contratos','Humillación','Soledad','Arrepentimiento','Inseguridad','Abuso','Angustia','Deuda emocional','Separación'];
+const NJ_EDI=['Traumas','Apegos','Abandono','Traición','Negatividad','Falta de amor propio','Injusticia','Vergüenza','Fracaso','Rabia','Venganza','Resentimiento','Posesividad','Miedo','Odio','Estrés','Pánico'];
+const NJ_HE=[['Baja autoestima','Soledad','Autocastigo','Tristeza'],['Dependencia','Apegos','Miedo','Soledad'],['Vergüenza','Culpa','Autocastigo','Falta de amor propio'],['Resentimiento','Manipulación','Posesividad','Rabia'],['Rabia','Frustración','Crítica/Celos','Resentimiento']];
+const njEh=()=>n3clamp(st('njeh',nigSel('he')),0,4);
+const njEdName=()=>{const v=RS.njed;if(!v)return '';const [r,i]=v.split('.');return (r==='o'?NJ_EDO:NJ_EDI)[+i]||''};
+window.RX=window.RX||{};
+RX.njed=(k,v)=>{RS.njed=RS.njed===k+'.'+v?'':k+'.'+v;render(false)};
+const njEdChart=hot=>niFan({label:'Gráfico de Energías Discordantes',act:'njed',sel:(k,i)=>RS.njed===k+'.'+i,hot:hot?(k,i,t)=>hot.includes(t)?1:-1:0,
+ rings:[{k:'i',r0:48,r1:168,items:NJ_EDI,fill:'#ffffff',on:'#7a5aa6',m:'rad',fs:9.5,dr:8},{k:'o',r0:168,r1:280,items:NJ_EDO.map(t=>t==='Votos/Contratos'?{t,c:'#f6e3e6'}:t),fill:'#ffffff',on:'#3f7d6e',m:'rad',fs:9.5}],
+ cap:'Toca la energía que marca el péndulo.'});
+RICH.nj8=()=>{const h=njEh(),hl=st('njehl',1),e=njEdName();
+ return dkH('Paso 3','Energías Discordantes','Elige la herida que leíste: se iluminan las energías que suelen acompañarla. Luego toca la que marca el péndulo.')+
+ `<div class="ni nj-two"><div class="nj-fig">${niOrig('njedO','energias.webp','Lámina original del gráfico de Energías Discordantes',njEdChart(hl?NJ_HE[h]:0))}</div>
+ <div class="nj-row"><div style="display:grid;gap:10px"><div class="dk-sub">La herida que leíste</div>${chipRow('njeh',NI_H.map(x=>x.n),h)}
+ <label class="ck" style="cursor:pointer"><input type="checkbox" ${hl?'checked':''} ${rxa('set','njehl',hl?0:1)} style="accent-color:var(--ni-lil2)"> <span>Iluminar las energías frecuentes</span></label></div>
+ ${e?`<div class="ni-hyp ni-in"><span class="ni-tag">El péndulo marcó</span><p><mark>${e}</mark> acompaña a la herida de ${NI_H[h].n.toLowerCase()}.</p><p style="font-size:.92rem">Ahora pregunta: ¿se limpia directo o se investiga desde el Mapa?</p><div>${njGo(1,'Ir al Paso 4')}</div></div>`:
+ `<div class="ni-quote">Pregunta al péndulo: ¿qué energía discordante acompaña a esta herida?</div>`}</div>
+ <div class="nj-three">${niBox('t','Qué son','Emociones y cargas que quedaron unidas a la herida y siguen actuando en la persona.')}
+ ${niBox('l','Las cinco heridas están aquí','Rechazo, abandono, humillación, traición e injusticia.')}
+ ${niBox('d','Dos caminos','Limpiar directo, o investigar desde el Mapa.')}</div></div>`};
+RICH.nj9=()=>{const h=njEh();
+ return dkH('Paso 3','Heridas y las energías que suelen acompañarlas','Toca una herida para ver sus energías frecuentes.')+
+ `<div class="ni" style="display:grid;gap:12px"><div class="ni-tw"><table class="ni-tbl"><thead><tr><th>Herida</th><th>Máscara</th><th>Energías discordantes frecuentes</th></tr></thead><tbody>
+ ${NI_H.map((x,i)=>`<tr class="${i===h?'on':''}" ${rxa('set','njeh',i)} style="cursor:pointer"><td>${x.n}</td><td>${x.m}</td><td>${i===h?`<span class="ni-hpills">${NJ_HE[i].map((y,j)=>`<span class="tg ni-in" style="animation-delay:${j*.08}s;padding:4px 10px;border-radius:999px;background:#fff;font-size:.82rem">${y}</span>`).join('')}</span>`:NJ_HE[i].join(' · ')}</td></tr>`).join('')}</tbody></table></div>
+ <div class="dk-cta" style="justify-content:center"><button class="btn btn-ghost btn-sm" data-slide="0">Verlas en el gráfico</button></div></div>`+
+ niNote('Son tendencias para orientar la búsqueda. El péndulo siempre confirma cuál está presente.')};
+
+/* ----- 6 · Paso 4: limpiar directo o investigar ----- */
+const NJ_SO=[['El péndulo marca la energía con claridad',0],['La energía es general y hace falta precisarla',1],['La persona la reconoce de inmediato',0],['La persona necesita comprender qué emoción quedó guardada',1],['Se busca el sector y luego la emoción',1],['Se limpia en el mismo gráfico',0]];
+RX.njso=(k,v)=>{const o=st('njso',{});if(NJ_SO[+k][1]===+v){o[k]=1;RS.njsx=-1}else RS.njsx=+k;render(false)};
+RX.njsr=()=>{delete RS.njso;RS.njsA=0;RS.njsx=-1;render(false)};
+RICH.nj10=()=>{const o=st('njso',{}),x=st('njsx',-1),all=st('njsA',0),done=Object.keys(o).length===6||all;
+ const col=w=>NJ_SO.map((s,i)=>[s,i]).filter(([s])=>s[1]===w).map(([s,i])=>o[i]||all?`<li>${s[0]}</li>`:'<li class="e"></li>').join('');
+ return dkH('Paso 4','Limpiar directo o investigar','¿Qué camino corresponde? Lleva cada frase a su columna.')+
+ `<div class="ni" style="display:grid;gap:12px"><div class="nj-sort"><div class="nj-card l"><h3>Limpiar directo</h3><p>Con el gráfico de Energías Discordantes</p><ul>${col(0)}</ul></div><div class="nj-card d"><h3>Investigar desde el Mapa</h3><p>Cuando hay más capas</p><ul>${col(1)}</ul></div></div>
+ ${done?`<div class="ni-quote ni-in">En ambos casos se pregunta al péndulo cuál camino corresponde.</div><div class="dk-cta" style="justify-content:center"><button class="btn btn-ghost btn-sm" ${rxa('njsr',0)}>Jugar de nuevo</button></div>`:
+ `<div class="nj-pile">${NJ_SO.map((s,i)=>o[i]?'':`<div class="${x===i?'no':''}"><span>${s[0]}</span><div class="row"><button class="btn btn-ghost btn-sm" ${rxa('njso',i,0)}>Directo</button><button class="btn btn-ghost btn-sm" ${rxa('njso',i,1)}>Mapa</button></div></div>`).join('')}</div>
+ ${x>=0?'<div class="dk-call warn">Mira otra vez: ¿la energía ya está clara o hace falta precisarla?</div>':''}<div class="dk-cta" style="justify-content:center"><button class="btn btn-ghost btn-sm" ${rxa('set','njsA',1)}>Ver la respuesta</button></div>`}</div>`};
+const NJ_MS=[['Rechazo',['Invisibilidad','Exclusión','Desvalorización','Desconexión','Sentirse de más'],'#e8dff2','#d6c7ea','#7a5aa6'],
+ ['Abandono',['Desamparo','Soledad','Vacío','Apego','Miedo a perder'],'#d8ebe5','#bfdcd2','#3f7d6e'],
+ ['Humillación',['Vergüenza','Culpa','Indignidad','Sumisión','Autocastigo'],'#f6e2e8','#ecc9d4','#a9567a'],
+ ['Traición',['Desconfianza','Decepción','Control','Resentimiento','Celos'],'#f2e9dd','#e3d4bf','#94692a'],
+ ['Injusticia',['Rabia','Exigencia','Rigidez','Frustración','Impotencia'],'#e5edd6','#d0dfba','#5c7a32'],
+ ['Emociones comunes',['Miedo','Tristeza','Angustia','Inseguridad','Bloqueo'],'#f5f0d6','#e8dfb3','#97822a']];
+RX.njmp=(k,v)=>{v=+v;if(k==='s'){RS.njms=RS.njms===v?-1:v;RS.njme=-1}else{RS.njms=Math.floor(v/5);RS.njme=v}RS.njmc=0;render(false)};
+RX.njmc=(k)=>{if(+k){RS.njmc=1}else{RS.njmc=-1;RS.njme=-1;RS.njms=-1}render(false)};
+const njMapa=()=>{const s=st('njms',-1),e=st('njme',-1);
+ return niFan({label:'Mapa de Emociones',act:'njmp',inner:58,sel:(k,i)=>k==='s'?i===s:i===e,hot:s<0?0:(k,i)=>(k==='s'?i===s:Math.floor(i/5)===s)?1:-1,
+ rings:[{k:'s',r0:76,r1:180,items:NJ_MS.map((x,i)=>({t:x[0]==='Emociones comunes'?'Emociones\ncomunes':x[0],sub:'Sector '+(i+1),c:x[3],on:x[4]})),m:'tan',fs:10.5},
+  {k:'e',r0:180,r1:280,items:NJ_MS.flatMap(x=>x[1].map(t=>({t,c:x[2],on:x[4]}))),m:'rad',fs:10}],cap:'Primero el sector, luego la emoción.'})};
+RICH.nj11=()=>{const s=st('njms',-1),e=st('njme',-1),c=st('njmc',0),E=e>=0?NJ_MS[Math.floor(e/5)][1][e%5]:'';
+ const cl=i=>i===0?(s>=0?'ok':'cur'):i===1?(e>=0?'ok':s>=0?'cur':''):(c===1?'ok':e>=0?'cur':'');
+ return dkH('Paso 4 · Investigar','El Mapa: investigar la emoción','Pregunta al péndulo y marca en el Mapa lo que responde.')+
+ `<div class="ni nj-two"><div class="nj-fig">${niOrig('njmO','mapa.webp','Lámina original del Mapa de Emociones',njMapa())}</div>
+ <div style="display:grid;gap:10px"><div class="dk-sub">Cómo se lee</div><div class="nj-steps h">
+ <div class="${cl(0)}"><span class="n">1</span><div><b>¿En qué sector está la emoción?</b><p>Una de las cinco heridas o emociones comunes.</p>${s>=0?`<div class="ans">${s+1} · ${NJ_MS[s][0]}</div>`:''}</div></div>
+ <div class="${cl(1)}"><span class="n">2</span><div><b>¿Cuál es la emoción?</b><p>Una de las cinco de ese sector.</p>${E?`<div class="ans">${E}</div>`:''}</div></div>
+ <div class="${cl(2)}"><span class="n">3</span><div><b>Confirmar</b><p>Preguntar si es correcta antes de limpiar.</p>${e>=0&&c!==1?`<div class="row" style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap"><button class="btn btn-primary btn-sm" ${rxa('njmc',1)}>El péndulo dice sí</button><button class="btn btn-ghost btn-sm" ${rxa('njmc',0)}>Dice no</button></div>`:''}</div></div></div>
+ ${c===1?`<div class="ni-hyp ni-in"><span class="ni-tag">Confirmada</span><p>Sector ${s+1}, ${NJ_MS[s][0].toLowerCase()} · <mark>${E}</mark>. Ya se puede limpiar.</p><div>${njGo(1,'Ir al Paso 5')}</div></div>`:c===-1?'<div class="dk-call warn">No era esa. Vuelve a preguntar desde el sector.</div>':''}
+ ${niNote('6 sectores · 5 emociones por sector')}</div></div>`};
+RICH.nj12=()=>{const o=st('njsc',{}),all=st('njscA',0);
+ return dkH('Paso 4 · Investigar','Los seis sectores del Mapa','Toca un sector para ver sus cinco emociones.')+
+ `<div class="ni" style="display:grid;gap:12px"><div class="nj-sec">${NJ_MS.map((x,i)=>`<button style="background:${x[2]}" ${rxa('tog','njsc',i)} ${pressed(!!(o[i]||all))}><b>${i+1} · ${x[0]}</b><span class="em">${o[i]||all?x[1].map((y,j)=>`<span style="animation-delay:${j*.06}s">${y}</span>`).join(''):'<em>Toca para ver</em>'}</span></button>`).join('')}</div>
+ <div class="dk-cta" style="justify-content:center"><button class="btn btn-ghost btn-sm" ${rxa('set','njscA',all?0:1)}>${all?'Ocultar todas':'Ver todas'}</button></div></div>`};
+
+/* ----- 7 · Paso 5: la limpieza ----- */
+const NJ_LI=[['Pedir permiso','Preguntar al péndulo si es el momento de limpiar esta energía.'],['Nombrar','Decir en voz alta la energía o emoción encontrada y la herida a la que pertenece.'],['Limpiar','Limpiar la energía o emoción encontrada, como aprendieron en Radiestesia y Sanación del Alma.'],['Verificar','Preguntar si la energía fue limpiada en totalidad. Si no, repetir.'],['Agradecer y registrar','Agradecer al comité espiritual y anotar lo encontrado en la ficha.']];
+const njEnergy=()=>{const e=st('njme',-1);if(e>=0&&st('njmc',0)===1)return NJ_MS[Math.floor(e/5)][1][e%5];return njEdName()||'Rabia'};
+RX.njl=(k)=>{const s=st('njl',0);if(k==='no0'){RS.njlp=1}else if(k==='no3'){RS.njl=2;RS.njlv=st('njlv',1)+1}else if(k==='r'){RS.njl=0;RS.njlv=1;RS.njlp=0}else RS.njl=s+1;render(false)};
+RICH.nj13=()=>{const s=n3clamp(st('njl',0),0,5),v=st('njlv',1),p=st('njlp',0),E=njEnergy(),H=NI_H[njEh()].n.toLowerCase();
+ let act;
+ if(p)act=`<div class="nj-pend" aria-hidden="true"><i></i></div><h3>Se respeta la respuesta</h3><p>Hoy no es el momento de limpiar esta energía. Se agradece al comité espiritual y se registra en la ficha.</p><div class="row"><button class="btn btn-ghost btn-sm" ${rxa('njl','r')}>Empezar de nuevo</button></div>`;
+ else if(s===0)act=`<div class="nj-pend" aria-hidden="true"><i></i></div><h3>¿Es el momento de limpiar esta energía?</h3><p>Pregunta al péndulo y espera su respuesta.</p><div class="row"><button class="btn btn-primary btn-sm" ${rxa('njl','si')}>Sí</button><button class="btn btn-ghost btn-sm" ${rxa('njl','no0')}>No</button></div>`;
+ else if(s===1)act=`<div class="nj-pend yes" aria-hidden="true"><i></i></div><h3>Nombrar en voz alta</h3><q>Nombro la energía de ${E.toLowerCase()}, que acompaña a la herida de ${H}.</q><div class="row"><button class="btn btn-primary btn-sm" ${rxa('njl','si')}>La nombré</button></div>`;
+ else if(s===2)act=`<div class="nj-pend cl" aria-hidden="true"><i></i></div><h3>Limpiar${v>1?` · vuelta ${v}`:''}</h3><p>Limpia ${E.toLowerCase()} como aprendiste en Radiestesia y Sanación del Alma.</p><div class="row"><button class="btn btn-primary btn-sm" ${rxa('njl','si')}>Ya limpié</button></div>`;
+ else if(s===3)act=`<div class="nj-pend" aria-hidden="true"><i></i></div><h3>¿Fue limpiada en totalidad?</h3><p>Pregunta al péndulo.</p><div class="row"><button class="btn btn-primary btn-sm" ${rxa('njl','si')}>Sí, en totalidad</button><button class="btn btn-ghost btn-sm" ${rxa('njl','no3')}>No, repetir</button></div>`;
+ else if(s===4)act=`<div class="nj-pend yes" aria-hidden="true"><i></i></div><h3>Agradecer y registrar</h3><q>Gracias, gracias, gracias.</q><p>Anota en la ficha la energía, la herida y que quedó verificada.</p><div class="row"><button class="btn btn-primary btn-sm" ${rxa('njl','si')}>Terminar</button></div>`;
+ else act=`<div class="ni-orb" aria-hidden="true" style="width:120px"><span></span></div><h3>Limpieza verificada</h3><p>${E} quedó limpiada en totalidad${v>1?` después de ${v} vueltas`:''}.</p><div class="row"><button class="btn btn-ghost btn-sm" ${rxa('njl','r')}>Empezar de nuevo</button></div>`;
+ return dkH('Paso 5','La limpieza','Practica la secuencia completa con la energía que encontraste.')+
+ `<div class="ni nj-lim"><div class="nj-act ni-in">${act}</div>
+ <div class="nj-steps">${NJ_LI.map((x,i)=>`<div class="${p&&i===0?'cur':i<s?'ok':i===s?'cur':''}"><span class="n">${i<s?'✓':i+1}</span><div><b>${x[0]}</b><p>${x[1]}</p></div></div>`).join('')}</div></div>`};
+
+/* ----- 8 · Ejemplo y práctica ----- */
+const NJ_EJ=[['Niño interno','5 a 10 años · Padre','Injusticia · Rígido/a · Años'],['E. Discordantes','Rabia','Camino: investigar desde el Mapa'],['Mapa','Sector 5','Injusticia · Frustración'],['Limpieza','Verificada','Limpiada en totalidad']];
+RICH.nj14=()=>{const s=n3clamp(st('njej',0),0,4);
+ return dkH('Ejemplo','Ejemplo del protocolo completo','Avanza paso a paso por un caso.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="nj-flow">${NJ_EJ.map((x,i)=>`<div class="${i<s?'lit':''}"><small>${x[0]}</small><b>${x[1]}</b><span>${x[2]}</span></div>`).join('')}</div>
+ ${s<4?`<div class="dk-cta" style="justify-content:center"><button class="btn btn-primary btn-sm" ${rxa('set','njej',s+1)}>${s?'Siguiente paso':'Empezar'}</button></div>`:
+ `<div class="nj-lect"><span class="ni-tag">Lectura</span><p>Entre los 5 y los 10 años, vinculada a la figura del padre, quedó una herida de injusticia con máscara rígida. La acompaña la rabia; en el Mapa aparece la frustración. Se limpió y se verificó.</p></div><div class="dk-cta" style="justify-content:center"><button class="btn btn-ghost btn-sm" ${rxa('set','njej',0)}>Ver de nuevo</button></div>`}</div>`+
+ niNote('Caso ficticio. La lectura es una hipótesis de trabajo que la persona confirma o descarta; no es un diagnóstico.')};
+const NJ_FC=['Consultante','Edad · Quién','Herida y máscara','Energía discordante','Mapa (sector · emoción)','Verificada'];
+RX.njf=(k)=>{const n=st('njfn',2);if(k==='add'){RS.njfn=Math.min(10,n+1)}else{let r=0;while(r<n&&NJ_FC.some((_,c)=>st('njf'+r+'_'+c,'')))r++;if(r>=n){RS.njfn=n+1}
+ const h=n3clamp(nigSel('he'),0,4),e=st('njme',-1);RS['njf'+r+'_1']=`${nigSel('ed')*5} · ${NIG[3].items[nigSel('qu')]}`;RS['njf'+r+'_2']=`${NI_H[h].n} · ${NI_H[h].m}`;
+ RS['njf'+r+'_3']=njEdName()||'';RS['njf'+r+'_4']=e>=0?`${Math.floor(e/5)+1} · ${NJ_MS[Math.floor(e/5)][1][e%5]}`:'';RS['njf'+r+'_5']=st('njl',0)>=5?'Sí':''}render(false)};
+RICH.nj15=()=>{const n=st('njfn',2);
+ return dkH('Práctica en parejas','Práctica en parejas','Una persona consulta, la otra facilita. Al terminar, registran y cambian de rol.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="nj-three ni-st"><div class="nj-card l"><span class="ni-tag">Persona A</span><h3>Consultante</h3><p>Comparte su herida principal de la tarea.</p></div><div class="nj-card t"><span class="ni-tag">Persona B</span><h3>Facilitadora</h3><p>Dice la oración de conexión y sigue los 5 pasos del protocolo.</p></div><div class="nj-card b"><span class="ni-tag">Al terminar</span><h3>Registran</h3><p>Completan la ficha de sesión y cambian de rol.</p></div></div>
+ <div class="dk-sub">Ficha de sesión</div><div class="ni-tw"><table class="ni-tbl nj-ficha"><thead><tr>${NJ_FC.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>
+ <tr class="ex"><td>Ej.: M. R.</td><td>5–10 · Padre</td><td>Injusticia · Rígido/a</td><td>Rabia</td><td>5 · Frustración</td><td>Sí</td></tr>
+ ${Array.from({length:n},(_,r)=>`<tr>${NJ_FC.map((x,c)=>`<td><input type="text" data-rsin="njf${r}_${c}" aria-label="${x}, fila ${r+1}" value="${esc(st('njf'+r+'_'+c,''))}"></td>`).join('')}</tr>`).join('')}</tbody></table></div>
+ <div class="dk-cta" style="justify-content:center;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" ${rxa('njf','add')}>Agregar fila</button><button class="btn btn-primary btn-sm" ${rxa('njf','fill')}>Llenar con lo que marqué en los gráficos</button></div></div>`+n3priv};
+
+/* ----- 9 · Reglas de oro, repaso y tarea ----- */
+RICH.nj16=()=>dkH('Facilitación','Reglas de oro al limpiar','Toca cada regla.')+
+ `<div class="ni">${n3flip('njro',[['pend','Siempre con permiso','Se pregunta al péndulo antes de limpiar, y se respeta la respuesta.'],['balanza','Hipótesis, no certezas','La persona confirma o descarta lo que aparece; no hay diagnósticos ni promesas.'],['corazon','Cuidar lo que se abre','Se da tiempo a la emoción. No se apura el cierre de la sesión.'],['enlace','Derivar cuando corresponda','Ante malestar intenso o crisis, se acompaña y se deriva a un profesional de salud.']],'c2',150)}</div>`;
+RICH.nj17=()=>dkH('Repaso en voz alta','Comprobemos lo aprendido','Respondan en voz alta y compartan cómo llegaron a su respuesta. Después toquen cada tarjeta.')+
+ `<div class="ni ni-cp">${n3flip('njcp',[['camino','1 · ¿Cuáles son los cinco pasos del protocolo de Casa Muladhara?','<b>Oración de conexión, Gráfico del Niño Interno, Energías Discordantes, limpiar o investigar, y verificar y cerrar.</b>'],['lupa','2 · ¿Cuándo conviene investigar en el Mapa en lugar de limpiar directo?','<b>Cuando hay más capas:</b> la energía es general y hace falta precisarla, o la persona necesita comprender qué emoción quedó guardada.'],['pend','3 · ¿Qué dos preguntas se hacen al péndulo en el Mapa?','<b>¿En qué sector está la emoción? y ¿Cuál es la emoción?</b> Luego se confirma antes de limpiar.']],'c4',260)}</div>`;
+RICH.nj18=()=>dkH('Cierre de la clase','Tarea de la semana')+
+ `<div class="ni dk-grid c2" style="align-items:start"><div class="ni-task">${n3ck('njta',[['ojo','Aplica el protocolo completo en ti misma, partiendo de tu herida principal'],['pend','Limpia las energías discordantes que aparezcan y verifica con el péndulo'],['libro','Completa tu ficha de sesión con lo que encontraste en el Mapa']],['Marca cada tarea cuando la completes.','¡Listo! Trae tu ficha de sesión a la próxima clase.'])}</div>
+ <div style="display:grid;gap:10px">${niBox('l','Para la próxima clase','Trae tu ficha de sesión. Compartir lo que encontraste es voluntario.')}${c4imp('Si al aplicarte el protocolo aparece una energía muy intensa, como abuso, violencia o autolesión, detente y conversa con tu facilitadora antes de seguir.')}</div></div>`;
