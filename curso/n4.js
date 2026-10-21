@@ -988,3 +988,193 @@ RICH.nl16=()=>{const o=st('nlrq',{}),n=NL_RQ.filter((_,i)=>o[i]).length;
 const NL_OR=['Amado Yo Superior, ángeles, arcángeles, seres de luz, todo mi comité espiritual: gracias por acompañarnos en este camino.','Gracias por cada herida reconocida, por cada niña y cada niño interior que fue visto, escuchado, abrazado.','Que lo aprendido se convierta en servicio, con humildad, respeto y amor.','Que cada sesión sea para el mayor bien de quien llega a nosotras.','Gracias, gracias, gracias.'];
 RICH.nl17=()=>dkH('Cierre de la especialización','Oración de agradecimiento','La decimos juntas para cerrar el camino.')+`<div class="ni">${n3pray('nlor',NL_OR)}</div>`;
 RICH.nl18=()=>`<div class="ni">${nbHero('Especialización Niño Interno','Gracias por','este camino','Sigue practicando, registra tus sesiones y acompáñate como acompañas a otras.',['Clase 1','Clase 2','Clase 3','Clase 4'],'Karen Oyarce · Maestra Holística',nlPhoto('Una mujer y una niña caminan de la mano por un sendero iluminado por el sol'))}</div>`;
+
+/* ---------- Nivel 4 · Formación Transgeneracional · Clase 1 ---------- */
+(function(){const c=document.createElement('style');c.id='tg-css';c.textContent=`
+.tgx{--tg-m:#f6d3ef;--tg-m2:#b0589a;--tg-p:#c9c9f5;--tg-p2:#5a5ab0}
+.tg-st4{grid-template-columns:repeat(2,minmax(0,1fr))!important}@media (max-width:760px){.tg-st4{grid-template-columns:1fr!important}}
+.tg-tree{width:100%;height:auto;display:block;overflow:visible}
+.tg-tree .nd{cursor:pointer;outline:none}
+.tg-tree .nd circle{stroke:#fff;stroke-width:2;transition:transform .3s;transform-box:fill-box;transform-origin:50% 50%}
+.tg-tree .nd:hover circle,.tg-tree .nd:focus-visible circle{transform:scale(1.12)}
+.tg-tree .nd.on circle{stroke:#3b4a24;stroke-width:3}
+.tg-tree .nd.new{animation:niPop .5s both}
+.tg-tree .dim{opacity:.25}
+.tg-tree text{font-family:var(--f-body,system-ui);text-anchor:middle;fill:#3b4a24}
+.tg-tree .rl{text-anchor:start;font:600 10px var(--f-body,system-ui);fill:#5d6b55}
+.tg-tree line{stroke:#b9ad84;stroke-width:1.2}
+.tg-sum{display:flex;justify-content:center;gap:8px;align-items:center;flex-wrap:wrap;font:400 1.2rem/1 var(--f-display);color:var(--ni-lil2)}
+.tg-sum span{animation:niPop .4s both}
+.tg-two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tg-two>.m{background:var(--tg-m);color:#5a2350}.tg-two>.p{background:var(--tg-p);color:#2a2a6a}
+.tg-flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.tg-flow>button{all:unset;box-sizing:border-box;cursor:pointer;position:relative;display:grid;gap:6px;align-content:start;padding:16px;border-radius:16px;border:1px solid var(--nb-line);background:var(--nb-paper);color:var(--nb-ink);opacity:.4;transition:opacity .4s,transform .4s}
+.tg-flow>button.lit{opacity:1}.tg-flow>button.cur{transform:translateY(-5px);border-color:var(--ni-lil2)}
+.tg-flow>button:last-child.lit{background:var(--ni-lil)}
+.tg-flow small{font:600 .56rem/1 var(--f-caps);letter-spacing:.16em;text-transform:uppercase;color:var(--ni-lil2)}
+.tg-flow b{font:400 1.2rem/1.2 var(--f-display)}.tg-flow span{font-size:.88rem;line-height:1.45;color:var(--nb-soft)}
+.tg-flow>button:not(:last-child)::after{content:"";position:absolute;right:-14px;top:50%;border:6px solid transparent;border-left:9px solid var(--ni-lil2);margin-top:-6px}
+.tg-law{display:grid;gap:8px}
+.tg-law>div{display:grid;grid-template-columns:minmax(110px,.6fr) 40px minmax(110px,.6fr) minmax(0,1.5fr) minmax(0,1fr);gap:10px;align-items:center;padding:12px 14px;border-radius:14px;background:var(--nb-paper);border:1px solid var(--nb-line)}
+.tg-law b{font-weight:600}.tg-law .ar{color:var(--ni-lil2);font-size:1.3rem;text-align:center;animation:njArr 1.6s ease-in-out infinite}
+.tg-law .c{color:var(--ni-lil2);font-weight:600;animation:niPop .4s both}
+.tg-law span{font-size:.86rem;line-height:1.45;color:var(--nb-ink);animation:niUp .4s both}
+.tg-law small{font-size:.78rem;color:var(--nb-soft);animation:niUp .4s .1s both}
+.tg-gen{display:grid;gap:6px}
+.tg-gen button{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:1fr 1fr;padding:10px 14px;border-radius:10px;border:1px solid var(--nb-line);background:var(--nb-paper);font-size:.9rem;color:var(--nb-ink)}
+.tg-gen button b{font-weight:600}
+.tg-gen button[aria-pressed="true"]{background:#e5edd6;border-color:#5c7a32}
+.tg-meter{height:14px;border-radius:14px;background:var(--nb-line);overflow:hidden}
+.tg-meter i{display:block;height:100%;border-radius:14px;background:linear-gradient(90deg,#e6dcf2,#7a5aa6);transition:width .6s cubic-bezier(.3,.7,.2,1)}
+.tg-groups{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.tg-groups button{all:unset;box-sizing:border-box;cursor:pointer;display:grid;gap:4px;align-content:start;padding:12px;border-radius:14px;border:1px solid var(--nb-line);background:var(--nb-paper);color:var(--nb-ink);transition:transform .25s;animation:niUp .4s both}
+.tg-groups button b{font-weight:600;font-size:.88rem}.tg-groups button span{font-size:.76rem;line-height:1.4;color:var(--nb-soft)}
+.tg-groups button[aria-pressed="true"]{background:var(--ni-lil);border-color:var(--ni-lil2);transform:translateY(-3px)}
+.tg-groups button.x{background:var(--ni-olv);color:#ece7d3;cursor:default}.tg-groups button.x span{color:#dfe3cf}
+.tg-pr{font-size:.8rem;line-height:1.5;color:var(--nb-soft);text-align:center;font-style:italic;max-width:70ch;margin:0 auto}
+@media (max-width:760px){.tg-two,.tg-flow{grid-template-columns:1fr}.tg-flow>button{opacity:1}.tg-flow>button::after{display:none}.tg-law>div{grid-template-columns:1fr 30px 1fr}.tg-law span,.tg-law small{grid-column:1/-1}.tg-groups{grid-template-columns:1fr 1fr}}
+`;document.head.appendChild(c)})();
+
+/* el árbol de cuatro generaciones: 15 personas, la rama materna a la izquierda */
+const TG_X=[340,225,455,168,282,398,512];for(let i=0;i<8;i++)TG_X.push(110+i*65.7);
+const TG_GEN=i=>i===0?0:i<3?1:i<7?2:3,TG_SIDE=i=>i===0?'':[1,3,4,7,8,9,10].includes(i)?'m':'p';
+const TG_PAR=i=>i===0?[1,2]:i<3?[i*2+1,i*2+2]:i<7?[7+(i-3)*2,8+(i-3)*2]:null;
+const TG_LB=(()=>{const L=['Yo','Madre','Padre','Abuela materna','Abuelo materno','Abuela paterna','Abuelo paterno'];
+ for(let a=3;a<7;a++){const s=a<5?'materna':'paterna',so=a<5?'materno':'paterno';L.push(`Bisabuela ${s} · madre de tu ${L[a].toLowerCase()}`,`Bisabuelo ${so} · padre de tu ${L[a].toLowerCase()}`)}return L})();
+const TG_SH=i=>i===0?'Yo':i<3?TG_LB[i]:i<7?TG_LB[i].split(' ')[0]:i%2?'Bisabuela':'Bisabuelo';
+const tgTree=o=>{o=o||{};const Y=[262,190,115,40],R=[24,20,18,16],rv=o.rv===undefined?3:o.rv;let g='';
+ ['Yo','Padres','Abuelos','Bisabuelos'].forEach((t,k)=>{if(k<=rv)g+=`<text class="rl${o.hg!==undefined&&o.hg!==k?' dim':''}" x="0" y="${Y[k]+4}">${t}</text>`});
+ for(let i=0;i<15;i++){const P=TG_PAR(i);if(P&&TG_GEN(i)+1<=rv)P.forEach(p=>{g+=`<line x1="${TG_X[i]}" y1="${Y[TG_GEN(i)]}" x2="${TG_X[p]}" y2="${Y[TG_GEN(p)]}"/>`})}
+ for(let i=0;i<15;i++){const k=TG_GEN(i);if(k>rv)continue;const s=TG_SIDE(i),dim=(o.hs&&s&&s!==o.hs)||(o.hg!==undefined&&o.hg!==k),nm=st('tan'+i,'');
+  g+=`<g class="nd${o.sel===i?' on':''}${dim?' dim':''}${k===rv&&o.anim?' new':''}" ${o.act?`${rxa(o.act,i)} role="button" tabindex="0" aria-label="${TG_LB[i]}"`:''} style="animation-delay:${(i%8)*.05}s"><circle cx="${TG_X[i]}" cy="${Y[k]}" r="${R[k]}" fill="${s==='m'?'#f6d3ef':s==='p'?'#c9c9f5':'#1f3f32'}"/>${i===0?`<text x="${TG_X[i]}" y="${Y[k]+4}" style="fill:#ece7d3;font-size:10px;font-weight:600">Yo</text>`:''}<text x="${TG_X[i]}" y="${Y[k]+R[k]+11}" style="font-size:${k===3?7.5:9}px">${esc(nm?nm.slice(0,12):i===0?'':TG_SH(i))}</text></g>`}
+ return `<svg class="tg-tree" viewBox="0 0 600 300" role="group" aria-label="Árbol de cuatro generaciones">${g}</svg>`};
+RX.tgn=k=>{RS.tgn=RS.tgn===+k?-1:+k;render(false)};
+
+/* el gráfico de Constelación Familiar, interactivo */
+const TG_T=['Ser hijo\nbastón','Excluidos\nen el árbol','Herencias','Muertes\ntempranas','Abortos o\nabusos','Abundancia /\ndinero','Divorcios /\nseparaciones','Éxitos','Heredero\nuniversal','Problemas con\nla familia','Migración','Yacente','Guerras','Bloqueos con\nla madre','Bloqueos con\nel padre','Repetición de\npatrones','Doble','Lealtades\ninconscientes','Lealtades\nconscientes','Roles\ncambiados','Recuperar mi\nlugar en el clan','Enfermedades (de-\npresiones / adicciones)','Vínculos\ndisfuncionales','Cargas\nemocionales','Votos\n(ir al gráfico)','Transgeneracional\n(ir al gráfico)'];
+const tgT=i=>TG_T[i].replace(/-\n/,'').replace(/\n/g,' ').replace(' (ir al gráfico)','');
+const TG_G=['1era Generación','2da Generación','3era Generación','4ta Generación'],TG_GQ=['Yo','Padres','Abuelos','Bisabuelos'],TG_L=['Materno','Paterno'];
+RX.tgc=(k,v)=>{const K='tg'+k;RS[K]=RS[K]===+v?-1:+v;render(false)};
+const tgChart=o=>{o=o||{};return niFan({label:'Gráfico de Constelación Familiar',act:'tgc',inner:50,sel:(k,i)=>st('tg'+k,-1)===i,
+ hot:o.ring||o.hot?(k,i,t)=>o.ring?(k===o.ring?0:-1):(k==='t'?(o.hot.includes(i)?1:-1):0):0,
+ rings:[{k:'l',r0:62,r1:118,items:[{t:'Linaje\nMaterno',c:'#f6d3ef',on:'#b0589a'},{t:'Linaje\nPaterno',c:'#c9c9f5',on:'#5a5ab0'}],m:'tan',fs:11},
+  {k:'t',r0:118,r1:238,items:TG_T,fill:'#ffffff',on:'#3f7d6e',m:'rad',fs:7.6},
+  {k:'g',r0:238,r1:260,items:TG_G,fill:'#eef4dc',on:'#5c7a32',m:'tan',fs:9.5},
+  {k:'e',r0:260,r1:280,items:Array.from({length:21},(_,i)=>String(i*5)),fill:'#efe4f3',on:'#7a5aa6',m:'tan',fs:7.5}],cap:o.cap===0?'':o.cap||'Toca el linaje, el tema, la generación y la escala.'})};
+const tgSel=()=>({l:st('tgl',-1),t:st('tgt',-1),g:st('tgg',-1),e:st('tge',-1)});
+const tgRead=()=>{const s=tgSel();return [s.l>=0?TG_L[s.l]:'',s.g>=0?`${TG_G[s.g].split(' ')[0]} · ${TG_GQ[s.g].toLowerCase()}`:'',s.e>=0?String(s.e*5):'',s.t>=0?tgT(s.t):'']};
+const tgReadRow=()=>{const r=tgRead();return `<div class="ni-read ni-st">${['Linaje','Generación','Escala','Tema'].map((x,i)=>`<div><small>Paso ${i+1} · ${x}</small><span>${r[i]||'—'}</span></div>`).join('')}</div>`};
+const TG_PRAY='Pido a mi Yo Superior, maestros ascendidos y seres de luz de la más alta vibración, que por favor limpien todo mi linaje ancestral, que corten todos los votos y energías negativas del pasado que ya no sirvan para el desarrollo y evolución de mi Alma en tiempo presente. Hoy reconozco, limpio, sano, libero y agradezco a todos mis ancestros por las experiencias del pasado. Hoy yo ………… con plena consciencia creo mi propia historia. Gracias, gracias, gracias.';
+
+/* ----- 1 · Bienvenida y agenda ----- */
+RICH.ta1=()=>`<div class="ni tgx">${nbHero('Formación Transgeneracional · Clase 1','El árbol','y el clan','Lo que pasa de una generación a otra: el árbol de cuatro generaciones, los dos linajes, las leyes del clan y el gráfico de Constelación Familiar.',['Árbol','Linajes','Leyes del clan','Constelación'],'Karen Oyarce · Maestra Holística',
+ `<div class="ni-ph"><img src="${N4P}trans/c1-portada.webp" alt="Una abuela, una madre y una niña, de espaldas, apoyan las manos en el tronco de un árbol enorme"><svg class="ni-arc" viewBox="0 0 200 104" aria-hidden="true"><path pathLength="1" d="M10 100a90 90 0 0 1 180 0" stroke="#f3ecd8" stroke-width="16"/><path pathLength="1" d="M34 100a66 66 0 0 1 132 0" stroke="#f6d3ef" stroke-width="16"/><path pathLength="1" d="M58 100a42 42 0 0 1 84 0" stroke="#c9c9f5" stroke-width="16"/><circle cx="100" cy="100" r="18" fill="#3b4a24"/></svg></div>`)}</div>`;
+RICH.ta2=()=>niAgenda('Clase 1',['Del niño interno al clan','Qué es lo transgeneracional y cómo se transmite','El árbol y los dos linajes','Las leyes del clan','Los tres gráficos de la formación','El gráfico de Constelación Familiar','Práctica en parejas','Honrar, repaso y tarea'],
+ ['Explicar qué es lo transgeneracional','Dibujar tu árbol de cuatro generaciones','Reconocer las tres leyes del clan','Leer el gráfico de Constelación: linaje, generación, escala y tema']);
+
+/* ----- 2 · Del niño interno al clan ----- */
+RICH.ta3=()=>{const v=st('ta3v',0),h=nigSel('he');
+ return dkH('Lo que traemos de antes de nacer','Del niño interno al clan','Toca cada lado para verlo.')+
+ `<div class="ni tgx" style="display:grid;gap:14px"><div class="dk-grid c2" style="align-items:stretch">
+ <button class="nj-card ${v===0?'l':''}" style="all:unset;box-sizing:border-box;cursor:pointer;border-radius:18px;padding:18px;display:grid;gap:8px;border:1px solid var(--nb-line);${v===0?'background:var(--nb-paper);box-shadow:0 0 0 2px var(--ni-lil2)':'background:var(--nb-paper)'}" ${rxa('set','ta3v',0)}><span class="ni-tag">Niño interno</span><h3 style="margin:0;font:400 1.4rem/1.2 var(--f-display)">Lo que viví</h3><p style="margin:0;line-height:1.5;color:var(--nb-soft)">Las heridas de mi infancia, la madre y el padre que tuve, las máscaras que aprendí para protegerme.</p></button>
+ <button style="all:unset;box-sizing:border-box;cursor:pointer;border-radius:18px;padding:18px;display:grid;gap:8px;background:var(--ni-olv);color:#ece7d3;${v===1?'box-shadow:0 0 0 2px var(--ni-lil2)':''}" ${rxa('set','ta3v',1)}><span class="ni-tag" style="color:#d9c9ef">Transgeneracional</span><h3 style="margin:0;font:400 1.4rem/1.2 var(--f-display);color:#fff">Lo que heredé</h3><p style="margin:0;line-height:1.5;color:#dfe3cf">Las memorias de mis padres, abuelos y bisabuelos: lo que vivieron, callaron o no pudieron resolver.</p></button></div>
+ <div style="max-width:560px;width:100%;justify-self:center">${tgTree({hg:v===0?0:undefined,rv:3})}</div>
+ ${niQ('Muchas heridas de la infancia repiten una historia que empezó antes que nosotras.')}
+ ${niBox('l','Pregunta al grupo','¿Qué herida de tu gráfico del niño interno crees que también vivió tu madre o tu padre? En tu gráfico marcaste la herida de '+NI_H[n3clamp(h,0,4)].n.toLowerCase()+'.')}</div>`};
+
+/* ----- 3 · Qué es lo transgeneracional ----- */
+const TG_HR=[['Se hereda','Llega con la vida, junto con el apellido, los gestos y las costumbres.'],['Se repite','Aparece otra vez en fechas, nombres, uniones, pérdidas o enfermedades.'],['Se puede sanar','Al reconocerlo y limpiarlo, deja de pasar a la siguiente generación.']];
+RICH.ta4=()=>{const s=n3clamp(st('ta4s',0),0,2);
+ return dkH('Lo transgeneracional','¿Qué es lo transgeneracional?','Avanza por los tres movimientos.')+
+ `<div class="ni tgx" style="display:grid;gap:14px"><div class="ni-hyp"><p>Es lo que pasa de una generación a otra sin que nadie lo decida: emociones, creencias, miedos, lealtades y memorias de lo que vivieron nuestros ancestros.</p></div>
+ <div class="tg-flow">${TG_HR.map((x,i)=>`<button class="${i<=s?'lit':''} ${i===s?'cur':''}" ${rxa('set','ta4s',i)}><small>${i+1}</small><b>${x[0]}</b><span>${x[1]}</span></button>`).join('')}</div>
+ ${s<2?`<div class="dk-cta" style="justify-content:center"><button class="btn btn-primary btn-sm" ${rxa('set','ta4s',s+1)}>Siguiente</button></div>`:''}
+ ${niBox('l','Pregunta al grupo','¿Qué frase o costumbre se repite en tu familia desde siempre?')}${n3area('ta4a','Anota la tuya','En mi familia siempre se dice…')}</div>`};
+RICH.ta5=()=>dkH('Lo transgeneracional','Cómo se transmite una memoria','Tres caminos. Toca cada tarjeta.')+
+ `<div class="ni tgx" style="display:grid;gap:14px">${n3flip('ta5',[['candado','Lo no dicho · Secretos','Lo que se calló o se escondió: un hijo no reconocido, una unión oculta, una muerte de la que no se habla.'],['gota','Lo no resuelto · Duelos y deudas','Pérdidas que no se lloraron, injusticias sin reparar, deudas emocionales o materiales.'],['persona','Lo excluido · Personas olvidadas','Alguien que fue rechazado, borrado o al que no se nombra en la familia.']],'c3',190)}
+ <div class="ni-hyp"><p>Lo que una generación no puede mirar, la siguiente lo vive.</p></div></div>`;
+
+/* ----- 4 · El árbol y los dos linajes ----- */
+RICH.ta6=()=>{const rv=n3clamp(st('tarv',0),0,3),s=st('tgn',-1),N=[1,2,4,8];
+ return dkH('El árbol','El árbol de cuatro generaciones','Construye el árbol generación por generación. Toca a una persona para anotar su nombre.')+
+ `<div class="ni tgx" style="display:grid;gap:12px"><div style="max-width:720px;width:100%;justify-self:center">${tgTree({rv,act:'tgn',sel:s,anim:1})}</div>
+ <div class="tg-sum">${N.slice(0,rv+1).map((n,i)=>`<span style="animation-delay:${i*.05}s">${i?'+ ':''}${n}</span>`).join('')}<span>= ${N.slice(0,rv+1).reduce((a,b)=>a+b,0)} ${rv===0?'persona':'personas'}</span></div>
+ ${rv<3?`<div class="dk-cta" style="justify-content:center"><button class="btn btn-primary btn-sm" ${rxa('set','tarv',rv+1)}>Agregar ${['','los padres','los abuelos','los bisabuelos'][rv+1]}</button></div>`:''}
+ ${s>=0&&TG_GEN(s)<=rv?`<div class="nj-det ni-in" style="background:${TG_SIDE(s)==='m'?'#f6d3ef':TG_SIDE(s)==='p'?'#c9c9f5':'var(--ni-tea)'}"><div><span class="ni-tag">${['1era','2da','3era','4ta'][TG_GEN(s)]} generación${TG_SIDE(s)?' · linaje '+(TG_SIDE(s)==='m'?'materno':'paterno'):''}</span><br><b>${TG_LB[s]}</b><p><input type="text" data-rsin="tan${s}" placeholder="Escribe su nombre" value="${esc(st('tan'+s,''))}" style="all:unset;box-sizing:border-box;width:100%;border-bottom:1px dashed currentColor;padding:4px 0;font:400 1rem var(--f-display)"></p></div></div>`:''}
+ ${niNote('Rosado: linaje materno · Lila: linaje paterno. Lo que anotes queda solo en tu sesión.')}</div>`};
+RICH.ta7=()=>{const s=st('ta7',-1);
+ return dkH('Los dos linajes','Linaje materno y linaje paterno','Toca un linaje para verlo en el árbol.')+
+ `<div class="ni tgx" style="display:grid;gap:12px"><div class="tg-two">${[['m','Linaje materno','La rama de mi madre','Mi madre, mis abuelos maternos y mis bisabuelos maternos. Lo que pasa de mujer a mujer suele verse con fuerza aquí.'],['p','Linaje paterno','La rama de mi padre','Mi padre, mis abuelos paternos y mis bisabuelos paternos. Aunque no conozca a mi padre, su linaje también es mío.']].map((x,i)=>`<button class="nj-card ${x[0]}" style="all:unset;box-sizing:border-box;cursor:pointer;border-radius:18px;padding:18px;display:grid;gap:8px;background:${i?'#c9c9f5':'#f6d3ef'};color:${i?'#2a2a6a':'#5a2350'};${s===i?'box-shadow:0 0 0 3px '+(i?'#5a5ab0':'#b0589a'):''}" ${rxa('set','ta7',s===i?-1:i)} ${pressed(s===i)}><span class="ni-tag" style="color:inherit;opacity:.8">${x[1]}</span><h3 style="margin:0;font:400 1.3rem/1.2 var(--f-display)">${x[2]}</h3><p style="margin:0;line-height:1.5">${x[3]}</p></button>`).join('')}</div>
+ <div style="max-width:620px;width:100%;justify-self:center">${tgTree({hs:s===0?'m':s===1?'p':''})}</div>
+ ${niQ('Las dos raíces cuentan por igual: nadie puede elegir uno solo de sus linajes.')}</div>`};
+
+/* ----- 5 · Las leyes del clan ----- */
+const TG_LY=[['grupo','Pertenencia','Todos los miembros tienen derecho a pertenecer: los que murieron, los que se fueron, los que no nacieron.','Exclusión','Alguien de una generación siguiente repite el destino del excluido.','Excluidos en el árbol',[1]],['camino','Orden','Quienes llegaron antes tienen su lugar primero. Los padres dan y los hijos reciben.','Desorden','Hijos que cuidan a sus padres o toman un lugar que no les corresponde.','Roles cambiados · Hijo bastón',[19,0]],['balanza','Equilibrio','Entre dar y recibir. Lo que se toma se devuelve, y lo que se da se reconoce.','Deudas','Alguien paga lo que otro no pagó: dinero, culpa o reparación.','Cargas emocionales',[23]]];
+RICH.ta8=()=>{const q=st('ta8q',-1);
+ return dkH('Las leyes del clan','Las tres leyes del clan','Toca cada ley.')+
+ `<div class="ni tgx" style="display:grid;gap:14px">${n3sel('ta8',TG_LY.map((x,i)=>[x[0],'Ley '+(i+1)+' · '+x[1],x[2]]),{eb:'Ley',nav:1})}
+ <div class="nj-card l"><span class="ni-tag">Pregunta al grupo</span><p style="opacity:1;font-size:.95rem">¿Cuál de estas tres leyes sientes más presente en tu familia?</p>${chipRow('ta8q',TG_LY.map(x=>x[1]),q)}</div></div>`};
+RICH.ta9=()=>{const o=st('ta9',{}),n=Object.values(o).filter(Boolean).length;
+ return dkH('Las leyes del clan','Qué pasa cuando una ley se rompe','Toca «Romper» en cada ley para ver qué aparece y dónde se ve en el gráfico.')+
+ `<div class="ni tgx tg-law">${TG_LY.map((x,i)=>`<div><b>${x[1]}</b>${o[i]?`<span class="ar" aria-hidden="true">➜</span><span class="c">${x[3]}</span><span>${x[4]}</span><small><b>En el gráfico:</b> ${x[5]}</small>`:`<span></span><button class="btn btn-ghost btn-sm" ${rxa('tog','ta9',i)} style="justify-self:start">Romper</button><span></span><span></span>`}</div>`).join('')}</div>
+ ${n===3?`<div class="ni" style="display:grid;gap:10px"><div style="max-width:640px;width:100%;justify-self:center">${tgChart({hot:[1,19,0,23],cap:'Estos temas aparecen en el gráfico de Constelación Familiar.'})}</div></div>`:''}`};
+
+/* ----- 6 · Los tres gráficos ----- */
+RICH.ta10=()=>dkH('La formación','Los tres gráficos de la formación','Una puerta de entrada y dos gráficos para profundizar.')+
+ `<div class="ni tgx" style="display:grid;gap:12px"><div class="nj-three ni-st"><div class="nj-card" style="background:var(--ni-olv);color:#ece7d3"><span class="ni-tag" style="color:#d9c9ef">Clases 1 y 2</span><h3 style="color:#fff">Constelación Familiar</h3><p style="color:#dfe3cf">La puerta de entrada: muestra el linaje, la generación y el tema.</p><div><button class="btn btn-ghost btn-sm" style="color:#ece7d3;border-color:#d9c9ef" data-les="${S.lesson[0]},${S.lesson[1]+1}">Verlo ahora</button></div></div>
+ <div class="nj-card" style="background:var(--nb-paper);border:1px solid var(--nb-line)"><span class="ni-tag">Clase 3</span><h3>Transgeneracional</h3><p>Las memorias del linaje: lo oculto, las uniones, las pérdidas y la historia colectiva.</p></div>
+ <div class="nj-card" style="background:var(--nb-paper);border:1px solid var(--nb-line)"><span class="ni-tag">Clase 3</span><h3>Votos o Pactos</h3><p>Los votos y pactos heredados, su nivel y cómo anularlos.</p></div></div>
+ <div class="nj-det"><div><span class="ni-tag">También usamos</span><p>Energías Discordantes para limpiar directo y el Mapa de Emociones para investigar, como ya aprendiste en Niño interior.</p></div><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" data-les="0,15">Energías</button><button class="btn btn-ghost btn-sm" data-les="0,16">Mapa</button></div></div></div>`;
+
+/* ----- 7 · El gráfico de Constelación Familiar ----- */
+RICH.ta11=()=>dkH('Constelación Familiar','El gráfico de Constelación Familiar','Explóralo: toca el linaje, un tema, la generación y la escala.')+
+ `<div class="ni tgx nj-two"><div class="nj-fig">${niOrig('ta11O','constelacion.webp','Lámina original del gráfico de Constelación Familiar de Casa Muladhara',tgChart())}</div>${tgReadRow()}
+ <p class="tg-pr">${TG_PRAY}</p></div>`;
+RICH.ta12=()=>{const l=st('tgl',-1);
+ return dkH('Paso 1','El centro: ¿de qué linaje viene?','Toca un linaje en el centro del gráfico o aquí.')+
+ `<div class="ni tgx nj-two"><div class="nj-fig">${tgChart({ring:'l',cap:0})}</div>
+ <div class="tg-two">${[['Linaje materno','La memoria viene de la rama de la madre.'],['Linaje paterno','La memoria viene de la rama del padre.']].map((x,i)=>`<button style="all:unset;box-sizing:border-box;cursor:pointer;border-radius:16px;padding:16px;display:grid;gap:6px;background:${i?'#c9c9f5':'#f6d3ef'};color:${i?'#2a2a6a':'#5a2350'};${l===i?'box-shadow:0 0 0 3px '+(i?'#5a5ab0':'#b0589a'):''}" ${rxa('tgc','l',i)} ${pressed(l===i)}><b style="font:400 1.2rem/1.2 var(--f-display)">${x[0]}</b><span style="font-size:.9rem">${x[1]}</span></button>`).join('')}</div>
+ ${niQ('Siempre se mide primero el linaje: ordena todo lo que viene después.')}</div>`};
+RICH.ta13=()=>{const g=st('tgg',-1),e=st('tge',-1);
+ return dkH('Pasos 2 y 3','Las cuatro generaciones y la escala','Toca una generación y después la intensidad en la escala.')+
+ `<div class="ni tgx" style="display:grid;gap:14px"><div class="dk-grid c2" style="align-items:center"><div class="tg-gen">${TG_G.map((x,i)=>`<button ${rxa('tgc','g',i)} ${pressed(g===i)}><b>${x}</b><span>${TG_GQ[i]}</span></button>`).join('')}</div>
+ <div>${tgTree({hg:g>=0?g:undefined})}</div></div>
+ <div class="nj-card" style="background:var(--ni-olv);color:#ece7d3"><span class="ni-tag" style="color:#d9c9ef">Escala de 0 a 100</span><p style="color:#dfe3cf;font-size:.92rem">Indica con qué intensidad la memoria está presente hoy en tu vida. Mientras más alto el número, más pesa.</p>
+ <div class="dk-chips">${Array.from({length:11},(_,i)=>`<button class="chip" ${rxa('tgc','e',i*2)} ${pressed(e===i*2)}>${i*10}</button>`).join('')}</div>
+ <div class="tg-meter" aria-hidden="true"><i style="width:${e<0?0:e*5}%"></i></div>${e>=0?`<b class="ni-in" style="font:400 1.1rem var(--f-display);color:#fff">${e*5} · ${e*5<35?'pesa poco':e*5<70?'pesa bastante':'pesa mucho'}</b>`:''}</div>
+ <div style="max-width:680px;width:100%;justify-self:center">${tgChart({ring:g<0?'g':'e',cap:'También puedes marcarlo en el gráfico.'})}</div></div>`};
+const TG_GR=[['El lugar en el clan',[0,19,1,20,11,16,8]],['Lealtades y patrones',[18,17,15,9]],['Madre y padre',[13,14]],['Pérdidas y rupturas',[3,4,6,10,12]],['Lo material',[2,5,7]],['Lo que se carga',[21,22,23]],['Ir a otro gráfico',[24,25]]];
+RICH.ta14=()=>{const s=st('ta14',-1),t=st('tgt',-1);
+ return dkH('Paso 4','Los temas del gráfico','26 temas en siete grupos. Toca un grupo para encontrarlo en el gráfico.')+
+ `<div class="ni tgx nj-two"><div class="nj-fig">${tgChart({hot:s>=0?TG_GR[s][1]:null,ring:s<0?'t':null,cap:0})}</div>
+ <div class="tg-groups">${TG_GR.map((x,i)=>`<button ${rxa('set','ta14',s===i?-1:i)} ${pressed(s===i)} style="animation-delay:${i*.04}s"><b>${x[0]}</b><span>${x[1].map(tgT).join(' · ')}</span></button>`).join('')}<button class="x"><b>26 temas</b><span>En la Clase 2 los miramos uno a uno.</span></button></div>
+ ${t>=0?`<div class="nj-det ni-in"><div><span class="ni-tag">Tema marcado</span><br><b>${tgT(t)}</b></div></div>`:''}</div>`};
+RICH.ta15=()=>{const r=tgRead();
+ return dkH('Lectura','Cómo se lee el gráfico','Siempre en el mismo orden. Abajo aparece lo que marcaste en el gráfico.')+
+ `<div class="ni tgx" style="display:grid;gap:14px"><div class="nj-flow">${[['Linaje','Materno o paterno, en el centro.'],['Generación','De la 1era a la 4ta.'],['Escala','De 0 a 100: cuánto pesa hoy.'],['Tema','Cuál de los 26 temas está activo.']].map((x,i)=>`<div class="lit" style="animation:niUp .45s ${i*.1}s both"><small>Paso ${i+1}</small><b>${x[0]}</b><span>${x[1]}</span><span style="font:400 1rem var(--f-display);color:${i===3?'#f2c66d':'var(--ni-lil2)'}">${r[i]||'—'}</span></div>`).join('')}</div>
+ ${r.every(Boolean)?`<div class="ni-hyp ni-in"><span class="ni-tag">Tu lectura</span><p>Linaje <mark>${r[0].toLowerCase()}</mark>, <mark>${r[1]}</mark>, con una intensidad de <mark>${r[2]}</mark>: el tema activo es <mark>${r[3].toLowerCase()}</mark>.</p></div>`:`<div class="dk-cta" style="justify-content:center"><button class="btn btn-ghost btn-sm" data-slide="0">Marcar en el gráfico</button></div>`}
+ ${niBox('l','Después','Limpiar directo con Energías Discordantes o investigar en el Mapa o el Transgeneracional. Lo veremos en la Clase 2.')}</div>`};
+RX.tgex=()=>{RS.tgl=0;RS.tgg=2;RS.tge=14;RS.tgt=6;goSlide('0')};
+const TG_EJ=[['Linaje','Materno'],['Generación','3era · abuelos'],['Escala','70'],['Tema','Divorcios / separaciones']];
+RICH.ta16=()=>{const s=n3clamp(st('ta16',0),0,4);
+ return dkH('Ejemplo','Ejemplo de lectura','Consultante: M. R., sus relaciones de pareja terminan siempre en separación.')+
+ `<div class="ni tgx" style="display:grid;gap:14px"><div class="nj-flow">${TG_EJ.map((x,i)=>`<div class="${i<s?'lit':''}"><small>${x[0]}</small><b>${x[1]}</b></div>`).join('')}</div>
+ ${s<4?`<div class="dk-cta" style="justify-content:center"><button class="btn btn-primary btn-sm" ${rxa('set','ta16',s+1)}>${s?'Siguiente':'Empezar'}</button></div>`:
+ `<div class="ni-hyp ni-in"><span class="ni-tag">Comprensión posible</span><p>La abuela materna vivió una separación de la que no se habló. Por lealtad, la nieta repite esa historia en sus parejas.</p></div>
+ <div class="dk-cta" style="justify-content:center"><button class="btn btn-primary btn-sm" ${rxa('tgex',0)}>Verlo en el gráfico</button><button class="btn btn-ghost btn-sm" ${rxa('set','ta16',0)}>Ver de nuevo</button></div>`}</div>`+niNote('Ejemplo ficticio.')};
+
+/* ----- 8 · Práctica en parejas ----- */
+const TG_PS=[['Dibuja tu árbol','Con lo que sabes hoy: nombres y lo que conozcas de cada persona.'],['Tu pareja lee','Linaje, generación, escala y tema en el gráfico de Constelación.'],['Conversen','¿Qué sabes de esa generación y de ese tema en tu familia?'],['Cambien de rol','La otra persona dibuja su árbol y recibe la lectura.']];
+RICH.ta17=()=>{const s=n3clamp(st('ta17',0),0,3);
+ return dkH('Práctica en parejas','Práctica en parejas','Cuatro pasos. Anota en tu ficha lo que aparece.')+
+ `<div class="ni tgx" style="display:grid;gap:14px"><div class="nj-steps h tg-st4">${TG_PS.map((x,i)=>`<div class="${i<s?'ok':i===s?'cur':''}" style="cursor:pointer" ${rxa('set','ta17',i)}><span class="n">${i<s?'✓':i+1}</span><div><b>${x[0]}</b><p>${x[1]}</p></div></div>`).join('')}</div>
+ ${s<3?`<div class="dk-cta" style="justify-content:center"><button class="btn btn-primary btn-sm" ${rxa('set','ta17',s+1)}>Siguiente paso</button></div>`:''}
+ ${niFicha('taf',['Persona','Linaje','Generación','Escala','Tema','Lo que sabes de esa historia'],['Ej.: M. R.','Materno','3era · abuelos','70','Divorcios / separaciones','La abuela se separó y nadie habla de eso'],()=>['',...tgRead(),''])}</div>`+n3priv};
+
+/* ----- 9 · Honrar, repaso y tarea ----- */
+RICH.ta18=()=>dkH('Honrar a los ancestros','Comprender sin juzgar','Lo decimos frase a frase.')+`<div class="ni">${n3pray('taho',['Miramos la historia para comprenderla, no para buscar culpables.','Cada ancestro hizo lo que pudo con lo que tenía y con lo que sabía.','Tomo la vida que llegó a través de ellos y la agradezco.','Lo que no me pertenece, lo reconozco y lo libero.'])}</div>`;
+RICH.ta19=()=>dkH('Repaso en voz alta','Comprobemos lo aprendido','Respondan en voz alta y compartan cómo llegaron a su respuesta. Después toquen cada tarjeta.')+
+ `<div class="ni ni-cp">${n3flip('tacp',[['nino','1 · ¿Qué diferencia hay entre lo que trabaja el niño interno y lo transgeneracional?','<b>El niño interno trabaja lo que viví:</b> las heridas de mi infancia. <b>Lo transgeneracional, lo que heredé:</b> las memorias de padres, abuelos y bisabuelos.'],['grupo','2 · ¿Cuáles son las tres leyes del clan y qué pasa cuando se rompe la pertenencia?','<b>Pertenencia, orden y equilibrio.</b> Si se rompe la pertenencia hay exclusión: alguien de una generación siguiente repite el destino del excluido.'],['camino','3 · ¿En qué orden se lee el gráfico de Constelación Familiar?','<b>Linaje, generación, escala y tema.</b> Siempre se mide primero el linaje.']],'c4',260)}</div>`;
+RICH.ta20=()=>dkH('Cierre de la clase','Tarea para la próxima clase','Tu árbol de cuatro generaciones.')+
+ `<div class="ni dk-grid c2" style="align-items:start"><div class="ni-task">${n3ck('tata',[['grupo','Nombres de las 15 personas y nombres que se repiten'],['reloj','Fechas de nacimiento y de muerte que conozcas'],['casa','Oficios y lugares donde vivieron'],['camino','Sucesos importantes: migraciones, pérdidas, uniones, separaciones'],['chat','Lo que nadie sabe o no se cuenta: anótalo como pregunta']],['Marca cada punto cuando lo tengas.','¡Listo! Trae tu árbol a la Clase 2.'])}</div>
+ <div style="display:grid;gap:10px">${niBox('d','Importante','Pregunta a tu familia lo que no sabes, con delicadeza y sin forzar. Trae tu árbol a la Clase 2: trabajaremos con él.')}<div class="dk-cta"><button class="btn btn-ghost btn-sm" data-les="${S.lesson[0]},${S.lesson[1]-5}">Completar mi árbol</button></div></div></div>`;
