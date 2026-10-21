@@ -651,8 +651,8 @@ const NJ_FC=['Consultante','Edad · Quién','Herida y máscara','Energía discor
 const NI_FILL={};
 RX.nifi=(k,v)=>{const n=st(k+'n',2),C=NI_FILL[k].c;if(v==='add'){RS[k+'n']=Math.min(10,n+1)}else{let r=0;while(r<n&&C.some((_,c)=>st(k+r+'_'+c,'')))r++;if(r>=n)RS[k+'n']=n+1;
  NI_FILL[k].f().forEach((x,c)=>{if(x)RS[k+r+'_'+c]=x})}render(false)};
-const niFicha=(k,C,ex,f)=>{NI_FILL[k]={c:C,f};const n=st(k+'n',2);
- return `<div class="dk-sub">Ficha de sesión</div><div class="ni-tw"><table class="ni-tbl nj-ficha"><thead><tr>${C.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>
+const niFicha=(k,C,ex,f,w)=>{NI_FILL[k]={c:C,f};const n=st(k+'n',2);
+ return `<div class="dk-sub">Ficha de sesión</div><div class="ni-tw"><table class="ni-tbl nj-ficha"${w?` style="min-width:${w}px"`:''}><thead><tr>${C.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>
  <tr class="ex">${ex.map(x=>`<td>${x}</td>`).join('')}</tr>
  ${Array.from({length:n},(_,r)=>`<tr>${C.map((x,c)=>`<td><input type="text" data-rsin="${k}${r}_${c}" aria-label="${x}, fila ${r+1}" value="${esc(st(k+r+'_'+c,''))}"></td>`).join('')}</tr>`).join('')}</tbody></table></div>
  <div class="dk-cta" style="justify-content:center;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" ${rxa('nifi',k,'add')}>Agregar fila</button><button class="btn btn-primary btn-sm" ${rxa('nifi',k,'fill')}>Llenar con lo que marqué en los gráficos</button></div>`};
@@ -832,3 +832,159 @@ RICH.nk16=()=>dkH('Repaso en voz alta','Comprobemos lo aprendido','Respondan en 
 RICH.nk17=()=>dkH('Cierre de la clase','Tarea de la semana')+
  `<div class="ni dk-grid c2" style="align-items:start"><div class="ni-task">${n3ck('nkta',[['grupo','Realiza dos sesiones completas con personas voluntarias'],['reloj','Precisa en cada una el anillo 1, la escala y la figura del anillo 4'],['libro','Completa una ficha de sesión por cada persona']],['Marca cada tarea cuando la completes.','¡Listo! Trae tus dos fichas a la próxima clase.'])}</div>
  <div style="display:grid;gap:10px">${niBox('l','Para la próxima clase','Trae tus dos fichas. Las usaremos en la evaluación práctica de la Clase 4.')}${c4imp('Si en una sesión aparece algo muy intenso, detén la lectura, acompaña con calma y conversa con tu facilitadora.')}</div></div>`;
+
+/* ---------- Nivel 4 · Especialización Niño Interno · Clase 4 ---------- */
+(function(){const c=document.createElement('style');c.id='nl-css';c.textContent=`
+.nl-path{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;position:relative}
+.nl-path button{all:unset;box-sizing:border-box;cursor:pointer;position:relative;display:grid;gap:6px;align-content:start;padding:14px;border-radius:16px;border:1px solid var(--nb-line);background:var(--nb-paper);color:var(--nb-ink);min-height:180px;animation:niUp .5s both;transition:transform .25s}
+.nl-path button:hover{transform:translateY(-4px)}
+.nl-path button:last-child{background:var(--ni-olv);border-color:var(--ni-olv);color:#ece7d3}
+.nl-path button:last-child span{color:#dfe3cf}.nl-path button:last-child small{color:#d9c9ef}
+.nl-path small{font:600 .56rem/1 var(--f-caps);letter-spacing:.16em;text-transform:uppercase;color:var(--ni-lil2)}
+.nl-path b{font:400 1.12rem/1.2 var(--f-display)}
+.nl-path span{font-size:.84rem;line-height:1.45;color:var(--nb-soft)}
+.nl-path em{font:600 .55rem/1 var(--f-caps);letter-spacing:.14em;text-transform:uppercase;font-style:normal;margin-top:auto;opacity:.7}
+.nl-path button:not(:last-child)::after{content:"";position:absolute;right:-14px;top:50%;border:6px solid transparent;border-left:9px solid var(--ni-lil2);margin-top:-6px;animation:njArr 1.6s ease-in-out infinite}
+.nl-bar{display:flex;gap:4px;height:46px;position:relative}
+.nl-bar button{all:unset;box-sizing:border-box;cursor:pointer;display:grid;place-items:center;border-radius:12px;font:600 .62rem/1.2 var(--f-caps);letter-spacing:.12em;text-transform:uppercase;transition:filter .25s,transform .25s;text-align:center}
+.nl-bar button[aria-pressed="true"]{transform:translateY(-4px);box-shadow:0 10px 20px -12px rgba(28,58,43,.8)}
+.nl-mom{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.nl-mom>div{border-radius:18px;padding:16px;display:grid;gap:8px;align-content:start;transition:opacity .35s,transform .35s}
+.nl-mom>div.off{opacity:.4}
+.nl-mom>div.on{transform:translateY(-4px)}
+.nl-mom h3{margin:0;font:400 1.3rem/1.2 var(--f-display)}
+.nl-mom small{font-size:.78rem;opacity:.75}
+.nl-mom ul{margin:0;padding-left:18px;display:grid;gap:6px;font-size:.88rem;line-height:1.45}
+.nl-mom li{animation:niUp .4s both}
+.nl-say{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:14px;align-items:start}
+.nl-frase{background:var(--ni-lil);color:#3b2a5a;border-radius:18px;padding:18px;display:grid;gap:8px;align-content:start;animation:niUp .5s .15s both}
+.nl-frase.d{background:var(--ni-olv);color:#ece7d3}.nl-frase.d .ni-tag{color:#d9c9ef}
+.nl-frase p{margin:0;font:italic 400 1.12rem/1.5 var(--f-display)}
+.nl-alert{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+.nl-alert .nj-card{min-height:100%}
+.nl-do{display:grid;gap:8px}
+.nl-do>div{display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;background:rgba(236,231,211,.1);color:#dfe3cf;opacity:.35;transition:opacity .4s,background .4s}
+.nl-do.on>div{opacity:1;background:rgba(236,231,211,.16);animation:niUp .45s both}
+.nl-do .n{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#d9c9ef;color:#3b2a5a;font:600 .78rem/1 var(--f-caps)}
+.nl-role{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.nl-role .who{display:inline-block;justify-self:start;padding:4px 10px;border-radius:999px;background:#fff;color:var(--nb-ink);font-weight:600;font-size:.82rem;animation:niPop .45s both}
+.nl-pauta td{vertical-align:middle}
+.nl-pauta td:nth-child(2){color:var(--nb-ink);font-weight:400}
+.nl-pauta .b{display:flex;gap:6px;flex-wrap:wrap}
+.nl-pauta .b button{all:unset;cursor:pointer;padding:5px 10px;border-radius:999px;border:1px solid var(--nb-line);font-size:.76rem;color:var(--nb-soft);background:var(--nb-paper);white-space:nowrap}
+.nl-pauta .b button[aria-pressed="true"].y{background:var(--ni-tea2);border-color:var(--ni-tea2);color:#fff;animation:niPop .3s both}
+.nl-pauta .b button[aria-pressed="true"].d{background:#e9c46a;border-color:#d8b155;color:#3b2a1a;animation:niPop .3s both}
+.nl-req{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.nl-req button{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start;padding:16px;border-radius:16px;border:1px solid var(--nb-line);background:var(--nb-paper);color:var(--nb-ink);transition:background .3s;animation:niUp .45s both}
+.nl-req button[aria-pressed="true"]{background:var(--ni-olv);border-color:var(--ni-olv);color:#ece7d3}
+.nl-req button[aria-pressed="true"] span{color:#dfe3cf}
+.nl-req i{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;border:2px solid var(--ni-lil2);font-style:normal;color:#fff}
+.nl-req button[aria-pressed="true"] i{background:var(--ni-tea2);border-color:var(--ni-tea2);animation:niPop .35s both}
+.nl-req b{font:400 1.1rem/1.2 var(--f-display);display:block;margin-bottom:4px}
+.nl-req span{font-size:.86rem;line-height:1.45;color:var(--nb-soft)}
+@media (max-width:760px){.nl-path,.nl-mom,.nl-say,.nl-alert,.nl-role,.nl-req{grid-template-columns:1fr}.nl-path button{min-height:0}.nl-path button::after{display:none}.nl-bar button{font-size:.52rem;letter-spacing:.06em}}
+`;document.head.appendChild(c)})();
+
+// juego de clasificar: cada frase va a su columna; las que se aciertan pasan a la tarjeta correspondiente
+window.RX=window.RX||{};
+const NI_SO={};
+RX.niso=(k,v)=>{const [key,i]=k.split('.'),o=st(key,{});if(NI_SO[key][+i][1]===+v){o[i]=1;RS[key+'x']=-1}else RS[key+'x']=+i;render(false)};
+RX.nisr=k=>{delete RS[k];RS[k+'A']=0;RS[k+'x']=-1;render(false)};
+const niSort=(key,items,cols,end,warn)=>{NI_SO[key]=items;const o=st(key,{}),x=st(key+'x',-1),all=st(key+'A',0),done=Object.keys(o).length===items.length||all;
+ const col=w=>items.map((s,i)=>[s,i]).filter(([s])=>s[1]===w).map(([s,i])=>o[i]||all?`<li>${s[0]}</li>`:'<li class="e"></li>').join('');
+ return `<div class="ni" style="display:grid;gap:12px"><div class="nj-sort">${cols.map((c,w)=>`<div class="nj-card ${c[2]}"><h3>${c[0]}</h3>${c[1]?`<p>${c[1]}</p>`:''}<ul>${col(w)}</ul></div>`).join('')}</div>
+ ${done?`<div class="ni-quote ni-in">${end}</div><div class="dk-cta" style="justify-content:center"><button class="btn btn-ghost btn-sm" ${rxa('nisr',key)}>Jugar de nuevo</button></div>`:
+ `<div class="nj-pile">${items.map((s,i)=>o[i]?'':`<div class="${x===i?'no':''}"><span>${s[0]}</span><div class="row">${cols.map((c,w)=>`<button class="btn btn-ghost btn-sm" ${rxa('niso',key+'.'+i,w)}>${c[3]}</button>`).join('')}</div></div>`).join('')}</div>
+ ${x>=0?`<div class="dk-call warn">${warn}</div>`:''}<div class="dk-cta" style="justify-content:center"><button class="btn btn-ghost btn-sm" ${rxa('set',key+'A',1)}>Ver la respuesta</button></div>`}</div>`};
+
+/* ----- 1 · Bienvenida y agenda ----- */
+const NL_PH=`${N4P}nino/c4-portada.webp`;
+const nlPhoto=alt=>`<div class="ni-ph"><img src="${NL_PH}" alt="${alt}"><svg class="ni-arc" viewBox="0 0 200 104" aria-hidden="true"><path pathLength="1" d="M10 100a90 90 0 0 1 180 0" stroke="#f3ecd8" stroke-width="16"/><path pathLength="1" d="M34 100a66 66 0 0 1 132 0" stroke="#cfe3dc" stroke-width="16"/><path pathLength="1" d="M58 100a42 42 0 0 1 84 0" stroke="#e6dcf2" stroke-width="16"/><circle cx="100" cy="100" r="18" fill="#e9c46a"/></svg></div>`;
+RICH.nl1=()=>`<div class="ni">${nbHero('Especialización Niño Interno · Clase 4','La sesión','completa','Todo lo aprendido se integra en una sesión con una consultante: antes, durante y después, cómo comunicar la lectura, cuándo derivar y la evaluación práctica.',['Encuadre','Protocolo','Cierre','Evaluación'],'Karen Oyarce · Maestra Holística',nlPhoto('Una mujer y una niña caminan de la mano por un sendero entre árboles, de espaldas'))}</div>`;
+RICH.nl2=()=>niAgenda('Clase 4',['Revisión de la tarea','El camino recorrido','La sesión completa: antes, durante y después','Cómo comunicar la lectura','Cierre, señales de alerta y registro','Demostración y evaluación práctica','Repaso y certificación','Oración de agradecimiento y cierre'],
+ ['Realizar una sesión completa de principio a fin','Comunicar la lectura como hipótesis, sin culpar','Reconocer señales de alerta y derivar','Aprobar la evaluación práctica']);
+
+/* ----- 2 · Revisión de la tarea ----- */
+RICH.nl3=()=>dkH('Lo que trajiste','Revisemos la tarea de la semana','Marca las preguntas a medida que las conversan.')+
+ `<div class="ni"><div class="nj-card l ni-in" style="max-width:720px;margin:0 auto"><h3>Tus dos sesiones con voluntarias</h3>${n3ck('nlt1',[['chat','¿Cómo te sentiste como facilitadora?'],['chat','¿Qué anillo 1, escala y figura aparecieron?'],['chat','¿Qué paso del protocolo te resultó más natural?'],['chat','¿En qué momento dudaste o no supiste qué decir?'],['chat','¿Qué te dijeron las personas al terminar?']])}</div></div>`+
+ niNote('Compartir es voluntario. Lo que se dice en el grupo, queda en el grupo.');
+
+/* ----- 3 · El camino recorrido ----- */
+const NL_CA=[['Clase 1','Comprender las heridas','Qué es el niño interno, las cinco heridas y sus máscaras, la madre y el padre.',0],['Clase 2','El protocolo de limpieza','Niño Interno, Energías Discordantes, el Mapa, limpiar y verificar.',10],['Clase 3','El tiempo y las figuras','Anillo 1, escala de 0 a 100 y las doce figuras del anillo 4.',20],['Clase 4','La sesión completa','Antes, durante y después; comunicación, cuidado y evaluación.',29]];
+RICH.nl4=()=>dkH('El camino recorrido','Cuatro clases, un camino','Toca una clase para volver a ella.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="nl-path">${NL_CA.map((x,i)=>`<button data-les="${S.lesson[0]},${x[3]}" style="animation-delay:${i*.12}s"><small>${x[0]}</small><b>${x[1]}</b><span>${x[2]}</span><em>${i<3?'Repasar':'Hoy'}</em></button>`).join('')}</div>
+ ${niQ('Hoy todo se integra en una sesión completa con una consultante.')}</div>`;
+
+/* ----- 4 · La sesión completa ----- */
+const NL_MO=[['Antes','Unos 10 minutos',10,['Encuadre y consentimiento','Motivo de consulta','Oración de conexión'],'#e6dcf2','#3b2a5a'],['Durante','Unos 40 minutos',40,['Gráfico del Niño Interno','Energías Discordantes y Mapa','Limpiar y verificar'],'#3b4a24','#ece7d3'],['Después','Unos 10 minutos',10,['Comunicar la lectura y cerrar','Sugerir autocuidado','Registrar la ficha'],'#d6e8e2','#1f3f32']];
+RICH.nl5=()=>{const s=st('nlmo',-1);
+ return dkH('La sesión completa','La sesión completa en tres momentos','Una hora de sesión. Toca un momento en la barra.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="nl-bar">${NL_MO.map((x,i)=>`<button ${rxa('set','nlmo',s===i?-1:i)} ${pressed(s===i)} style="flex:${x[2]};background:${x[4]};color:${x[5]}">${x[0]} · ${x[2]} min</button>`).join('')}</div>
+ <div class="nl-mom">${NL_MO.map((x,i)=>`<div class="${s<0?'':s===i?'on':'off'}" style="background:${x[4]};color:${x[5]}"><h3>${x[0]}</h3><small>${x[1]}</small><ul>${x[3].map((y,j)=>`<li style="animation-delay:${j*.08}s">${y}</li>`).join('')}</ul></div>`).join('')}</div></div>`+
+ niNote('Tiempos de referencia para una sesión de una hora.')};
+RICH.nl6=()=>dkH('Momento 1','Antes: el encuadre','Marca cada paso a medida que lo haces.')+
+ `<div class="ni nl-say"><div>${n3ck('nlan',[['persona','Presentarte y explicar en qué consiste el trabajo con el niño interno'],['escudo','Aclarar lo que no es: no reemplaza una terapia ni hace diagnósticos'],['candado','Explicar la confidencialidad de la sesión'],['check','Pedir el consentimiento de la persona para leer su gráfico'],['chat','Preguntar el motivo de consulta: qué le gustaría mirar hoy'],['loto','Abrir con la oración de conexión']],['Sigue el orden: el encuadre va antes de leer el gráfico.','¡Encuadre completo! Ya puedes empezar a leer el gráfico.'])}</div>
+ <div class="nl-frase"><span class="ni-tag">Frase para empezar</span><p>«Vamos a mirar juntas lo que tu niño interno guarda. Lo que aparezca es una posibilidad que tú confirmas o descartas. ¿Estás de acuerdo en que comencemos?»</p></div></div>`;
+const NL_DU=[['Paso 2','Gráfico del Niño Interno','Los cuatro anillos de adentro hacia afuera y la escala de 0 a 100.',14],['Paso 3','Energías Discordantes','La energía que acompaña a la herida.',15],['Paso 4','Limpiar o investigar','Limpiar directo o investigar la emoción en el Mapa.',16],['Paso 5','Verificar','Confirmar con el péndulo que la limpieza se completó.',17]];
+RICH.nl7=()=>{const s=n3clamp(st('nldu',0),0,3),x=NL_DU[s];
+ return dkH('Momento 2','Durante: el protocolo','Cuatro pasos. Toca uno para verlo o repasarlo.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="nj-proto" style="grid-template-columns:repeat(4,minmax(0,1fr))">${NL_DU.map((p,i)=>`<button class="${i===3?'new':''}" ${rxa('set','nldu',i)} ${pressed(i===s)} style="animation-delay:${i*.08}s"><small>${p[0]}</small><b>${p[1]}</b><span>${p[2]}</span></button>`).join('')}</div>
+ <div class="nj-det"><div><span class="ni-tag">${x[0]}</span><br><b>${x[1]}</b><p>${x[2]}</p></div><button class="btn btn-ghost btn-sm" data-les="${S.lesson[0]},${x[3]}">Repasar en la Clase 2</button></div>
+ ${niBox('l','Entre un gráfico y otro, pregunta a la persona qué le hace sentido.','La sesión es una conversación, no una lectura en voz alta.')}</div>`};
+
+/* ----- 5 · Cómo comunicar la lectura ----- */
+RICH.nl8=()=>dkH('Comunicación','Cómo comunicar la lectura','¿Se dice así o se evita? Lleva cada frase a su columna.')+
+ niSort('nlco',[['«El gráfico muestra una posible herida de abandono. ¿Te hace sentido?»',0],['«Tu madre te abandonó.»',1],['«¿Qué recuerdas de esa etapa de tu vida?»',0],['«Esto te pasó, seguro.»',1],['«Tu niña aprendió a protegerse de esta forma.»',0],['«Tienes que perdonar ya.»',1],['«¿Qué necesitaba esa niña en ese momento?»',0],['«Con esta sesión se sana todo.»',1]],
+ [['Decir así','',' t','Decir así'],['Evitar','','l','Evitar']],'Hablamos en hipótesis, sin culpar y sin prometer resultados.','Mira otra vez: ¿la frase habla en hipótesis o afirma, culpa o promete?');
+
+/* ----- 6 · Cierre, señales de alerta y registro ----- */
+RICH.nl9=()=>dkH('Momento 3','Después: cierre y acompañamiento','Marca cada paso a medida que lo haces.')+
+ `<div class="ni nl-say"><div>${n3ck('nlde',[['chat','Resumir la lectura en una frase y preguntar cómo se siente'],['loto','Agradecer al comité espiritual y cerrar el espacio'],['corazon','Sugerir autocuidado: carta al niño interno, meditación, observar la máscara'],['libro','Registrar la ficha de sesión con iniciales'],['reloj','Acordar un seguimiento si la persona lo necesita']],['Cierra con calma, sin apurar.','¡Sesión cerrada con cuidado!'])}</div>
+ <div class="nl-frase d"><span class="ni-tag">Frase para cerrar</span><p>«Hoy tu niño interno fue visto y escuchado. Date tiempo para integrar lo que apareció. ¿Cómo te sientes ahora?»</p></div></div>`;
+const NL_DO=['Detener la lectura y no profundizar','Acompañar con calma y presencia','Sugerir la ayuda de un profesional de salud','Ante riesgo inmediato, contactar a los servicios de emergencia'];
+RICH.nl10=()=>{const o=st('nlse',{}),on=Object.values(o).some(Boolean);
+ return dkH('Cuidado','Señales de alerta y derivación','Marca una señal de alerta para ver qué hacer.')+
+ `<div class="ni nl-alert"><div class="nj-card" style="background:#f6e2e8;color:#5a2a3a"><h3>Señales de alerta</h3>${n3ck('nlse',[['gota','Angustia intensa que no baja con el cierre'],['rayo','Recuerdos traumáticos que irrumpen con fuerza'],['xcirc','Ideas de hacerse daño'],['escudo','Relatos de abuso o violencia que ocurren hoy']])}</div>
+ <div class="nj-card" style="background:var(--ni-olv);color:#ece7d3"><h3>Qué hacer</h3><div class="nl-do${on?' on':''}">${NL_DO.map((x,i)=>`<div style="animation-delay:${i*.12}s"><span class="n">${i+1}</span><span>${x}</span></div>`).join('')}</div>${on?'':'<p style="margin:0;color:#dfe3cf;font-size:.86rem">Marca una señal a la izquierda.</p>'}</div></div>`+
+ `<div class="ni">${niQ('Acompañar también es saber cuándo derivar.')}</div>`};
+RICH.nl11=()=>{const d=new Date(),hoy=String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0');
+ return dkH('Registro','Ficha de sesión completa','La ficha final de la especialización. El botón la llena con lo que marcaste en los gráficos.')+
+ `<div class="ni" style="display:grid;gap:12px">${niFicha('nlf',['Fecha','Consultante','Motivo','Anillo 1 · escala','Quién','Herida · máscara','Energía · Mapa','Verificada','Autocuidado'],['Ej.: 04/11','M. R.','Miedo a quedarse sola','Meses','Madre','Abandono · Dependiente','Soledad · Desamparo','Sí','Carta al niño interno'],
+ ()=>{const h=n3clamp(nigSel('he'),0,4);return [hoy,'','',nkEdad(),NIG[3].items[nigSel('qu')],`${NI_H[h].n} · ${NI_H[h].m}`,[njEdName(),njMapaTxt()].filter(Boolean).join(' · '),st('njl',0)>=5?'Sí':'','']},1080)}</div>`+
+ niNote('Usa iniciales y registra solo lo necesario. La primera fila es un ejemplo ficticio.')};
+
+/* ----- 7 · Demostración y evaluación práctica ----- */
+RICH.nl12=()=>dkH('En vivo','Demostración en vivo','Observa la sesión completa y toma nota.')+
+ `<div class="ni dk-grid c2" style="align-items:start"><div class="nj-card l"><h3>Una sesión completa en vivo</h3><ul style="margin:0;padding-left:18px;display:grid;gap:6px;line-height:1.5" class="ni-st"><li>Con una voluntaria del grupo y un tema liviano</li><li>Antes, durante y después, sin saltar pasos</li><li>Pausas breves para explicar cada decisión</li></ul></div>
+ <div class="nj-card" style="background:var(--ni-olv);color:#ece7d3"><h3>Mientras observas</h3><ul style="margin:0;padding-left:18px;display:grid;gap:6px;line-height:1.5;color:#dfe3cf" class="ni-st"><li>Usa la pauta de evaluación <button class="btn btn-ghost btn-sm" data-slide="2" style="margin-left:6px;color:#ece7d3;border-color:#d9c9ef">Abrir la pauta</button></li><li>Anota una frase que quieras usar</li><li>Anota una pregunta para el final</li></ul></div></div>
+ <div class="ni dk-grid c2">${n3area('nlnf','Una frase que quiero usar','«…»')}${n3area('nlnq','Una pregunta para el final','¿…?')}</div>`+n3priv;
+const NL_RO=[['Consultante','Recibe la sesión','Trae un tema liviano y responde con honestidad.','l'],['Facilitadora','Realiza la sesión completa','Antes, durante y después, con la ficha.','t'],['Observadora','Evalúa con la pauta','Marca cada criterio y da una devolución amable.','b']];
+RICH.nl13=()=>{const r=n3clamp(st('nlr',0),0,2),A=['Alumna A','Alumna B','Alumna C'];
+ return dkH('Evaluación práctica','Evaluación práctica en tríos','Tres rondas: todas pasan por los tres roles. Toca una ronda para ver quién hace qué.')+
+ `<div class="ni" style="display:grid;gap:14px">${chipRow('nlr',['Ronda 1','Ronda 2','Ronda 3'],r)}
+ <div class="nl-role">${NL_RO.map((x,i)=>`<div class="nj-card ${x[3]}"><span class="ni-tag">${x[0]}</span><span class="who" style="animation-delay:${i*.1}s">${A[(i+r)%3]}</span><h3>${x[1]}</h3><p>${x[2]}</p></div>`).join('')}</div>
+ ${niBox('d','Tres rondas','Cada ronda, unos 30 minutos de sesión y 5 de devolución.')}</div>`};
+const NL_PA=[['Encuadre y consentimiento','Explica el trabajo, aclara lo que no es y pide consentimiento'],['Apertura','Abre con la oración de conexión'],['Lectura del gráfico','Lee los cuatro anillos y la escala con orden'],['Energías y Mapa','Encuentra la energía y, si corresponde, la emoción en el Mapa'],['Limpieza y verificación','Limpia y verifica antes de cerrar'],['Comunicación','Habla en hipótesis, sin culpar ni prometer'],['Cierre y registro','Cierra con cuidado, sugiere autocuidado y completa la ficha']];
+RX.nlpa=(k,v)=>{const o=st('nlpa',{});o[k]=o[k]===+v?0:+v;render(false)};
+RX.nlpr=()=>{delete RS.nlpa;render(false)};
+RICH.nl14=()=>{const o=st('nlpa',{}),y=NL_PA.filter((_,i)=>o[i]===1).length,d=NL_PA.filter((_,i)=>o[i]===2).length;
+ return dkH('Evaluación práctica','Pauta de evaluación','La observadora marca cada criterio durante la sesión.')+
+ `<div class="ni" style="display:grid;gap:12px"><div class="ni-tw"><table class="ni-tbl nl-pauta" style="min-width:640px"><thead><tr><th>Criterio</th><th>Qué se observa</th><th>Marca</th></tr></thead><tbody>
+ ${NL_PA.map((x,i)=>`<tr><td>${x[0]}</td><td>${x[1]}</td><td><div class="b"><button class="y" ${rxa('nlpa',i,1)} ${pressed(o[i]===1)}>Logrado</button><button class="d" ${rxa('nlpa',i,2)} ${pressed(o[i]===2)}>En desarrollo</button></div></td></tr>`).join('')}</tbody></table></div>
+ <div class="prog"><span>${y} logrados · ${d} en desarrollo · ${7-y-d} sin marcar</span><div class="bar"><i style="width:${y/7*100}%"></i></div></div>
+ ${y+d===7?`<div class="dk-call${d?' warn':''} ni-in">${d?'Hay criterios en desarrollo: dales una devolución amable y concreta para la próxima sesión.':'¡Todos los criterios logrados!'}</div><div class="dk-cta" style="justify-content:center"><button class="btn btn-ghost btn-sm" ${rxa('nlpr',0)}>Evaluar otra sesión</button></div>`:''}</div>`};
+
+/* ----- 8 · Repaso y certificación ----- */
+RICH.nl15=()=>dkH('Repaso en voz alta','Comprobemos lo aprendido','Respondan en voz alta y compartan cómo llegaron a su respuesta. Después toquen cada tarjeta.')+
+ `<div class="ni ni-cp">${n3flip('nlcp',[['escudo','1 · ¿Qué se aclara siempre en el encuadre, antes de leer el gráfico?','<b>En qué consiste el trabajo y lo que no es:</b> no reemplaza una terapia ni hace diagnósticos. Se explica la confidencialidad y se pide el consentimiento.'],['chat','2 · Elige una frase de «Evitar» y dila como hipótesis.','<b>Por ejemplo:</b> en lugar de «Tu madre te abandonó», «El gráfico muestra una posible herida de abandono vinculada a la madre. ¿Te hace sentido?»'],['enlace','3 · ¿Qué haces si aparece una señal de alerta?','<b>Detener la lectura y no profundizar,</b> acompañar con calma, sugerir un profesional de salud y, ante riesgo inmediato, contactar a los servicios de emergencia.']],'c4',260)}</div>`;
+const NL_RQ=[['grupo','Asistencia','Participar en las cuatro clases de la especialización.'],['libro','Tareas','Entregar la carta al niño interno y las fichas de las clases 2 y 3.'],['ojo','Sesiones','Registrar al menos tres sesiones completas con su ficha.'],['check','Evaluación práctica','Aprobar la sesión observada en tríos según la pauta.']];
+RICH.nl16=()=>{const o=st('nlrq',{}),n=NL_RQ.filter((_,i)=>o[i]).length;
+ return dkH('Certificación','Requisitos para la certificación','Marca los que ya cumples.')+
+ `<div class="ni" style="display:grid;gap:12px"><div class="nl-req">${NL_RQ.map((x,i)=>`<button ${rxa('tog','nlrq',i)} ${pressed(!!o[i])} style="animation-delay:${i*.08}s"><i>${o[i]?'✓':''}</i><div><b>${x[1]}</b><span>${x[2]}</span></div></button>`).join('')}</div>
+ <div class="prog"><span>${n} de 4</span><div class="bar"><i style="width:${n/4*100}%"></i></div></div>
+ ${n===4?niQ('¡Cumples los cuatro requisitos para tu certificación en Niño Interno!'):''}</div>`};
+
+/* ----- 9 · Oración de agradecimiento y cierre ----- */
+const NL_OR=['Amado Yo Superior, ángeles, arcángeles, seres de luz, todo mi comité espiritual: gracias por acompañarnos en este camino.','Gracias por cada herida reconocida, por cada niña y cada niño interior que fue visto, escuchado, abrazado.','Que lo aprendido se convierta en servicio, con humildad, respeto y amor.','Que cada sesión sea para el mayor bien de quien llega a nosotras.','Gracias, gracias, gracias.'];
+RICH.nl17=()=>dkH('Cierre de la especialización','Oración de agradecimiento','La decimos juntas para cerrar el camino.')+`<div class="ni">${n3pray('nlor',NL_OR)}</div>`;
+RICH.nl18=()=>`<div class="ni">${nbHero('Especialización Niño Interno','Gracias por','este camino','Sigue practicando, registra tus sesiones y acompáñate como acompañas a otras.',['Clase 1','Clase 2','Clase 3','Clase 4'],'Karen Oyarce · Maestra Holística',nlPhoto('Una mujer y una niña caminan de la mano por un sendero iluminado por el sol'))}</div>`;
