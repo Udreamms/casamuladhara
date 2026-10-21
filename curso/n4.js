@@ -1569,3 +1569,107 @@ RICH.tc21=()=>dkH('Repaso en voz alta','Comprobemos lo aprendido','Respondan en 
 RICH.tc22=()=>dkH('Cierre de la clase','Tarea para la Clase 4','Una memoria y un voto de tu linaje.')+
  `<div class="ni dk-grid c2" style="align-items:start"><div class="ni-task">${n3ck('tcta',[['lupa','Investiga en tu linaje una memoria del Transgeneracional y un voto'],['diana','Mide linaje y anillos; y el voto con su nivel y escala'],['limpia','Limpia, di la oración de Votos y cierra con la oración del linaje'],['libro','Completa la ficha y tráela a la Clase 4']],['Marca cada punto cuando lo tengas.','¡Listo! Trae tu ficha a la Clase 4.'])}</div>
  <div style="display:grid;gap:10px">${niBox('d','Recuerda','Lee siempre en hipótesis y con cuidado. Si aparece una memoria de violencia, nómbrala sin buscar detalles.')}<div class="dk-cta" style="flex-wrap:wrap"><button class="btn btn-ghost btn-sm" data-les="${S.lesson[0]},${S.lesson[1]-6}">Abrir el Transgeneracional</button><button class="btn btn-ghost btn-sm" data-les="${S.lesson[0]},${S.lesson[1]-2}">Abrir Votos o Pactos</button><button class="btn btn-ghost btn-sm" data-les="${S.lesson[0]},${S.lesson[1]-1}">Oración de Votos</button></div></div></div>`;
+
+/* ---------- Nivel 4 · Formación Transgeneracional · Clase 4 ---------- */
+const TD_PH=`${N4P}trans/c4-portada.webp`;
+const tdPhoto=alt=>`<div class="ni-ph"><img src="${TD_PH}" alt="${alt}"><svg class="ni-arc" viewBox="0 0 200 104" aria-hidden="true"><path pathLength="1" d="M10 100a90 90 0 0 1 180 0" stroke="#f3ecd8" stroke-width="16"/><path pathLength="1" d="M34 100a66 66 0 0 1 132 0" stroke="#f6d3ef" stroke-width="16"/><path pathLength="1" d="M58 100a42 42 0 0 1 84 0" stroke="#c9c9f5" stroke-width="16"/><circle cx="100" cy="100" r="18" fill="#e9c46a"/></svg></div>`;
+
+/* ----- 1 · Bienvenida y agenda ----- */
+RICH.td1=()=>`<div class="ni tgx">${nbHero('Formación Transgeneracional · Clase 4','La sesión','transgeneracional','Todo lo aprendido se integra en una sesión completa: antes, durante y después, cómo comunicar una memoria sin culpar, cuándo derivar y la evaluación práctica.',['Encuadre','Protocolo','Cierre','Evaluación'],'Karen Oyarce · Maestra Holística',tdPhoto('Una mujer sentada al pie de un árbol, con los ojos cerrados y las manos en el pecho'))}</div>`;
+RICH.td2=()=>niAgenda('Clase 4',['Revisión de la tarea','El camino recorrido','La sesión: antes, durante y después','Comunicar y cuidar','Cierre y ficha de sesión','Demostración y evaluación práctica','Niño interno y linaje','Repaso y certificación','Ritual, oración y cierre'],
+ ['Realizar una sesión transgeneracional completa','Comunicar una memoria sin culpar a los ancestros','Cuidar los temas sensibles y derivar','Aprobar la evaluación práctica']);
+
+/* ----- 2 · Revisión de la tarea ----- */
+RICH.td3=()=>dkH('Lo que trajiste','Revisemos la tarea de la semana','La memoria y el voto en tu linaje. Marca las preguntas a medida que las conversan.')+
+ `<div class="ni tgx dk-grid c2" style="align-items:start"><div class="nj-card l ni-in" style="min-height:0"><h3>La memoria y el voto en tu linaje</h3>${n3ck('tdt1',[['lupa','¿Qué memoria apareció en el Transgeneracional? ¿En qué anillo?'],['diana','¿Qué voto encontraste? ¿Con qué nivel y escala?'],['voz','¿Cómo te sentiste al decir la oración de Votos?'],['hoja','¿Qué cambió en ti durante la semana?'],['chat','¿Qué duda te quedó?']])}</div>
+ <div style="display:grid;gap:10px"><div class="dk-sub">Lo que marcaste en los gráficos</div>${tcRow(['Linaje','Interior','Exterior'],trRead())}${tcRow(['Voto','Nivel','Escala'],tvRead())}<div class="dk-cta" style="flex-wrap:wrap"><button class="btn btn-ghost btn-sm" data-les="${S.lesson[0]},20">Transgeneracional</button><button class="btn btn-ghost btn-sm" data-les="${S.lesson[0]},24">Votos o Pactos</button></div></div></div>`+
+ niNote('Compartir es voluntario. Lo que se dice en el grupo, queda en el grupo.');
+
+/* ----- 3 · El camino recorrido ----- */
+const TD_CA=[['Clase 1','El árbol y el clan','Lo transgeneracional, el árbol de cuatro generaciones, las leyes del clan y Constelación.',0],['Clase 2','Lealtades, roles y repeticiones','Lo que el clan pide sin decirlo y el protocolo: limpiar directo o investigar.',9],['Clase 3','Memorias y votos','El Transgeneracional, las memorias del linaje y el gráfico de Votos.',18],['Clase 4','La sesión completa','Antes, durante y después; comunicación, cuidado y evaluación.',27]];
+RICH.td4=()=>dkH('El camino recorrido','El camino recorrido','Toca una clase para volver a ella.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="nl-path">${TD_CA.map((x,i)=>`<button data-les="${S.lesson[0]},${x[3]}" style="animation-delay:${i*.12}s"><small>${x[0]}</small><b>${x[1]}</b><span>${x[2]}</span><em>${i<3?'Repasar':'Hoy'}</em></button>`).join('')}</div>
+ ${niQ('Hoy todo se integra en una sesión transgeneracional completa.')}</div>`;
+
+/* ----- 4 · La sesión: antes, durante y después ----- */
+const TD_MO=[['Antes','Unos 10 minutos',10,['Encuadre y consentimiento','Motivo de consulta','Datos del árbol'],'#e6dcf2','#3b2a5a'],['Durante','Unos 40 minutos',40,['Constelación Familiar','Limpiar directo o investigar','Transgeneracional y Votos'],'#3b4a24','#ece7d3'],['Después','Unos 10 minutos',10,['Comunicar sin culpar','Oraciones de cierre','Registrar la ficha'],'#d6e8e2','#1f3f32']];
+RICH.td5=()=>{const s=st('tdmo',-1);
+ return dkH('La sesión','La sesión en tres momentos','Una hora de sesión. Toca un momento en la barra.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="nl-bar">${TD_MO.map((x,i)=>`<button ${rxa('set','tdmo',s===i?-1:i)} ${pressed(s===i)} style="flex:${x[2]};background:${x[4]};color:${x[5]}">${x[0]} · ${x[2]} min</button>`).join('')}</div>
+ <div class="nl-mom">${TD_MO.map((x,i)=>`<div class="${s<0?'':s===i?'on':'off'}" style="background:${x[4]};color:${x[5]}"><h3>${x[0]}</h3><small>${x[1]}</small><ul>${x[3].map((y,j)=>`<li style="animation-delay:${j*.08}s">${y}</li>`).join('')}</ul></div>`).join('')}</div></div>`+
+ niNote('Tiempos de referencia para una sesión de una hora.')};
+RICH.td6=()=>dkH('Momento 1','Antes: encuadre y datos del árbol','Marca cada paso a medida que lo haces.')+
+ `<div class="ni nl-say"><div>${n3ck('tdan',[['persona','Presentarte y explicar en qué consiste el trabajo transgeneracional'],['escudo','Aclarar lo que no es: no reemplaza una terapia ni hace diagnósticos'],['candado','Explicar la confidencialidad y pedir el consentimiento'],['chat','Preguntar el motivo de consulta: qué le gustaría mirar hoy'],['arbol','Pedir los datos del árbol que conozca: nombres, fechas, sucesos'],['loto','Abrir con la oración de conexión']],['Sigue el orden: el encuadre va antes de leer el árbol.','¡Encuadre completo! Ya puedes empezar con Constelación.'])}</div>
+ <div class="nl-frase"><span class="ni-tag">Frase para empezar</span><p>«Vamos a mirar juntas la historia de tu linaje. Lo que aparezca es una posibilidad que tú confirmas o descartas con lo que sabes de tu familia. ¿Estás de acuerdo en que comencemos?»</p></div></div>`;
+const TD_DU=[['Paso 1','Constelación Familiar','Linaje, generación, escala y tema.',[['Abrir Constelación',6]]],['Paso 2','Decidir','Limpiar directo con Energías Discordantes o investigar.',[['Repasar el protocolo',15]]],['Paso 3','Investigar','Mapa de Emociones, Transgeneracional o Votos.',[['Mapa','0,16'],['Transgeneracional',20],['Votos',24]]],['Paso 4','Limpiar','Como aprendiste; los votos se anulan con su oración.',[['Oración de Votos',25]]],['Paso 5','Verificar','Confirmar con el péndulo que la limpieza se completó.',[['Repasar en Niño interior','0,17']]]];
+RICH.td7=()=>{const s=n3clamp(st('tddu',0),0,4),x=TD_DU[s];
+ return dkH('Momento 2','Durante: el protocolo completo','Cinco pasos. Toca uno para verlo o repasarlo.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="nj-proto td-5">${TD_DU.map((p,i)=>`<button class="${i===4?'new':''}" ${rxa('set','tddu',i)} ${pressed(i===s)} style="animation-delay:${i*.08}s"><small>${p[0]}</small><b>${p[1]}</b><span>${p[2]}</span></button>`).join('')}</div>
+ <div class="nj-det"><div><span class="ni-tag">${x[0]}</span><br><b>${x[1]}</b><p>${x[2]}</p></div><div style="display:flex;gap:6px;flex-wrap:wrap">${x[3].map(b=>`<button class="btn btn-ghost btn-sm" data-les="${typeof b[1]==='string'?b[1]:S.lesson[0]+','+b[1]}">${b[0]}</button>`).join('')}</div></div>
+ ${niBox('l','Entre un gráfico y otro, pregunta a la persona qué sabe de esa historia.','La sesión es una conversación, no una lectura en voz alta.')}</div>`};
+
+/* ----- 5 · Comunicar y cuidar ----- */
+RICH.td8=()=>dkH('Comunicación','Comunicar sin culpar a los ancestros','¿Se dice así o se evita? Lleva cada frase a su columna.')+
+ niSort('tdco',[['«El gráfico muestra una posible memoria de pérdidas en el linaje paterno. ¿Te hace sentido?»',0],['«Tu abuelo arruinó a la familia.»',1],['«¿Qué sabes de tus abuelos en ese tema?»',0],['«En tu familia hubo un abuso, seguro.»',1],['«Tu abuela hizo lo que pudo con lo que tenía.»',0],['«Tu madre te pasó su enfermedad.»',1],['«Lo que no te pertenece, hoy lo puedes liberar.»',0],['«Con esta sesión se limpia todo tu linaje.»',1]],
+ [['Decir así','','t','Decir así'],['Evitar','','l','Evitar']],'Hablamos en hipótesis, sin culpar, sin afirmar hechos y sin prometer resultados.','Mira otra vez: ¿la frase habla en hipótesis o culpa, afirma o promete?');
+RICH.td9=()=>{const o=st('tdse',{}),on=Object.values(o).some(Boolean);
+ return dkH('Cuidado','Temas sensibles y derivación','Marca una señal de alerta para ver qué hacer.')+
+ `<div class="ni nl-alert"><div class="nj-card" style="background:#f6e2e8;color:#5a2a3a"><h3>Señales de alerta</h3>${n3ck('tdse',[['escudo','La persona relata un abuso o una violencia propia'],['gota','Angustia intensa que no baja con el cierre'],['rayo','Recuerdos traumáticos que irrumpen con fuerza'],['xcirc','Ideas de hacerse daño']])}</div>
+ <div class="nj-card" style="background:var(--ni-olv);color:#ece7d3"><h3>Qué hacer</h3><div class="nl-do${on?' on':''}">${NL_DO.map((x,i)=>`<div style="animation-delay:${i*.12}s"><span class="n">${i+1}</span><span>${x}</span></div>`).join('')}</div>${on?'':'<p style="margin:0;color:#dfe3cf;font-size:.86rem">Marca una señal a la izquierda.</p>'}</div></div>`+
+ `<div class="ni">${niQ('Acompañar también es saber cuándo derivar.')}</div>`};
+
+/* ----- 6 · Cierre y ficha de sesión ----- */
+RICH.td10=()=>dkH('Momento 3','Después: cierre de la sesión','Marca cada paso a medida que lo haces.')+
+ `<div class="ni nl-say"><div>${n3ck('tdde',[['chat','Resumir la lectura en una frase y preguntar cómo se siente'],['voz','Si hubo votos, decir juntas la oración de Votos'],['paloma','Cerrar con la oración del linaje'],['loto','Agradecer al comité espiritual y cerrar el espacio'],['libro','Registrar la ficha y acordar un seguimiento si hace falta']],['Cierra con calma, sin apurar.','¡Sesión cerrada con cuidado!'])}
+ <div class="dk-cta" style="flex-wrap:wrap;margin-top:8px"><button class="btn btn-ghost btn-sm" data-les="${S.lesson[0]},25">Oración de Votos</button><button class="btn btn-ghost btn-sm" data-les="${S.lesson[0]},23">Oración del linaje</button></div></div>
+ <div class="nl-frase d"><span class="ni-tag">Frase para cerrar</span><p>«Hoy miraste una parte de la historia de tu clan. Lo que reconociste ya no tiene que repetirse. Date tiempo para integrarlo. ¿Cómo te sientes ahora?»</p></div></div>`;
+RICH.td11=()=>dkH('Registro','Ficha de sesión transgeneracional','Constelación: linaje · generación · escala · tema. Investigación: Mapa, Transgeneracional o Votos. El botón la llena con lo que marcaste en los gráficos.')+
+ `<div class="ni" style="display:grid;gap:12px">${niFicha('tdf',['Fecha','Consultante','Motivo','Constelación','Investigación','Voto · nivel · escala','Verificada','Oraciones'],['Ej.: 18/11','L. M.','Relaciones que no prosperan','Materno · 4ta · 60 · Votos','Votos','Renunciar al amor · Alto · 70','Sí','Votos y linaje'],
+ ()=>{const g=tgRead(),t=trRead(),v=tvRead(),m=njMapaTxt();return [tbHoy(),'','',g.filter(Boolean).join(' · '),v[0]?'Votos':t.some(Boolean)?'Transgeneracional':m?'Mapa: '+m:'',v.filter(Boolean).join(' · '),'',v[0]?'Votos y linaje':'Linaje']},1060)}</div>`+
+ niNote('Usa iniciales; la primera fila es un ejemplo ficticio.');
+
+/* ----- 7 · Demostración y evaluación práctica ----- */
+RICH.td12=()=>dkH('En vivo','Demostración en vivo','Observa la sesión completa y toma nota.')+
+ `<div class="ni dk-grid c2" style="align-items:start"><div class="nj-card l" style="min-height:0"><h3>Una sesión completa en vivo</h3><ul style="margin:0;padding-left:18px;display:grid;gap:6px;line-height:1.5" class="ni-st"><li>Con una voluntaria del grupo y un tema liviano</li><li>Antes, durante y después, sin saltar pasos</li><li>De Constelación al gráfico que corresponda</li><li>Pausas breves para explicar cada decisión</li></ul></div>
+ <div class="nj-card" style="background:var(--ni-olv);color:#ece7d3;min-height:0"><h3>Mientras observas</h3><ul style="margin:0;padding-left:18px;display:grid;gap:6px;line-height:1.5;color:#dfe3cf" class="ni-st"><li>Observa el orden de los pasos</li><li>Anota una frase que quieras usar</li><li>Anota una pregunta para el final</li></ul></div></div>
+ <div class="ni dk-grid c2">${n3area('tdnf','Una frase que quiero usar','«…»')}${n3area('tdnq','Una pregunta para el final','¿…?')}</div>`+n3priv;
+const TD_RO=[['Consultante','Recibe la sesión','Trae un tema liviano de su linaje y responde con honestidad.','l'],['Facilitadora','Realiza la sesión completa','Antes, durante y después, con la ficha.','t'],['Observadora','Observa y acompaña','Sigue la sesión paso a paso y da una devolución amable.','b']];
+RX.tdobr=()=>{delete RS.tdob;render(false)};
+const TD_OB=[['Antes','Encuadre y consentimiento'],['Antes','Motivo de consulta y datos del árbol'],['Durante','Constelación Familiar'],['Durante','Limpiar directo o investigar'],['Durante','Transgeneracional o Votos, si corresponde'],['Durante','Verificar con el péndulo'],['Después','Comunicar sin culpar'],['Después','Oraciones de cierre'],['Después','Registrar la ficha']];
+RICH.td13=()=>{const r=n3clamp(st('tdr',0),0,2),A=['Alumna A','Alumna B','Alumna C'],o=st('tdob',{}),n=TD_OB.filter((_,i)=>o[i]).length;
+ return dkH('Evaluación práctica','Evaluación práctica en tríos','Tres rondas: todas pasan por los tres roles. Toca una ronda para ver quién hace qué.')+
+ `<div class="ni" style="display:grid;gap:14px">${chipRow('tdr',['Ronda 1','Ronda 2','Ronda 3'],r)}
+ <div class="nl-role">${TD_RO.map((x,i)=>`<div class="nj-card ${x[3]}" style="min-height:0"><span class="ni-tag">${x[0]}</span><span class="who" style="animation-delay:${i*.1}s">${A[(i+r)%3]}</span><h3>${x[1]}</h3><p>${x[2]}</p></div>`).join('')}</div>
+ ${niBox('d','Tres rondas','Todas pasan por los tres roles. Cada ronda, unos 30 minutos de sesión y 5 de devolución.')}
+ <div class="dk-sub">Para la observadora: sigue la sesión paso a paso</div><div class="tb-gold">${TD_OB.map((x,i)=>`<button ${rxa('tog','tdob',i)} ${pressed(!!o[i])} style="animation-delay:${i*.04}s"><i>${o[i]?'✓':''}</i><b>${x[1]}</b><span>${x[0]}</span></button>`).join('')}</div>
+ <div class="prog"><span>${n} de ${TD_OB.length} pasos observados</span><div class="bar"><i style="width:${n/TD_OB.length*100}%"></i></div></div>
+ ${n===TD_OB.length?`<div class="dk-call ni-in">Sesión completa, sin saltar pasos. Ahora, una devolución amable.</div><div class="dk-cta" style="justify-content:center"><button class="btn btn-ghost btn-sm" ${rxa('tdobr',0)}>Observar otra ronda</button></div>`:''}</div>`};
+
+/* ----- 8 · Niño interno y linaje ----- */
+RICH.td14=()=>{const v=st('td14',-1),h=nigSel('he');
+ return dkH('Dos caminos','Niño interno y linaje: cómo se complementan','Toca cada forma de unirlos.')+
+ `<div class="ni tgx" style="display:grid;gap:14px"><div class="tg-two"><div class="tb-c w"><span class="ni-tag">Niño interno</span><h3>Lo que viví</h3><p>Las heridas de mi infancia, mis máscaras y quién las provocó.</p><div><button class="btn btn-ghost btn-sm" data-les="0,0">Ir a Niño interior</button></div></div>
+ <div class="tb-c d"><span class="ni-tag" style="color:#d9c9ef">Transgeneracional</span><h3 style="color:#fff">Lo que heredé</h3><p>Las memorias, lealtades y votos que llegaron a través del clan.</p></div></div>
+ ${tbList('td14',['Si una herida del niño interno también la vivió la madre o el padre, se mira en el linaje.','Si una memoria del linaje se limpia, se observa cómo responde el niño interno.'])}
+ ${v===0?`<div class="ni-in dk-grid c2" style="align-items:center"><div>${tgTree({hg:1})}</div>${niBox('l','Tu herida: '+NI_H[n3clamp(h,0,4)].n.toLowerCase(),'Pregúntate si también la vivió tu madre o tu padre. Si es así, mírala en el linaje con Constelación.')}</div>`:
+ v===1?`<div class="ni-in dk-grid c2" style="align-items:center"><div>${tgTree({hg:0})}</div>${niBox('t','Después de limpiar','Observa cómo responde tu niño interno: lo que sientes, sueñas o notas distinto. Puedes volver a medir tu gráfico del niño interno.')}</div>`:''}</div>`};
+
+/* ----- 9 · Repaso y certificación ----- */
+RICH.td15=()=>dkH('Repaso en voz alta','Comprobemos lo aprendido','Respondan en voz alta y compartan cómo llegaron a su respuesta. Después toquen cada tarjeta.')+
+ `<div class="ni ni-cp">${n3flip('tdcp',[['escudo','1 · ¿Qué se aclara siempre en el encuadre, antes de leer el árbol?','<b>En qué consiste el trabajo transgeneracional y lo que no es:</b> no reemplaza una terapia ni hace diagnósticos. Se explica la confidencialidad y se pide el consentimiento.'],['chat','2 · Di como hipótesis: «Tu abuelo arruinó a la familia.»','<b>Por ejemplo:</b> «El gráfico muestra una posible memoria de pérdidas en el linaje paterno. ¿Te hace sentido? ¿Qué sabes de tus abuelos en ese tema?»'],['corazon','3 · ¿Qué haces si una consultante relata un abuso propio?','<b>Detener la lectura y no profundizar,</b> acompañar con calma y presencia, y sugerir la ayuda de un profesional de salud. Ante riesgo inmediato, contactar a los servicios de emergencia.']],'c4',280)}</div>`;
+const TD_RQ=[['grupo','Asistencia','Participar en las cuatro clases de la formación.'],['libro','Tareas','Entregar las tres tareas: el árbol, la lealtad o repetición, y la memoria y el voto.'],['check','Evaluación práctica','Aprobar la sesión observada en tríos.']];
+RICH.td16=()=>{const o=st('tdrq',{}),n=TD_RQ.filter((_,i)=>o[i]).length;
+ return dkH('Certificación','Requisitos para la certificación','Marca los que ya cumples.')+
+ `<div class="ni" style="display:grid;gap:12px"><div class="nl-req td-3">${TD_RQ.map((x,i)=>`<button ${rxa('tog','tdrq',i)} ${pressed(!!o[i])} style="animation-delay:${i*.08}s"><i>${o[i]?'✓':''}</i><div><b>${x[1]}</b><span>${x[2]}</span></div></button>`).join('')}</div>
+ <div class="prog"><span>${n} de 3</span><div class="bar"><i style="width:${n/3*100}%"></i></div></div>
+ ${n===3?niQ('¡Cumples los tres requisitos para tu certificación en la Formación Transgeneracional!'):''}</div>`};
+
+/* ----- 10 · Ritual, oración y cierre ----- */
+RICH.td17=()=>dkH('Ritual de cierre','Honrar a los ancestros','Lo hacemos juntas, frase a frase.')+`<div class="ni">${n3pray('tdho',['Cierra los ojos y siente detrás de ti a tu madre y a tu padre; detrás de ellos, a sus padres.','Di en tu interior: «Gracias por la vida. Tomo lo bueno que me dieron.»','«Lo que les pertenece, se lo dejo con amor.»','Siente el apoyo de tu linaje a tu espalda y da un paso hacia adelante.'])}</div>`;
+RICH.td18=()=>dkH('Cierre de la formación','Oración de agradecimiento','La decimos juntas para cerrar el camino.')+`<div class="ni">${n3pray('tdor',['Amado Yo Superior, ángeles, arcángeles, seres de luz, todo mi comité espiritual: gracias por acompañarnos en este camino.','Gracias a nuestros ancestros, a cada madre y a cada padre que nos antecedió, por la vida que llegó a través de ellos.','Gracias por cada memoria reconocida, por cada voto liberado, por cada historia que hoy miramos con amor.','Que lo aprendido se convierta en servicio, con humildad, respeto y amor.','Que cada sesión sea para el mayor bien de quien llega a nosotras y de todo su linaje.','Gracias, gracias, gracias.'])}</div>`;
+RICH.td19=()=>`<div class="ni tgx">${nbHero('Formación Transgeneracional','Gracias por','este camino','Sigue practicando, registra tus sesiones y honra a tu linaje como honras el de otras.',['Clase 1','Clase 2','Clase 3','Clase 4'],'Karen Oyarce · Maestra Holística',tdPhoto('Una mujer sentada al pie de un árbol, con los ojos cerrados y las manos en el pecho, sonríe'))}</div>`;
+(function(){const c=document.createElement('style');c.id='td-css';c.textContent=`
+.nj-proto.td-5{grid-template-columns:repeat(5,minmax(0,1fr))}
+.nl-req.td-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:760px){.nj-proto.td-5,.nl-req.td-3{grid-template-columns:1fr}}
+`;document.head.appendChild(c)})();
