@@ -5,7 +5,6 @@
 //   /assets/n2/...  (materiales)  -> requiere el Nivel 2 abierto
 //   /curso/n2.js    (código)      -> requiere lvl >= 2: el código de cada nivel usa piezas de los anteriores,
 //                                    así que se descargan juntos; el aula solo muestra los niveles abiertos
-//   /curso/esp/... (especialidades) -> por ahora solo la Maestra
 import { next } from '@vercel/functions';
 import { createRemoteJWKSet, jwtVerify } from 'jose';
 

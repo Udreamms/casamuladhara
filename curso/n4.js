@@ -1,13 +1,14 @@
-// Casa Muladhara · Especialización Niño Interno (aparte de los cinco niveles; por ahora solo la Maestra, lo exige middleware.js).
-// Script clásico: usa las piezas de curso/n1.js y curso/n3.js, que se cargan antes.
-/* ---------- Especialización Niño Interno · Clase 1 ---------- */
+// Casa Muladhara · contenido del Nivel 4 (solo con acceso a este nivel; lo exige middleware.js).
+// Script clásico: sus constantes quedan en el ámbito global que usa aula.html. Se carga después de los niveles anteriores.
+/* ---------- Nivel 4 · Especialización Niño Interno · Clase 1 ---------- */
+const N4P='assets/n4/';
 (function(){const c=document.createElement('style');c.id='ni-css';c.textContent=`
 .ni{--ni-lil:#e6dcf2;--ni-lil2:#7a5aa6;--ni-tea:#d6e8e2;--ni-tea2:#3f7d6e;--ni-olv:#3b4a24;--ni-red:#c0392b}
 .ni-tag{display:inline-block;font:600 .62rem/1 var(--f-caps);letter-spacing:.18em;text-transform:uppercase;color:var(--ni-lil2)}
 .ni-cover{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:26px;align-items:center}
 .ni-cover .nb-cover{min-height:0}
 .ni-ph{position:relative;justify-self:center;width:min(100%,300px);margin:0 auto}
-.ni-ph img{display:block;width:100%;aspect-ratio:536/578;object-fit:cover;border-radius:999px 999px 22px 22px;border:4px solid #f3ecd8;box-shadow:0 22px 50px -26px rgba(28,58,43,.7)}
+.ni-ph img{display:block;width:100%;aspect-ratio:605/648;object-fit:cover;border-radius:999px 999px 22px 22px;border:4px solid #f3ecd8;box-shadow:0 22px 50px -26px rgba(28,58,43,.7)}
 .ni-arc{display:block;width:58%;margin:14px auto 0}
 .ni-arc path{fill:none;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;animation:niDraw 1.6s cubic-bezier(.3,.7,.2,1) forwards}
 .ni-arc path:nth-child(2){animation-delay:.25s}.ni-arc path:nth-child(3){animation-delay:.5s}
@@ -118,6 +119,7 @@
 .ni-read{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;align-items:stretch}
 .ni-read>label,.ni-read>div{border-radius:14px;padding:10px 12px;background:var(--nb-paper);border:1px solid var(--nb-line);display:grid;gap:6px;align-content:start}
 .ni-read small{font:600 .56rem/1 var(--f-caps);letter-spacing:.16em;text-transform:uppercase;color:var(--ni-lil2)}
+.ni-read span{font:400 1.05rem/1.25 var(--f-display);color:var(--nb-ink)}
 .ni-read input{all:unset;box-sizing:border-box;width:100%;font:400 1.05rem/1.2 var(--f-display);color:var(--nb-ink);border-bottom:1px dashed var(--nb-line);padding:2px 0}
 .ni-read .dk-chips{gap:4px}.ni-read .chip{padding:5px 9px;font-size:.78rem}
 .ni-hyp{background:var(--ni-olv);color:#ece7d3;border-radius:18px;padding:18px 20px;display:grid;gap:8px}
@@ -167,7 +169,7 @@ const NI_H=[
   adu:['Se siente invisible o fuera de lugar en los grupos','Se aísla o desaparece ante el conflicto','Duda de su valor y se compara constantemente','Le cuesta recibir afecto y reconocimiento'],
   masc:'Se protege desapareciendo: se retira, se calla o se refugia en su mundo interior para no volver a sentir el rechazo.',
   fig:'Según Bourbeau, suele vivirse con el progenitor del mismo sexo.',
-  qs:'Reconocer su derecho a existir, ocupar su lugar y ser vista o visto sin tener que esconderse.',
+  qs:'Reconocer su derecho a existir, ocupar su lugar y ser vista o visto sin tener que esconderse.',pg:'¿En qué situaciones has visto a alguien desaparecer para no sentirse rechazado?',
   hv:'sintió que no era aceptado tal como era',ha:'retirarse, callarse y refugiarse en su mundo interior'},
  {n:'Abandono',m:'Dependiente',ic:'nino',med:'presencia',mic:'grupo',need:'Presencia y apoyo emocional',act:'Se queda solo o siente distancia',sana:'La capacidad de sostenerse a sí mismo',
   viv:'Sintió que le faltó presencia, compañía o apoyo emocional. Puede venir de ausencias reales, como separaciones, hospitalizaciones o padres que trabajaban mucho, o de adultos presentes en el cuerpo pero no en lo emocional.',
@@ -175,7 +177,7 @@ const NI_H=[
   adu:['Miedo intenso a la soledad y a perder a quien ama','Necesita atención y aprobación constantes','Permanece en relaciones que le hacen daño','Le cuesta tomar decisiones sin apoyo'],
   masc:'Se protege buscando sostén en otros: pide ayuda, se aferra y hace lo posible para no quedarse sola o solo.',
   fig:'Según Bourbeau, suele vivirse con el progenitor del sexo opuesto.',
-  qs:'Aprender a acompañarse, sostener su propia soledad y elegir los vínculos desde el deseo y no desde el miedo.',
+  qs:'Aprender a acompañarse, sostener su propia soledad y elegir los vínculos desde el deseo y no desde el miedo.',pg:'¿Qué diferencia hay entre estar acompañada y sentirse acompañada?',
   hv:'vivió la falta de presencia',ha:'aferrarse, pedir aprobación y temerle a la distancia'},
  {n:'Humillación',m:'Masoquista',ic:'gota',med:'dignidad',mic:'estrella',need:'Respeto por su cuerpo y su dignidad',act:'Siente vergüenza o culpa por lo que desea',sana:'La dignidad y el permiso para disfrutar',
   viv:'Se sintió avergonzado, controlado o ridiculizado, sobre todo en relación con su cuerpo, sus necesidades o sus deseos. Aprendió que el placer y la libertad eran motivo de culpa.',
@@ -183,7 +185,7 @@ const NI_H=[
   adu:['Carga con los problemas de otros y se olvida de sí','Siente vergüenza de su cuerpo o de sus deseos','Le cuesta disfrutar sin sentir culpa','Se pone en segundo lugar para ser querida o querido'],
   masc:'Se protege cargando y sirviendo: se sacrifica por otros y se castiga antes de que alguien la humille.',
   fig:'Según Bourbeau, suele vivirse con quien se ocupó de su cuerpo y su crianza, con frecuencia la madre.',
-  qs:'Recuperar su dignidad, darse permiso para disfrutar y poner límites sin culpa.',
+  qs:'Recuperar su dignidad, darse permiso para disfrutar y poner límites sin culpa.',pg:'¿Cómo se ve en el día a día alguien que siempre se pone en segundo lugar?',
   hv:'se sintió avergonzado o controlado en su cuerpo y sus deseos',ha:'cargar con otros, sacrificarse y ponerse en segundo lugar'},
  {n:'Traición',m:'Controlador',ic:'candado',med:'confianza',mic:'escudo',need:'Poder confiar en el adulto',act:'Se rompe una promesa o un compromiso',sana:'La confianza y el soltar el control',
   viv:'Sintió que un adulto importante no cumplió lo que prometió, no lo protegió o lo usó para sus propias necesidades. Perdió la confianza en que el amor era seguro.',
@@ -191,7 +193,7 @@ const NI_H=[
   adu:['Necesita controlar situaciones y personas','Le cuesta delegar y confiar','Se impacienta y necesita tener la razón','Sospecha de las intenciones de los demás'],
   masc:'Se protege adelantándose: planifica, vigila y decide por otros para no volver a ser defraudado.',
   fig:'Según Bourbeau, suele vivirse con el progenitor del sexo opuesto.',
-  qs:'Volver a confiar, soltar el control y aceptar que los demás pueden fallar sin que eso la destruya.',
+  qs:'Volver a confiar, soltar el control y aceptar que los demás pueden fallar sin que eso la destruya.',pg:'¿Qué tipo de promesa no cumplida puede quebrar la confianza de un niño?',
   hv:'sintió que no cumplieron lo prometido o que no lo protegieron',ha:'adelantarse, vigilar y controlar para no volver a ser defraudado'},
  {n:'Injusticia',m:'Rígido/a',ic:'balanza',med:'reconocimiento',mic:'sol',need:'Reconocimiento, calidez y equidad',act:'Percibe trato desigual o frialdad',sana:'El permiso para sentir y descansar',
   viv:'Creció con adultos fríos, exigentes o autoritarios. Sintió que lo valoraban por lo que hacía bien y no por lo que era, o que lo trataban distinto que a otros.',
@@ -199,7 +201,7 @@ const NI_H=[
   adu:['Perfeccionismo y autoexigencia alta','Le cuesta mostrar emociones y vulnerabilidad','Se juzga con dureza a sí mismo y a otros','Trabaja de más y le cuesta descansar'],
   masc:'Se protege con orden y perfección: se desconecta de lo que siente para no sufrir.',
   fig:'Según Bourbeau, suele vivirse con el progenitor del mismo sexo.',
-  qs:'Permitirse sentir, equivocarse y descansar, y reconocer su valor más allá de lo que logra.',
+  qs:'Permitirse sentir, equivocarse y descansar, y reconocer su valor más allá de lo que logra.',pg:'¿Cómo distinguimos una exigencia sana de la máscara rígida?',
   hv:'vivió frialdad, exigencia o un trato distinto que a otros',ha:'ser perfecto, exigirse y desconectarse de lo que siente'}
 ];
 const niBox=(c,t,p)=>`<div class="ni-box ${c}"><b>${t}</b>${p?`<p>${p}</p>`:''}</div>`;
@@ -207,12 +209,14 @@ const niQ=t=>`<div class="ni-quote">${t}</div>`;
 const niNote=t=>`<p class="dk-note" style="text-align:center">${t}</p>`;
 
 /* ----- 1 · Bienvenida y agenda ----- */
-RICH.ni1=()=>`<div class="ni">${nbHero('Especialización Niño Interno · Clase 1 · Profundización','Lo que el niño interno','nos enseña a sanar','Las cinco heridas, sus máscaras y las figuras de madre y padre, leídas en el gráfico con mayor profundidad.',['Heridas','Máscaras','Madre y padre','Sanación'],'Karen Oyarce · Maestra Holística',
- `<div class="ni-ph"><img src="assets/esp/nino-abrazo.webp" alt="Una mujer abraza con ternura a una niña, con los ojos cerrados"><svg class="ni-arc" viewBox="0 0 200 104" aria-hidden="true"><path pathLength="1" d="M10 100a90 90 0 0 1 180 0" stroke="#f3ecd8" stroke-width="16"/><path pathLength="1" d="M34 100a66 66 0 0 1 132 0" stroke="#cfe3dc" stroke-width="16"/><path pathLength="1" d="M58 100a42 42 0 0 1 84 0" stroke="#e6dcf2" stroke-width="16"/><circle cx="100" cy="100" r="18" fill="#c0392b"/></svg></div>`)}</div>`;
-const NI_AG=[['Qué es el niño interno',1],['Cómo se forma',1],['Qué podemos sanar con él',1],['Cómo se forma una herida',2],['Las cinco heridas, una por una',3],['Rechazo y abandono: diferencias',4],['La madre y el padre en el gráfico',5],['Lectura profunda, sanación y práctica',6]];
-RICH.ni2=()=>dkH('Clase 1','Agenda de la clase','Ocho momentos. Toca uno para ir directo a él.')+
- `<div class="ni dk-split" style="align-items:stretch"><div class="ni-agenda ni-st">${NI_AG.map((x,i)=>`<button data-les="0,${x[1]}"><b>${i+1}</b><span>${x[0]}</span><small>Ir</small></button>`).join('')}</div>
- <div class="ni-obj"><span class="ni-tag" style="color:#d9c9ef">Objetivo de hoy</span><h3>Pasar de la lectura a la comprensión</h3><p>Reconocer cada herida, su máscara, la figura involucrada y lo que la persona puede sanar.</p></div></div>`;
+RICH.ni1=()=>`<div class="ni">${nbHero('Especialización Niño Interno · Clase 1','Lo que el niño interno','nos enseña a sanar','Las cinco heridas, sus máscaras y las figuras de madre y padre, leídas en el gráfico con mayor profundidad.',['Heridas','Máscaras','Madre y padre','Sanación'],'Karen Oyarce · Maestra Holística',
+ `<div class="ni-ph"><img src="${N4P}nino/abrazo.webp" alt="Una mujer abraza con ternura a una niña, con los ojos cerrados"><svg class="ni-arc" viewBox="0 0 200 104" aria-hidden="true"><path pathLength="1" d="M10 100a90 90 0 0 1 180 0" stroke="#f3ecd8" stroke-width="16"/><path pathLength="1" d="M34 100a66 66 0 0 1 132 0" stroke="#cfe3dc" stroke-width="16"/><path pathLength="1" d="M58 100a42 42 0 0 1 84 0" stroke="#e6dcf2" stroke-width="16"/><circle cx="100" cy="100" r="18" fill="#c0392b"/></svg></div>`)}</div>`;
+const NI_AG=['Qué es el niño interno y cómo se forma','Qué podemos sanar con él','Cómo se forma una herida','Las cinco heridas, una por una','Rechazo y abandono: diferencias','El gráfico: la madre y el padre','Lectura profunda y camino de sanación','Meditación: encuentro con mi niño interior','Práctica, repaso y tarea'];
+const NI_OBJ=['Explicar qué es el niño interno y cómo se forma','Reconocer las cinco heridas y su máscara en un caso','Distinguir rechazo de abandono','Relacionar madre y padre con el anillo 4'];
+// la especialización es el primer módulo del Nivel 4; cada momento de la agenda es una lección
+RICH.ni2=()=>dkH('Clase 1','Agenda de la clase','Nueve momentos. Toca uno para ir directo a él.')+
+ `<div class="ni dk-split" style="align-items:stretch"><div class="ni-agenda ni-st">${NI_AG.map((x,i)=>`<button data-les="${S.lesson[0]},${i+1}"><b>${i+1}</b><span>${x}</span><small>Ir</small></button>`).join('')}</div>
+ <div class="ni-obj"><span class="ni-tag" style="color:#d9c9ef">Objetivo de hoy</span><h3>Al terminar la clase podrás</h3><ul class="ni-st" style="margin:0;padding-left:18px;display:grid;gap:8px;color:#dfe3cf;line-height:1.5">${NI_OBJ.map(x=>`<li>${x}</li>`).join('')}</ul></div></div>`;
 
 /* ----- 2 · El niño interno ----- */
 RICH.ni3=()=>dkH('El niño interno','¿Qué es el niño interno?','Es la estructura inicial que formó lo que hoy soy: la parte de nosotros que guarda las emociones, los recuerdos, las experiencias y las necesidades de la infancia.')+
@@ -254,7 +258,8 @@ const niHerida=i=>()=>{const h=NI_H[i],k='nih'+i,mo=!!st(k+'m',{})[0];
  <div style="display:grid;gap:10px"><button class="ni-mask ${mo?'on':''}" ${rxa('flip',k+'m',0)} ${pressed(mo)} aria-label="Máscara ${h.m}: toca para ver lo que protege"><span><span class="f">${ic('mascara',34)}<em>Lo que se ve · toca para mirar detrás</em><b>Máscara ${h.m}</b><p>${h.masc}</p></span>
   <span class="b"><em>Detrás de la máscara</em><b>Herida de ${h.n.toLowerCase()}</b><p>El niño necesitaba: <strong>${h.need.toLowerCase()}</strong>. Se activa cuando ${h.act.toLowerCase()}.</p></span></span></button>
   ${niBox('t','Figura asociada',h.fig+' En el gráfico, la figura se confirma siempre con el péndulo.')}
-  ${niBox('d','Qué se sana',h.qs)}</div></div>`};
+  ${niBox('d','Qué se sana',h.qs)}</div></div>
+ <div class="ni ni-pg"><div class="dk-call"><b>Pregunta al grupo.</b> <i>${h.pg}</i></div>${n3area('nipg'+i,'Tu respuesta (opcional)','Lo que he visto…')}</div>`};
 [8,9,10,11,12].forEach((n,i)=>{RICH['ni'+n]=niHerida(i)});
 
 /* ----- 5 · Rechazo y abandono ----- */
@@ -273,25 +278,78 @@ const NI_FIG={
  padre:{t:'El padre en el gráfico',rep:['Protección y límites','Estructura y dirección','Confianza para salir al mundo','Logro, trabajo y prosperidad'],her:['Inseguridad para decidir y avanzar','Conflicto con la autoridad o los límites','Bloqueos con el trabajo o el dinero','Búsqueda de aprobación y protección en otros'],san:['Reconocer su historia y sus propios límites','Tomar la fuerza que dio y soltar el reclamo','Construir su propia protección y dirección'],q:'Sanar al padre interno es aprender a protegerse y a avanzar con confianza.',c1:'t'}};
 const niFig=f=>()=>{const F=NI_FIG[f],k='nif'+f,s=n3clamp(st(k,0),0,2);
  const col=(i,c,eb,items,x)=>`<div class="ni-box ${c}" style="${x||''};${i>s?'opacity:.25;filter:blur(1.5px)':''};transition:opacity .4s,filter .4s"><span class="ni-tag"${c==='d'?' style="color:#d9c9ef"':''}>${eb}</span>${i<=s?`<ul style="margin:0;padding-left:18px;display:grid;gap:6px;font-size:.88rem;line-height:1.45">${items.map((x,j)=>`<li style="animation:niUp .45s ${j*.08}s both">${x}</li>`).join('')}</ul>`:'<p style="font-size:.85rem">Toca «Siguiente» para abrir.</p>'}</div>`;
- return dkH('Anillo 2 · Quién la provocó',F.t,'Recorre las tres columnas: lo que representa, cómo se ve la herida y lo que se sana.')+
+ return dkH('Anillo 4 · Quién la provocó',F.t,'Recorre las tres columnas: lo que representa, cómo se ve la herida y lo que se sana.')+
  `<div class="ni" style="display:grid;gap:14px"><div class="ni-fig">${col(0,F.c1,'Lo que representa',F.rep)}${col(1,'','Cuando la herida es con '+(f==='madre'?'la madre':'el padre'),F.her,'background:var(--nb-paper);border:1px solid var(--nb-line);color:var(--nb-ink)')}${col(2,'d','Qué se sana',F.san)}</div>
  ${s<2?`<div class="dk-cta" style="justify-content:center"><button class="btn btn-primary btn-sm" ${rxa('set',k,s+1)}>Siguiente</button></div>`:`<div class="ni-quote ni-in">${F.q}</div>`}</div>`};
 RICH.ni14=niFig('madre');RICH.ni15=niFig('padre');
 
 /* ----- 7 · Lectura profunda y sanación ----- */
-RICH.ni16=()=>{const ed=st('nired','0 a 5'),cu=st('nircu','Meses'),f=st('nirf',0),h=n3clamp(st('nirh',1),0,4),H=NI_H[h];
- const fig=['Madre','Padre'][f];
- return dkH('Lectura profunda','De la lectura a la comprensión','Arma una lectura con los cuatro datos del gráfico y mira cómo se traduce en una hipótesis de trabajo.')+
- `<div class="ni" style="display:grid;gap:14px"><div class="ni-read">
-  <label><small>Edad</small><input type="text" data-rsin="nired" value="${esc(ed)}" placeholder="0 a 5"></label>
-  <div><small>Quién</small>${chipRow('nirf',['Madre','Padre'],f)}</div>
-  <div><small>Herida y máscara</small>${chipRow('nirh',NI_H.map(x=>x.n),h)}</div>
-  <label><small>Cuándo</small><input type="text" data-rsin="nircu" value="${esc(cu)}" placeholder="Meses"></label></div>
- <div class="ni-hyp ni-in"><span class="ni-tag">Lo que podría haber vivido · ${H.n} · ${H.m}</span><p>En la etapa de <mark>${esc(ed)||'…'}</mark> años, durante <mark>${esc(cu.toLowerCase())||'…'}</mark>, esa niña o ese niño ${H.hv} con su <mark>${fig.toLowerCase()}</mark>. Para protegerse aprendió a ${H.ha}.</p></div>
+/* el gráfico del niño interno, interactivo: cinco anillos de adentro hacia afuera */
+const NIG=[
+ {k:'cu',t:'Cuándo',r0:46,r1:102,items:['Vientre','Nacimiento','Días','Semanas','Meses','Años'],fill:'#ffffff',on:'#3f7d6e',m:'rad',fs:10.5},
+ {k:'ma',t:'Máscara',r0:102,r1:136,items:['Evasivo/a','Dependiente','Masoquista','Controlador','Rígido/a'],fill:'#efe4f7',on:'#7a5aa6',m:'tan',fs:9.5},
+ {k:'he',t:'Herida',r0:136,r1:178,items:['Rechazo','Abandono','Humillación','Traición','Injusticia'],fill:'#ffffff',on:'#7a5aa6',m:'tan',fs:10.5},
+ {k:'qu',t:'Quién la provocó',r0:178,r1:252,items:['Niño Interno','Adulto','Padre','Madre','Grupo','Familia','Soñador','Tutor','Femenino','Masculino','Amigo(a)','Otro reparto'],fill:'#d3e9e5',on:'#3f7d6e',m:'rad',fs:10},
+ {k:'ed',t:'Edad',r0:252,r1:280,items:Array.from({length:21},(_,i)=>String(i*5)),fill:'#ffffff',on:'#9b6f27',m:'tan',fs:9}];
+const NIG_D={cu:4,he:1,qu:3,ed:1};
+const nigSel=k=>{const v=st('nig'+(k==='ma'?'he':k),NIG_D[k==='ma'?'he':k]);return v};
+window.RX=window.RX||{};
+RX.nigs=(k,v)=>{RS['nig'+(k==='ma'?'he':k)]=+v;render(false)};
+const niChart=o=>{o=o||{};const cx=300,cy=292,P=(r,a)=>[(cx+r*Math.cos(a)).toFixed(1),(cy-r*Math.sin(a)).toFixed(1)];
+ const seg=(r0,r1,a1,a2)=>{const [x1,y1]=P(r1,a1),[x2,y2]=P(r1,a2),[x3,y3]=P(r0,a2),[x4,y4]=P(r0,a1);return `M${x1} ${y1}A${r1} ${r1} 0 0 1 ${x2} ${y2}L${x3} ${y3}A${r0} ${r0} 0 0 0 ${x4} ${y4}Z`};
+ let g='';
+ NIG.forEach(R=>{const n=R.items.length,sel=nigSel(R.k),dim=o.hl&&o.hl!==R.k;
+  g+=`<g class="nig-r${dim?' dim':''}${o.hl===R.k?' hl':''}">`;
+  R.items.forEach((t,i)=>{const a1=Math.PI-i*Math.PI/n,a2=Math.PI-(i+1)*Math.PI/n,am=(a1+a2)/2,deg=am*180/Math.PI,rm=(R.r0+R.r1)/2,[tx,ty]=P(rm,am),on=i===sel;
+   const rot=R.m==='rad'?(deg<=90?-deg:180-deg):90-deg;
+   g+=`<g class="nig-s${on?' on':''}" ${rxa('nigs',R.k,i)} role="button" tabindex="0" aria-label="${R.t}: ${t}" aria-pressed="${on}"><path d="${seg(R.r0,R.r1,a1,a2)}" fill="${on?R.on:R.fill}"/><text x="${tx}" y="${ty}" transform="rotate(${rot.toFixed(1)} ${tx} ${ty})" font-size="${R.fs}" fill="${on?'#fff':'#1f3f32'}">${t}</text></g>`});
+  g+='</g>'});
+ return `<figure class="nig"><svg viewBox="0 0 600 334" role="group" aria-label="Gráfico del niño interno">${g}<path d="M${cx-282} ${cy}A282 282 0 0 1 ${cx+282} ${cy}" fill="none" stroke="#a89a6e" stroke-width="5"/><circle cx="${cx}" cy="${cy}" r="40" fill="#1f3f32"/><svg x="${cx-26}" y="${cy-34}" width="52" height="52" style="color:#ece7d3"><use href="#mark"/></svg></svg>${o.cap===0?'':'<figcaption>Toca un sector de cada anillo. La herida y su máscara van juntas.</figcaption>'}</figure>`};
+(function(){const c=document.createElement('style');c.textContent=`
+.nig{margin:0;display:grid;gap:6px}
+.ni-cp .flip .f b{font:400 1.02rem/1.4 var(--f-display)}
+@media (max-width:640px){.ni-cp .dk-grid{grid-template-columns:1fr}.ni-cp .flip{height:210px!important}}.ni-cp .flip .b{font-size:.9rem;line-height:1.5}
+.nig>svg{width:100%;height:auto;display:block;overflow:visible}
+.nig-s{cursor:pointer;outline:none}
+.nig-s path{stroke:#b9ad84;stroke-width:1;transition:filter .2s}
+.nig-s:hover path,.nig-s:focus-visible path{filter:brightness(.93)}
+.nig-s:focus-visible path{stroke:#7a5aa6;stroke-width:2.5}
+.nig-s text{text-anchor:middle;dominant-baseline:central;font-family:var(--f-body,system-ui);font-weight:600;pointer-events:none}
+.nig-s.on path{animation:nigOn .45s both}
+@keyframes nigOn{from{opacity:.3}to{opacity:1}}
+.nig-r{transition:opacity .35s}
+.nig-r.dim{opacity:.28}
+.nig-r.hl path{stroke:#9b6f27;stroke-width:1.6}
+.nig figcaption{font-size:.78rem;color:var(--nb-soft);text-align:center}
+.ni-rings{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:760px){.ni-rings{grid-template-columns:1fr 1fr}}
+.ni-ring{all:unset;box-sizing:border-box;cursor:pointer;display:grid;gap:4px;padding:12px 14px;border-radius:14px;border:1px solid var(--nb-line);background:var(--nb-paper);color:var(--nb-ink);transition:transform .25s,background .25s}
+.ni-ring b{font:400 1.02rem/1.2 var(--f-display)}
+.ni-ring span{font-size:.84rem;color:var(--nb-soft);line-height:1.45}
+.ni-ring[aria-pressed="true"]{background:var(--ni-lil);border-color:var(--ni-lil2);transform:translateY(-4px)}
+.ni-ring[aria-pressed="true"]:last-child{background:var(--ni-olv);color:#ece7d3}.ni-ring[aria-pressed="true"]:last-child span{color:#dfe3cf}
+.ni-orig{width:100%;border-radius:14px;border:1px solid var(--nb-line);display:block}
+`;document.head.appendChild(c)})();
+
+const NI_AN=[['ed','Anillo 1 · Edad','Del vientre a los años: en qué momento se originó la herida.'],['ma','Anillo 2 · Máscara','La forma en que la persona aprendió a protegerse.'],['he','Anillo 3 · Herida','Rechazo, abandono, humillación, traición o injusticia.'],['qu','Anillo 4 · Quién la provocó','Madre, Padre y otras diez figuras. Es el que miramos ahora.']];
+RICH.nian=()=>{const s=n3clamp(st('nian',3),0,3),orig=st('nianO',0);
+ return dkH('Los anillos, de adentro hacia afuera','Volvamos al gráfico','Toca un anillo para verlo en el gráfico.')+
+ `<div class="ni" style="display:grid;gap:12px"><div style="max-width:760px;width:100%;justify-self:center">${orig?`<img class="ni-orig ni-in" src="${N4P}nino/grafico.webp" alt="Lámina original del gráfico del niño interno de Casa Muladhara">`:niChart({hl:NI_AN[s][0]})}
+  <div class="dk-cta" style="justify-content:center"><button class="btn btn-ghost btn-sm" ${rxa('set','nianO',orig?0:1)}>${orig?'Ver el gráfico interactivo':'Ver la lámina original'}</button></div></div>
+ <div class="ni-rings ni-st">${NI_AN.map((x,i)=>`<button class="ni-ring" ${rxa('set','nian',i)} ${pressed(i===s)}><b>${x[1]}</b><span>${x[2]}</span></button>`).join('')}</div></div>`+
+ `<div class="ni">${niQ('La figura se confirma siempre con el péndulo; no se da por supuesta.')}</div>`};
+
+const NI_QUP=['su niño interno','un adulto','su padre','su madre','un grupo','su familia','la figura del soñador','un tutor','una figura femenina','una figura masculina','un amigo o una amiga','otra figura de su vida'];
+const NI_CUP=['ya en el vientre','en el nacimiento','durante días','durante semanas','durante meses','durante años'];
+RICH.ni16=()=>{const ed=nigSel('ed')*5,qu=nigSel('qu'),h=n3clamp(nigSel('he'),0,4),cu=nigSel('cu'),H=NI_H[h];
+ const edP=ed===0?'Antes del primer año':'Alrededor de los '+ed+' años';const fig=qu===3?NI_FIG.madre:qu===2?NI_FIG.padre:null;
+ return dkH('Lectura profunda','De la lectura a la comprensión','Arma una lectura en el gráfico: toca la edad, quién la provocó, la herida y cuándo. Abajo se traduce en una hipótesis de trabajo.')+
+ `<div class="ni" style="display:grid;gap:14px">${niChart()}
+ <div class="ni-read ni-st"><div><small>Edad</small><span>${ed}</span></div><div><small>Quién</small><span>${NIG[3].items[qu]}</span></div><div><small>Herida y máscara</small><span>${H.n} · ${H.m}</span></div><div><small>Cuándo</small><span>${NIG[0].items[cu]}</span></div></div>
+ <div class="ni-hyp ni-in"><span class="ni-tag">Lo que podría haber vivido</span><p><mark>${edP}</mark>, <mark>${NI_CUP[cu]}</mark>, esa niña o ese niño ${H.hv}, en relación con <mark>${NI_QUP[qu]}</mark>. Para protegerse aprendió a ${H.ha}.</p></div>
  <div class="dk-grid c2" style="align-items:start"><div style="display:grid;gap:8px"><div class="dk-sub">Preguntas para abrir la conversación · marca las que harías</div>${n3ck('nirq',[['chat','¿Qué pasaba en tu familia en esa etapa?'],['chat','¿Cómo reaccionas hoy cuando alguien se aleja?'],['chat','¿Qué necesitaba esa niña o ese niño?'],['chat','¿Qué puedes darte hoy que no recibiste?']])}</div>
- <div style="display:grid;gap:10px">${niBox('t','Qué se sana',H.qs)}${c4imp('La lectura es una hipótesis de trabajo que la persona confirma o descarta; no es un diagnóstico.')}</div></div>
- ${niNote('El ejemplo inicial (0 a 5 · Madre · Abandono · Meses) es un caso ficticio.')}</div>`};
-document.addEventListener('input',e=>{const k=e.target.dataset&&e.target.dataset.rsin;if(k==='nired'||k==='nircu'){const p=document.querySelector('.ni-hyp mark:nth-of-type('+(k==='nired'?1:2)+')');if(p)p.textContent=k==='nircu'?e.target.value.toLowerCase():e.target.value}});
+ <div style="display:grid;gap:10px">${niBox('t','Qué se sana · '+H.n,H.qs)}${fig?niBox('d','Qué se sana con '+(qu===3?'la madre':'el padre'),fig.san.join('. ')+'.'):''}${c4imp('La lectura es una hipótesis de trabajo que la persona confirma o descarta; no es un diagnóstico.')}</div></div>
+ ${niNote('Caso ficticio para practicar. En una sesión real, cada dato se confirma con el péndulo.')}</div>`};
 const NI_CA=[['ojo','Reconocer','Nombrar la herida y la máscara sin juicio: «esto me pasó y así aprendí a protegerme».'],['gota','Sentir','Dar espacio a la emoción que quedó guardada, sin apurarla ni explicarla.'],['regalo','Dar lo que faltó','El adulto de hoy le ofrece al niño aceptación, presencia, respeto, confianza o reconocimiento.'],['camino','Integrar','Elegir una respuesta nueva cada vez que la máscara quiera aparecer.']];
 const NI_MORD=[3,0,4,1,2];
 window.RX=window.RX||{};
@@ -308,7 +366,7 @@ RICH.ni17=()=>{const ok=st('nimok',{}),sel=RS.nimh,n=Object.keys(ok).length;
  ${n===5?`<div class="ni-quote ni-in">Rechazo, aceptación · Abandono, presencia · Humillación, dignidad · Traición, confianza · Injusticia, reconocimiento.</div><div class="dk-cta" style="justify-content:center"><button class="btn btn-ghost btn-sm" ${rxa('nimr',0)}>Jugar de nuevo</button></div>`:RS.nimmsg?`<div class="dk-call${/Bien/.test(RS.nimmsg)?'':' warn'}">${RS.nimmsg} <span class="muted">(${n} de 5)</span></div>`:''}</div>`};
 
 /* ----- 8 · Meditación, práctica y cierre ----- */
-const NI_OR=['Amado Yo Superior, ángeles, arcángeles, seres de luz y todo mi comité espiritual: pido en este momento su presencia.','Envuélvanme en su luz, protección y amor, y acompáñenme en este encuentro con mi niño interior.','Abran mi corazón para recibir con ternura todo lo que hoy quiera mostrarse, sin juicio y sin miedo.','Ayúdenme a verlo, escucharlo y abrazarlo, a reconocer sus heridas y a darle el amor, la presencia y el cuidado que necesitó.','Que todo lo que se mueva en este espacio sea para mi mayor bien y el de todas las personas presentes, y que sane en totalidad lo que hoy esté listo para sanar.','Gracias, gracias, gracias.'];
+const NI_OR=['Amado Yo Superior, ángeles, arcángeles, seres de luz, todo mi comité espiritual: pido en este momento su presencia.','Envuélvanme en su luz, su protección, su amor. Acompáñenme en este encuentro con mi niño interior.','Abran mi corazón para recibir con ternura lo que hoy quiera mostrarse, sin juicio, sin miedo.','Ayúdenme a verlo, a escucharlo, a abrazarlo; a reconocer sus heridas para darle el amor, la presencia, el cuidado que necesitó.','Que todo lo que se mueva en este espacio sea para mi mayor bien y el de todas las personas presentes.','Que sane en totalidad lo que hoy esté listo para sanar. Gracias, gracias, gracias.'];
 const NI_ME=[['Llegar al cuerpo','Respira profundo y siente tu cuerpo apoyado, aquí y ahora.'],['El lugar seguro','Camina hacia un lugar donde te sientes en paz y a salvo.'],['El encuentro','Allí está tu niño interior. Mira su edad, su ropa, su mirada.'],['Escuchar','Pregúntale qué necesita y dile: «te veo, estoy aquí».'],['Abrazar y volver','Abrázalo, prométele cuidarlo y vuelve despacio al presente.']];
 RICH.ni18=()=>{const m=st('nimo',0),s=n3clamp(st('nime',0),0,4);
  return dkH('Meditación guiada · 15 minutos','Encuentro con mi niño interior','Primero la oración de conexión; luego, los cinco pasos del encuentro.')+
@@ -327,6 +385,8 @@ RICH.ni19=()=>dkH('Práctica · en parejas','Práctica: reconoce la herida','Par
  ${a<0?'':a===c[2]?`<div class="res ok"><b>Herida de ${NI_H[a].n.toLowerCase()}.</b> ${c[3]}</div>`:`<div class="res no"><b>Mira otra vez.</b> ${NI_H[a].n} se reconoce porque ${NI_H[a].act.toLowerCase()}. ¿Es eso lo que le pasa a ${c[0]}?</div>`}</div>`}).join('')}</div>`+niNote('Casos ficticios.');
 RICH.ni20=()=>dkH('Facilitación','Reglas de oro del facilitador','Toca cada regla.')+
  `<div class="ni">${n3flip('niro',[['candado','Confidencialidad','Lo que se lee en una sesión no se comparte fuera de ella.'],['escudo','Sin diagnósticos ni promesas','El gráfico orienta; no diagnostica ni garantiza resultados.'],['corazon','Comprender, no culpar','Madre y padre también tuvieron un niño interno herido. La sanación no busca culpables.'],['enlace','Derivar cuando corresponda','Ante malestar intenso o crisis, se acompaña y se deriva a un profesional de salud.']],'c2',150)}</div>`;
+RICH.nicp=()=>dkH('Repaso en voz alta','Comprobemos lo aprendido','Respondan en voz alta. Después toquen cada tarjeta para ver la respuesta.')+
+ `<div class="ni ni-cp">${n3flip('nicp',[['lupa','1 · Una persona se aleja ante cualquier conflicto y siente que no tiene lugar en el grupo. ¿Qué herida y qué máscara reconoces?','<b>Herida de rechazo, máscara evasiva.</b> Se protege desapareciendo y duda de su lugar. Lo que se sana es su derecho a existir y ocupar su lugar.'],['candado','2 · ¿Qué máscara corresponde a la herida de traición?','<b>Máscara controladora.</b> Se protege adelantándose: planifica, vigila y decide por otros para no volver a ser defraudado.'],['camino','3 · ¿Cuáles son los cuatro pasos del camino de sanación?','<b>Reconocer, sentir, dar lo que faltó e integrar.</b> Nombrar sin juicio, dar espacio a la emoción, ofrecer lo que faltó y elegir una respuesta nueva.']],'c4',260)}</div>`;
 const NI_QZ=[
  {q:'¿Qué es el niño interno?',o:['Un recuerdo de la infancia que ya no influye','La estructura inicial que formó lo que hoy soy y sigue presente en la vida adulta','Una etapa que termina en la adolescencia'],a:1,e:'Guarda emociones, recuerdos, experiencias y necesidades de la infancia, y sigue influyendo hoy.'},
  {q:'¿En qué orden se forma una herida?',o:['Máscara, creencia, emoción, necesidad y patrón adulto','Necesidad, emoción, creencia, máscara y patrón adulto','Emoción, necesidad, patrón adulto, creencia y máscara'],a:1,e:'Lo que no se recibió se vive como emoción, se convierte en creencia y luego en una forma de protegerse.'},
