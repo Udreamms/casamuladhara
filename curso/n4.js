@@ -1178,3 +1178,229 @@ RICH.ta19=()=>dkH('Repaso en voz alta','Comprobemos lo aprendido','Respondan en 
 RICH.ta20=()=>dkH('Cierre de la clase','Tarea para la próxima clase','Tu árbol de cuatro generaciones.')+
  `<div class="ni dk-grid c2" style="align-items:start"><div class="ni-task">${n3ck('tata',[['grupo','Nombres de las 15 personas y nombres que se repiten'],['reloj','Fechas de nacimiento y de muerte que conozcas'],['casa','Oficios y lugares donde vivieron'],['camino','Sucesos importantes: migraciones, pérdidas, uniones, separaciones'],['chat','Lo que nadie sabe o no se cuenta: anótalo como pregunta']],['Marca cada punto cuando lo tengas.','¡Listo! Trae tu árbol a la Clase 2.'])}</div>
  <div style="display:grid;gap:10px">${niBox('d','Importante','Pregunta a tu familia lo que no sabes, con delicadeza y sin forzar. Trae tu árbol a la Clase 2: trabajaremos con él.')}<div class="dk-cta"><button class="btn btn-ghost btn-sm" data-les="${S.lesson[0]},${S.lesson[1]-5}">Completar mi árbol</button></div></div></div>`;
+
+/* ---------- Nivel 4 · Formación Transgeneracional · Clase 2 ---------- */
+(function(){const c=document.createElement('style');c.id='tb-css';c.textContent=`
+.tb-c{border-radius:18px;padding:18px;display:grid;gap:10px;align-content:start}
+.tb-c.d{background:var(--ni-olv);color:#ece7d3}.tb-c.d p{color:#dfe3cf}.tb-c.d small{color:#d9c9ef}
+.tb-c.w{background:var(--nb-paper);border:1px solid var(--nb-line);color:var(--nb-ink)}
+.tb-c p{margin:0;line-height:1.55}.tb-c small{font-size:.8rem;font-style:italic;line-height:1.45}
+.tb-c h3{margin:0;font:400 1.25rem/1.2 var(--f-display)}
+.tb-ls{display:grid;gap:8px}
+.tb-ls button{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;padding:11px 14px;border-radius:12px;border:1px solid var(--nb-line);background:var(--nb-paper);color:var(--nb-ink);font-size:.92rem;line-height:1.45;transition:transform .25s,background .25s;animation:niUp .4s both}
+.tb-ls button i{font-style:normal;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:.7rem;font-weight:700;background:var(--ni-lil);color:var(--ni-lil2)}
+.tb-ls button[aria-pressed="true"]{background:var(--ni-lil);border-color:var(--ni-lil2);transform:translateX(4px)}
+.tb-ls button[aria-pressed="true"] i{background:var(--ni-lil2);color:#fff}
+.tb-frs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tb-frs button{all:unset;box-sizing:border-box;cursor:pointer;padding:16px 18px;border-radius:14px;border:1px solid var(--nb-line);background:var(--nb-paper);font:italic 400 1.08rem/1.4 var(--f-display);color:var(--nb-ink);display:grid;gap:6px;animation:niUp .5s both;transition:background .3s,transform .3s}
+.tb-frs button:nth-child(4n+1),.tb-frs button:nth-child(4n){background:var(--ni-lil)}
+.tb-frs button small{font:600 .56rem/1 var(--f-caps);font-style:normal;letter-spacing:.16em;text-transform:uppercase;color:var(--ni-lil2)}
+.tb-frs button[aria-pressed="true"]{background:var(--ni-olv);color:#fff;transform:translateY(-3px)}
+.tb-frs button[aria-pressed="true"] small{color:#d9c9ef}
+.tb-gens{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;position:relative}
+.tb-gens>div{position:relative;display:grid;justify-items:center;gap:6px;text-align:center;padding:14px 8px;border-radius:16px;background:var(--nb-paper);border:1px solid var(--nb-line)}
+.tb-gens>div:not(:last-child)::after{content:"";position:absolute;right:-13px;top:50%;border:6px solid transparent;border-left:9px solid var(--ni-lil2);margin-top:-6px}
+.tb-gens small{font:600 .56rem/1 var(--f-caps);letter-spacing:.16em;text-transform:uppercase;color:var(--nb-soft)}
+.tb-gens .dot{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:var(--ni-lil);color:var(--ni-lil2)}
+.tb-gens .on .dot{background:var(--ni-lil2);color:#fff;animation:niPop .5s both}
+.tb-gens .on b{animation:niUp .5s both}
+.tb-gens b{font:400 1rem/1.25 var(--f-display);min-height:2.5em}
+.tb-fam{width:100%;max-width:440px;height:auto;display:block;margin:0 auto;overflow:visible}
+.tb-fam text{font-family:var(--f-body,system-ui);text-anchor:middle;font-size:12px;fill:#3b4a24}
+.tb-fam .mv{animation:tbMv .9s cubic-bezier(.3,.7,.2,1) forwards}
+.tb-fam .dim{opacity:.3;transition:opacity .6s}
+.tb-fam .ln{stroke:#b9ad84;stroke-width:1.5}
+.tb-fam .ex{animation:tbOut 2.4s ease-in-out infinite}
+.tb-fam .in{animation:tbIn .9s cubic-bezier(.3,.7,.2,1) forwards}
+.tb-fam .pl{animation:niBeat 1.6s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 50%}
+@keyframes tbMv{to{transform:translate(var(--dx),var(--dy))}}
+@keyframes tbOut{0%,100%{opacity:.35}50%{opacity:.6}}
+@keyframes tbIn{from{transform:translate(var(--dx),var(--dy));opacity:.4}to{transform:none;opacity:1}}
+.tb-quiz{display:grid;gap:10px}
+.tb-quiz>div{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,2fr);gap:10px;align-items:center;padding:12px 14px;border-radius:14px;background:var(--nb-paper);border:1px solid var(--nb-line);animation:niUp .4s both}
+.tb-quiz>div>span{font-size:.9rem;line-height:1.45}
+.tb-quiz .ok{border-color:#5c7a32;background:#eef4dc}.tb-quiz .no{animation:niShake .4s}
+.tb-quiz .dk-chips{justify-content:flex-end}
+.tb-5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.tb-5 button{all:unset;box-sizing:border-box;cursor:pointer;display:grid;gap:8px;align-content:start;min-height:150px;padding:14px;border-radius:16px;border:1px solid var(--nb-line);background:var(--nb-paper);color:var(--nb-ink);animation:niUp .45s both;transition:transform .3s,background .3s}
+.tb-5 button b{font:400 1.08rem/1.2 var(--f-display)}.tb-5 button span{font-size:.84rem;line-height:1.45;color:var(--nb-soft)}
+.tb-5 button small{font:600 .56rem/1 var(--f-caps);letter-spacing:.16em;text-transform:uppercase;color:var(--ni-lil2);align-self:end}
+.tb-5 button.s{background:var(--ni-lil)}
+.tb-5 button[aria-pressed="true"]{transform:translateY(-4px);border-color:var(--ni-lil2)}
+.tb-wave{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;text-align:center}
+.tb-wave div{display:grid;gap:4px;justify-items:center;padding:10px;border-radius:14px;background:rgba(236,231,211,.1);animation:niUp .5s both}
+.tb-wave i{width:16px;height:16px;border-radius:50%;background:#d9c9ef;animation:niBeat 1.8s ease-in-out infinite}
+.tb-wave small{font:600 .56rem/1 var(--f-caps);letter-spacing:.16em;text-transform:uppercase;color:#d9c9ef}
+.tb-wave b{font:400 1rem var(--f-display);color:#fff}
+.tg-flow.tb-f4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.tb-warn{border-radius:16px;padding:14px 18px;background:#f7dde5;color:#6a2a3e;font-weight:600;display:flex;gap:10px;align-items:center}
+.tb-dec{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tb-dec button{all:unset;box-sizing:border-box;cursor:pointer;display:grid;gap:8px;align-content:start;padding:16px 18px;border-radius:16px;transition:transform .3s,box-shadow .3s}
+.tb-dec button b{font:400 1.2rem/1.2 var(--f-display)}.tb-dec button span{font-size:.9rem;line-height:1.5}
+.tb-dec button:first-child{background:var(--ni-tea);color:#1f3f32}.tb-dec button:last-child{background:var(--ni-lil);color:#3b2a5a}
+.tb-dec button[aria-pressed="true"]{transform:translateY(-4px);box-shadow:0 0 0 3px var(--ni-lil2)}
+.tb-ej{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.tb-ej>div{display:grid;gap:8px;align-content:start;min-height:96px;padding:14px;border-radius:14px;border:1px solid var(--nb-line);background:var(--nb-paper);opacity:.25;transition:opacity .45s,transform .45s}
+.tb-ej>div.lit{opacity:1;transform:translateY(-4px)}
+.tb-ej>div:first-child{background:#c9c9f5;border-color:#c9c9f5}.tb-ej>div:last-child{background:var(--ni-lil);border-color:var(--ni-lil)}
+.tb-ej small{font:600 .56rem/1 var(--f-caps);letter-spacing:.16em;text-transform:uppercase;color:var(--ni-lil2)}
+.tb-ej b{font:400 1.1rem/1.25 var(--f-display)}
+.tb-gold{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tb-gold button{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:center;padding:14px 16px;border-radius:14px;border:1px solid var(--nb-line);background:var(--nb-paper);color:var(--nb-ink);animation:niUp .4s both;transition:background .3s}
+.tb-gold button i{grid-row:span 2;font-style:normal;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--ni-lil2);display:grid;place-items:center;font-size:.8rem;color:#fff}
+.tb-gold button b{font:400 1.08rem/1.2 var(--f-display)}.tb-gold button span{font-size:.86rem;line-height:1.45;color:var(--nb-soft)}
+.tb-gold button[aria-pressed="true"] i{background:var(--ni-lil2);animation:niPop .4s both}
+.tb-gold button.hl{background:var(--ni-olv);color:#ece7d3;border-color:var(--ni-olv)}.tb-gold button.hl span{color:#dfe3cf}.tb-gold button.hl i{border-color:#d9c9ef}
+.tb-say{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tb-say button{all:unset;box-sizing:border-box;cursor:pointer;padding:16px;border-radius:14px;border:1px solid var(--nb-line);background:var(--nb-paper);font:italic 400 1.05rem/1.45 var(--f-display);color:var(--nb-ink);transition:transform .3s}
+.tb-say button.ok{background:#eef4dc;border-color:#5c7a32}.tb-say button.no{background:#f7dde5;border-color:#c46a85}
+@media (max-width:760px){.tg-flow.tb-f4{grid-template-columns:1fr}.tb-frs,.tb-dec,.tb-gold,.tb-say{grid-template-columns:1fr}.tb-5,.tb-ej{grid-template-columns:1fr 1fr}.tb-5 button{min-height:0}.tb-quiz>div{grid-template-columns:1fr}.tb-quiz .dk-chips{justify-content:flex-start}.tb-gens{gap:10px}.tb-gens .dot{width:42px;height:42px}.tb-wave{grid-template-columns:1fr}}
+`;document.head.appendChild(c)})();
+
+/* «Qué es» de cada tema y su lugar en el gráfico de Constelación */
+const tbQue=(k,que,hot)=>{const v=st(k,0);return `<div class="tb-c d"><span class="ni-tag" style="color:#d9c9ef">Qué es</span><p>${que}</p><small>En el gráfico: ${hot.map(tgT).join(' · ')}</small><div><button class="btn btn-ghost btn-sm" style="color:#ece7d3;border-color:#d9c9ef" ${rxa('set',k,v?0:1)} ${pressed(!!v)}>${v?'Ocultar el gráfico':'Verlo en el gráfico'}</button></div></div>`};
+const tbGraf=(k,hot)=>st(k,0)?`<div class="ni-in" style="max-width:620px;width:100%;justify-self:center">${tgChart({hot,cap:'Así aparece en el gráfico de Constelación Familiar.'})}</div>`:'';
+const tbList=(k,items,multi)=>{const o=multi?st(k,{}):null,s=multi?-1:st(k,-1);return `<div class="tb-ls">${items.map((x,i)=>{const on=multi?!!o[i]:s===i;return `<button ${multi?rxa('tog',k,i):rxa('set',k,on?-1:i)} ${pressed(on)} style="animation-delay:${i*.06}s"><i>${multi&&on?'✓':i+1}</i><span>${x}</span></button>`}).join('')}</div>`};
+const tbAsk=t=>niBox('l','Pregunta al grupo',t);
+const TB_PH=`${N4P}trans/c2-portada.webp`;
+
+/* ----- 1 · Bienvenida y agenda ----- */
+RICH.tb1=()=>`<div class="ni tgx">${nbHero('Formación Transgeneracional · Clase 2','Lealtades, roles','y repeticiones','Lo que el clan pide sin decirlo: las lealtades, los lugares que ocupamos en la familia, lo que se hereda y se carga, y el protocolo para limpiar directo o investigar.',['Lealtades','Lugares en el clan','Pérdidas y cargas','Protocolo'],'Karen Oyarce · Maestra Holística',
+ `<div class="ni-ph"><img src="${TB_PH}" alt="La mano de una abuela, la de una mujer adulta y la de una niña se toman entre hojas verdes"><svg class="ni-arc" viewBox="0 0 200 104" aria-hidden="true"><path pathLength="1" d="M10 100a90 90 0 0 1 180 0" stroke="#f3ecd8" stroke-width="16"/><path pathLength="1" d="M34 100a66 66 0 0 1 132 0" stroke="#f6d3ef" stroke-width="16"/><path pathLength="1" d="M58 100a42 42 0 0 1 84 0" stroke="#c9c9f5" stroke-width="16"/><circle cx="100" cy="100" r="18" fill="#7a5aa6"/></svg></div>`)}</div>`;
+RICH.tb2=()=>niAgenda('Clase 2',['Revisión de la tarea y ronda','Lealtades y repeticiones','Los lugares en el clan','Madre, padre y abundancia','Pérdidas y cargas','El protocolo y un ejemplo','Práctica en parejas','Reglas de oro, repaso y tarea'],
+ ['Reconocer lealtades y repeticiones en tu árbol','Distinguir roles cambiados, el doble, el yacente y los excluidos','Aplicar el protocolo: limpiar directo o investigar','Registrar una lectura en la ficha']);
+
+/* ----- 2 · Revisión de la tarea y ronda ----- */
+const TB_RV=['¿Pudiste completar las 15 personas?','¿Qué nombres, fechas u oficios se repiten?','¿Qué te contó tu familia que no sabías?','¿Qué quedó como pregunta sin respuesta?','¿Qué sentiste al armarlo?'];
+RICH.tb3=()=>{const s=st('tb3',-1);let n=0;for(let i=0;i<15;i++)if(st('tan'+i,''))n++;
+ return dkH('Lo que trajiste','Revisemos la tarea de la semana','Tu árbol de cuatro generaciones. Toca una pregunta para anotar tu respuesta.')+
+ `<div class="ni tgx" style="display:grid;gap:14px"><div class="dk-grid c2" style="align-items:start">
+ <div style="display:grid;gap:10px"><div>${tgTree()}</div><div class="tg-sum"><span>${n} de 15 personas con nombre</span></div><div class="dk-cta" style="justify-content:center"><button class="btn btn-ghost btn-sm" data-les="${S.lesson[0]},3">${n?'Completar mi árbol':'Anotar los nombres en mi árbol'}</button></div></div>
+ <div style="display:grid;gap:10px">${tbList('tb3',TB_RV)}${s>=0?`<div class="ni-in">${n3area('tb3a'+s,TB_RV[s],'Lo que descubrí…')}</div>`:''}</div></div>
+ ${niQ('Compartir es voluntario. Lo que se dice en el grupo, queda en el grupo.')}</div>`};
+const TB_RO=[['puzzle','Algo que se repite','Un nombre, una fecha, una forma de unirse o de separarse.'],['candado','Algo que no se dice','Una persona de la que no se habla o una historia a medias.'],['regalo','Algo que agradezco','Un ancestro, una fortaleza o un regalo que llegó a través del clan.']];
+RICH.tb4=()=>{const s=st('tb4',-1);
+ return dkH('La ronda','Ronda: lo que descubrí en mi árbol','Elige una tarjeta y prepara tu frase.')+
+ `<div class="ni tgx" style="display:grid;gap:14px"><div class="nk-cards">${TB_RO.map((x,i)=>`<button ${rxa('set','tb4',s===i?-1:i)} ${pressed(s===i)} style="animation-delay:${i*.08}s${i===2&&s!==i?';background:var(--ni-lil)':''}">${ic(x[0],24)}<b>${x[1]}</b><span>${x[2]}</span>${st('tb4a'+i,'')?'<small>Ya la anotaste</small>':''}</button>`).join('')}</div>
+ ${s>=0?`<div class="ni-in">${n3area('tb4a'+s,TB_RO[s][1],'Una o dos frases…')}</div>`:niNote('Una o dos frases por persona.')}</div>`};
+
+/* ----- 3 · Lealtades y repeticiones ----- */
+const TB_FR=['En esta familia las mujeres salen adelante solas.','No seas más que tus padres.','El dinero se va tan rápido como llega.','De eso no se habla.'];
+RICH.tb5=()=>{const o=st('tb5',{}),n=Object.values(o).filter(Boolean).length;
+ return dkH('Lealtades','Lo que el clan pide sin decirlo','Toca las frases que también escuchaste en tu familia.')+
+ `<div class="ni tgx" style="display:grid;gap:14px"><div class="ni-hyp"><p>Cada familia tiene reglas que nadie escribió. Se aprenden desde niñas y, sin darnos cuenta, las seguimos para seguir perteneciendo.</p></div>
+ <div class="tb-frs">${TB_FR.map((x,i)=>`<button ${rxa('tog','tb5',i)} ${pressed(!!o[i])} style="animation-delay:${i*.12}s">«${x}»${o[i]?'<small>La escuché en mi familia</small>':''}</button>`).join('')}</div>
+ ${tbAsk('¿Qué frase de este tipo escuchaste en tu familia?')}${n3area('tb5a',n?'Escribe la tuya':'Escribe la de tu familia','En mi familia se decía…')}</div>`};
+RICH.tb6=()=>dkH('Tema del gráfico','Lealtades conscientes e inconscientes','Ordena cada ejemplo: ¿la elijo o la repito sin darme cuenta?')+
+ `<div class="ni tgx" style="display:grid;gap:14px">${tbQue('tb6g','Una lealtad es una forma de amor al clan: hago lo que mi familia hizo para seguir perteneciendo. Es <b>consciente</b> cuando la elijo; es <b>inconsciente</b> cuando la repito sin darme cuenta.',[18,17])}
+ ${tbGraf('tb6g',[18,17])}
+ ${niSort('tb6s',[['Seguir el oficio familiar porque lo amo',0],['No permitirme estar mejor que mi madre',1],['Enfermar o fracasar a la misma edad que un ancestro',1],['Cargar la tristeza de un abuelo que nunca la mostró',1]],[['Consciente','La elijo','t','Consciente'],['Inconsciente','La repito sin darme cuenta','l','Inconsciente']],'Al verla, una lealtad inconsciente puede volverse una elección.','Mira de nuevo: ¿la persona lo elige o le pasa sin darse cuenta?')}
+ ${tbAsk('¿Qué lealtad sientes que eliges y cuál repites sin querer?')}</div>`;
+const TB_RP=[['Separaciones a la misma edad en madre, abuela e hija','xcirc',['Abuela','Madre','Hija'],'Se separa a la misma edad'],['Accidentes o pérdidas en fechas cercanas de distintos años','reloj',['Hace 60 años','Hace 30 años','Este año'],'Una pérdida en la misma fecha'],['Uniones con parejas ausentes, generación tras generación','corazon',['Abuela','Madre','Hija'],'Una pareja ausente'],['Negocios que se pierden siempre de la misma forma','balanza',['Abuelo','Padre','Hijo'],'El negocio se pierde igual']];
+RICH.tb7=()=>{const s=st('tb7',0),x=TB_RP[n3clamp(s,0,3)];
+ return dkH('Tema del gráfico','Repetición de patrones','Elige un ejemplo y mira cómo vuelve a aparecer en cada generación.')+
+ `<div class="ni tgx" style="display:grid;gap:14px"><div class="dk-grid c2" style="align-items:start">${tbQue('tb7g','Un mismo hecho aparece en varias generaciones: en la misma fecha, a la misma edad o en la misma situación. Es el clan intentando mirar algo que quedó sin resolver.',[15,9])}
+ <div style="display:grid;gap:12px">${chipRow('tb7',['Separaciones','Fechas','Parejas ausentes','Negocios'],s)}<p style="margin:0;font-size:.92rem;color:var(--nb-soft)">${x[0]}.</p>
+ <div class="tb-gens">${x[2].map((g,i)=>`<div class="on" style="--d:${i*.35}s"><small>${g}</small><span class="dot" style="animation-delay:${i*.35}s">${ic(x[1],24)}</span><b style="animation-delay:${i*.35+.1}s">${x[3]}</b></div>`).join('')}</div></div></div>
+ ${tbGraf('tb7g',[15,9])}${tbAsk('¿Qué se repite en tu árbol de cuatro generaciones?')}</div>`};
+
+/* ----- 4 · Los lugares en el clan ----- */
+const TB_RC=[['La hija que hace de madre de su madre',{H:[-50,-100],M:[50,100]},'cuida a mamá'],['El hijo que se vuelve pareja emocional de su madre o su padre',{H:[50,-100],P:[70,30,1]},'ocupa el lugar del padre'],['Quien se queda en casa para cuidar y posterga su vida',{H:[0,-50]},'posterga su vida'],['Hermanos mayores que crían a los menores',{H:[60,-50],M:[0,0,1],P:[0,0,1]},'cría a su hermano']];
+const tbFam=s=>{const x=s>=0?TB_RC[s]:null,m=x?x[1]:{},N=[['M','Madre',150,50,'#f6d3ef'],['P','Padre',250,50,'#c9c9f5'],['H',s===3?'Hermano mayor':s===0?'Hija':'Hijo',s===3?140:200,150,'#1f3f32']];if(s===3)N.push(['h','Hermano menor',300,150,'#e6dcf2']);
+ const g=N.map(([k,t,cx,cy,f])=>{const d=m[k],mv=d&&(d[0]||d[1]),dim=d&&d[2];return `<g class="${mv?'mv':''}${dim?' dim':''}" style="--dx:${d?d[0]:0}px;--dy:${d?d[1]:0}px"><circle cx="${cx}" cy="${cy}" r="${k==='H'?24:22}" fill="${f}"${k==='H'&&mv?' class="pl"':''}/><text x="${cx}" y="${cy+40}">${t}</text>${k==='H'&&mv?`<text x="${cx}" y="${cy+55}" style="fill:#7a5aa6;font-weight:600">${esc(x[2])}</text>`:''}</g>`}).join('');
+ return `<svg class="tb-fam" viewBox="60 -10 280 230" role="img" aria-label="${x?esc(x[0]):'Una familia en orden: los padres arriba y los hijos abajo'}"><line class="ln" x1="150" y1="50" x2="250" y2="50"/><line class="ln" x1="200" y1="50" x2="200" y2="${s===3?120:126}"/>${s===3?'<line class="ln" x1="140" y1="120" x2="300" y2="120"/>':''}${g}</svg>`};
+RICH.tb8=()=>{const s=st('tb8',-1);
+ return dkH('El lugar en el clan','Roles cambiados y ser hijo bastón','Toca un ejemplo y mira qué lugar ocupa cada uno.')+
+ `<div class="ni tgx" style="display:grid;gap:14px"><div class="dk-grid c2" style="align-items:start">${tbQue('tb8g','Un rol cambiado es ocupar un lugar que no nos corresponde. El <b>hijo bastón</b> es quien sostiene a uno de sus padres: lo cuida, lo acompaña o lo consuela como si fuera el adulto.',[19,0])}
+ <div style="display:grid;gap:10px"><div class="nj-card b" style="min-height:0;padding:12px">${tbFam(s)}<p style="text-align:center;opacity:1">${s<0?'<b>En orden:</b> los padres dan y los hijos reciben.':'<b>Rol cambiado:</b> '+TB_RC[s][0].toLowerCase()+'.'}</p></div>${tbList('tb8',TB_RC.map(x=>x[0]))}</div></div>
+ ${tbGraf('tb8g',[19,0])}${tbAsk('¿Hubo en tu familia alguien que tuvo que ser grande antes de tiempo?')}</div>`};
+const TB_DY=[['El doble','Lleva otra historia','Quien recibe el nombre, la fecha o el lugar de un ancestro y, sin saberlo, repite parte de su destino.','espiral'],['El yacente','Nace en lugar de otro','Quien es concebido o nace cerca de la muerte de un familiar y carga la memoria de esa persona.','hoja'],['El heredero universal','Carga lo pendiente','Quien recibe lo que el clan dejó sin resolver: deudas, secretos o tareas de otros.','bateria']];
+const TB_DQ=[['Lleva el nombre de su abuelo y vive un destino parecido al de él.',0],['Nació pocos meses después de que murió su tío.',1],['Le tocó resolver las deudas y los secretos que dejó la familia.',2]];
+RX.tbdq=(k,v)=>{const o=st('tb9q',{});o[k]=+v;RS.tb9q=o;render(false)};
+RICH.tb9=()=>{const o=st('tb9q',{}),ok=TB_DQ.filter((q,i)=>o[i]===q[1]).length;
+ return dkH('El lugar en el clan','El doble, el yacente y el heredero universal','Toca cada tarjeta. Después reconoce a cada uno.')+
+ `<div class="ni tgx" style="display:grid;gap:14px">${n3flip('tb9',TB_DY.map(x=>[x[3],x[0]+' · '+x[1],x[2]]),'c3',170)}
+ <div class="dk-sub">¿Quién es?</div><div class="tb-quiz">${TB_DQ.map((q,i)=>{const a=o[i],r=a===undefined?'':a===q[1]?'ok':'no';return `<div class="${r}" style="animation-delay:${i*.06}s"><span>${q[0]}${r==='ok'?` <b style="color:#5c7a32">✓ ${TB_DY[q[1]][0]}</b>`:''}</span><div class="dk-chips">${TB_DY.map((d,j)=>`<button class="chip" ${rxa('tbdq',i,j)} ${pressed(a===j)}>${d[0].replace('El ','')}</button>`).join('')}</div></div>`}).join('')}</div>
+ ${ok===3?niQ('¡Los tres reconocidos! En el gráfico aparecen como Doble, Yacente y Heredero universal.'):niNote('Situaciones de práctica.')}
+ ${tbAsk('¿Llevas el nombre o la fecha de alguien de tu árbol?')}</div>`};
+const TB_EX=['Hijos no reconocidos o dados en adopción','Embarazos que no llegaron a término','Parejas anteriores de las que no se habla','Quien se fue lejos, enfermó o trajo vergüenza'];
+RICH.tb10=()=>{const s=n3clamp(st('tb10',0),0,3),v=st('tb10v',0),X=[110,170,230,290];
+ const fam=X.map((x,i)=>`<g><circle cx="${x}" cy="70" r="20" fill="${i%2?'#c9c9f5':'#f6d3ef'}"/></g>`).join('');
+ const ds=`<g><circle cx="200" cy="170" r="22" fill="#1f3f32"${v?'':' class="pl"'}/><text x="200" y="174" style="fill:#ece7d3;font-size:10px">Yo</text><text x="200" y="208">${v?'toma su propio lugar':'repite su destino'}</text></g>`;
+ const ex=`<g class="${v?'in':'ex'}" style="--dx:45px;--dy:0px"><circle cx="${v?350:395}" cy="70" r="20" fill="#e6dcf2" stroke="#7a5aa6" stroke-width="2" ${v?'':'stroke-dasharray="4 4"'}/><text x="${v?350:395}" y="74" style="font-size:14px;fill:#7a5aa6">${v?'♡':'?'}</text><text x="${v?350:395}" y="106">${v?'tiene su lugar':'excluido'}</text></g>`;
+ return dkH('El lugar en el clan','Excluidos en el árbol','Elige un ejemplo y devuélvele su lugar.')+
+ `<div class="ni tgx" style="display:grid;gap:14px"><div class="dk-grid c2" style="align-items:start">${tbQue('tb10g','Son quienes fueron olvidados, rechazados o borrados de la historia familiar. Cuando alguien queda fuera, otro miembro del clan suele repetir su destino para que sea visto.',[1,20])}
+ <div style="display:grid;gap:10px">${chipRow('tb10',['Hijos','Embarazos','Parejas','Quien se fue'],s)}<p style="margin:0;font-size:.92rem;color:var(--nb-soft)">${TB_EX[s]}.</p>
+ <div class="nj-card b" style="min-height:0;padding:12px"><svg class="tb-fam" viewBox="70 30 360 190" role="img" aria-label="${v?'La persona excluida vuelve a tener su lugar en la familia':'Una persona queda fuera de la familia y otro miembro repite su destino'}"><line class="ln" x1="110" y1="70" x2="${v?350:290}" y2="70"/><line class="ln" x1="200" y1="70" x2="200" y2="148"/>${v?'':'<line class="ln" x1="200" y1="148" x2="380" y2="85" stroke-dasharray="3 5" style="stroke:#7a5aa6"/>'}${fam}${ex}${ds}</svg></div>
+ <div class="dk-cta" style="justify-content:center"><button class="btn ${v?'btn-ghost':'btn-primary'} btn-sm" ${rxa('set','tb10v',v?0:1)}>${v?'Ver de nuevo':'Darle su lugar'}</button></div></div></div>
+ ${v?`<div class="ni-box t ni-in"><b>Recuperar mi lugar en el clan</b><p>Darle a cada uno el suyo, empezando por los excluidos, y tomar el mío.</p></div>`:''}${tbGraf('tb10g',[1,20])}</div>`};
+
+/* ----- 5 · Madre, padre y abundancia ----- */
+RICH.tb11=()=>{const s=st('tb11',-1);
+ return dkH('Madre y padre','Bloqueos con la madre y con el padre','Toca un linaje para verlo en el árbol.')+
+ `<div class="ni tgx" style="display:grid;gap:14px"><div class="tg-two">${[['Linaje materno','Bloqueos con la madre','Dificultad para recibir: el cuidado, el cuerpo, los vínculos, la ternura.','Muchas veces la madre también tuvo una madre con la que no pudo conectar.'],['Linaje paterno','Bloqueos con el padre','Dificultad para salir al mundo: el trabajo, la dirección, la confianza en sí misma.','Muchas veces el padre tampoco tuvo un padre presente.']].map((x,i)=>`<button style="all:unset;box-sizing:border-box;cursor:pointer;border-radius:18px;padding:18px;display:grid;gap:8px;align-content:start;background:${i?'#c9c9f5':'#f6d3ef'};color:${i?'#2a2a6a':'#5a2350'};${s===i?'box-shadow:0 0 0 3px '+(i?'#5a5ab0':'#b0589a'):''}" ${rxa('set','tb11',s===i?-1:i)} ${pressed(s===i)}><span class="ni-tag" style="color:inherit;opacity:.8">${x[0]}</span><h3 style="margin:0;font:400 1.3rem/1.2 var(--f-display)">${x[1]}</h3><p style="margin:0;line-height:1.5">${x[2]}</p>${s===i?`<p class="ni-in" style="margin:0;line-height:1.5;font-style:italic">${x[3]}</p>`:''}</button>`).join('')}</div>
+ <div style="max-width:620px;width:100%;justify-self:center">${tgTree({hs:s===0?'m':s===1?'p':''})}</div>
+ ${s>=0?`<div class="ni-in" style="max-width:560px;width:100%;justify-self:center">${tgChart({hot:[s?14:13],cap:'En el gráfico: '+tgT(s?14:13)+'.'})}</div>`:''}
+ ${tbAsk('¿Qué historia vivió tu madre o tu padre con sus propios padres?')}</div>`};
+RICH.tb12=()=>dkH('Lo material','Herencias, abundancia, dinero y éxitos','Toca los ejemplos que reconoces en tu familia.')+
+ `<div class="ni tgx" style="display:grid;gap:14px"><div class="dk-grid c2" style="align-items:start">${tbQue('tb12g','Lo material también se hereda: bienes, deudas y creencias. Hay familias donde prosperar se siente como traicionar a quienes vivieron con poco.',[2,5,7])}
+ <div style="display:grid;gap:10px"><div class="dk-sub">Cómo se ve en la familia</div>${tbList('tb12',['Herencias que separaron a la familia','Creencias como «ser pobre pero honrado»','Sentir culpa al ganar más que los padres','Éxitos que se pierden justo al llegar'],1)}</div></div>
+ ${tbGraf('tb12g',[2,5,7])}${tbAsk('¿Qué te enseñó tu familia sobre el dinero?')}${n3area('tb12a','Anota lo que te enseñaron','En mi casa el dinero…')}</div>`;
+
+/* ----- 6 · Pérdidas y cargas ----- */
+const TB_PE=[['Muertes tempranas','Hijos, hermanos o padres que murieron jóvenes.'],['Abortos o abusos','Memorias delicadas: se leen sin buscar detalles.'],['Divorcios y separaciones','Uniones que se rompieron y lo que quedó pendiente.'],['Migración','Dejar la tierra, la lengua y la familia.'],['Guerras','Lo que el clan vivió en conflictos y persecuciones.']];
+RICH.tb13=()=>{const o=st('tb13',{}),n=Object.values(o).filter(Boolean).length;
+ return dkH('Pérdidas y rupturas','Pérdidas y rupturas','Toca cada tarjeta para verla.')+
+ `<div class="ni tgx" style="display:grid;gap:14px"><div class="tb-5">${TB_PE.map((x,i)=>`<button class="${i===1?'s':''}" ${rxa('tog','tb13',i)} ${pressed(!!o[i])} style="animation-delay:${i*.07}s"><b>${x[0]}</b>${o[i]?`<span class="ni-in">${x[1]}</span>`:'<small>Toca para ver</small>'}</button>`).join('')}</div>
+ <div class="tb-c d"><p style="font:400 1.15rem/1.45 var(--f-display);color:#fff">Un duelo que no se vivió pasa a la siguiente generación como tristeza, miedo o una pérdida que se repite.</p>
+ <div class="tb-wave">${['Tristeza','Miedo','Una pérdida que se repite'].map((x,i)=>`<div style="animation-delay:${i*.25}s"><i style="animation-delay:${i*.3}s"></i><small>${i+1}ª generación siguiente</small><b>${x}</b></div>`).join('')}</div></div>
+ ${n===5?`<div class="ni-in" style="max-width:620px;width:100%;justify-self:center">${tgChart({hot:[3,4,6,10,12],cap:'Los cinco temas en el gráfico de Constelación Familiar.'})}</div>`:niNote(`${n} de 5 tarjetas vistas.`)}</div>`};
+const TB_CA=[['Enfermedades','Que aparecen en varias generaciones, incluidas depresiones y adicciones.'],['Vínculos disfuncionales','Control, dependencia o violencia que se repite.'],['Cargas emocionales','Culpa, rabia o tristeza que no son propias.']];
+RICH.tb14=()=>dkH('Lo que se carga','Enfermedades, vínculos y cargas emocionales','Toca cada carga.')+
+ `<div class="ni tgx" style="display:grid;gap:14px">${tbQue('tb14g','Son pesos que pasan de una generación a otra: enfermedades que se repiten, formas de relacionarse que hacen daño y emociones que nadie pudo expresar.',[21,22,23])}
+ <div class="dk-sub">Cómo se ve en la familia</div>${n3sel('tb14',TB_CA.map((x,i)=>[['gota','hilos','bateria'][i],x[0],x[1]]),{eb:'Carga',nav:1})}
+ <div class="tb-warn">${ic('escudo',22)}<span>El gráfico muestra memorias del linaje, no diagnósticos.</span></div>${tbGraf('tb14g',[21,22,23])}</div>`;
+
+/* ----- 7 · El protocolo y un ejemplo ----- */
+const TB_PR=[['Leer','Constelación: linaje, generación, escala y tema.'],['Decidir','Limpiar directo o investigar.'],['Limpiar','Como aprendiste en Radiestesia y Sanación del Alma.'],['Cerrar','Con la oración del linaje.']];
+RICH.tb15=()=>{const s=n3clamp(st('tb15',0),0,3),d=st('tb15d',-1),t=st('tgt',-1);
+ return dkH('El protocolo','El protocolo','Cuatro pasos, siempre en el mismo orden.')+
+ `<div class="ni tgx" style="display:grid;gap:14px"><div class="tg-flow tb-f4">${TB_PR.map((x,i)=>`<button class="${i<=s?'lit':''} ${i===s?'cur':''}" ${rxa('set','tb15',i)}><small>Paso ${i+1}</small><b>${x[0]}</b><span>${x[1]}</span></button>`).join('')}</div>
+ ${s<3?`<div class="dk-cta" style="justify-content:center"><button class="btn btn-primary btn-sm" ${rxa('set','tb15',s+1)}>Siguiente paso</button></div>`:''}
+ ${s===1?`<div class="tb-dec ni-in"><button ${rxa('set','tb15d',d===0?-1:0)} ${pressed(d===0)}><b>Limpiar directo</b><span>Con Energías Discordantes: la energía del tema se limpia sin investigar más.</span></button><button ${rxa('set','tb15d',d===1?-1:1)} ${pressed(d===1)}><b>Investigar</b><span>En el Mapa de Emociones (sector y emoción). Si el tema es Votos o Transgeneracional, se va a ese gráfico: lo vemos en la Clase 3.</span></button></div>
+ ${d>=0?`<div class="dk-cta ni-in" style="justify-content:center"><button class="btn btn-ghost btn-sm" data-les="0,${d?16:15}">${d?'Abrir el Mapa de Emociones':'Abrir Energías Discordantes'}</button></div>`:''}`:''}
+ ${s===3?`<div class="ni-box d ni-in"><b>La oración del linaje</b><p style="font-style:italic">${TG_PRAY}</p></div>`:''}
+ ${t>=0?niBox('l','Con tu lectura',`Marcaste <b>${tgT(t)}</b>. ${t>=24?'Ese tema se va a su propio gráfico: anótalo y lo trabajamos en la Clase 3.':'Puedes limpiar directo con Energías Discordantes o investigar en el Mapa de Emociones.'}`):''}</div>`};
+const TB_EJ=[['Linaje','Paterno'],['Generación','2da · padres'],['Escala','80'],['Tema','Abundancia / dinero'],['Mapa','Humillación → Culpa']];
+RX.tbex=()=>{RS.tgl=1;RS.tgg=1;RS.tge=16;RS.tgt=5;RS.tb16c=1;render(false)};
+RICH.tb16=()=>{const s=n3clamp(st('tb16',0),0,6),c=st('tb16c',0);
+ return dkH('Ejemplo','Ejemplo de lectura y limpieza','Consultante: C. P., siente culpa cada vez que gana más dinero.')+
+ `<div class="ni tgx" style="display:grid;gap:14px"><div class="tb-ej">${TB_EJ.map((x,i)=>`<div class="${i<s?'lit':''}"><small>${x[0]}</small><b>${x[1]}</b></div>`).join('')}</div>
+ ${s>=6?`<div class="ni-box d ni-in"><b>Comprensión posible</b><p>Su padre perdió su negocio y vivió con culpa. Por lealtad, ganar más se siente como dejarlo atrás.</p></div>
+ <div class="tg-flow ni-in">${[['Investiga','En el Mapa: humillación y culpa.'],['Limpia','La culpa, con el péndulo.'],['Cierra','Con la oración del linaje.']].map((x,i)=>`<button class="lit" style="cursor:default;animation:niUp .45s ${i*.12}s both"><small>${i+1}</small><b>${x[0]}</b><span>${x[1]}</span></button>`).join('')}</div>
+ ${c?`<div class="ni-in" style="max-width:620px;width:100%;justify-self:center">${tgChart({cap:'La lectura de C. P. marcada en el gráfico.'})}</div>`:''}
+ <div class="dk-cta" style="justify-content:center">${c?'':`<button class="btn btn-primary btn-sm" ${rxa('tbex',0)}>Verlo en el gráfico</button>`}<button class="btn btn-ghost btn-sm" ${rxa('set','tb16',0)}>Ver de nuevo</button></div>`:
+ `<div class="dk-cta" style="justify-content:center"><button class="btn btn-primary btn-sm" ${rxa('set','tb16',s+1)}>${s===0?'Empezar':s===5?'Ver la comprensión':'Siguiente'}</button></div>`}</div>`+niNote('Ejemplo ficticio.')};
+
+/* ----- 8 · Práctica en parejas ----- */
+const TB_PS=[['Tu pareja lee','Tu árbol en Constelación: linaje, generación, escala y tema.'],['Deciden juntas','Limpiar directo o investigar en el Mapa.'],['Limpian y cierran','Con la oración del linaje.'],['Completan la ficha','Y cambian de rol.']];
+const tbHoy=()=>{const d=new Date();return d.getDate()+'/'+(d.getMonth()+1)};
+RICH.tb17=()=>{const s=n3clamp(st('tb17',0),0,3);
+ return dkH('Práctica en parejas','Práctica en parejas','Cuatro pasos. Anota en la ficha lo que aparece.')+
+ `<div class="ni tgx" style="display:grid;gap:14px"><div class="nj-steps h tg-st4">${TB_PS.map((x,i)=>`<div class="${i<s?'ok':i===s?'cur':''}" style="cursor:pointer" ${rxa('set','tb17',i)}><span class="n">${i<s?'✓':i+1}</span><div><b>${x[0]}</b><p>${x[1]}</p></div></div>`).join('')}</div>
+ ${s<3?`<div class="dk-cta" style="justify-content:center"><button class="btn btn-primary btn-sm" ${rxa('set','tb17',s+1)}>Siguiente paso</button></div>`:''}
+ ${niFicha('tbf',['Fecha','Consultante','Motivo','Linaje','Generación','Escala','Tema','Limpieza','Verificada'],['Ej.: 11/11','C. P.','Culpa al ganar dinero','Paterno','2da','80','Abundancia / dinero','Mapa: Humillación · Culpa','Sí'],()=>{const r=tgRead(),m=njMapaTxt();return [tbHoy(),'','',r[0],r[1].split(' ')[0],r[2],r[3],m?'Mapa: '+m:'','']},1000)}</div>`+n3priv};
+
+/* ----- 9 · Reglas de oro, repaso y tarea ----- */
+const TB_RG=[['Hablar en hipótesis','«El gráfico muestra una posible…». La persona confirma.'],['No culpar a los ancestros','Comprendemos la historia; no buscamos culpables.'],['No afirmar hechos','Nunca decir que algo le pasó a una persona concreta.'],['Pedir consentimiento','Antes de leer el árbol o el gráfico de otra persona.'],['Cuidar los temas sensibles','No profundizar y derivar si la persona relata algo propio.'],['Confidencialidad','Lo que se comparte en la sesión, queda en la sesión.']];
+RICH.tb18=()=>{const o=st('tb18',{}),n=Object.values(o).filter(Boolean).length,q=st('tb18q',-1);
+ return dkH('Reglas de oro','Reglas de oro','Toca cada regla para comprometerte con ella.')+
+ `<div class="ni tgx" style="display:grid;gap:14px"><div class="tb-gold">${TB_RG.map((x,i)=>`<button class="${i===4?'hl':''}" ${rxa('tog','tb18',i)} ${pressed(!!o[i])} style="animation-delay:${i*.06}s"><i>${o[i]?'✓':''}</i><b>${x[0]}</b><span>${x[1]}</span></button>`).join('')}</div>
+ ${niNote(n===6?'Te comprometiste con las seis reglas.':`${n} de 6 reglas.`)}
+ <div class="dk-sub">¿Cómo lo dirías?</div><div class="tb-say">${['«Tu abuela sufrió un abuso.»','«El gráfico muestra una posible memoria delicada en el linaje materno. ¿Te hace sentido?»'].map((x,i)=>`<button class="${q===i?(i?'ok':'no'):''}" ${rxa('set','tb18q',i)} ${pressed(q===i)}>${x}</button>`).join('')}</div>
+ ${q===0?`<div class="dk-call warn ni-in">Así se afirma un hecho sobre una persona concreta. Habla en hipótesis y deja que la persona confirme.</div>`:q===1?niQ('Así es: hablas en hipótesis, no afirmas hechos y la persona confirma.'):''}</div>`};
+RICH.tb19=()=>dkH('Repaso en voz alta','Comprobemos lo aprendido','Respondan en voz alta y compartan cómo llegaron a su respuesta. Después toquen cada tarjeta.')+
+ `<div class="ni ni-cp">${n3flip('tbcp',[['corazon','1 · ¿Qué es una lealtad inconsciente? Da un ejemplo.','<b>Repetir lo que hizo mi familia sin darme cuenta, para seguir perteneciendo.</b> Por ejemplo: no permitirme estar mejor que mi madre, o cargar la tristeza de un abuelo que nunca la mostró.'],['persona','2 · ¿En qué se diferencia un rol cambiado del doble?','<b>En el rol cambiado ocupo un lugar que no me corresponde</b>, como la hija que hace de madre de su madre. <b>El doble lleva la historia de un ancestro:</b> recibe su nombre, su fecha o su lugar y repite parte de su destino.'],['lupa','3 · Si decides investigar un tema, ¿en qué gráficos lo haces?','<b>En el Mapa de Emociones</b>, con el sector y la emoción. Si el tema es <b>Votos o Transgeneracional</b>, se va a ese gráfico: lo vemos en la Clase 3.']],'c4',270)}</div>`;
+RICH.tb20=()=>dkH('Cierre de la clase','Tarea para la próxima clase','Una lealtad o repetición en tu árbol.')+
+ `<div class="ni dk-grid c2" style="align-items:start"><div class="ni-task">${n3ck('tbta',[['lupa','Elige una lealtad o una repetición que reconozcas en tu árbol'],['diana','Léela en el gráfico de Constelación: linaje, generación, escala y tema'],['limpia','Limpia directo o investiga en el Mapa'],['paloma','Cierra con la oración del linaje'],['libro','Completa la ficha y anota lo que sentiste durante la semana']],['Marca cada punto cuando lo tengas.','¡Listo! Trae tu ficha a la Clase 3.'])}</div>
+ <div style="display:grid;gap:10px">${niBox('d','Importante','Si el tema que aparece es Votos o Transgeneracional, anótalo y no lo trabajes todavía: lo veremos en la Clase 3. Trae tu ficha.')}<div class="dk-cta" style="flex-wrap:wrap"><button class="btn btn-ghost btn-sm" data-les="${S.lesson[0]},6">Abrir el gráfico de Constelación</button><button class="btn btn-ghost btn-sm" data-les="${S.lesson[0]},${S.lesson[1]-1}">Volver a la ficha</button></div></div></div>`;
