@@ -298,8 +298,9 @@ RX.nigs=(k,v)=>{RS['nig'+(k==='ma'?'he':k)]=+v;render(false)};
 const niChart=o=>{o=o||{};const cx=300,cy=292,P=(r,a)=>[(cx+r*Math.cos(a)).toFixed(1),(cy-r*Math.sin(a)).toFixed(1)];
  const seg=(r0,r1,a1,a2)=>{const [x1,y1]=P(r1,a1),[x2,y2]=P(r1,a2),[x3,y3]=P(r0,a2),[x4,y4]=P(r0,a1);return `M${x1} ${y1}A${r1} ${r1} 0 0 1 ${x2} ${y2}L${x3} ${y3}A${r0} ${r0} 0 0 0 ${x4} ${y4}Z`};
  let g='';
- NIG.forEach(R=>{const n=R.items.length,sel=nigSel(R.k),dim=o.hl&&o.hl!==R.k;
-  g+=`<g class="nig-r${dim?' dim':''}${o.hl===R.k?' hl':''}">`;
+ const HL=o.hl?[].concat(o.hl):0;
+ NIG.forEach(R=>{const n=R.items.length,sel=nigSel(R.k),dim=HL&&!HL.includes(R.k);
+  g+=`<g class="nig-r${dim?' dim':''}${HL&&!dim?' hl':''}">`;
   R.items.forEach((t,i)=>{const a1=Math.PI-i*Math.PI/n,a2=Math.PI-(i+1)*Math.PI/n,am=(a1+a2)/2,deg=am*180/Math.PI,rm=(R.r0+R.r1)/2,[tx,ty]=P(rm,am),on=i===sel;
    const rot=R.m==='rad'?(deg<=90?-deg:180-deg):90-deg;
    g+=`<g class="nig-s${on?' on':''}" ${rxa('nigs',R.k,i)} role="button" tabindex="0" aria-label="${R.t}: ${t}" aria-pressed="${on}"><path d="${seg(R.r0,R.r1,a1,a2)}" fill="${on?R.on:R.fill}"/><text x="${tx}" y="${ty}" transform="rotate(${rot.toFixed(1)} ${tx} ${ty})" font-size="${R.fs}" fill="${on?'#fff':'#1f3f32'}">${t}</text></g>`});
@@ -646,16 +647,20 @@ RICH.nj14=()=>{const s=n3clamp(st('njej',0),0,4);
  `<div class="nj-lect"><span class="ni-tag">Lectura</span><p>Entre los 5 y los 10 años, vinculada a la figura del padre, quedó una herida de injusticia con máscara rígida. La acompaña la rabia; en el Mapa aparece la frustración. Se limpió y se verificó.</p></div><div class="dk-cta" style="justify-content:center"><button class="btn btn-ghost btn-sm" ${rxa('set','njej',0)}>Ver de nuevo</button></div>`}</div>`+
  niNote('Caso ficticio. La lectura es una hipótesis de trabajo que la persona confirma o descarta; no es un diagnóstico.')};
 const NJ_FC=['Consultante','Edad · Quién','Herida y máscara','Energía discordante','Mapa (sector · emoción)','Verificada'];
-RX.njf=(k)=>{const n=st('njfn',2);if(k==='add'){RS.njfn=Math.min(10,n+1)}else{let r=0;while(r<n&&NJ_FC.some((_,c)=>st('njf'+r+'_'+c,'')))r++;if(r>=n){RS.njfn=n+1}
- const h=n3clamp(nigSel('he'),0,4),e=st('njme',-1);RS['njf'+r+'_1']=`${nigSel('ed')*5} · ${NIG[3].items[nigSel('qu')]}`;RS['njf'+r+'_2']=`${NI_H[h].n} · ${NI_H[h].m}`;
- RS['njf'+r+'_3']=njEdName()||'';RS['njf'+r+'_4']=e>=0?`${Math.floor(e/5)+1} · ${NJ_MS[Math.floor(e/5)][1][e%5]}`:'';RS['njf'+r+'_5']=st('njl',0)>=5?'Sí':''}render(false)};
-RICH.nj15=()=>{const n=st('njfn',2);
+// ficha de sesión: filas editables y un botón que la llena con lo marcado en los gráficos
+const NI_FILL={};
+RX.nifi=(k,v)=>{const n=st(k+'n',2),C=NI_FILL[k].c;if(v==='add'){RS[k+'n']=Math.min(10,n+1)}else{let r=0;while(r<n&&C.some((_,c)=>st(k+r+'_'+c,'')))r++;if(r>=n)RS[k+'n']=n+1;
+ NI_FILL[k].f().forEach((x,c)=>{if(x)RS[k+r+'_'+c]=x})}render(false)};
+const niFicha=(k,C,ex,f)=>{NI_FILL[k]={c:C,f};const n=st(k+'n',2);
+ return `<div class="dk-sub">Ficha de sesión</div><div class="ni-tw"><table class="ni-tbl nj-ficha"><thead><tr>${C.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>
+ <tr class="ex">${ex.map(x=>`<td>${x}</td>`).join('')}</tr>
+ ${Array.from({length:n},(_,r)=>`<tr>${C.map((x,c)=>`<td><input type="text" data-rsin="${k}${r}_${c}" aria-label="${x}, fila ${r+1}" value="${esc(st(k+r+'_'+c,''))}"></td>`).join('')}</tr>`).join('')}</tbody></table></div>
+ <div class="dk-cta" style="justify-content:center;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" ${rxa('nifi',k,'add')}>Agregar fila</button><button class="btn btn-primary btn-sm" ${rxa('nifi',k,'fill')}>Llenar con lo que marqué en los gráficos</button></div>`};
+const njMapaTxt=()=>{const e=st('njme',-1);return e>=0?`${Math.floor(e/5)+1} · ${NJ_MS[Math.floor(e/5)][1][e%5]}`:''};
+RICH.nj15=()=>{
  return dkH('Práctica en parejas','Práctica en parejas','Una persona consulta, la otra facilita. Al terminar, registran y cambian de rol.')+
  `<div class="ni" style="display:grid;gap:14px"><div class="nj-three ni-st"><div class="nj-card l"><span class="ni-tag">Persona A</span><h3>Consultante</h3><p>Comparte su herida principal de la tarea.</p></div><div class="nj-card t"><span class="ni-tag">Persona B</span><h3>Facilitadora</h3><p>Dice la oración de conexión y sigue los 5 pasos del protocolo.</p></div><div class="nj-card b"><span class="ni-tag">Al terminar</span><h3>Registran</h3><p>Completan la ficha de sesión y cambian de rol.</p></div></div>
- <div class="dk-sub">Ficha de sesión</div><div class="ni-tw"><table class="ni-tbl nj-ficha"><thead><tr>${NJ_FC.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>
- <tr class="ex"><td>Ej.: M. R.</td><td>5–10 · Padre</td><td>Injusticia · Rígido/a</td><td>Rabia</td><td>5 · Frustración</td><td>Sí</td></tr>
- ${Array.from({length:n},(_,r)=>`<tr>${NJ_FC.map((x,c)=>`<td><input type="text" data-rsin="njf${r}_${c}" aria-label="${x}, fila ${r+1}" value="${esc(st('njf'+r+'_'+c,''))}"></td>`).join('')}</tr>`).join('')}</tbody></table></div>
- <div class="dk-cta" style="justify-content:center;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" ${rxa('njf','add')}>Agregar fila</button><button class="btn btn-primary btn-sm" ${rxa('njf','fill')}>Llenar con lo que marqué en los gráficos</button></div></div>`+n3priv};
+ ${niFicha('njf',NJ_FC,['Ej.: M. R.','5–10 · Padre','Injusticia · Rígido/a','Rabia','5 · Frustración','Sí'],()=>{const h=n3clamp(nigSel('he'),0,4);return ['',`${nigSel('ed')*5} · ${NIG[3].items[nigSel('qu')]}`,`${NI_H[h].n} · ${NI_H[h].m}`,njEdName(),njMapaTxt(),st('njl',0)>=5?'Sí':'']})}</div>`+n3priv};
 
 /* ----- 9 · Reglas de oro, repaso y tarea ----- */
 RICH.nj16=()=>dkH('Facilitación','Reglas de oro al limpiar','Toca cada regla.')+
@@ -665,3 +670,165 @@ RICH.nj17=()=>dkH('Repaso en voz alta','Comprobemos lo aprendido','Respondan en 
 RICH.nj18=()=>dkH('Cierre de la clase','Tarea de la semana')+
  `<div class="ni dk-grid c2" style="align-items:start"><div class="ni-task">${n3ck('njta',[['ojo','Aplica el protocolo completo en ti misma, partiendo de tu herida principal'],['pend','Limpia las energías discordantes que aparezcan y verifica con el péndulo'],['libro','Completa tu ficha de sesión con lo que encontraste en el Mapa']],['Marca cada tarea cuando la completes.','¡Listo! Trae tu ficha de sesión a la próxima clase.'])}</div>
  <div style="display:grid;gap:10px">${niBox('l','Para la próxima clase','Trae tu ficha de sesión. Compartir lo que encontraste es voluntario.')}${c4imp('Si al aplicarte el protocolo aparece una energía muy intensa, como abuso, violencia o autolesión, detente y conversa con tu facilitadora antes de seguir.')}</div></div>`;
+
+/* ---------- Nivel 4 · Especialización Niño Interno · Clase 3 ---------- */
+(function(){const c=document.createElement('style');c.id='nk-css';c.textContent=`
+.nk-mo{display:grid;gap:12px}
+.nk-track{position:relative;height:58px;margin:0 6%}
+.nk-track::before{content:"";position:absolute;left:0;right:0;top:40px;height:3px;border-radius:3px;background:var(--nb-line)}
+.nk-track .fill{position:absolute;left:0;top:40px;height:3px;border-radius:3px;background:linear-gradient(90deg,var(--ni-lil2),var(--ni-tea2));transition:width .5s}
+.nk-track .dot{position:absolute;top:35px;width:13px;height:13px;margin-left:-6.5px;border-radius:50%;background:var(--nb-paper);border:2px solid var(--ni-lil2)}
+.nk-track .dot.on{background:var(--ni-lil2)}
+.nk-track .kid{position:absolute;top:0;width:34px;height:34px;margin-left:-17px;display:grid;place-items:center;border-radius:50%;background:var(--ni-lil);color:var(--ni-lil2);transition:left .5s cubic-bezier(.3,.7,.2,1)}
+.nk-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.nk-cards button{all:unset;box-sizing:border-box;cursor:pointer;display:grid;gap:6px;align-content:start;padding:14px;border-radius:16px;border:1px solid var(--nb-line);background:var(--nb-paper);color:var(--nb-ink);transition:transform .25s,background .25s;animation:niUp .45s both}
+.nk-cards button[aria-pressed="true"]{background:var(--ni-olv);border-color:var(--ni-olv);color:#ece7d3;transform:translateY(-4px)}
+.nk-cards button[aria-pressed="true"] span{color:#dfe3cf}.nk-cards button[aria-pressed="true"] small{color:#d9c9ef}
+.nk-cards small{font:600 .56rem/1 var(--f-caps);letter-spacing:.16em;text-transform:uppercase;color:var(--ni-lil2)}
+.nk-cards b{font:400 1.1rem/1.2 var(--f-display)}
+.nk-cards span{font-size:.85rem;line-height:1.45;color:var(--nb-soft)}
+.nk-mem{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;align-items:center;font-size:.8rem;color:var(--nb-soft)}
+.nk-mem i{display:block;height:8px;border-radius:8px;transition:width .5s}
+.nk-rule{width:100%;height:auto;display:block}
+.nk-rule .tr{cursor:pointer}
+.nk-rule .tr rect{transition:fill .3s}
+.nk-rule .tr:focus-visible rect{stroke:#7a5aa6;stroke-width:2}
+.nk-rule .sec{animation:niPop .45s both;transform-box:fill-box;transform-origin:50% 100%}
+.nk-rule text{font-family:var(--f-body,system-ui);font-size:11px;fill:#5d6b55;text-anchor:middle}
+.nk-legend{display:flex;flex-wrap:wrap;gap:6px}
+.nk-legend button{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;border:1px solid var(--nb-line);font-size:.8rem;color:var(--nb-ink);background:var(--nb-paper)}
+.nk-legend button i{width:12px;height:12px;border-radius:3px}
+.nk-legend button[aria-pressed="true"]{border-color:var(--ni-lil2);box-shadow:inset 0 0 0 1px var(--ni-lil2)}
+.nk-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.nk-grid button{all:unset;box-sizing:border-box;cursor:pointer;display:grid;gap:2px;padding:12px 14px;border-radius:12px;color:#2b2b22;transition:opacity .3s,transform .25s;animation:niPop .4s both}
+.nk-grid button b{font-weight:600;font-size:.92rem}.nk-grid button small{font-size:.72rem;opacity:.7}
+.nk-grid button.off{opacity:.3}
+.nk-grid button[aria-pressed="true"]{transform:translateY(-3px);box-shadow:0 0 0 2px var(--ni-lil2)}
+.nk-figs{display:grid;gap:10px}
+.nk-fig{display:grid;gap:10px;align-content:start;padding:16px;border-radius:18px;background:var(--nb-paper);border:1px solid var(--nb-line);animation:niUp .5s both}
+.nk-fig header{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.nk-fig h3{margin:0;font:400 1.25rem/1.2 var(--f-display);color:var(--nb-ink)}
+.nk-fig p{margin:0;font-size:.88rem;line-height:1.5;color:var(--nb-ink)}
+.nk-fig .ej{padding:10px 12px;border-radius:12px;background:var(--ni-tea);color:#1f3f32;animation:niUp .4s both}
+.nk-fig .q{padding:10px 12px;border-radius:12px;background:var(--ni-lil);color:#3b2a5a;font:italic 400 1rem/1.4 var(--f-display)}
+.nk-fig svg{width:74px;height:auto;flex:none}
+.nk-5{grid-template-columns:repeat(5,minmax(0,1fr))}
+@media (max-width:760px){.nk-cards,.nk-grid{grid-template-columns:1fr 1fr}.nk-track{display:none}.nk-5{grid-template-columns:1fr}}
+`;document.head.appendChild(c)})();
+
+const niAgenda=(cl,ag,obj)=>dkH(cl,'Agenda de la clase',(['Seis','Siete','Ocho','Nueve','Diez'][ag.length-6]||ag.length)+' momentos. Toca uno para ir directo a él.')+
+ `<div class="ni dk-split" style="align-items:stretch"><div class="ni-agenda ni-st">${ag.map((x,i)=>`<button data-les="${S.lesson[0]},${S.lesson[1]+i+1}"><b>${i+1}</b><span>${x}</span><small>Ir</small></button>`).join('')}</div>
+ <div class="ni-obj"><span class="ni-tag" style="color:#d9c9ef">Objetivo de hoy</span><h3>Al terminar la clase podrás</h3><ul class="ni-st" style="margin:0;padding-left:18px;display:grid;gap:8px;color:#dfe3cf;line-height:1.5">${obj.map(x=>`<li>${x}</li>`).join('')}</ul></div></div>`;
+
+/* ----- 1 · Bienvenida y agenda ----- */
+RICH.nk1=()=>`<div class="ni">${nbHero('Especialización Niño Interno · Clase 3','El tiempo y','las figuras de la herida','Completamos el gráfico: el anillo 1 con la escala de 0 a 100, para saber cuándo se originó la herida, y el anillo 4 con sus doce figuras, para saber quién la provocó.',['Anillo 1','Escala 0 a 100','Doce figuras','Lectura completa'],'Karen Oyarce · Maestra Holística',
+ `<div class="ni-ph"><img src="${N4P}nino/c3-portada.webp" alt="Una mujer y una niña sentadas en el pasto, con los ojos cerrados; la niña apoya la cabeza en su hombro"><svg class="ni-arc" viewBox="0 0 200 104" aria-hidden="true"><path pathLength="1" d="M10 100a90 90 0 0 1 180 0" stroke="#f3ecd8" stroke-width="16"/><path pathLength="1" d="M34 100a66 66 0 0 1 132 0" stroke="#cfe3dc" stroke-width="16"/><path pathLength="1" d="M58 100a42 42 0 0 1 84 0" stroke="#e6dcf2" stroke-width="16"/><circle cx="100" cy="100" r="18" fill="#7a5aa6"/></svg></div>`)}</div>`;
+RICH.nk2=()=>niAgenda('Clase 3',['Revisión de la tarea','Los anillos que completamos hoy','Anillo 1: el momento de la herida','Anillo 4: las doce figuras','Figuras del vínculo y del entorno','Lo femenino, lo masculino y uno mismo','Ejemplo y práctica en parejas','Reglas de oro, repaso y tarea'],
+ ['Leer el anillo 1 y la escala de 0 a 100','Reconocer las doce figuras del anillo 4','Integrar edad y figura en una lectura','Aplicar el protocolo con una compañera']);
+
+/* ----- 2 · Revisión de la tarea ----- */
+RICH.nk3=()=>dkH('Lo que trajiste','Revisemos la tarea de la semana','Marca las preguntas a medida que las conversan.')+
+ `<div class="ni dk-grid c2" style="align-items:stretch"><div class="nj-card l ni-in"><h3>1 · El protocolo en ti misma</h3><p>Aplicaste los 5 pasos partiendo de tu herida principal.</p>${n3ck('nkt1',[['chat','¿Qué energía discordante apareció?'],['chat','¿Limpiaste directo o investigaste en el Mapa?'],['chat','¿Qué sector y qué emoción encontraste?'],['chat','¿Cómo te sentiste después de limpiar?']])}</div>
+ <div class="nj-card t ni-in" style="animation-delay:.12s"><h3>2 · Tu ficha de sesión</h3><p>Registraste lo que encontraste.</p>${n3ck('nkt2',[['chat','¿Completaste todos los pasos?'],['chat','¿Qué paso te costó más?'],['chat','¿Qué dudas te quedaron del protocolo?'],['chat','¿Quieres compartir tu ficha? Es voluntario.']])}</div></div>`+
+ niNote('Compartir es voluntario. Lo que se dice en el grupo, queda en el grupo.');
+const NK_EDL=[...new Set(NJ_EDO.concat(NJ_EDI))].sort((a,b)=>a.localeCompare(b,'es'));
+RICH.nk4=()=>{const s=st('nkrs',-1),e=st('nkre',-1);
+ return dkH('Lo que trajiste','Ronda de descubrimientos','Cada alumna completa en voz alta:')+
+ `<div class="ni nj-ronda"><div><span class="n">1</span><div><b>La energía discordante que apareció fue…</b><small>Una de las energías del gráfico.</small><input type="text" list="nk-edl" data-rsin="nkr1" placeholder="Escribe o elige una energía" value="${esc(st('nkr1',''))}"><datalist id="nk-edl">${NK_EDL.map(x=>`<option value="${x}">`).join('')}</datalist></div></div>
+ <div><span class="n">2</span><div><b>En el Mapa encontré…</b><small>El sector y la emoción, si investigaste.</small>${chipRow('nkrs',NJ_MS.map((x,i)=>(i+1)+' · '+x[0]),s)}${s>=0?`<div class="ni-in" style="margin-top:8px">${chipRow('nkre',NJ_MS[s][1],e)}</div>`:''}${s>=0&&e>=0?`<small class="ni-in" style="margin:8px 0 0">Sector ${s+1} · <b style="font-size:.95rem">${NJ_MS[s][1][e]||''}</b></small>`:''}</div></div>
+ <div><span class="n">3</span><div><b>Después de limpiar sentí…</b><small>Una sensación, una imagen o una emoción.</small><input type="text" data-rsin="nkr3" placeholder="Escribe tu frase" value="${esc(st('nkr3',''))}"></div></div></div>`+n3priv};
+
+/* ----- 3 · Los anillos que completamos hoy ----- */
+const NK_AN=[[['cu','ed'],'Anillo 1 · Edad','Del vientre a los años, más la escala de 0 a 100: cuándo se originó la herida.','Hoy'],[['ma','he'],'Anillos 2 y 3','Máscara y herida: vistos en la Clase 1.','Visto'],[['qu'],'Anillo 4 · Quién la provocó','Madre y padre ya vistos. Hoy, las otras diez figuras.','Hoy']];
+RICH.nk5=()=>{const s=n3clamp(st('nkan',0),0,2);
+ return dkH('Anillos 1 y 4','Hoy completamos el gráfico','Toca cada grupo de anillos para verlo en el gráfico.')+
+ `<div class="ni nj-two"><div class="nj-fig">${niOrig('nkanO','grafico.webp','Lámina original del gráfico del niño interno de Casa Muladhara',niChart({hl:NK_AN[s][0]}))}</div>
+ <div class="nk-cards">${NK_AN.map((x,i)=>`<button ${rxa('set','nkan',i)} ${pressed(i===s)} style="animation-delay:${i*.08}s"><small>${x[3]}</small><b>${x[1]}</b><span>${x[2]}</span></button>`).join('')}</div></div>`};
+
+/* ----- 4 · Anillo 1: el momento de la herida ----- */
+const NK_MO=[['Vientre','Lo que vivió la madre durante el embarazo: si fue esperado, el clima emocional, las preocupaciones.'],['Nacimiento','Cómo fue el parto y la llegada: separaciones, complicaciones, cómo fue recibido.'],['Días','Los primeros días de vida: contacto, cuidados y presencia de quienes lo recibieron.'],['Semanas','Las primeras semanas: alimentación, rutina y disponibilidad de quien lo cuidaba.'],['Meses','El primer tiempo de vida: apego, separaciones o cambios en la familia.'],['Años','Experiencias que ya recuerda o le contaron. La edad se precisa en la escala de 0 a 100.']];
+RICH.nk6=()=>{const s=n3clamp(nigSel('cu'),0,5),pos=s*20;
+ return dkH('Anillo 1','El momento de la herida','Seis momentos, del vientre a los años. Toca uno: también queda marcado en tu gráfico.')+
+ `<div class="ni nk-mo"><div class="nk-track" aria-hidden="true"><i class="fill" style="width:${pos}%"></i>${NK_MO.map((_,i)=>`<i class="dot${i<=s?' on':''}" style="left:${i*20}%"></i>`).join('')}<span class="kid" style="left:${pos}%">${ic(s===0?'vientre':'nino',20)}</span></div>
+ <div class="nk-cards">${NK_MO.map((x,i)=>`<button ${rxa('nigs','cu',i)} ${pressed(i===s)} style="animation-delay:${i*.05}s"><small>${i+1}</small><b>${x[0]}</b><span>${x[1]}</span></button>`).join('')}</div>
+ <div class="nk-mem"><span>Recuerdo consciente</span><i style="width:${8+s*18}%;background:var(--ni-tea2)"></i><span>Sensación</span><i style="width:${98-s*14}%;background:var(--ni-lil2)"></i></div>
+ ${s===5?`<div class="dk-cta" style="justify-content:center"><button class="btn btn-primary btn-sm" data-slide="1">Precisar la edad en la escala</button></div>`:''}
+ ${niQ('Cuanto más temprano el momento, menos recuerdo consciente: suele reconocerse como sensación.')}</div>`};
+RX.nkt=k=>{RS.nkt=+k;RS.nks=-1;render(false)};
+RX.nks=k=>{RS.nks=+k;RS.niged=st('nkt',0)*4+ +k;render(false)};
+const nkEdad=()=>{const cu=nigSel('cu'),a=nigSel('ed')*5;return cu===5?`Años · ${a}–${Math.min(100,a+5)}`:NIG[0].items[cu]};
+RICH.nk7=()=>{const t=st('nkt',-1),z=st('nks',-1),cu=nigSel('cu'),X=v=>30+v*5.4;
+ let svg=`<svg class="nk-rule" viewBox="0 0 600 110" role="group" aria-label="Escala de 0 a 100">`;
+ for(let i=0;i<5;i++)svg+=`<g class="tr" ${rxa('nkt',i)} role="button" tabindex="0" aria-label="Tramo ${i*20} a ${i*20+20}" aria-pressed="${i===t}"><rect x="${X(i*20)+1}" y="34" width="${20*5.4-2}" height="22" rx="4" fill="${i===t?'#7a5aa6':'#e6dcf2'}"/><text x="${X(i*20+10)}" y="76" style="font-weight:${i===t?700:400};fill:${i===t?'#7a5aa6':'#5d6b55'}">Tramo ${i*20}–${i*20+20}</text></g>`;
+ for(let v=0;v<=100;v+=5)svg+=`<line x1="${X(v)}" x2="${X(v)}" y1="${v%10?24:18}" y2="32" stroke="#a89a6e" stroke-width="${v%10?1:1.5}"/>${v%10?'':`<text x="${X(v)}" y="12">${v}</text>`}`;
+ svg+=`<line x1="${X(0)}" x2="${X(100)}" y1="32" y2="32" stroke="#a89a6e" stroke-width="1.5"/>`;
+ if(t>=0&&z>=0)svg+=`<rect class="sec" x="${X(t*20+z*5)}" y="28" width="${5*5.4}" height="32" rx="3" fill="#3b4a24" opacity=".85"/><text class="sec" x="${X(t*20+z*5+2.5)}" y="100" style="font-weight:700;fill:#3b4a24">${t*20+z*5} a ${t*20+z*5+5} años</text>`;
+ svg+='</svg>';
+ return dkH('Anillo 1 · Escala','La escala de 0 a 100: la edad en años','Pregunta al péndulo en dos pasos y marca su respuesta en la escala.')+
+ `<div class="ni" style="display:grid;gap:14px">${svg}
+ <div class="dk-grid c2" style="align-items:stretch"><div class="nj-card l"><span class="ni-tag">Paso 1 · El tramo</span><p style="font-size:.9rem;opacity:1">Preguntar al péndulo en qué tramo de 20 años está la herida. Toca un tramo en la escala o aquí.</p><div class="dk-chips">${[0,1,2,3,4].map(i=>`<button class="chip" ${rxa('nkt',i)} ${pressed(i===t)}>${i*20}–${i*20+20}</button>`).join('')}</div>${t>=0?'':'<p><i>Ejemplo: tramo 0–20.</i></p>'}</div>
+ <div class="nj-card" style="background:var(--ni-olv);color:#ece7d3"><span class="ni-tag" style="color:#d9c9ef">Paso 2 · El sector</span><p style="font-size:.9rem;color:#dfe3cf">Dentro del tramo, afinar de 5 en 5 hasta llegar al sector.</p>
+ ${t>=0?`<div class="dk-chips ni-in">${[0,1,2,3].map(i=>`<button class="chip" ${rxa('nks',i)} ${pressed(i===z)}>${t*20+i*5}–${t*20+i*5+5}</button>`).join('')}</div>`:'<p style="color:#dfe3cf"><i>Ejemplo: entre 10 y 15 años.</i></p>'}</div></div>
+ ${t>=0&&z>=0?`<div class="ni-hyp ni-in"><span class="ni-tag">Lectura del anillo 1</span><p>La herida se originó <mark>entre los ${t*20+z*5} y los ${t*20+z*5+5} años</mark>. Ya quedó marcado en tu gráfico.</p></div>`:''}
+ ${cu!==5?`<div class="dk-call warn">La escala se lee cuando el anillo 1 marca «Años». En tu gráfico marca «${NIG[0].items[cu]}». <button class="btn btn-ghost btn-sm" ${rxa('nigs','cu',5)}>Marcar «Años»</button></div>`:niNote('La escala se lee cuando el anillo 1 marca «Años».')}</div>`};
+
+/* ----- 5 · Anillo 4: las doce figuras ----- */
+const NK_CAT={v:['Vínculo cercano','#d6e8e2'],e:['Entorno','#efe6d6'],f:['Lo femenino y lo masculino','#e6dcf2'],u:['Uno mismo','#f6e2e8']};
+const NK_F=[
+ {c:'u',rep:'Lo que el propio niño concluyó sobre sí mismo y sigue sosteniendo.',ej:'«Yo tuve la culpa», «no soy suficiente», «tengo que portarme bien».',q:'¿Qué decidió tu niña sobre sí misma?'},
+ {c:'u',rep:'La persona de hoy, que repite la herida o se la provoca a sí misma.',ej:'Autoexigencia, abandonarse a sí misma, relaciones que repiten el patrón.',q:'¿Cómo te repites hoy esa herida?'},
+ {c:'v',c1:1,rep:'Protección, límites, estructura y confianza para salir al mundo.',q:'Vista en la Clase 1.'},
+ {c:'v',c1:1,rep:'Nutrición, acogida, capacidad de recibir y seguridad emocional.',q:'Vista en la Clase 1.'},
+ {c:'e',rep:'Los colectivos donde participó: el curso, el colegio, el barrio, una comunidad o un equipo.',ej:'Burlas en el colegio, no ser elegida en el equipo, rechazo de una comunidad.',q:'¿En qué grupo te sentiste fuera de lugar?'},
+ {c:'v',rep:'El sistema familiar más amplio: abuelos, tíos, hermanos, y los mandatos de la familia.',ej:'Comparaciones entre hermanos, secretos familiares, «aquí no se llora».',q:'¿Qué se esperaba de ti en tu familia?'},
+ {c:'u',rep:'Los sueños e ideales: la herida de lo que no se pudo ser o hacer.',ej:'Un sueño abandonado, una vocación negada, un ideal frustrado.',q:'¿Qué sueño de niña quedó guardado?'},
+ {c:'v',rep:'Quien cuidó o educó en lugar de los padres o junto a ellos.',ej:'Una abuela que crió, un profesor que humilló, un cuidador distante.',q:'¿Quién te cuidaba cuando tus padres no estaban?'},
+ {c:'f',rep:'Lo femenino en general y la relación con las mujeres, más allá de la madre.',ej:'Mensajes sobre el cuerpo, la sensibilidad o el lugar de la mujer.',q:'¿Qué aprendiste de niña sobre lo femenino?'},
+ {c:'f',rep:'Lo masculino en general y la relación con los hombres, más allá del padre.',ej:'Mensajes sobre la fuerza, la autoridad o el lugar del hombre.',q:'¿Qué aprendiste de niña sobre lo masculino?'},
+ {c:'v',rep:'Los vínculos de amistad y los pares más cercanos.',ej:'Una amiga que contó un secreto, la exclusión de un mejor amigo.',q:'¿Hubo una amistad que te marcó?'},
+ {c:'e',rep:'Personas que no están en las otras figuras: vecinos, médicos, desconocidos, autoridades ocasionales.',ej:'Un médico en el nacimiento, un vecino, alguien que apareció en un momento difícil.',q:'¿Hubo alguien fuera de tu círculo que te dejó una huella?'}];
+const NK_GRID=[0,1,2,3,4,5,6,7,8,9,10,11];
+RICH.nk8=()=>{const q=nigSel('qu'),c=st('nkc',''),F=NK_F[q],off=F.c==='u'||F.c==='f'?2:1;
+ return dkH('Anillo 4','Las doce figuras','Toca una figura o un sector del anillo 4. El color dice a qué grupo pertenece.')+
+ `<div class="ni nj-two"><div class="nj-fig">${niChart({hl:'qu',cap:0})}</div>
+ <div class="nk-legend">${Object.entries(NK_CAT).map(([k,x])=>`<button ${rxa('set','nkc',c===k?'':k)} ${pressed(c===k)}><i style="background:${x[1]}"></i>${x[0]}</button>`).join('')}</div>
+ <div class="nk-grid">${NK_GRID.map(i=>`<button ${rxa('nigs','qu',i)} ${pressed(i===q)} class="${c&&NK_F[i].c!==c?'off':''}" style="background:${NK_CAT[NK_F[i].c][1]};animation-delay:${i*.03}s"><b>${NIG[3].items[i]}</b>${NK_F[i].c1?'<small>Vista en la Clase 1</small>':''}</button>`).join('')}</div>
+ <div class="nj-det" style="background:${NK_CAT[F.c][1]}"><div><span class="ni-tag">${NK_CAT[F.c][0]}</span><br><b>${NIG[3].items[q]}</b><p>${F.rep}</p></div>${F.c1?`<button class="btn btn-ghost btn-sm" data-les="${S.lesson[0]},6">Repasar en la Clase 1</button>`:njGo(off,'Ver en detalle','btn-ghost')}</div></div>`+
+ niNote('El orden sigue el gráfico, de izquierda a derecha. Cada figura se confirma con el péndulo.')};
+
+/* ----- 6 y 7 · Las figuras en detalle ----- */
+const nkMini=i=>{const cx=40,cy=38,r0=12,r1=34,P=(r,a)=>[(cx+r*Math.cos(a)).toFixed(1),(cy-r*Math.sin(a)).toFixed(1)];let g='';
+ for(let j=0;j<12;j++){const a1=Math.PI-j*Math.PI/12,a2=Math.PI-(j+1)*Math.PI/12,[x1,y1]=P(r1,a1),[x2,y2]=P(r1,a2),[x3,y3]=P(r0,a2),[x4,y4]=P(r0,a1);
+  g+=`<path d="M${x1} ${y1}A${r1} ${r1} 0 0 1 ${x2} ${y2}L${x3} ${y3}A${r0} ${r0} 0 0 0 ${x4} ${y4}Z" fill="${j===i?'#7a5aa6':'#e9e3d0'}" stroke="#fff" stroke-width="1"${j===i?' style="animation:niPop .5s .2s both;transform-origin:40px 38px"':''}/>`}
+ return `<svg viewBox="0 0 80 42" aria-hidden="true">${g}<circle cx="${cx}" cy="${cy}" r="8" fill="#1f3f32"/></svg>`};
+const nkFigs=(k,ids)=>{const o=st(k,{});
+ return `<div class="ni dk-grid ${ids.length===3?'c3':'c2'} nk-figs" style="align-items:stretch">${ids.map((i,n)=>{const F=NK_F[i];return `<div class="nk-fig" style="animation-delay:${n*.1}s"><header><div><span class="ni-tag">Qué representa</span><h3>${NIG[3].items[i]}</h3></div>${nkMini(i)}</header><p>${F.rep}</p>
+ ${o[i]?`<div class="ej"><span class="ni-tag" style="color:#3f7d6e">Ejemplos</span><p style="color:inherit">${F.ej}</p></div>`:`<button class="btn btn-ghost btn-sm" ${rxa('tog',k,i)}>Ver ejemplos</button>`}
+ <div class="q">${F.q}</div></div>`}).join('')}</div>`};
+RICH.nk9=()=>dkH('Anillo 4 · Quién la provocó','Figuras del vínculo cercano','Lee qué representa cada figura y abre sus ejemplos. La pregunta sirve para la sesión.')+nkFigs('nkf9',[5,7,10]);
+RICH.nk10=()=>dkH('Anillo 4 · Quién la provocó','Figuras del entorno','Lee qué representa cada figura y abre sus ejemplos.')+nkFigs('nkf10',[4,11]);
+RICH.nk11=()=>dkH('Anillo 4 · Quién la provocó','Lo femenino y lo masculino','Más allá de la madre y del padre. Abre los ejemplos.')+nkFigs('nkf11',[8,9]);
+RICH.nk12=()=>dkH('Anillo 4 · Quién la provocó','Cuando la figura es uno mismo','Tres figuras que miran hacia la propia persona. Abre los ejemplos.')+nkFigs('nkf12',[0,1,6]);
+
+/* ----- 8 · Ejemplo y práctica ----- */
+const NK_EJ=[['Anillo 1','Años','Escala: 10 a 15'],['Anillo 4','Grupo','El curso del colegio'],['Anillos 3 y 2','Rechazo','Máscara Evasivo/a'],['E. Discordantes','Baja autoestima','Limpiar directo'],['Limpieza','Verificada','En totalidad']];
+RICH.nk13=()=>{const s=n3clamp(st('nkej',0),0,5);
+ return dkH('Ejemplo','Ejemplo: una lectura completa','Avanza anillo por anillo.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="nj-flow nk-5">${NK_EJ.map((x,i)=>`<div class="${i<s?'lit':''}"><small>${x[0]}</small><b>${x[1]}</b><span>${x[2]}</span></div>`).join('')}</div>
+ ${s<5?`<div class="dk-cta" style="justify-content:center"><button class="btn btn-primary btn-sm" ${rxa('set','nkej',s+1)}>${s?'Siguiente':'Empezar'}</button></div>`:
+ `<div class="dk-grid c2" style="align-items:start"><div class="nj-lect"><span class="ni-tag">Lectura</span><p>Entre los 10 y los 15 años, en el grupo del colegio, quedó una herida de rechazo con máscara evasiva. La acompaña la baja autoestima. Se limpió y se verificó.</p></div>
+ <div style="display:grid;gap:8px"><div class="dk-sub">Preguntas para la consultante · marca las que harías</div>${n3ck('nkeq',[['chat','¿Cómo era tu curso a esa edad?'],['chat','¿Cuándo empezaste a desaparecer para no ser vista?'],['chat','¿Dónde ocurre eso hoy?']])}</div></div>
+ <div class="dk-cta" style="justify-content:center"><button class="btn btn-ghost btn-sm" ${rxa('set','nkej',0)}>Ver de nuevo</button></div>`}</div>`+
+ niNote('Caso ficticio. La lectura es una hipótesis de trabajo que la persona confirma o descarta; no es un diagnóstico.')};
+RICH.nk14=()=>dkH('Práctica en parejas','Práctica en parejas','Una persona consulta, la otra facilita. Al terminar, registran y cambian de rol.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="nj-three ni-st"><div class="nj-card l"><span class="ni-tag">Persona A</span><h3>Consultante</h3><p>Elige un tema liviano o su herida principal.</p></div><div class="nj-card t"><span class="ni-tag">Persona B</span><h3>Facilitadora</h3><p>Aplica el protocolo y precisa anillo 1, escala y figura.</p></div><div class="nj-card b"><span class="ni-tag">Al terminar</span><h3>Registran</h3><p>Completan la ficha y cambian de rol.</p></div></div>
+ ${niFicha('nkf',['Consultante','Anillo 1 · escala','Quién','Herida y máscara','Energía · Mapa','Verificada'],['Ej.: M. R.','Años · 10–15','Grupo','Rechazo · Evasivo/a','Baja autoestima','Sí'],()=>{const h=n3clamp(nigSel('he'),0,4),m=njMapaTxt();return ['',nkEdad(),NIG[3].items[nigSel('qu')],`${NI_H[h].n} · ${NI_H[h].m}`,[njEdName(),m].filter(Boolean).join(' · '),st('njl',0)>=5?'Sí':'']})}</div>`+n3priv;
+
+/* ----- 9 · Reglas de oro, repaso y tarea ----- */
+RICH.nk15=()=>dkH('Facilitación','Reglas de oro al leer figuras','Toca cada regla.')+
+ `<div class="ni">${n3flip('nkro',[['corazon','Comprender, no culpar','Cada figura también tuvo su historia. La lectura busca comprender, no señalar culpables.'],['balanza','Hipótesis, no certezas','La persona confirma o descarta lo que aparece; no hay diagnósticos ni promesas.'],['escudo','Cuidar lo que se abre','Los momentos tempranos y la figura «Otro reparto» pueden tocar experiencias difíciles.'],['enlace','Derivar cuando corresponda','Ante malestar intenso o crisis, se acompaña y se deriva a un profesional de salud.']],'c2',150)}</div>`;
+RICH.nk16=()=>dkH('Repaso en voz alta','Comprobemos lo aprendido','Respondan en voz alta y compartan cómo llegaron a su respuesta. Después toquen cada tarjeta.')+
+ `<div class="ni ni-cp">${n3flip('nkcp',[['reloj','1 · Si el anillo 1 marca «Años», ¿cómo se precisa la edad?','<b>Con la escala de 0 a 100.</b> Primero se pregunta al péndulo el tramo de 20 años y luego se afina de 5 en 5 hasta llegar al sector.'],['grupo','2 · ¿Qué diferencia hay entre la figura Madre y la figura Femenino?','<b>Madre es la propia madre.</b> Femenino es lo femenino en general y la relación con las mujeres, más allá de la madre.'],['persona','3 · Si la figura es el Adulto, ¿qué estamos viendo?','<b>A la persona de hoy,</b> que repite la herida o se la provoca a sí misma.']],'c4',260)}</div>`;
+RICH.nk17=()=>dkH('Cierre de la clase','Tarea de la semana')+
+ `<div class="ni dk-grid c2" style="align-items:start"><div class="ni-task">${n3ck('nkta',[['grupo','Realiza dos sesiones completas con personas voluntarias'],['reloj','Precisa en cada una el anillo 1, la escala y la figura del anillo 4'],['libro','Completa una ficha de sesión por cada persona']],['Marca cada tarea cuando la completes.','¡Listo! Trae tus dos fichas a la próxima clase.'])}</div>
+ <div style="display:grid;gap:10px">${niBox('l','Para la próxima clase','Trae tus dos fichas. Las usaremos en la evaluación práctica de la Clase 4.')}${c4imp('Si en una sesión aparece algo muy intenso, detén la lectura, acompaña con calma y conversa con tu facilitadora.')}</div></div>`;
