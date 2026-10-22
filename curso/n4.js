@@ -2476,3 +2476,122 @@ RICH.lu20=()=>dkH('Cierre de la clase','Tarea para la próxima clase','Tu árbol
 .nj-flow.lu-3{grid-template-columns:repeat(3,minmax(0,1fr))}
 @media (max-width:760px){.nj-flow.lu-3{grid-template-columns:1fr}}
 `;document.head.appendChild(c)})();
+
+/* ---------- Nivel 4 · Especialización Limpieza Uterina · Clase 2 ---------- */
+(function(){const c=document.createElement('style');c.id='lv-css';c.textContent=`
+.lv-emo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:14px;align-items:start}
+.lv-emo .q{background:var(--ni-olv);color:#ece7d3;border-radius:18px;padding:18px;display:grid;gap:10px;align-content:start;min-height:100%}
+.lv-emo .q p{margin:0;color:#dfe3cf;line-height:1.55}.lv-emo .q small{font-style:italic;color:#d9c9ef;font-size:.82rem}
+.lv-pink{background:#f6e2ef;color:#4a2340;border-radius:16px;padding:14px 18px;font:italic 400 1.02rem/1.45 var(--f-display)}
+.lv-drop{display:grid;gap:8px}
+.lv-drop .bar{height:14px;border-radius:8px;background:#f6e2ef;overflow:hidden}
+.lv-drop .bar i{display:block;height:100%;background:linear-gradient(90deg,#ecc3dc,#b0589a);border-radius:8px;animation:lvDrop 2.4s .4s ease-in-out both}
+.lv-drop .lab{display:flex;justify-content:space-between;font:600 .82rem var(--f-body);color:#7a5aa6}
+@keyframes lvDrop{from{width:80%}to{width:10%}}
+.lu-two.lv-g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.lv-rg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:760px){.lv-emo,.lv-rg,.lu-two.lv-g3{grid-template-columns:1fr}}
+`;document.head.appendChild(c)})();
+const lvPhoto=alt=>`<div class="ni-ph"><img src="${N4P}utero/c2-portada.webp" alt="${alt}"><svg class="ni-arc" viewBox="0 0 200 104" aria-hidden="true"><path pathLength="1" d="M10 100a90 90 0 0 1 180 0" stroke="#f3ecd8" stroke-width="16"/><path pathLength="1" d="M34 100a66 66 0 0 1 132 0" stroke="#ecc3dc" stroke-width="16"/><path pathLength="1" d="M58 100a42 42 0 0 1 84 0" stroke="#e6dcf2" stroke-width="16"/><circle cx="100" cy="100" r="18" fill="#b0589a"/></svg></div>`;
+const lvSee=(k,hot,cap)=>{const v=st(k,0);return `<div class="dk-cta" style="justify-content:center"><button class="btn btn-ghost btn-sm" ${rxa('set',k,v?0:1)} ${pressed(!!v)}>${v?'Ocultar el gráfico':'Verlo en el gráfico de Limpieza Uterina'}</button></div>${v?`<div class="ni-in" style="max-width:640px;width:100%;justify-self:center">${luChart({hot:(r,i)=>r==='t'&&hot.includes(i),cap})}</div>`:''}`};
+
+/* ----- 1 · Bienvenida y agenda ----- */
+RICH.lv1=()=>`<div class="ni">${nbHero('Especialización Limpieza de Útero · Clase 2','Las memorias','del útero','Lo que el útero guarda: memorias emocionales, de dolor y del cuerpo, cómo leer con cuidado los temas sensibles y el protocolo para limpiar directo, investigar en el Mapa o profundizar en el linaje.',['Memorias','Protocolo','Mapa','Transgeneracional'],'Karen Oyarce · Maestra Holística',lvPhoto('Una mujer embarazada, con los ojos cerrados, sostiene su vientre entre flores rosadas'))}</div>`;
+RICH.lv2=()=>niAgenda('Clase 2',['Revisión de la tarea y ronda','Lo que el útero guarda','Memorias emocionales y de dolor','Abusos, abortos y el cuerpo: leer con cuidado','El protocolo','Leer con cuidado y derivar','Ejemplo y práctica','Reglas de oro, repaso y tarea'],
+ ['Reconocer las memorias que guarda el útero','Leer con cuidado abusos, abortos y temas del cuerpo','Limpiar directo o investigar en el Mapa','Saber cuándo profundizar en lo transgeneracional']);
+
+/* ----- 2 · Revisión de la tarea y ronda ----- */
+RICH.lv3=()=>{const n=LU_GN.filter((_,i)=>st('lun'+i,'')).length;
+ return dkH('Lo que trajiste','Revisemos la tarea de la semana','Tu árbol femenino de siete generaciones. Marca las preguntas a medida que las conversan.')+
+ `<div class="ni" style="display:grid;gap:14px">${luTree()}${n?'':niNote('En el árbol aparecen los nombres que escribiste en la tarea de la Clase 1.')}
+ <div class="dk-grid c2" style="align-items:start"><div class="nj-card l ni-in" style="min-height:0;background:#f6e2ef"><h3>Tu árbol femenino</h3>${n3ck('lvt1',[['arbol','¿Hasta qué generación llegaste?'],['nudo','¿Qué se repite en las mujeres de tu linaje?'],['corazon','¿Qué supiste de cómo vivieron su cuerpo, su sexualidad o su maternidad?'],['chat','¿Qué te contaron las mujeres de tu familia que no sabías?'],['hoja','¿Qué sentiste al armarlo?']])}</div>
+ <div style="display:grid;gap:10px">${niQ('Compartir es voluntario. Lo que se dice en el grupo, queda en el grupo.')}<div class="dk-cta"><button class="btn btn-ghost btn-sm" data-les="${S.lesson[0]},8">Completar mi árbol</button></div></div></div></div>`};
+RICH.lv4=()=>dkH('Ronda','Ronda: las mujeres de mi linaje','Una o dos frases por persona. Si quieres, anota la tuya.')+
+ `<div class="ni va-3">${[['Algo que se repite','Una forma de amar, de callar o de cargar que veo en varias generaciones.'],['Algo que me duele','Una historia de una mujer de mi linaje que me conmueve.'],['Algo que agradezco','Una fuerza o un don que heredé de ellas.']].map((x,i)=>`<div class="nj-card${i===2?' l':''}" style="min-height:0;animation:niUp .45s ${i*.1}s both${i===2?';background:#f6e2ef':''}"><h3>${x[0]}</h3><p>${x[1]}</p>${n3area('lv4'+i,'','Escribe aquí…')}</div>`).join('')}</div>`+n3priv;
+
+/* ----- 3 · Lo que el útero guarda ----- */
+const LV_GU=[['Memorias emocionales','Tristeza, miedos, ira, asco, rencor...',[5,14,15,16,17,18,19,20,22]],['Memorias de dolor','Dolor ancestral, abusos, abortos, ansiedades...',[0,1,2,3,4,7]],['El cuerpo','Miomas, fertilidad, exceso de energía masculina.',[21,25,24]]];
+RICH.lv5=()=>{const s=st('lv5',-1);
+ return dkH('El útero','Lo que el útero guarda','Tres tipos de memoria. Toca uno para verlo en el gráfico.')+
+ `<div class="ni" style="display:grid;gap:14px">${niBox('d','Memorias propias y del linaje','El útero guarda memorias propias y memorias de las mujeres del linaje. Muchas de las emociones que sentimos no empezaron en nosotras.')}
+ <div class="lu-two lv-g3">${LV_GU.map((x,i)=>`<button class="m" style="${i<2?'background:var(--nb-paper);border:1px solid var(--nb-line);color:var(--nb-ink)':''}" ${rxa('set','lv5',s===i?-1:i)} ${pressed(s===i)}><b>${x[0]}</b><span>${x[1]}</span></button>`).join('')}</div>
+ ${s>=0?`<div class="ni-in" style="max-width:640px;width:100%;justify-self:center">${luChart({hot:(r,i)=>r==='t'&&LV_GU[s][2].includes(i),cap:LV_GU[s][0]+' en el gráfico de Limpieza Uterina.'})}</div>`:''}
+ ${n3area('lv5a','Pregunta al grupo: ¿qué emoción sientes que no empezó en ti?','Siento que…')}</div>`+n3priv};
+
+/* ----- 4 · Memorias emocionales y de dolor ----- */
+const lvEmo=(k,t,que,graf,items,hot,foot)=>dkH('Memorias emocionales',t,'Marca lo que reconoces. Es tu práctica personal.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="lv-emo"><div class="q"><span class="ni-tag" style="color:#d9c9ef">Qué es</span><p>${que}</p><small>En el gráfico: ${graf}</small></div>
+ <div class="nj-card" style="min-height:0"><h3>Cómo puede sentirse hoy</h3>${n3ck(k,items)}</div></div>
+ ${lvSee(k+'g',hot,'En el gráfico: '+graf+'.')}${foot}</div>`;
+RICH.lv6=()=>lvEmo('lv6','Tristeza, miedos e inseguridad','Emociones que las mujeres del linaje no pudieron expresar ni sanar, y que el útero sigue guardando como propias.','Memorias de tristeza · de miedos · de inseguridad · Falta de autoestima',[['gota','Una tristeza que aparece sin motivo'],['xcirc','Miedos que no se explican por la propia historia'],['persona','Sentirse menos, dudar de sí misma'],['corazon','Dificultad para quererse y cuidarse']],[5,14,15,16],n3area('lv6a','Pregunta al grupo: ¿cuál de estas emociones viste también en tu madre o en tu abuela?','La vi en…'));
+RICH.lv7=()=>lvEmo('lv7','Ira, frustración, rencor y odio','Rabia contenida por injusticias, silencios o violencias que las mujeres del linaje no pudieron expresar ni defender.','Memorias de ira · de frustración · de rencor · de odio',[['rayo','Irritabilidad o explosiones que sorprenden'],['nudo','Resentimiento con la madre, la pareja o los hombres'],['xcirc','Frustración por no lograr lo que se desea'],['grupo','Cansancio de cargar con todo']],[17,19,20,22],n3area('lv7a','Pregunta al grupo: ¿qué injusticia crees que callaron las mujeres de tu linaje?','Creo que…'));
+RICH.lv8=()=>lvEmo('lv8','Asco y rechazo','Rechazo al propio cuerpo, a la sexualidad o al contacto, muchas veces heredado de experiencias de vergüenza o de abuso en el linaje.','Memorias de asco',[['persona','Incomodidad con el propio cuerpo'],['escudo','Rechazo al contacto o a la intimidad'],['gota','Vergüenza con la menstruación o la sexualidad'],['ojo','Sentir que el cuerpo es algo que hay que esconder']],[18],`<div class="lv-pink">Se nombra con respeto. Lo que la persona cuenta, lo cuenta porque quiere.</div>`);
+RICH.lv9=()=>dkH('Memorias de dolor','Memorias de dolor','Cuatro memorias. Toca cada tarjeta.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="ni-cp">${n3flip('lv9',[['reloj','Memorias ancestrales de dolor','El dolor de muchas generaciones de mujeres, guardado sin nombre.'],['rayo','Ansiedades','Inquietud constante, como si algo malo fuera a pasar.'],['corazon','Dolor físico','Molestias sin explicación aparente, siempre después de consultar a un profesional.'],['nudo','Victimismo','Sentir que la vida pasa por encima, sin poder elegir.']],'c4',190)}</div>
+ ${niQ('En el gráfico se nombran como «limpiar»: el dolor se reconoce y se suelta.')}${lvSee('lv9g',[0,3,4,7],'Limpiar memorias ancestrales de dolor · ansiedades · dolor físico · victimismo.')}</div>`;
+
+/* ----- 5 · Abusos, abortos y el cuerpo ----- */
+RICH.lv10=()=>dkH('Leer con cuidado','Abusos e impactos de abortos: leer con cuidado','Marca cada acuerdo a medida que lo conversan.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="dk-grid c2" style="align-items:start"><div style="display:grid;gap:12px">${[['Memorias de abusos','Lo que el linaje vivió y que hoy puede pesar como miedo, vergüenza o desconexión del cuerpo.'],['Impactos de abortos','Espontáneos o provocados, propios o del linaje. Se limpia el impacto que dejaron, sin juzgar a nadie.']].map((x,i)=>`<div class="nj-card" style="min-height:0;background:#f6e2ef;animation:niUp .45s ${i*.12}s both"><h3>${x[0]}</h3><p>${x[1]}</p></div>`).join('')}</div>
+ <div class="nj-card" style="min-height:0;background:var(--ni-olv);color:#ece7d3"><h3>Cómo se leen</h3>${n3ck('lv10',[['chat','Se nombra la memoria sin buscar detalles'],['persona','Nunca se afirma que le pasó a una persona concreta'],['escudo','No se juzga ni se pregunta por lo ocurrido'],['corazon','Si la consultante relata algo propio, se detiene la lectura, se acompaña y se sugiere apoyo profesional']])}</div></div>
+ <div class="vc-alert">Ante cualquier riesgo actual para alguien, se contacta a los servicios de emergencia.</div></div>`;
+RICH.lv11=()=>{const q=st('lv11q',-1);
+ return dkH('El cuerpo','El cuerpo: memorias, no diagnósticos','Toca cada tarjeta.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="ni-cp">${n3flip('lv11',[['loto','Miomas','Se lee la memoria emocional que el linaje asocia a ese lugar del cuerpo.'],['corazon','Fertilidad','Memorias del linaje sobre la maternidad, las pérdidas o el deseo de ser madre.'],['rayo','Exceso de energía masculina','Vivir solo desde el hacer, la exigencia y el control, sin espacio para recibir.']],'c3',190)}</div>
+ ${niBox('d','Nunca se diagnostica','Ni se promete curar o lograr un embarazo. Este trabajo acompaña la atención médica y ginecológica.')}
+ <div class="dk-sub" style="margin:0">¿Se puede decir así? «Con esta limpieza vas a poder quedar embarazada.»</div>
+ <div class="dk-cta" style="flex-wrap:wrap"><button class="btn btn-ghost btn-sm" ${rxa('set','lv11q',0)} ${pressed(q===0)}>Sí</button><button class="btn btn-ghost btn-sm" ${rxa('set','lv11q',1)} ${pressed(q===1)}>No</button></div>
+ ${q===1?`<div class="dk-call ni-in">Correcto. Se puede decir: «El gráfico muestra una posible memoria del linaje sobre la maternidad. La podemos mirar y limpiar, junto con lo que indique tu médico.»</div>`:q===0?`<div class="dk-call warn ni-in">No: es una promesa de resultado. Se habla de memorias, nunca de curar o de lograr un embarazo.</div>`:''}</div>`};
+
+/* ----- 6 · El protocolo ----- */
+const LV_PR=[['Paso 1','Árbol femenino','Las mujeres de las siete generaciones.',[['Abrir el árbol',5]]],['Paso 2','Constelación','Linaje y generación.',[['Abrir Constelación',5]]],['Paso 3','Limpieza Uterina','Generación, tema y porcentaje.',[['Abrir el gráfico',6]]],['Paso 4','Decidir','Limpiar directo, investigar o ir al linaje.',[]],['Paso 5','Limpiar y medir','El porcentaje debería bajar.',[]]];
+RICH.lv12=()=>{const s=n3clamp(st('lv12',0),0,4),x=LV_PR[s];
+ return dkH('Protocolo','El protocolo','Cinco pasos. Toca uno para verlo o repasarlo.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="nj-proto">${LV_PR.map((p,i)=>`<button class="${i===4?'new':i===2?'vd-opt':''}" ${rxa('set','lv12',i)} ${pressed(i===s)} style="animation-delay:${i*.08}s${i===2?';background:#f6e2ef;border-color:#f6e2ef':''}"><small>${p[0]}</small><b>${p[1]}</b><span>${p[2]}</span></button>`).join('')}</div>
+ <div class="nj-det"><div><span class="ni-tag">${x[0]}</span><br><b>${x[1]}</b><p>${x[2]}</p></div><div style="display:flex;gap:6px;flex-wrap:wrap">${s===3?`<button class="btn btn-ghost btn-sm" data-slide="1">Ver las tres opciones</button>`:x[3].map(b=>`<button class="btn btn-ghost btn-sm" data-les="${S.lesson[0]},${b[1]}">${b[0]}</button>`).join('')}</div></div>
+ ${niQ('Y al final: recuperar lo que se perdió. Lo vemos en la Clase 3.')}</div>`};
+const lvOpt=(n,cu,mid,de)=>`<div style="display:grid;gap:10px">${niBox('l','Cuándo',cu)}<div class="nj-card" style="min-height:0;background:#f6e2ef;padding:14px 16px"><h3 style="font-size:1.05rem">${mid[0]}</h3><p>${mid[1]}</p></div>${niBox('d','Después',de)}</div>`;
+RICH.lv13=()=>{const e=njEdName();
+ return dkH('Paso 4 · Opción 1','Limpiar directo: Energías Discordantes','Toca la energía que marca el péndulo.')+
+ `<div class="ni tc-side"><div class="nj-fig">${niOrig('lv13O','energias.webp','Lámina original del gráfico de Energías Discordantes',njEdChart(0))}</div>
+ <div style="display:grid;gap:10px">${lvOpt(1,'Cuando el tema se puede limpiar sin investigar más.',['Cómo','Como aprendiste en Radiestesia y Sanación del Alma.'],'Volver a medir el porcentaje en Limpieza Uterina.')}${e?`<div class="nj-det ni-in"><div><span class="ni-tag">El péndulo marcó</span><br><b>${e}</b></div></div>`:''}</div></div>`};
+RICH.lv14=()=>{const m=njMapaTxt();
+ return dkH('Paso 4 · Opción 2','Investigar desde el Mapa','Primero el sector, luego la emoción.')+
+ `<div class="ni tc-side"><div class="nj-fig">${niOrig('lv14O','mapa.webp','Lámina original del Mapa de Emociones',njMapa())}</div>
+ <div style="display:grid;gap:10px">${lvOpt(2,'Cuando hace falta saber qué emoción sostiene el tema.',['Qué se mide','El sector y la emoción.'],'Limpiar y volver a medir el porcentaje.')}${m?`<div class="nj-det ni-in"><div><span class="ni-tag">Sector · emoción</span><br><b>${m}</b></div></div>`:''}</div></div>`};
+RICH.lv15=()=>{const v=st('lv15',0);
+ return dkH('Paso 4 · Opción 3','Cuándo ir al Transgeneracional','Si la memoria viene de un hecho del linaje.')+
+ `<div class="ni tc-side"><div class="nj-fig">${niOrig('lv15O','trans/transgeneracional.webp','Lámina original del gráfico Transgeneracional de Casa Muladhara',trChart(v?{hot:['i0','o6','o11','o3','o25'],cap:'Abortos · abusos · secretos · uniones forzadas · muertes tempranas.'}:{}))}</div>
+ <div style="display:grid;gap:10px">${niBox('l','Cuándo','Si la memoria viene de un hecho del linaje.')}<button class="nj-card" style="all:unset;box-sizing:border-box;cursor:pointer;border-radius:16px;padding:14px 16px;display:grid;gap:6px;background:#f6e2ef;${v?'box-shadow:0 0 0 3px #b0589a':''}" ${rxa('set','lv15',v?0:1)} ${pressed(!!v)}><b style="font:400 1.05rem var(--f-display)">Por ejemplo</b><span>Abortos, abusos, secretos, uniones forzadas, muertes tempranas.</span><small style="color:#7a5aa6;font-weight:600">${v?'Ocultar en el gráfico':'Verlos en el gráfico'}</small></button>${niBox('d','Después','Limpiar, oración del linaje y volver a medir.')}<div class="dk-cta"><button class="btn btn-ghost btn-sm" data-les="2,20">Repasar el Transgeneracional</button></div></div></div>`};
+
+/* ----- 7 · Leer con cuidado y derivar ----- */
+RICH.lv16=()=>dkH('Cuidado','Leer con cuidado','Seis acuerdos. Márcalos a medida que los conversan.')+
+ `<div class="ni nl-say"><div>${n3ck('lv16',[['check','Pedir siempre el consentimiento'],['chat','Hablar en hipótesis: «el gráfico muestra una posible...»'],['corazon','No culpar a la madre ni a las abuelas: honrar lo que vivieron'],['escudo','No diagnosticar ni prometer resultados en el cuerpo'],['ojo','No buscar detalles en abusos o abortos'],['persona','Si aparece algo propio y doloroso, detenerse y derivar']],['Son acuerdos para cada sesión.','¡Seis acuerdos claros!'])}</div>
+ <div class="nl-frase" style="background:#f6e2ef;color:#4a2340"><span class="ni-tag">Frase para acompañar</span><p>«Esto que apareció no es tu culpa ni la de ellas. Hoy lo podemos mirar con amor y empezar a soltarlo.»</p></div></div>`;
+
+/* ----- 8 · Ejemplo y práctica ----- */
+RX.lvex=()=>{Object.assign(RS,{tgl:0,tgg:2,lug:2,lut:17,lup:8,njms:4,njme:20,njmc:1,lv17v:1});render(false)};
+const LV_EJ=[['Constelación','Materno · 3era'],['Generación','3 · abuelas'],['Tema','Memorias de ira'],['Mapa','Injusticia → Rabia'],['Porcentaje','80 % → 10 %']];
+RICH.lv17=()=>{const s=n3clamp(st('lv17',0),0,5),v=st('lv17v',0);
+ return dkH('Ejemplo','Ejemplo de lectura y limpieza','Consultante: C. M., una rabia contenida que explota con su pareja.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="nj-flow va-5">${LV_EJ.map((x,i)=>`<div class="${i<s?'lit':''}"${i===2?' style="background:#f6e2ef"':''}><small>${x[0]}</small><b>${x[1]}</b></div>`).join('')}</div>
+ ${s<5?`<div class="dk-cta" style="justify-content:center"><button class="btn btn-primary btn-sm" ${rxa('set','lv17',s+1)}>${s?'Siguiente':'Empezar'}</button></div>`:
+ `<div class="ni-hyp ni-in"><span class="ni-tag">Comprensión posible</span><p>La abuela materna calló injusticias toda su vida. Esa rabia quedó en el linaje y hoy aparece en la nieta. Se investiga en el Mapa, se limpia y el porcentaje baja.</p></div>
+ <div class="lv-drop ni-in"><div class="lab"><span>Antes · 80 %</span><span>Después · 10 %</span></div><div class="bar"><i></i></div></div>
+ <div class="dk-cta" style="justify-content:center">${v?'':`<button class="btn btn-primary btn-sm" ${rxa('lvex',0)}>Verlo en los gráficos</button>`}<button class="btn btn-ghost btn-sm" ${rxa('set','lv17',0)}>Ver de nuevo</button></div>
+ ${v?`<div class="dk-grid c2 ni-in" style="align-items:start"><div>${luChart({hot:(k,i)=>k==='g'?i===2:k==='t'?i===17:i===8,cap:'Limpieza Uterina: generación 3, memorias de ira, 80 %.'})}</div><div>${njMapa()}</div></div>`:''}`}</div>`+niNote('Ejemplo ficticio.')};
+const LV_PS=[['Leer','Con tu árbol a la vista, tu pareja lee Constelación y Limpieza Uterina.'],['Decidir','Deciden juntas: limpiar directo, investigar en el Mapa o ir al linaje.'],['Limpiar y medir','Limpian y vuelven a medir el porcentaje.'],['Ficha','Completan la ficha y cambian de rol.']];
+RICH.lv18=()=>{const s=n3clamp(st('lv18',0),0,3);
+ return dkH('Práctica en parejas','Práctica en parejas','Cuatro pasos. El botón llena la ficha con lo que marcaste en los gráficos.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="nj-steps h tg-st4">${LV_PS.map((x,i)=>`<div class="${i<s?'ok':i===s?'cur':''}" style="cursor:pointer" ${rxa('set','lv18',i)}><span class="n">${i<s?'✓':i+1}</span><div><b>${x[0]}</b><p>${x[1]}</p></div></div>`).join('')}</div>
+ ${s<3?`<div class="dk-cta" style="justify-content:center"><button class="btn btn-primary btn-sm" ${rxa('set','lv18',s+1)}>Siguiente paso</button></div>`:''}
+ ${niFicha('lvf',['Fecha','Consultante','Motivo','Linaje','Generación','Tema','% inicial','Limpieza','% final'],['Ej.: 04/11','C. M.','Rabia con su pareja','Materno','3','Memorias de ira','80 %','Mapa: Injusticia · Rabia','10 %'],
+ ()=>{const g=tgRead(),u=luRead(),m=njMapaTxt(),e=njEdName();return [tbHoy(),'','',g[0],u[0]?u[0].split(' · ')[0]:'',u[1],u[2],m?'Mapa: '+NJ_MS[st('njms',0)][0]+' · '+m.split(' · ')[1]:e?'Directo: '+e:'','']},1060)}</div>`+niNote('Usa iniciales; la primera fila es un ejemplo ficticio.')};
+
+/* ----- 9 · Reglas de oro, repaso y tarea ----- */
+RICH.lv19=()=>dkH('Repaso','Reglas de oro y comprobemos','Las reglas de cada sesión. Después respondan en voz alta y toquen cada tarjeta.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="nj-card" style="min-height:0;background:var(--ni-olv);color:#ece7d3"><h3>Reglas de oro</h3><div class="lv-rg">${['Hablar siempre en hipótesis','Honrar a las mujeres del linaje, sin culparlas','No diagnosticar ni prometer resultados','Cuidar los temas sensibles y derivar cuando haga falta'].map((x,i)=>`<div style="background:#ffffff14;border-radius:12px;padding:10px 12px;color:#dfe3cf;animation:niUp .45s ${i*.1}s both"><b style="color:#f2c66d">${i+1}</b> ${x}</div>`).join('')}</div></div>
+ <div class="ni-cp">${n3flip('lvcp',[['diana','1 · ¿Cuándo se limpia directo y cuándo se investiga en el Mapa?','<b>Directo,</b> con Energías Discordantes, cuando el tema se puede limpiar sin investigar más. <b>En el Mapa,</b> cuando hace falta saber qué emoción sostiene el tema.'],['arbol','2 · ¿Cuándo se profundiza en el Transgeneracional?','<b>Si la memoria viene de un hecho del linaje:</b> abortos, abusos, secretos, uniones forzadas o muertes tempranas. Después se limpia, se dice la oración del linaje y se vuelve a medir.'],['loto','3 · ¿Cómo se leen miomas y fertilidad?','<b>Como memorias, no como diagnósticos.</b> Se lee la memoria emocional del linaje, sin prometer curar ni lograr un embarazo, y acompañando la atención médica.']],'c3',260)}</div></div>`;
+RICH.lv20=()=>dkH('Cierre de la clase','Tarea para la próxima clase','Una memoria de tu linaje femenino.')+
+ `<div class="ni dk-grid c2" style="align-items:start"><div class="ni-task">${n3ck('lvta',[['arbol','Lee en Constelación tu linaje y la generación'],['diana','Lee en Limpieza Uterina la generación, el tema y el porcentaje'],['limpia','Limpia directo, investiga en el Mapa o profundiza en el linaje'],['reloj','Vuelve a medir el porcentaje'],['libro','Completa la ficha y anota lo que sentiste durante la semana']],['Marca cada punto cuando lo tengas.','¡Listo! Trae tu ficha a la Clase 3.'])}</div>
+ <div style="display:grid;gap:10px">${niBox('d','Importante','Elige un tema que puedas mirar con calma. Si algo te remueve mucho, detente y pide apoyo. Trae tu ficha.')}<div class="dk-cta" style="flex-wrap:wrap"><button class="btn btn-ghost btn-sm" data-les="${S.lesson[0]},6">Limpieza Uterina</button>${vaGo(-1,'Abrir mi ficha')}</div></div></div>`;
