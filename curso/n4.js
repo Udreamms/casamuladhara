@@ -2720,3 +2720,117 @@ RICH.lw20=()=>{const s=st('lwq',-1);
  <div class="dk-sub" style="margin:0">Mi cualidad de la semana</div>${chipRow('lwq',['Sexualidad','Creatividad','Virtudes','Fuerza','Soltar'],s)}
  <div class="lw-my"><label class="n3-lab">% al inicio<input type="text" data-rsin="lwq0" value="${esc(st('lwq0',''))}" placeholder="0 a 100 %"></label><label class="n3-lab">% al final<input type="text" data-rsin="lwq1" value="${esc(st('lwq1',''))}" placeholder="0 a 100 %"></label></div>
  ${n3area('lwq2','Cómo se manifiesta en mi vida','Esta semana noté…')}</div></div>`+n3priv};
+
+/* ---------- Nivel 4 · Especialización Limpieza Uterina · Clase 4 ---------- */
+(function(){const c=document.createElement('style');c.id='lx-css';c.textContent=`
+.lx-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.lx-4 .tb-c{animation:niUp .45s both;transition:transform .3s,box-shadow .3s,opacity .3s}
+.lx-4 .tb-c.lx-on{box-shadow:0 0 0 3px #b0589a;transform:translateY(-4px)}.lx-4 .tb-c.lx-off{opacity:.5}
+.lx-ri{display:grid;gap:10px}
+.lx-ri div{border-radius:14px;padding:12px 16px;font:italic 400 1.02rem/1.45 var(--f-display);animation:niUp .45s both}
+@media (max-width:760px){.lx-4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:460px){.lx-4{grid-template-columns:1fr}}
+`;document.head.appendChild(c)})();
+const lxPhoto=alt=>`<div class="ni-ph"><img src="${N4P}utero/c4-portada.webp" alt="${alt}"><svg class="ni-arc" viewBox="0 0 200 104" aria-hidden="true"><path pathLength="1" d="M10 100a90 90 0 0 1 180 0" stroke="#f3ecd8" stroke-width="16"/><path pathLength="1" d="M34 100a66 66 0 0 1 132 0" stroke="#ecc3dc" stroke-width="16"/><path pathLength="1" d="M58 100a42 42 0 0 1 84 0" stroke="#d6e8e2" stroke-width="16"/><circle cx="100" cy="100" r="18" fill="#b0589a"/></svg></div>`;
+const LX_ALT='Una mujer sonriente gira con un vestido de flores en un prado al atardecer';
+const LW_Q=['Sexualidad','Creatividad','Virtudes','Fuerza','Soltar'];
+
+/* ----- 1 · Bienvenida y agenda ----- */
+RICH.lx1=()=>`<div class="ni">${nbHero('Especialización Limpieza de Útero · Clase 4','La sesión de','limpieza de útero','Todo lo aprendido se integra en una sesión completa: antes, durante y después, cómo comunicar sin culpar a la madre ni a las abuelas, cuándo derivar y la evaluación práctica.',['Encuadre','Protocolo','Cierre','Evaluación'],'Karen Oyarce · Maestra Holística',lxPhoto(LX_ALT))}</div>`;
+RICH.lx2=()=>niAgenda('Clase 4',['Revisión de la tarea','El camino recorrido','La sesión: antes, durante y después','Comunicar y cuidar','Cierre y ficha de sesión','Demostración y evaluación práctica','Cuatro miradas y repaso','Certificación y cuidado de la facilitadora','Ritual, oración y cierre'],
+ ['Realizar una sesión de limpieza de útero completa','Comunicar sin culpar a la madre ni a las abuelas','Cuidar los temas sensibles y derivar','Aprobar la evaluación práctica']);
+
+/* ----- 2 · Revisión de la tarea ----- */
+RICH.lx3=()=>{const q=st('lwq',-1);
+ return dkH('Lo que trajiste','Revisemos la tarea de la semana','La cualidad que recuperaste. Marca las preguntas a medida que las conversan.')+
+ `<div class="ni dk-grid c2" style="align-items:start"><div class="nj-card l ni-in" style="min-height:0;background:#f6e2ef"><h3>La cualidad que recuperaste</h3>${n3ck('lxt1',[['diana','¿Qué sector pidió recuperarse?'],['vientre','¿Cómo te fue con la meditación y la oración?'],['sol','¿Cómo se manifestó esa cualidad en tu semana?'],['reloj','¿Qué porcentaje mediste al final?'],['chat','¿Qué duda te quedó?']])}</div>
+ <div style="display:grid;gap:10px"><div class="dk-sub">Lo que anotaste en la tarea</div>${tcRow(['Cualidad','% al inicio','% al final'],[q>=0?LW_Q[q]:'',st('lwq0',''),st('lwq1','')])}<div class="dk-cta"><button class="btn btn-ghost btn-sm" data-les="${S.lesson[0]},26">Abrir mi tarea</button></div></div></div>`+
+ niNote('Compartir es voluntario. Lo que se dice en el grupo, queda en el grupo.')};
+
+/* ----- 3 · El camino recorrido ----- */
+const LX_CA=[['Clase 1','El útero y el linaje femenino','El árbol de siete generaciones y el gráfico.',0],['Clase 2','Las memorias del útero','Limpiar directo, investigar o ir al linaje.',9],['Clase 3','Recuperar la energía femenina','Los sectores de recuperación, la oración y la meditación.',18],['Clase 4','La sesión completa','Antes, durante y después; comunicación, cuidado y evaluación.',27]];
+RICH.lx4=()=>dkH('El camino recorrido','El camino recorrido','Toca una clase para volver a ella.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="nl-path">${LX_CA.map((x,i)=>`<button data-les="${S.lesson[0]},${x[3]}" style="animation-delay:${i*.12}s"><small>${x[0]}</small><b>${x[1]}</b><span>${x[2]}</span><em>${i<3?'Repasar':'Hoy'}</em></button>`).join('')}</div>
+ ${niQ('Hoy todo se integra en una sesión completa.')}</div>`;
+
+/* ----- 4 · La sesión: antes, durante y después ----- */
+const LX_MO=[['Antes','Unos 10 minutos',10,['Encuadre y consentimiento','Motivo de consulta','Árbol femenino'],'#f6e2ef','#4a2340'],['Durante','Unos 40 minutos',40,['Constelación y Limpieza Uterina','Limpiar, investigar o ir al linaje','Recuperar'],'#3b4a24','#ece7d3'],['Después','Unos 10 minutos',10,['Oración del linaje femenino','Comunicar sin culpar','Registrar la ficha'],'#d6e8e2','#1f3f32']];
+RICH.lx5=()=>{const s=st('lxmo',-1);
+ return dkH('La sesión','La sesión en tres momentos','Una hora de sesión. Toca un momento en la barra.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="nl-bar">${LX_MO.map((x,i)=>`<button ${rxa('set','lxmo',s===i?-1:i)} ${pressed(s===i)} style="flex:${x[2]};background:${x[4]};color:${x[5]}">${x[0]} · ${x[2]} min</button>`).join('')}</div>
+ <div class="nl-mom">${LX_MO.map((x,i)=>`<div class="${s<0?'':s===i?'on':'off'}" style="background:${x[4]};color:${x[5]}"><h3>${x[0]}</h3><small>${x[1]}</small><ul>${x[3].map((y,j)=>`<li style="animation-delay:${j*.08}s">${y}</li>`).join('')}</ul></div>`).join('')}</div></div>`+
+ niNote('Tiempos de referencia para una sesión de una hora.')};
+RICH.lx6=()=>dkH('Momento 1','Antes: el encuadre','Marca cada paso a medida que lo haces.')+
+ `<div class="ni nl-say"><div>${n3ck('lxan',[['persona','Presentarte y explicar en qué consiste la limpieza de útero'],['escudo','Aclarar lo que no es: no reemplaza la atención médica ni ginecológica'],['candado','Explicar la confidencialidad y pedir el consentimiento'],['chat','Preguntar el motivo de consulta: qué le gustaría sanar'],['arbol','Pedir lo que sepa de las mujeres de su linaje'],['loto','Abrir con la oración de conexión']],['Sigue el orden: el encuadre va antes de medir.','¡Encuadre completo! Ya puedes empezar con Constelación.'])}
+ <div class="dk-cta" style="flex-wrap:wrap;margin-top:8px"><button class="btn btn-ghost btn-sm" data-les="${S.lesson[0]},5">Abrir el árbol femenino</button></div></div>
+ <div class="nl-frase" style="background:#f6e2ef;color:#4a2340"><span class="ni-tag">Frase para empezar</span><p>«Vamos a mirar juntas lo que tu útero guarda de las mujeres de tu linaje. Lo que aparezca es una posibilidad que tú confirmas o descartas. ¿Estás de acuerdo en que comencemos?»</p></div></div>`;
+const LX_DU=[['Paso 1','Constelación Familiar','Linaje y generación.',0,[['Abrir Constelación','2,6']]],['Paso 2','Limpieza Uterina','Generación, tema y porcentaje.',1,[['Abrir el gráfico','3,6']]],['Paso 3','Decidir','Limpiar directo, investigar en el Mapa o ir al Transgeneracional.',0,[['Repasar las tres opciones','3,14']]],['Paso 4','Limpiar y medir','Como aprendiste; el porcentaje debería bajar.',0,[]],['Paso 5','Recuperar','El sector de recuperación que pide volver.',1,[['Ver los sectores','3,20']]],['Paso 6','Verificar','Confirmar con el péndulo que se completó.',2,[]]];
+RICH.lx7=()=>{const s=n3clamp(st('lxdu',0),0,5),x=LX_DU[s];
+ return dkH('Momento 2','Durante: el protocolo completo','Seis pasos. Toca uno para verlo o repasarlo.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="nj-proto vd-6">${LX_DU.map((p,i)=>`<button class="${p[3]===1?'vd-opt':p[3]===2?'new':''}" ${rxa('set','lxdu',i)} ${pressed(i===s)} style="animation-delay:${i*.08}s${p[3]===1?';background:#f6e2ef;border-color:#f6e2ef':''}"><small>${p[0]}</small><b>${p[1]}</b><span>${p[2]}</span></button>`).join('')}</div>
+ <div class="nj-det"><div><span class="ni-tag">${x[0]}</span><br><b>${x[1]}</b><p>${x[2]}</p></div><div style="display:flex;gap:6px;flex-wrap:wrap">${x[4].map(b=>`<button class="btn btn-ghost btn-sm" data-les="${b[1]}">${b[0]}</button>`).join('')}</div></div>
+ ${niQ('La sesión es una conversación, no una lectura en voz alta.')}</div>`};
+
+/* ----- 5 · Comunicar y cuidar ----- */
+RICH.lx8=()=>dkH('Comunicación','Comunicar sin culpar a la madre ni a las abuelas','¿Se dice así o se evita? Lleva cada frase a su columna.')+
+ niSort('lxco',[['«El gráfico muestra una posible memoria de tristeza de tus abuelas. ¿Te hace sentido?»',0],['«Tu madre te pasó su tristeza.»',1],['«Ellas hicieron lo que pudieron con lo que tenían.»',0],['«Por eso tienes miomas.»',1],['«Esto no es tu culpa ni la de ellas.»',0],['«Con esta limpieza vas a quedar embarazada.»',1],['«En tu familia hubo un abuso, seguro.»',1]],
+ [['Decir así','','t','Decir así'],['Evitar','','l','Evitar']],'Hablamos en hipótesis, sin culpar, sin diagnosticar y sin prometer resultados.','Mira otra vez: ¿la frase habla en hipótesis o culpa, diagnostica o promete?');
+const LX_DO=['Detener la lectura y no profundizar','Acompañar con calma y presencia','Sugerir la ayuda de un profesional de salud','Ante riesgo inmediato, contactar a los servicios de emergencia'];
+RICH.lx9=()=>{const o=st('lxse',{}),on=Object.values(o).some(Boolean);
+ return dkH('Cuidado','Temas sensibles y derivación','Marca una señal de alerta para ver qué hacer.')+
+ `<div class="ni nl-alert"><div class="nj-card" style="background:#f6e2e8;color:#5a2a3a"><h3>Señales de alerta</h3>${n3ck('lxse',[['escudo','La persona relata un abuso o una violencia propia'],['gota','Un duelo reciente por una pérdida o un aborto'],['vientre','Angustia intensa por la fertilidad o la salud'],['xcirc','Ideas de hacerse daño']])}</div>
+ <div class="nj-card" style="background:var(--ni-olv);color:#ece7d3"><h3>Qué hacer</h3><div class="nl-do${on?' on':''}">${LX_DO.map((x,i)=>`<div style="animation-delay:${i*.12}s"><span class="n">${i+1}</span><span>${x}</span></div>`).join('')}</div>${on?'':'<p style="margin:0;color:#dfe3cf;font-size:.86rem">Marca una señal a la izquierda.</p>'}</div></div>`+
+ `<div class="ni">${niQ('Acompañar también es saber cuándo derivar.')}</div>`};
+
+/* ----- 6 · Cierre y ficha de sesión ----- */
+RICH.lx10=()=>dkH('Momento 3','Después: cierre de la sesión','Marca cada paso a medida que lo haces.')+
+ `<div class="ni nl-say"><div>${n3ck('lxde',[['chat','Resumir la lectura en una frase y preguntar cómo se siente'],['hilos','Decir juntas la oración del linaje femenino'],['paloma','Agradecer a las mujeres del linaje y al comité espiritual'],['vientre','Sugerir la meditación de conexión con el útero en casa'],['libro','Registrar la ficha y acordar un seguimiento si hace falta']],['Cierra con calma, sin apurar.','¡Sesión cerrada con cuidado!'])}
+ <div class="dk-cta" style="flex-wrap:wrap;margin-top:8px"><button class="btn btn-ghost btn-sm" data-les="${S.lesson[0]},24">Oración y meditación</button></div></div>
+ <div class="nl-frase d"><span class="ni-tag">Frase para cerrar</span><p>«Hoy honraste a las mujeres de tu linaje y soltaste lo que no era tuyo. Date tiempo para integrarlo. ¿Cómo te sientes ahora?»</p></div></div>`;
+RICH.lx11=()=>dkH('Registro','Ficha de sesión de limpieza de útero','El botón la llena con lo que marcaste en los gráficos.')+
+ `<div class="ni" style="display:grid;gap:12px">${niFicha('lxf',['Fecha','Consultante','Motivo','Linaje · gen.','Tema','% inicial','Limpieza','% final','Recuperar'],['Ej.: 18/11','C. M.','Rabia con su pareja','Materno · 3','Memorias de ira','80 %','Mapa: Injusticia · Rabia','10 %','Recuperar fuerza'],
+ ()=>{const g=tgRead(),u=luRead(),m=njMapaTxt(),e=njEdName(),q=st('lwq',-1);return [tbHoy(),'','',[g[0],u[0]?u[0].split(' · ')[0]:''].filter(Boolean).join(' · '),u[1],u[2],m?'Mapa: '+NJ_MS[st('njms',0)][0]+' · '+m.split(' · ')[1]:e?'Directo: '+e:'','',q>=0?LW_Q[q]:'']},1140)}</div>`+
+ niNote('Usa iniciales y registra solo lo necesario. La primera fila es un ejemplo ficticio.');
+
+/* ----- 7 · Demostración y evaluación práctica ----- */
+RICH.lx12=()=>dkH('En vivo','Demostración en vivo','Observa la sesión completa y toma nota.')+
+ `<div class="ni dk-grid c2" style="align-items:start"><div class="nj-card l" style="min-height:0;background:#f6e2ef"><h3>Una sesión completa en vivo</h3><ul style="margin:0;padding-left:18px;display:grid;gap:6px;line-height:1.5" class="ni-st"><li>Con una voluntaria del grupo y un tema liviano</li><li>Antes, durante y después, sin saltar pasos</li><li>Limpiar y también recuperar</li><li>Pausas breves para explicar cada decisión</li></ul></div>
+ <div class="nj-card" style="background:var(--ni-olv);color:#ece7d3;min-height:0"><h3>Mientras observas</h3><ul style="margin:0;padding-left:18px;display:grid;gap:6px;line-height:1.5;color:#dfe3cf" class="ni-st"><li>Observa el orden de los pasos</li><li>Anota una frase que quieras usar</li><li>Anota una pregunta para el final</li></ul></div></div>
+ <div class="ni dk-grid c2">${n3area('lxnf','Una frase que quiero usar','«…»')}${n3area('lxnq','Una pregunta para el final','¿…?')}</div>`+n3priv;
+const LX_RO=[['Consultante','Recibe la sesión','Trae un tema liviano de su linaje femenino.','l'],['Facilitadora','Realiza la sesión completa','Antes, durante y después, con la ficha.','t'],['Observadora','Observa y acompaña','Sigue la sesión paso a paso y da una devolución amable.','b']];
+RX.lxobr=()=>{delete RS.lxob;render(false)};
+const LX_OB=[['Antes','Encuadre y consentimiento'],['Antes','Motivo de consulta y árbol femenino'],['Durante','Constelación'],['Durante','Limpieza Uterina'],['Durante','Decidir: directo, Mapa o linaje'],['Durante','Limpiar y medir'],['Durante','Recuperar y verificar'],['Después','Oración del linaje y comunicar sin culpar'],['Después','Ficha y seguimiento']];
+RICH.lx13=()=>{const r=n3clamp(st('lxr',0),0,2),A=['Alumna A','Alumna B','Alumna C'],o=st('lxob',{}),n=LX_OB.filter((_,i)=>o[i]).length;
+ return dkH('Evaluación práctica','Evaluación práctica en tríos','Tres rondas: todas pasan por los tres roles. Toca una ronda para ver quién hace qué.')+
+ `<div class="ni" style="display:grid;gap:14px">${chipRow('lxr',['Ronda 1','Ronda 2','Ronda 3'],r)}
+ <div class="nl-role">${LX_RO.map((x,i)=>`<div class="nj-card ${x[3]}" style="min-height:0${i===0?';background:#f6e2ef':''}"><span class="ni-tag">${x[0]}</span><span class="who" style="animation-delay:${i*.1}s">${A[(i+r)%3]}</span><h3>${x[1]}</h3><p>${x[2]}</p></div>`).join('')}</div>
+ ${niBox('d','Tres rondas','Todas pasan por los tres roles. Cada ronda, unos 30 minutos de sesión y 5 de devolución.')}
+ <div class="dk-sub">Para la observadora: sigue la sesión paso a paso</div><div class="tb-gold">${LX_OB.map((x,i)=>`<button ${rxa('tog','lxob',i)} ${pressed(!!o[i])} style="animation-delay:${i*.04}s"><i>${o[i]?'✓':''}</i><b>${x[1]}</b><span>${x[0]}</span></button>`).join('')}</div>
+ <div class="prog"><span>${n} de ${LX_OB.length} pasos observados</span><div class="bar"><i style="width:${n/LX_OB.length*100}%"></i></div></div>
+ ${n===LX_OB.length?`<div class="dk-call ni-in">Sesión completa, sin saltar pasos. Ahora, una devolución amable.</div><div class="dk-cta" style="justify-content:center"><button class="btn btn-ghost btn-sm" ${rxa('lxobr',0)}>Observar otra ronda</button></div>`:''}</div>`};
+
+/* ----- 8 · Cuatro miradas y repaso ----- */
+const LX_MI=[['Niño interno','Lo que viví','Las heridas de mi infancia.','0,0','w'],['Transgeneracional','Lo que heredé','Las memorias del clan.','2,0','w'],['Vidas pasadas','Lo que mi alma trae','Daños y votos de otras vidas.','1,0','w'],['Útero','Lo que guardo','Las memorias del linaje femenino.','','d']];
+const LX_EX=['«Desde niña siento que no me ven.»','«En mi familia se repiten las quiebras.»','«Un miedo al agua que no se explica.»','«Una tristeza que también vivieron mis abuelas.»'];
+RICH.lx14=()=>{const v=st('lx14',-1);
+ return dkH('Cuatro miradas','Cuatro miradas, una misma persona','Toca un motivo de ejemplo para ver qué mirada lo ilumina primero.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="lx-4">${LX_MI.map((x,i)=>`<div class="tb-c ${x[4]}${v<0?'':v===i?' lx-on':' lx-off'}" style="animation-delay:${i*.1}s"><span class="ni-tag"${x[4]==='d'?' style="color:#d9c9ef"':''}>${x[0]}</span><h3${x[4]==='d'?' style="color:#fff"':''}>${x[1]}</h3><p>${x[2]}</p>${x[3]?`<div><button class="btn btn-ghost btn-sm" data-les="${x[3]}">Abrir</button></div>`:''}</div>`).join('')}</div>
+ ${chipRow('lx14',LX_EX,v)}
+ ${niQ('Cada mirada ilumina una parte; juntas acompañan a la persona completa.')}</div>`+niNote('Motivos de ejemplo. Una misma persona puede necesitar más de una mirada.')};
+RICH.lx15=()=>dkH('Repaso en voz alta','Comprobemos lo aprendido','Respondan en voz alta y compartan cómo llegaron a su respuesta. Después toquen cada tarjeta.')+
+ `<div class="ni ni-cp">${n3flip('lxcp',[['reloj','1 · ¿En qué orden se recorre una sesión completa?','<b>Antes:</b> encuadre, motivo y árbol femenino. <b>Durante:</b> Constelación, Limpieza Uterina, decidir, limpiar y medir, recuperar y verificar. <b>Después:</b> oración del linaje, comunicar sin culpar y ficha.'],['chat','2 · Di como hipótesis: «Tu madre te pasó su tristeza.»','<b>Por ejemplo:</b> «El gráfico muestra una posible memoria de tristeza en tu linaje femenino. ¿Te hace sentido? Ellas hicieron lo que pudieron con lo que tenían; esto no es tu culpa ni la de ellas.»'],['escudo','3 · ¿Qué haces si la persona relata un abuso propio?','<b>Detener la lectura y no profundizar.</b> Acompañar con calma y presencia y sugerir la ayuda de un profesional de salud. Ante riesgo inmediato, contactar a los servicios de emergencia.']],'c3',280)}</div>`;
+
+/* ----- 9 · Certificación y cuidado de la facilitadora ----- */
+const LX_RQ=[['grupo','Asistencia','Participar en las cuatro clases de la especialización.'],['libro','Tareas','Entregar las tres tareas: tu árbol femenino, la memoria de tu linaje y la cualidad recuperada.'],['check','Evaluación práctica','Aprobar la sesión observada en tríos.']];
+RICH.lx16=()=>{const o=st('lxrq',{}),n=LX_RQ.filter((_,i)=>o[i]).length;
+ return dkH('Certificación','Requisitos para la certificación','Marca los que ya cumples.')+
+ `<div class="ni" style="display:grid;gap:12px"><div class="nl-req td-3">${LX_RQ.map((x,i)=>`<button ${rxa('tog','lxrq',i)} ${pressed(!!o[i])} style="animation-delay:${i*.08}s"><i>${o[i]?'✓':''}</i><div><b>${x[1]}</b><span>${x[2]}</span></div></button>`).join('')}</div>
+ <div class="prog"><span>${n} de 3</span><div class="bar"><i style="width:${n/3*100}%"></i></div></div>
+ ${n===3?niQ('¡Cumples los tres requisitos para tu certificación en Limpieza de Útero!'):''}</div>`};
+RICH.lx17=()=>dkH('Autocuidado','Cuidar a quien acompaña','Antes, durante, después y siempre. Toca cada tarjeta.')+
+ `<div class="ni ni-cp">${n3flip('lxcu',[['loto','Antes · Prepararte','Oración de conexión y protección. Llegar descansada y presente.'],['escudo','Durante · No cargar la historia','Acompañar sin hacer tuyo lo que aparece. Volver a tu respiración.'],['limpia','Después · Limpiarte','Tu limpieza personal como aprendiste, agua, descanso y tu meditación de útero.'],['chat','Siempre · Compartir lo difícil','Llevar los casos que te remuevan a tu facilitadora del programa.']],'c4',220)}</div>`;
+
+/* ----- 10 · Ritual, oración y cierre ----- */
+RICH.lx18=()=>dkH('Ritual de cierre','El hilo sagrado del linaje femenino','Lo hacemos juntas, frase a frase.')+`<div class="ni">${n3pray('lxhi',['Formamos un círculo y cerramos los ojos. Sentimos a las mujeres de nuestro linaje detrás de nosotras.','Cada una ata un hilo rojo en la muñeca de la compañera de al lado.','Decimos: «Me uno a ti con un sagrado hilo que nos vincula en amor».','Agradecemos en silencio a todas las mujeres que nos antecedieron.'])}</div>`;
+RICH.lx19=()=>dkH('Cierre de la especialización','Oración de agradecimiento','La decimos juntas para cerrar el camino.')+`<div class="ni">${n3pray('lxor',['Amado Yo Superior, ángeles, arcángeles, seres de luz, todo mi comité espiritual: gracias por acompañarnos en este camino.','Gracias a mi madre, a mis abuelas y a todas las mujeres que me antecedieron, por la vida que llegó a través de ellas.','Gracias por cada memoria liberada, por cada fuerza recuperada.','Que lo aprendido se convierta en servicio, con humildad, respeto y amor.','Que cada sesión sea para el mayor bien de quien llega a nosotras y de todo su linaje femenino.','Gracias, gracias, gracias.'])}</div>`;
+RICH.lx20=()=>`<div class="ni">${nbHero('Especialización Limpieza de Útero','Gracias por','este camino','Sigue practicando, registra tus sesiones y honra a las mujeres de tu linaje.',['Clase 1','Clase 2','Clase 3','Clase 4'],'Karen Oyarce · Maestra Holística',lxPhoto(LX_ALT))}</div>`;
