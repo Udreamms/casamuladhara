@@ -2595,3 +2595,128 @@ RICH.lv19=()=>dkH('Repaso','Reglas de oro y comprobemos','Las reglas de cada ses
 RICH.lv20=()=>dkH('Cierre de la clase','Tarea para la próxima clase','Una memoria de tu linaje femenino.')+
  `<div class="ni dk-grid c2" style="align-items:start"><div class="ni-task">${n3ck('lvta',[['arbol','Lee en Constelación tu linaje y la generación'],['diana','Lee en Limpieza Uterina la generación, el tema y el porcentaje'],['limpia','Limpia directo, investiga en el Mapa o profundiza en el linaje'],['reloj','Vuelve a medir el porcentaje'],['libro','Completa la ficha y anota lo que sentiste durante la semana']],['Marca cada punto cuando lo tengas.','¡Listo! Trae tu ficha a la Clase 3.'])}</div>
  <div style="display:grid;gap:10px">${niBox('d','Importante','Elige un tema que puedas mirar con calma. Si algo te remueve mucho, detente y pide apoyo. Trae tu ficha.')}<div class="dk-cta" style="flex-wrap:wrap"><button class="btn btn-ghost btn-sm" data-les="${S.lesson[0]},6">Limpieza Uterina</button>${vaGo(-1,'Abrir mi ficha')}</div></div></div>`;
+
+/* ---------- Nivel 4 · Especialización Limpieza Uterina · Clase 3 ---------- */
+(function(){const c=document.createElement('style');c.id='lw-css';c.textContent=`
+.lw-mv{display:grid;grid-template-columns:minmax(0,1fr) 150px minmax(0,1fr);gap:14px;align-items:center}
+.lw-mv .nj-card{min-height:0;transition:opacity .3s,box-shadow .3s}.lw-mv .nj-card.dim{opacity:.45}
+.lw-mv .nj-card.on{box-shadow:0 0 0 3px #b0589a}
+.lw-jar{position:relative;width:110px;height:150px;margin:0 auto;border:3px solid #7a5aa6;border-top:0;border-radius:0 0 46px 46px;overflow:hidden;background:#fff}
+.lw-jar i{position:absolute;left:0;right:0;bottom:0;transition:height 1.6s ease-in-out,background 1.2s}
+.lw-jar i.h0{height:78%;background:linear-gradient(#8a8476,#5c5a4f)}.lw-jar i.h1{height:8%;background:linear-gradient(#8a8476,#5c5a4f)}.lw-jar i.h2{height:84%;background:linear-gradient(#ecc3dc,#b0589a)}
+.lw-jar b{position:absolute;inset:auto 0 8px;text-align:center;font:600 .74rem var(--f-body);color:#fff;z-index:1}
+.lw-jar.s1 b{color:#7a5aa6}
+.lw-sec{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.lw-sec span{background:#f6e2ef;color:#4a2340;border-radius:999px;padding:6px 12px;font:600 .84rem var(--f-body);animation:niUp .45s both}
+.lw-sec.h span{background:var(--ni-olv);color:#ece7d3}
+.lw-bal{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr) minmax(0,1fr);gap:14px;align-items:center}
+.lw-bal .lw-sd{border-radius:18px;padding:16px;display:grid;gap:8px;align-content:start;transition:transform .5s,box-shadow .5s}
+.lw-bal .lw-sd.lw-f{background:#f6e2ef;color:#4a2340}.lw-bal .lw-sd.lw-m{background:var(--ni-olv);color:#ece7d3}
+.lw-bal .lw-sd.lw-on{box-shadow:0 0 0 3px #b0589a}
+.lw-bal .lw-sd ul{margin:0;padding-left:18px;display:grid;gap:3px}
+.lw-bal svg{width:100%;height:auto;display:block}
+.lw-bal .beam{transition:transform .8s cubic-bezier(.3,1.4,.5,1);transform-origin:120px 60px}
+.lw-rng{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.lw-es{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.lw-my{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+@media (max-width:760px){.lw-mv,.lw-bal,.lw-es{grid-template-columns:1fr}.lw-mv .lw-jar{height:110px;width:120px}}
+`;document.head.appendChild(c)})();
+const lwPhoto=alt=>`<div class="ni-ph"><img src="${N4P}utero/c3-portada.webp" alt="${alt}"><svg class="ni-arc" viewBox="0 0 200 104" aria-hidden="true"><path pathLength="1" d="M10 100a90 90 0 0 1 180 0" stroke="#f3ecd8" stroke-width="16"/><path pathLength="1" d="M34 100a66 66 0 0 1 132 0" stroke="#ecc3dc" stroke-width="16"/><path pathLength="1" d="M58 100a42 42 0 0 1 84 0" stroke="#b0589a" stroke-width="16"/><circle cx="100" cy="100" r="18" fill="#e6dcf2"/></svg></div>`;
+const LW_REC=[6,8,9,10,23],LW_SAN=[11,12,13];
+
+/* ----- 1 · Bienvenida y agenda ----- */
+RICH.lw1=()=>`<div class="ni">${nbHero('Especialización Limpieza de Útero · Clase 3','Recuperar la','energía femenina','Después de limpiar, se recupera: la sexualidad, la creatividad, las virtudes y la fuerza; honrar, respetar y perdonar; soltar y volver al equilibrio, con la oración del linaje femenino y la meditación del útero.',['Recuperar','Honrar','Perdonar','Equilibrio'],'Karen Oyarce · Maestra Holística',lwPhoto('Manos de mujeres unidas sobre el musgo, con hilos rojos en las muñecas'))}</div>`;
+RICH.lw2=()=>niAgenda('Clase 3',['Revisión de la tarea y ronda','Limpiar y recuperar','Sexualidad, creatividad, virtudes y fuerza','Honrar, respetar y perdonar','Soltar y el equilibrio de energías','Oración y meditación','Ejemplo, práctica y repaso','Tarea'],
+ ['Explicar por qué después de limpiar se recupera','Reconocer los sectores de recuperación del gráfico','Acompañar la recuperación de una cualidad','Guiar la oración del linaje femenino y la meditación']);
+
+/* ----- 2 · Revisión de la tarea y ronda ----- */
+RICH.lw3=()=>{const r=luRead();
+ return dkH('Lo que trajiste','Revisemos la tarea de la semana','La memoria de tu linaje femenino. Marca las preguntas a medida que las conversan.')+
+ `<div class="ni dk-grid c2" style="align-items:start"><div class="nj-card l ni-in" style="min-height:0;background:#f6e2ef"><h3>Tu ficha</h3>${n3ck('lwt1',[['arbol','¿Qué generación y qué tema aparecieron?'],['diana','¿Limpiaste directo, investigaste en el Mapa o fuiste al linaje?'],['reloj','¿Cuánto bajó el porcentaje?'],['vientre','¿Qué sentiste en tu cuerpo durante la semana?'],['chat','¿Qué duda te quedó?']])}</div>
+ <div style="display:grid;gap:10px">${r.every(Boolean)?`<div class="ni-hyp ni-in"><span class="ni-tag">Lo que marcaste en el gráfico</span><p>Generación <mark>${r[0]}</mark>, <mark>${r[1].toLowerCase()}</mark>, <mark>${r[2]}</mark>.</p></div>`:''}${niQ('Compartir es voluntario. Lo que se dice en el grupo, queda en el grupo.')}<div class="dk-cta" style="flex-wrap:wrap"><button class="btn btn-ghost btn-sm" data-les="${S.lesson[0]},16">Abrir mi ficha</button></div></div></div>`};
+RICH.lw4=()=>dkH('Ronda','Ronda de descubrimientos','Una o dos frases por persona. Si quieres, anota la tuya.')+
+ `<div class="ni va-3">${[['Lo que solté','Algo que se siente más liviano después de limpiar.'],['Lo que noté','Un cambio en mi cuerpo, mis emociones o mis vínculos.'],['Lo que quiero recuperar','Una cualidad que siento que me falta.']].map((x,i)=>`<div class="nj-card${i===2?' l':''}" style="min-height:0;animation:niUp .45s ${i*.1}s both${i===2?';background:#f6e2ef':''}"><h3>${x[0]}</h3><p>${x[1]}</p>${n3area('lw4'+i,'','Escribe aquí…')}</div>`).join('')}</div>`+n3priv;
+
+/* ----- 3 · Limpiar y recuperar ----- */
+RICH.lw5=()=>{const s=n3clamp(st('lw5',0),0,2);
+ return dkH('Dos movimientos','Limpiar y recuperar','Toca cada movimiento y mira qué pasa en el útero.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="lw-mv">
+ <button class="nj-card ${s===1?'on':s===2?'dim':''}" style="all:unset;box-sizing:border-box;cursor:pointer;border-radius:18px;padding:16px;display:grid;gap:6px;background:var(--nb-paper);border:1px solid var(--nb-line)" ${rxa('set','lw5',1)} ${pressed(s===1)}><span class="ni-tag">Primer movimiento</span><b style="font:400 1.25rem var(--f-display)">Limpiar</b><span>Soltar las memorias de dolor, miedo o rabia que no son nuestras.</span></button>
+ <div class="lw-jar s${s}" role="img" aria-label="${['Útero con memorias','Útero limpio: un espacio libre','Útero lleno de fuerza, creatividad, placer y virtudes'][s]}"><b>${['Memorias','Espacio libre','Recuperado'][s]}</b><i class="h${s}"></i></div>
+ <button class="nj-card ${s===2?'on':s===0?'dim':''}" style="all:unset;box-sizing:border-box;cursor:pointer;border-radius:18px;padding:16px;display:grid;gap:6px;background:#f6e2ef;color:#4a2340" ${rxa('set','lw5',2)} ${pressed(s===2)}><span class="ni-tag">Segundo movimiento</span><b style="font:400 1.25rem var(--f-display)">Recuperar</b><span>Llenar ese espacio con fuerza, creatividad, placer y virtudes.</span></button></div>
+ ${s?`<div class="dk-call ni-in">${s===1?'El útero queda con un espacio libre. Ahora toca «Recuperar».':'Lo que el linaje no pudo vivir, hoy se recupera.'}</div>`:''}
+ ${niBox('d','La idea','Limpiar deja un espacio libre; recuperar lo llena con lo que el linaje no pudo vivir.')}</div>`};
+RICH.lw6=()=>{const s=st('lw6',0);
+ return dkH('El gráfico','Los sectores de recuperación','Toca cada grupo para verlo en el gráfico de Limpieza Uterina.')+
+ `<div class="ni tc-side"><div class="nj-fig">${luChart({hot:(r,i)=>r==='t'&&(s===0?LW_REC:LW_SAN).includes(i),cap:s===0?'Sectores rosados: recuperar.':'Para sanar: honrar, respetar y perdonar.'})}</div>
+ <div style="display:grid;gap:12px;align-content:start">${chipRow('lw6',['Sectores rosados','Para sanar'],s)}
+ ${s===0?`<div class="lw-sec">${['Sexualidad','Manifestar creatividad','Recuperar virtudes','Recuperar fuerza','Soltar, confiar y dejar ir'].map((x,i)=>`<span style="animation-delay:${i*.07}s">${x}</span>`).join('')}</div>`:
+ `<div class="lw-sec h">${['Honrar las experiencias','Respetar','Perdonar'].map((x,i)=>`<span style="animation-delay:${i*.07}s">${x}</span>`).join('')}</div>`}
+ ${niBox('l','Cómo se trabaja','Se mide cuál pide recuperarse y su porcentaje, antes y después.')}</div></div>`};
+
+/* ----- 4 · Sexualidad, creatividad, virtudes y fuerza ----- */
+const lwRec=(k,t,i,que,items,q,ph)=>dkH('Recuperar',t,'Marca lo que reconoces. Es tu práctica personal.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="lv-emo"><div class="q" style="background:#f6e2ef;color:#4a2340"><span class="ni-tag">Qué es recuperarla</span><p style="color:#4a2340">${que}</p><small style="color:#7a5aa6">En el gráfico: ${luT(i)}</small></div>
+ <div class="nj-card" style="min-height:0;background:var(--ni-olv);color:#ece7d3"><h3>Cuando vuelve, se nota en</h3>${n3ck(k,items)}</div></div>
+ ${lvSee(k+'g',[i],'En el gráfico: '+luT(i)+'.')}${n3area(k+'a','Pregunta al grupo: '+q,ph)}</div>`+n3priv;
+RICH.lw7=()=>lwRec('lw7','Recuperar la sexualidad',6,'Vivir el cuerpo, el placer y la intimidad con dignidad, libre de la vergüenza o el miedo que el linaje cargó.',[['persona','Disfrutar del propio cuerpo sin culpa'],['escudo','Poner límites con claridad'],['corazon','Vivir la intimidad desde el deseo, no la obligación'],['luna','Vivir el ciclo menstrual sin vergüenza']],'¿Qué mensaje sobre el cuerpo recibiste de las mujeres de tu linaje?','Recibí que…');
+RICH.lw8=()=>lwRec('lw8','Manifestar la creatividad',8,'Recuperar el útero como centro creador: ideas, proyectos, arte y caminos nuevos que piden nacer.',[['estrella','Ganas de crear y de jugar'],['check','Terminar lo que se empieza'],['voz','Expresarse con libertad'],['sol','Confiar en las propias ideas']],'¿Qué quieres crear que todavía no te permites?','Quiero crear…');
+RICH.lw9=()=>lwRec('lw9','Recuperar las virtudes',9,'Tomar los dones que también nos dejaron las mujeres del linaje: sabiduría, ternura, intuición, resiliencia.',[['regalo','Reconocer en una misma los dones de las abuelas'],['ojo','Confiar en la propia intuición'],['corazon','Cuidar sin descuidarse'],['arbol','Sentirse orgullosa de su origen']],'¿Qué virtud de una mujer de tu linaje quieres tomar?','Quiero tomar…');
+RICH.lw10=()=>lwRec('lw10','Recuperar la fuerza',10,'La fuerza para decidir, poner límites y sostener el propio camino, sin dureza y sin cargar con todo.',[['xcirc','Decir que no sin culpa'],['grupo','Pedir ayuda cuando se necesita'],['escudo','Defenderse sin violencia'],['puno','Sostenerse en los momentos difíciles']],'¿En qué momento de tu vida necesitas hoy tu fuerza?','La necesito en…');
+
+/* ----- 5 · Honrar, respetar y perdonar ----- */
+RICH.lw11=()=>dkH('Para sanar','Honrar las experiencias','Tres gestos. Toca cada tarjeta.')+
+ `<div class="ni" style="display:grid;gap:14px">${niBox('d','Honrar','Reconocer lo que vivieron las mujeres del linaje, con su dolor y su fuerza, sin negarlo ni juzgarlo.')}
+ <div class="ni-cp">${n3flip('lw11',[['ojo','Ver','Mirar su historia completa, no solo lo que dolió.'],['hilos','Reconocer','Lo que vivieron les dio forma a ellas y a nosotras.'],['corazon','Agradecer','La vida llegó a través de ellas.']],'c3',170)}</div>
+ ${lvSee('lw11g',[11],'En el gráfico: Honrar las experiencias.')}${n3area('lw11a','Pregunta al grupo: ¿qué experiencia de una mujer de tu linaje quieres honrar hoy?','Quiero honrar…')}</div>`+n3priv;
+RICH.lw12=()=>{const o=st('lw12',{});
+ return dkH('Para sanar','Respetar','Dos respetos. Toca cada uno.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="lw-es">${[['Respetar sus decisiones','Ellas eligieron con lo que tenían y con lo que sabían. No nos toca juzgarlas.','#f6e2ef','#4a2340'],['Respetar las propias','Podemos elegir distinto sin dejar de pertenecer al linaje.','var(--ni-olv)','#ece7d3']].map((x,i)=>`<button class="nj-card" style="all:unset;box-sizing:border-box;cursor:pointer;border-radius:18px;padding:18px;display:grid;gap:8px;background:${x[2]};color:${x[3]};animation:niUp .45s ${i*.12}s both${o[i]?';box-shadow:0 0 0 3px #b0589a':''}" ${rxa('tog','lw12',i)} ${pressed(!!o[i])}><b style="font:400 1.2rem var(--f-display)">${x[0]}</b>${o[i]?`<span class="ni-in">${x[1]}</span>`:`<small style="opacity:.75">Toca para ver</small>`}</button>`).join('')}</div>
+ ${o[0]&&o[1]?`<div class="ni-in">${n3quote('<mark>Elegir distinto no es traicionar.</mark>')}</div>`:''}
+ ${lvSee('lw12g',[12],'En el gráfico: Respetar.')}</div>`};
+RICH.lw13=()=>dkH('Para sanar','Perdonar: liberar sin justificar','Ordena cada frase: ¿es perdonar o no lo es?')+
+ niSort('lw13',[['Soltar el peso que nos ata a lo ocurrido',0],['Justificar lo que pasó',1],['Liberar a las mujeres del linaje y liberarse',0],['Olvidar o negar el dolor',1],['Un proceso que llega a su tiempo',0],['Volver a relacionarse con quien dañó',1],['Una obligación',1]],
+ [['Perdonar es','','l','Es'],['Perdonar no es','','d','No es']],'Nadie está obligada a perdonar.','Mira de nuevo: perdonar libera, pero no justifica, no olvida ni obliga.');
+
+/* ----- 6 · Soltar y el equilibrio de energías ----- */
+RICH.lw14=()=>lwRec('lw14','Soltar, confiar y dejar ir',23,'Dejar de sostener lo que ya no nos pertenece y confiar en que la vida puede ser distinta a la del linaje.',[['ala','Menos necesidad de controlar'],['camino','Confianza en el propio camino'],['paloma','Capacidad de despedirse'],['loto','Más descanso y más disfrute']],'¿Qué necesitas soltar hoy para seguir adelante?','Necesito soltar…');
+const LW_BAL=['Solo hacer','Más hacer','En equilibrio','Más recibir','Solo recibir'];
+RICH.lw15=()=>{const v=n3clamp(st('lw15',0),0,4),a=(v-2)*-9;
+ return dkH('Equilibrio','El equilibrio de las energías','Mueve la balanza: ¿desde dónde vives hoy?')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="lw-bal"><div class="lw-sd lw-f${v>2?' lw-on':''}"><span class="ni-tag">Energía femenina</span><b style="font:400 1.2rem var(--f-display)">Recibir</b><ul>${['Sentir','Descansar','Intuir','Crear','Cuidar y dejarse cuidar'].map(x=>`<li>${x}</li>`).join('')}</ul></div>
+ <svg viewBox="0 0 240 150" role="img" aria-label="Balanza: ${LW_BAL[v]}"><path d="M120 60v74M90 138h60" stroke="#7a5aa6" stroke-width="5" stroke-linecap="round" fill="none"/>
+ <g class="beam" style="transform:rotate(${a}deg)"><path d="M30 60h180" stroke="#7a5aa6" stroke-width="5" stroke-linecap="round"/><path d="M30 60l-18 38h36zM210 60l-18 38h36z" fill="none" stroke="#7a5aa6" stroke-width="2"/><ellipse cx="30" cy="100" rx="22" ry="6" fill="#ecc3dc"/><ellipse cx="210" cy="100" rx="22" ry="6" fill="#5c6b4a"/></g><circle cx="120" cy="60" r="7" fill="#b0589a"/></svg>
+ <div class="lw-sd lw-m${v<2?' lw-on':''}"><span class="ni-tag" style="color:#d9c9ef">Energía masculina</span><b style="font:400 1.2rem var(--f-display)">Hacer</b><ul>${['Decidir','Proteger','Avanzar','Ordenar','Sostener'].map(x=>`<li>${x}</li>`).join('')}</ul></div></div>
+ <div class="lw-rng">${LW_BAL.map((x,i)=>`<button class="chip" ${rxa('set','lw15',i)} ${pressed(i===v)}>${x}</button>`).join('')}</div>
+ <div class="dk-call${v===2?'':' warn'} ni-in">${v===2?'Las dos energías se sostienen: se recibe y se hace.':v<2?'Cuando solo vivimos desde el hacer, aparece el exceso de energía masculina.':'Recibir sin hacer también desequilibra: hacen falta las dos.'}</div>
+ ${niBox('d','Sanar','Es volver al equilibrio: recibir y hacer, las dos energías juntas.')}${lvSee('lw15g',[24],'En el gráfico: Exceso de energía masculina.')}</div>`};
+
+/* ----- 7 · Oración y meditación ----- */
+const LW_PR=LU_PRAY.split(/(?<=[.,])\s+(?=las perdono|Las libero|y me uno|Hoy de mi|y las reemplazo)/);
+RICH.lw16=()=>dkH('Cierre de la limpieza','La oración del linaje femenino','La decimos juntas, frase a frase, para cerrar cada limpieza.')+`<div class="ni">${n3pray('lwor',LW_PR)}</div>`;
+RICH.lw17=()=>dkH('Meditación','Conexión con el útero','Lee despacio cada frase y respira entre una y otra.')+`<div class="ni">${n3pray('lwme',['Siéntate cómoda, cierra los ojos y pon tus manos sobre el vientre.','Respira lento y lleva tu atención a tu útero. Imagina allí una luz suave.','Siente detrás de ti a tu madre, a tus abuelas y a todas las mujeres de tu linaje.','Diles en tu interior: «Gracias por la vida. Lo que es de ustedes, se los devuelvo con amor».','Pide recuperar la cualidad que necesitas hoy y siente cómo llena ese espacio.','Respira, agradece y vuelve despacio al presente.'])}</div>`;
+
+/* ----- 8 · Ejemplo, práctica y repaso ----- */
+const LW_EJ=[['Memoria','Ira · abuela materna'],['Limpieza','80 % → 10 %'],['Sector','Recuperar fuerza'],['Para sanar','Perdonar'],['Cierre','Oración del linaje']];
+RICH.lw18=()=>{const s=n3clamp(st('lw18',0),0,5),v=st('lw18v',0);
+ return dkH('Ejemplo','De la memoria a la recuperación','Consultante: C. M., la misma de la Clase 2.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="nj-flow va-5">${LW_EJ.map((x,i)=>`<div class="${i<s?'lit':''}"${i===2||i===3?' style="background:#f6e2ef"':''}><small>${x[0]}</small><b>${x[1]}</b></div>`).join('')}</div>
+ ${s<5?`<div class="dk-cta" style="justify-content:center"><button class="btn btn-primary btn-sm" ${rxa('set','lw18',s+1)}>${s?'Siguiente':'Empezar'}</button></div>`:
+ `<div class="ni-hyp ni-in"><span class="ni-tag">Comprensión posible</span><p>La abuela no pudo defenderse y su fuerza se volvió rabia callada. Hoy la nieta recupera esa fuerza como una <mark>fuerza serena</mark>, que pone límites sin explotar.</p></div>
+ <div class="dk-cta" style="justify-content:center"><button class="btn btn-primary btn-sm" ${rxa('set','lw18v',v?0:1)} ${pressed(!!v)}>${v?'Ocultar el gráfico':'Verlo en el gráfico'}</button><button class="btn btn-ghost btn-sm" ${rxa('set','lw18',0)}>Ver de nuevo</button></div>
+ ${v?`<div class="ni-in" style="max-width:640px;width:100%;justify-self:center">${luChart({hot:(k,i)=>k==='t'&&(i===10||i===13),cap:'Recuperar fuerza y Perdonar.'})}</div>`:''}`}</div>`+niNote('Ejemplo ficticio.')};
+const LW_PS=[['Retoma','La memoria que limpiaste en la tarea.'],['Mide','Tu pareja mide qué sector pide recuperarse y su porcentaje.'],['Oración','Digan juntas la oración del linaje femenino.'],['Vuelve a medir','Y cambien de rol.']];
+RICH.lw19=()=>{const s=n3clamp(st('lw19',0),0,3);
+ return dkH('Práctica y repaso','Práctica en parejas y comprobemos','Cuatro pasos. Después respondan en voz alta y toquen cada tarjeta.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="nj-steps h tg-st4">${LW_PS.map((x,i)=>`<div class="${i<s?'ok':i===s?'cur':''}" style="cursor:pointer" ${rxa('set','lw19',i)}><span class="n">${i<s?'✓':i+1}</span><div><b>${x[0]}</b><p>${x[1]}</p></div></div>`).join('')}</div>
+ <div class="dk-cta" style="justify-content:center;flex-wrap:wrap">${s<3?`<button class="btn btn-primary btn-sm" ${rxa('set','lw19',s+1)}>Siguiente paso</button>`:''}${s===1||s===3?`<button class="btn btn-ghost btn-sm" data-les="${S.lesson[0]},6">Abrir el gráfico</button>`:s===2?`<button class="btn btn-ghost btn-sm" data-les="${S.lesson[0]},24">Abrir la oración</button>`:''}</div>
+ <div class="ni-cp">${n3flip('lwcp',[['vientre','1 · ¿Por qué después de limpiar se recupera?','<b>Porque limpiar deja un espacio libre</b> y recuperar lo llena con lo que el linaje no pudo vivir: fuerza, creatividad, placer y virtudes.'],['diana','2 · ¿Cuáles son los sectores de recuperación?','<b>Los sectores rosados:</b> sexualidad, manifestar creatividad, recuperar virtudes, recuperar fuerza y soltar, confiar y dejar ir. Para sanar: honrar, respetar y perdonar.'],['paloma','3 · ¿Qué es perdonar y qué no es?','<b>Es</b> soltar el peso, liberar y liberarse, a su tiempo. <b>No es</b> justificar, olvidar, volver con quien dañó ni una obligación.']],'c3',260)}</div></div>`};
+
+/* ----- 9 · Tarea ----- */
+RICH.lw20=()=>{const s=st('lwq',-1);
+ return dkH('Cierre de la clase','Tarea para la próxima clase','Recupera una cualidad.')+
+ `<div class="ni dk-grid c2" style="align-items:start"><div class="ni-task">${n3ck('lwta',[['diana','Mide qué sector pide recuperarse y su porcentaje'],['vientre','Haz la meditación de conexión con el útero tres veces en la semana'],['hilos','Di cada día la oración del linaje femenino'],['libro','Anota cómo se manifiesta esa cualidad en tu vida'],['reloj','Vuelve a medir al final de la semana y completa la ficha']],['Marca cada punto cuando lo tengas.','¡Listo! Trae tu ficha a la Clase 4.'])}</div>
+ <div style="display:grid;gap:10px">${niBox('d','Importante','Recuperar lleva su tiempo. Sé amable contigo y observa los pequeños cambios. Trae tu ficha a la Clase 4.')}
+ <div class="dk-sub" style="margin:0">Mi cualidad de la semana</div>${chipRow('lwq',['Sexualidad','Creatividad','Virtudes','Fuerza','Soltar'],s)}
+ <div class="lw-my"><label class="n3-lab">% al inicio<input type="text" data-rsin="lwq0" value="${esc(st('lwq0',''))}" placeholder="0 a 100 %"></label><label class="n3-lab">% al final<input type="text" data-rsin="lwq1" value="${esc(st('lwq1',''))}" placeholder="0 a 100 %"></label></div>
+ ${n3area('lwq2','Cómo se manifiesta en mi vida','Esta semana noté…')}</div></div>`+n3priv};
