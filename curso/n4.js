@@ -1673,3 +1673,211 @@ RICH.td19=()=>`<div class="ni tgx">${nbHero('Formación Transgeneracional','Grac
 .nl-req.td-3{grid-template-columns:repeat(3,minmax(0,1fr))}
 @media (max-width:760px){.nj-proto.td-5,.nl-req.td-3{grid-template-columns:1fr}}
 `;document.head.appendChild(c)})();
+
+/* ---------- Nivel 4 · Especialización Vidas Pasadas · Clase 1 ---------- */
+(function(){const c=document.createElement('style');c.id='va-css';c.textContent=`
+.va-arcs{width:100%;max-width:520px;justify-self:center;display:block}
+.va-arcs path{transition:fill .4s,opacity .4s}.va-arcs text{font:400 13px var(--f-display);text-anchor:middle;fill:#1f3f32}
+.va-arcs .dim{opacity:.35}
+.va-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.va-3>button{all:unset;box-sizing:border-box;cursor:pointer;border-radius:18px;padding:18px;display:grid;gap:8px;align-content:start;border:1px solid var(--nb-line);background:var(--nb-paper);color:var(--nb-ink);animation:niUp .45s both;transition:transform .3s,box-shadow .3s}
+.va-3>button:nth-child(2){animation-delay:.08s}.va-3>button:nth-child(3){animation-delay:.16s}
+.va-3>button.d{background:var(--ni-olv);border-color:var(--ni-olv);color:#ece7d3}.va-3>button.d p{color:#dfe3cf}.va-3>button.d .ni-tag{color:#d9c9ef}
+.va-3>button[aria-pressed="true"]{transform:translateY(-4px);box-shadow:0 0 0 2px var(--ni-lil2)}
+.va-3 h3{margin:0;font:400 1.3rem/1.2 var(--f-display)}.va-3 p{margin:0;line-height:1.5;color:var(--nb-soft);font-size:.92rem}
+.va-g5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.va-g5>button{all:unset;box-sizing:border-box;cursor:pointer;border-radius:16px;overflow:hidden;display:grid;align-content:start;border:1px solid var(--nb-line);background:var(--nb-paper);color:var(--nb-ink);animation:niUp .45s both;transition:transform .3s,box-shadow .3s}
+.va-g5>button img{width:100%;aspect-ratio:611/344;object-fit:cover;background:#fff;display:block}
+.va-g5>button div{padding:12px;display:grid;gap:4px}.va-g5 b{font:400 1.05rem/1.2 var(--f-display)}.va-g5 small{font-size:.8rem;color:var(--nb-soft)}
+.va-g5>button.d{background:var(--ni-olv);border-color:var(--ni-olv);color:#fff}.va-g5>button.d small{color:#dfe3cf}.va-g5>button.d img{border:6px solid var(--ni-olv);border-bottom:0}
+.va-g5>button[aria-pressed="true"]{transform:translateY(-4px);box-shadow:0 0 0 2px var(--ni-lil2)}
+.va-yn{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.va-yn>button{all:unset;box-sizing:border-box;cursor:pointer;border-radius:18px;padding:18px 20px;display:grid;gap:8px;align-content:start;border:1px solid var(--nb-line);background:var(--nb-paper);color:var(--nb-ink);min-height:120px;transition:transform .3s,background .3s,opacity .3s}
+.va-yn>button b{font:400 1.7rem/1 var(--f-display)}.va-yn>button span{line-height:1.5;font-size:.95rem}
+.va-yn>button.va-y[aria-pressed="true"]{background:var(--ni-olv);color:#fff;border-color:var(--ni-olv)}
+.va-yn>button.va-n[aria-pressed="true"]{background:var(--ni-tea);border-color:var(--ni-tea)}
+.va-yn.va-ch>button[aria-pressed="false"]{opacity:.45}
+.va-yn>button[aria-pressed="true"]{transform:translateY(-4px)}
+.va-q{background:var(--ni-olv);color:#fff;border-radius:18px;padding:22px 26px;font:italic 400 1.3rem/1.45 var(--f-display);animation:niUp .5s both}
+.va-ty{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.va-ty>button,.va-ty>div{all:unset;box-sizing:border-box;cursor:pointer;border-radius:16px;padding:14px 16px;display:grid;gap:6px;align-content:start;border:1px solid var(--nb-line);background:var(--nb-paper);color:var(--nb-ink);min-height:112px;animation:niUp .4s both;transition:transform .25s,background .25s}
+.va-ty>button b{font:400 1.12rem/1.2 var(--f-display)}.va-ty span{font-size:.84rem;line-height:1.45;color:var(--nb-soft)}
+.va-ty>button[aria-pressed="true"]{background:#f6d3e6;border-color:#c0628f;transform:translateY(-3px)}
+.va-ty>button[aria-pressed="true"] b::after{content:" ✓";color:#c0628f}
+.va-ty>div{cursor:default;background:var(--ni-olv);border-color:var(--ni-olv);color:#fff}.va-ty>div span{color:#dfe3cf}.va-ty>div b{font:400 1.12rem/1.2 var(--f-display)}
+.va-int{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.va-int>button{all:unset;box-sizing:border-box;cursor:pointer;border-radius:18px;padding:18px;display:grid;gap:8px;align-content:start;min-height:150px;border:1px solid var(--nb-line);transition:transform .3s,box-shadow .3s;animation:niUp .45s both}
+.va-int>button:nth-child(1){background:var(--nb-paper)}.va-int>button:nth-child(2){background:var(--ni-lil);border-color:var(--ni-lil);animation-delay:.08s}.va-int>button:nth-child(3){background:var(--ni-olv);border-color:var(--ni-olv);color:#fff;animation-delay:.16s}
+.va-int>button:nth-child(3) span{color:#dfe3cf}
+.va-int b{font:400 1.25rem/1.2 var(--f-display)}.va-int span{font-size:.9rem;line-height:1.5;color:var(--nb-soft)}
+.va-int>button[aria-pressed="true"]{transform:translateY(-4px);box-shadow:0 0 0 3px #e9c46a}
+.va-int i{display:flex;gap:4px}.va-int i u{display:block;width:18px;height:6px;border-radius:3px;background:currentColor;opacity:.2}.va-int i u.on{opacity:1;background:#c0628f}
+.nj-flow.va-5{grid-template-columns:repeat(5,minmax(0,1fr))}
+.va-calc{display:grid;gap:10px;border-radius:18px;padding:16px 18px;background:var(--nb-paper);border:1px solid var(--nb-line)}
+.va-calc .dk-chips{margin:0}.va-calc small{font:600 .56rem/1 var(--f-caps);letter-spacing:.16em;text-transform:uppercase;color:var(--ni-lil2)}
+.va-res{font:400 1.25rem/1.35 var(--f-display);color:var(--nb-ink)}
+.va-res mark{background:#f7f1c8;padding:0 4px;border-radius:4px}
+@media (max-width:760px){.va-3,.va-yn,.va-int{grid-template-columns:1fr}.va-g5{grid-template-columns:1fr 1fr}.va-ty{grid-template-columns:1fr 1fr}.nj-flow.va-5{grid-template-columns:1fr}.va-q{font-size:1.1rem;padding:18px}}
+`;document.head.appendChild(c)})();
+
+const VA_PH=`${N4P}vidas/c1-portada.webp`;
+const vaPhoto=alt=>`<div class="ni-ph"><img src="${VA_PH}" alt="${alt}"><svg class="ni-arc" viewBox="0 0 200 104" aria-hidden="true"><path pathLength="1" d="M10 100a90 90 0 0 1 180 0" stroke="#f3ecd8" stroke-width="16"/><path pathLength="1" d="M34 100a66 66 0 0 1 132 0" stroke="#d8d8f3" stroke-width="16"/><path pathLength="1" d="M58 100a42 42 0 0 1 84 0" stroke="#f7f1c8" stroke-width="16"/><circle cx="100" cy="100" r="18" fill="#3b4a24"/></svg></div>`;
+const vaGo=(off,t,cls)=>`<button class="btn ${cls||'btn-ghost'} btn-sm" data-les="${S.lesson[0]},${S.lesson[1]+off}">${t}</button>`;
+
+/* el gráfico de Fechas: número · sí · no al centro, esta vida, años del siglo y siglo */
+const VF_N=['0','1','2','3','4','5','6','7','8','9','Sí','No','*'];
+const VF_V=['Gestación','Nacimiento','0 a 7\naños','8 a 14\naños','15 a 21\naños','22 a 35\naños','36 a 50\naños','51 años\no más'];
+const VF_A=['00 a 09','10 a 19','20 a 29','30 a 39','40 a 49','50 a 59','60 a 69','70 a 79','80 a 89','90 a 99'];
+const VF_S=['a. C.','I a V','VI a X','XI a XV','XVI','XVII','XVIII','XIX','XX','XXI'];
+RX.vfc=(k,v)=>{v=+v;const T=(K,x)=>{RS[K]=st(K,-1)===x?-1:x};
+ if(k==='n'){if(v<10)T('vfn',v);else if(v<12)T('vfq',v-10);else T('vfx',1)}else T('vf'+k,v);render(false)};
+const vfSel=(k,i)=>k==='n'?(i<10?st('vfn',-1)===i:i<12?st('vfq',-1)===i-10:st('vfx',-1)===1):st('vf'+k,-1)===i;
+const vfChart=o=>{o=o||{};return niFan({label:'Gráfico de Fechas',act:'vfc',inner:50,sel:vfSel,
+ hot:o.ring||o.hot?(k,i)=>o.hot?(o.hot(k,i)?1:-1):(k===o.ring?0:-1):0,
+ rings:[{k:'n',r0:62,r1:112,items:VF_N,fill:'#fbf8e6',on:'#a08a2a',m:'tan',fs:10},
+  {k:'v',r0:112,r1:178,items:VF_V,fill:'#fbeef4',on:'#c0628f',m:'rad',fs:8.6},
+  {k:'a',r0:178,r1:232,items:VF_A,fill:'#ffffff',on:'#3f7d6e',m:'tan',fs:8.6},
+  {k:'s',r0:232,r1:280,items:VF_S,fill:'#e8e8f8',on:'#5a5ab0',m:'tan',fs:9.5}],cap:o.cap===0?'':o.cap||'Toca un número o Sí / No en el centro, el siglo y los años del siglo.'})};
+const vaRom={'XVI':16,'XVII':17,'XVIII':18,'XIX':19,'XX':20,'XXI':21};
+const vfEpoca=(s,a,short)=>{if(s<0)return '';const S=VF_S[s],c=vaRom[S],A=a>=0?VF_A[a]:'';
+ if(short)return (s===0?'a. C.':'S. '+S)+(A?' · '+A.replace(' a ','–'):'');
+ if(c&&a>=0){const y=(c-1)*100+a*10;return `alrededor de ${y} a ${y+9}`}
+ return (s===0?'antes de Cristo':c?'siglo '+S:'siglos '+S)+(A?', años '+A+' de su siglo':'')};
+const vfRead=()=>{const q=st('vfq',-1),n=st('vfn',-1),s=st('vfs',-1),a=st('vfa',-1);return [q<0?'':q?'No':'Sí',n<0?'':String(n),vfEpoca(s,a,1)]};
+
+/* el gráfico Vidas Pasadas (Investigación): ¿hubo daño? al centro, siete tipos y su intensidad */
+const VI_H=['Sí','No'],VI_T=['Físico','Emocional','Mental','Moral','Mortal','Económico','Espiritual'],VI_I=['Daño menor','Daño mayor','Daño mortal'];
+const VI_TD=['Heridas, golpes o enfermedades en el cuerpo.','Pérdidas, abandono, miedo o desamor.','Creencias impuestas, presión o confusión.','Vergüenza, culpa, juicio o deshonra.','Un daño que terminó con esa vida.','Pobreza, ruina o despojo.','Desconexión, pérdida de la fe o castigo religioso.'];
+RX.vic=(k,v)=>{v=+v;if(k==='t'){const o=st('vit',{});if(o[v])delete o[v];else o[v]=1;RS.vit=o}else{const K='vi'+k;RS[K]=st(K,-1)===v?-1:v}render(false)};
+const viTipos=()=>Object.keys(st('vit',{})).map(Number).sort((a,b)=>a-b);
+const viChart=o=>{o=o||{};return niFan({label:'Gráfico Vidas Pasadas, investigación',act:'vic',inner:50,
+ sel:(k,i)=>k==='t'?!!st('vit',{})[i]:st('vi'+k,-1)===i,
+ hot:o.ring?(k,i)=>k===o.ring?0:-1:0,
+ rings:[{k:'h',r0:62,r1:130,items:VI_H,fill:'#e3e9fa',on:'#4f6fb0',m:'tan',fs:13},
+  {k:'t',r0:130,r1:205,items:VI_T,fill:'#fbeef4',on:'#c0628f',m:'rad',fs:10},
+  {k:'i',r0:205,r1:280,items:VI_I,fill:'#fbf8e6',on:'#a08a2a',m:'tan',fs:11.5}],cap:o.cap===0?'':o.cap||'Toca Sí o No en el centro, uno o más tipos de daño y su intensidad.'})};
+const viRead=()=>{const h=st('vih',-1),i=st('vii',-1);return [h<0?'':VI_H[h],viTipos().map(x=>VI_T[x]).join(', '),i<0?'':VI_I[i].replace('Daño ','')]};
+
+/* ----- 1 · Bienvenida y agenda ----- */
+RICH.va1=()=>`<div class="ni">${nbHero('Especialización Vidas Pasadas · Clase 1','La memoria','del alma','Lo que el alma trae de otras vidas: qué es una vida pasada, para qué se investiga, el encuadre ético y los dos primeros gráficos de la especialización, Fechas e Investigación.',['Memoria del alma','Encuadre ético','Fechas','Investigación'],'Karen Oyarce · Maestra Holística',vaPhoto('Ruinas de piedra con arcos cubiertos de hiedra y musgo en un bosque con niebla'))}</div>`;
+RICH.va2=()=>niAgenda('Clase 1',['Del linaje al alma','Qué es una vida pasada y cómo se expresa','Para qué se investiga y el encuadre ético','Los cinco gráficos de la especialización','Fechas: vida activa, vidas atrás y época','Investigación: daño, tipo e intensidad','Ejemplo y práctica en parejas','Repaso y tarea'],
+ ['Explicar qué es una memoria de vida pasada','Confirmar si hay una vida pasada activa, cuántas vidas atrás y en qué época','Investigar el daño: si lo hubo, tipo e intensidad','Leer con cuidado ético, en hipótesis']);
+
+/* ----- 2 · Del linaje al alma ----- */
+const VA_MI=[['Niño interno','Lo que viví','Las heridas de mi infancia y las máscaras que aprendí.','0,0','Repasar Niño interior'],['Transgeneracional','Lo que heredé','Las memorias, lealtades y votos que llegaron a través del clan.','2,0','Repasar Transgeneracional'],['Vidas pasadas','Lo que mi alma trae','Experiencias de otras vidas que siguen presentes en esta.','','']];
+RICH.va3=()=>{const s=st('va3',-1);
+ const arc=(r,i,t)=>`<path class="${s>=0&&s!==i?'dim':''}" d="M${260-r} 250A${r} ${r} 0 0 1 ${260+r} 250" fill="none" stroke="${['#e6dcf2','#d8d8f3','#3b4a24'][i]}" stroke-width="44"/><text x="260" y="${256-r}" style="${i===2?'fill:#fff':''}">${t}</text>`;
+ return dkH('Tres miradas','Del linaje al alma','Toca cada mirada.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="va-3">${VA_MI.map((x,i)=>`<button class="${i===2?'d':''}" ${rxa('set','va3',s===i?-1:i)} ${pressed(s===i)}><span class="ni-tag">${x[0]}</span><h3>${x[1]}</h3><p>${x[2]}</p></button>`).join('')}</div>
+ <svg class="va-arcs" viewBox="0 0 520 262" aria-hidden="true">${arc(206,2,'Lo que mi alma trae')}${arc(150,1,'Lo que heredé')}${arc(94,0,'Lo que viví')}<circle cx="260" cy="250" r="40" fill="#1f3f32"/><svg x="234" y="216" width="52" height="52" style="color:#ece7d3"><use href="#mark"/></svg></svg>
+ ${s>=0&&VA_MI[s][3]?`<div class="nj-det ni-in"><div><span class="ni-tag">${VA_MI[s][0]}</span><br><b>${VA_MI[s][1]}</b><p>${VA_MI[s][2]}</p></div><button class="btn btn-ghost btn-sm" data-les="${VA_MI[s][3]}">${VA_MI[s][4]}</button></div>`:''}
+ ${niQ('Tres miradas sobre una misma persona.')}
+ ${niBox('l','Pregunta al grupo','¿Hay algo en tu vida que no logras explicar ni por tu infancia ni por tu familia?')}${n3area('va3a','Anota lo tuyo','Algo que no logro explicar es…')}</div>`};
+
+/* ----- 3 · Qué es una vida pasada y cómo se expresa ----- */
+const VA_DEF=[['El alma recuerda','Las experiencias intensas dejan huella más allá de una vida.'],['Lo no resuelto vuelve','Aparece como miedo, patrón o vínculo que se repite.'],['Se puede liberar','Al reconocerlo y limpiarlo, deja de actuar en el presente.']];
+RICH.va4=()=>{const s=n3clamp(st('va4s',0),0,2);
+ return dkH('La memoria del alma','¿Qué es una vida pasada?','Avanza por los tres movimientos.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="ni-hyp"><p>Es una experiencia que el alma vivió antes de esta vida. Lo que quedó sin resolver en ella puede seguir presente hoy como una memoria.</p></div>
+ <div class="tg-flow">${VA_DEF.map((x,i)=>`<button class="${i<=s?'lit':''} ${i===s?'cur':''}" ${rxa('set','va4s',i)}><small>${i+1}</small><b>${x[0]}</b><span>${x[1]}</span></button>`).join('')}</div>
+ ${s<2?`<div class="dk-cta" style="justify-content:center"><button class="btn btn-primary btn-sm" ${rxa('set','va4s',s+1)}>Siguiente</button></div>`:''}
+ ${niBox('l','Pregunta al grupo','¿Qué te gustaría comprender de tu alma en esta especialización?')}${n3area('va4a','Anota lo tuyo','Me gustaría comprender…')}</div>`};
+RICH.va5=()=>dkH('Señales','Cómo puede expresarse hoy','Seis señales posibles. Toca cada tarjeta.')+
+ `<div class="ni" style="display:grid;gap:14px">${n3flip('va5',[['rayo','Miedos sin origen','Al agua, al fuego, a la altura o a la oscuridad, sin una causa en esta vida.'],['espiral','Patrones que se repiten','Situaciones que vuelven una y otra vez, aunque cambien las personas.'],['camino','Afinidades','Lugares, épocas, idiomas u oficios que atraen sin saber por qué.'],['enlace','Vínculos intensos','Personas que sentimos conocer desde siempre, para bien o para mal.'],['persona','Sensaciones en el cuerpo','Molestias sin explicación aparente, siempre después de consultar a un profesional.'],['nudo','Votos que pesan','Renuncias que se cumplen sin haberlas elegido: al amor, al dinero, a la voz.']],'c3',180)}
+ ${niBox('d','Son señales posibles, no pruebas','Este trabajo no reemplaza la atención médica ni psicológica.')}</div>`;
+
+/* ----- 4 · Para qué se investiga y el encuadre ético ----- */
+RICH.va6=()=>dkH('El propósito','Para qué se investiga','¿Para sanar o no? Lleva cada motivo a su columna.')+
+ niSort('vasa',[['Comprender un patrón que se repite',0],['Satisfacer la curiosidad',1],['Liberar un miedo sin origen',0],['Buscar si fuimos alguien famoso',1],['Sanar un vínculo difícil',0],['Alimentar fantasías o historias',1],['Anular un voto que limita',0],['Culpar a alguien por lo que pasó en otra vida',1]],
+ [['Para sanar','','t','Para sanar'],['No para','','l','No para']],'Investigamos para sanar, no por curiosidad.','Mira otra vez: ¿ese motivo ayuda a sanar algo de hoy?');
+const VA_ET=[['check','Pedir siempre el consentimiento de la persona'],['chat','Hablar en hipótesis: «el gráfico muestra una posible…»'],['xcirc','No agregar detalles imaginados ni nombres de personajes históricos'],['balanza','No culpar a nadie por lo que pasó en otra vida'],['corazon','Recordar que no reemplaza la atención médica ni psicológica'],['escudo','Ante un tema sensible, detenerse y derivar a un profesional']];
+RICH.va7=()=>dkH('El encuadre ético','El encuadre ético','Seis acuerdos para cada sesión. Márcalos a medida que los conversan.')+
+ `<div class="ni dk-split" style="align-items:start"><div>${n3ck('vaet',VA_ET,['Marca cada acuerdo.','Este es el encuadre de cada sesión de vidas pasadas.'])}</div>
+ <div class="ni-obj"><span class="ni-tag" style="color:#d9c9ef">Recuerda</span><p style="margin:0;font:italic 400 1.15rem/1.5 var(--f-display);color:#ece7d3">Lo que aparece en el gráfico es una posibilidad. La persona la confirma o la descarta con lo que siente y sabe de sí misma.</p></div></div>`;
+
+/* ----- 5 · Los cinco gráficos ----- */
+const VA_G=[['fechas','Fechas','Clases 1 y 2','Si hay una vida pasada activa, cuántas vidas atrás, en qué época y cuándo se activó en esta vida.',5],['investigacion','Investigación','Clase 1','Si hubo daño o herida en esa vida, de qué tipo y con qué intensidad.',6],['anexo','Anexo','Clase 2 · opcional','Más detalles de esa vida, solo si hace falta.',0],['muerte','Causas de Muerte','Clase 3','Cuando el daño fue mortal.',0],['votos','Votos o Pactos','Clase 3','Los votos y pactos que vienen de otras vidas.',0]];
+RICH.va8=()=>{const s=st('va8',-1);
+ return dkH('La especialización','Los cinco gráficos de la especialización','Toca un gráfico para saber cuándo lo usamos.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="va-g5">${VA_G.map((x,i)=>`<button class="${i<2?'d':''}" ${rxa('set','va8',s===i?-1:i)} ${pressed(s===i)} style="animation-delay:${i*.07}s"><img src="${N4P}vidas/g-${x[0]}.webp" alt="Miniatura del gráfico ${x[1]}" loading="lazy"><div><b>${x[1]}</b><small>${x[2]}</small></div></button>`).join('')}</div>
+ ${s>=0?`<div class="nj-det ni-in"><div><span class="ni-tag">${VA_G[s][2]}</span><br><b>${VA_G[s][1]}</b><p>${VA_G[s][3]}</p></div>${VA_G[s][4]?`<button class="btn btn-primary btn-sm" data-les="${S.lesson[0]},${VA_G[s][4]}">Verlo ahora</button>`:''}</div>`:''}
+ ${niQ('Hoy: Fechas e Investigación.')}</div>`};
+
+/* ----- 6 · Fechas ----- */
+const VF_RG=[['n','Número · Sí · No','Sí o no, y cuántas vidas atrás (0 a 9).'],['v','Esta vida','En qué etapa se activó. Lo vemos en la Clase 2.'],['a','Años del siglo','La década dentro del siglo.'],['s','Siglo','Desde antes de Cristo hasta el siglo XXI.']];
+RICH.va9=()=>{const s=st('va9',-1);
+ return dkH('Fechas','El gráfico de Fechas','Cuatro anillos, de adentro hacia afuera. Toca un anillo para verlo o explora el gráfico.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="tc-side"><div class="nj-fig">${niOrig('va9O','vidas/fechas.webp','Lámina original del gráfico de Fechas de Casa Muladhara',vfChart({ring:s>=0?VF_RG[s][0]:null,cap:s>=0?0:undefined}))}</div>
+ <div style="display:grid;gap:10px">${tbList('va9',VF_RG.map(x=>`<b>${x[1]}</b> · ${x[2]}`))}${tcRow(['Vida activa','Vidas atrás','Época'],vfRead())}</div></div>
+ ${niQ('Se pregunta del centro hacia afuera: primero si hay una vida activa, después cuántas vidas atrás y al final la época.')}</div>`};
+RICH.va10=()=>{const q=st('vfq',-1);
+ return dkH('Paso 1','¿Hay una vida pasada activa?','Pregúntalo en el centro del gráfico de Fechas. Toca la respuesta.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="va-q">«¿Hay una vida pasada que influye hoy en este motivo de consulta?»</div>
+ <div class="va-yn${q>=0?' va-ch':''}"><button class="va-y" ${rxa('vfc','n',10)} ${pressed(q===0)}><b>Sí</b><span>Seguimos: cuántas vidas atrás y en qué época.</span></button><button class="va-n" ${rxa('vfc','n',11)} ${pressed(q===1)}><b>No</b><span>El motivo se mira con otras herramientas, como Niño Interno o Transgeneracional.</span></button></div>
+ ${q===0?`<div class="dk-cta ni-in" style="justify-content:center"><button class="btn btn-primary btn-sm" data-slide="2">Seguir al paso 2</button></div>`:q===1?`<div class="nj-det ni-in"><div><span class="ni-tag">Otras herramientas</span><br><b>Niño Interno o Transgeneracional</b></div><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" data-les="0,0">Niño interior</button><button class="btn btn-ghost btn-sm" data-les="2,0">Transgeneracional</button></div></div>`:''}
+ <div style="max-width:560px;width:100%;justify-self:center">${vfChart({hot:(k,i)=>k==='n'&&i>9&&i<12,cap:'Sí y No están en el centro, junto a los números.'})}</div>
+ ${niQ('Una pregunta clara, una respuesta clara.')}</div>`};
+RX.vfex=()=>{RS.vfs=6;RS.vfa=4;render(false)};
+RICH.va11=()=>{const n=st('vfn',-1),s=st('vfs',-1),a=st('vfa',-1),T=(K,i,t)=>`<button class="chip" ${rxa('vfc',K,i)} ${pressed(st('vf'+K,-1)===i)}>${t}</button>`;
+ return dkH('Pasos 2 y 3','¿Cuántas vidas atrás y en qué época?','Marca el número en el centro y después el siglo y los años del siglo.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="tc-side"><div class="nj-fig">${vfChart({ring:n<0?'n':s<0?'s':'a',cap:0})}</div>
+ <div class="va-calc"><small>Paso 2 · Centro · Cuántas vidas atrás</small><p style="margin:0;font-size:.88rem;color:var(--nb-soft)">Del 0 al 9. El 1 es la vida inmediatamente anterior.</p><div class="dk-chips">${VF_N.slice(0,10).map((t,i)=>T('n',i,t)).join('')}</div>
+ <small>Paso 3 · Anillos exteriores · Siglo</small><div class="dk-chips">${VF_S.map((t,i)=>T('s',i,t)).join('')}</div>
+ <small>Años del siglo</small><div class="dk-chips">${VF_A.map((t,i)=>T('a',i,t)).join('')}</div></div></div>
+ ${n>=0||s>=0?`<div class="ni-hyp ni-in"><span class="ni-tag">Tu lectura</span><p>${n>=0?`<mark>${n===0?'En esta misma vida':n===1?'La vida inmediatamente anterior':n+' vidas atrás'}</mark>`:'Marca cuántas vidas atrás'}${s>=0?`, ${vfEpoca(s,a)}`:''}.</p></div>`:''}
+ <div class="nj-det"><div><span class="ni-tag">Ejemplo</span><p style="font-size:1rem">Siglo XVIII + años 40 a 49 = una vida alrededor de 1740 a 1749.</p></div><button class="btn btn-ghost btn-sm" ${rxa('vfex',0)}>Probar el ejemplo</button></div></div>`};
+
+/* ----- 7 · Investigación ----- */
+const VI_RG=[['h','1. ¿Hubo daño o herida?','Sí o no, en el centro.'],['t','2. Tipo de daño','Siete tipos, en el anillo del medio.'],['i','3. Intensidad del daño','Menor, mayor o mortal, en el anillo exterior.']];
+RICH.va12=()=>{const s=st('va12',-1);
+ return dkH('Investigación','El gráfico Vidas Pasadas (Investigación)','Tres anillos. Toca un paso para verlo o explora el gráfico.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="tc-side"><div class="nj-fig">${niOrig('va12O','vidas/investigacion.webp','Lámina original del gráfico Vidas Pasadas, investigación, de Casa Muladhara',viChart({ring:s>=0?VI_RG[s][0]:null,cap:s>=0?0:undefined}))}</div>
+ <div style="display:grid;gap:10px">${tbList('va12',VI_RG.map(x=>`<b>${x[1]}</b> · ${x[2]}`))}${tcRow(['Daño','Tipo','Intensidad'],viRead())}</div></div>
+ ${niQ('Se lee de adentro hacia afuera.')}</div>`};
+RICH.va13=()=>{const h=st('vih',-1);
+ return dkH('Paso 4','¿Hubo daño o herida?','Pregúntalo en el centro del gráfico de Investigación. Toca la respuesta.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="va-yn${h>=0?' va-ch':''}"><button class="va-y" ${rxa('vic','h',0)} ${pressed(h===0)}><b>Sí</b><span>Seguimos con el tipo de daño y su intensidad.</span></button><button class="va-n" ${rxa('vic','h',1)} ${pressed(h===1)}><b>No</b><span>Esa vida puede traer un don o un aprendizaje. Se reconoce y se agradece.</span></button></div>
+ ${h===0?`<div class="dk-cta ni-in" style="justify-content:center"><button class="btn btn-primary btn-sm" data-slide="2">Seguir al paso 5</button></div>`:h===1?niQ('Un don de otra vida también es una memoria del alma: se reconoce y se agradece.'):''}
+ <div style="max-width:560px;width:100%;justify-self:center">${viChart({ring:'h',cap:0})}</div>
+ ${niBox('l','Pregunta al grupo','¿Qué don podrías haber traído de otra vida?')}${n3area('va13a','Anota el tuyo','Un don que siento que traigo es…')}</div>`};
+RICH.va14=()=>{const T=viTipos();
+ return dkH('Paso 5','Los siete tipos de daño','Toca cada tipo que marque el péndulo. Puede haber más de uno.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="va-ty">${VI_T.map((t,i)=>`<button ${rxa('vic','t',i)} ${pressed(T.includes(i))} style="animation-delay:${i*.05}s"><b>${t}</b><span>${VI_TD[i]}</span></button>`).join('')}<div><b>Puede haber más de uno</b><span>Se pregunta por cada tipo hasta que el péndulo indique que no hay más.</span></div></div>
+ <div class="tc-side"><div class="nj-fig">${viChart({ring:'t',cap:0})}</div>
+ <div style="display:grid;gap:10px">${T.length?niBox('l',T.length===1?'Marcaste un tipo':`Marcaste ${T.length} tipos`,T.map(x=>VI_T[x]).join(', ')+'.'):niNote('Lo que marques aquí aparece también en el gráfico.')}${T.includes(4)?niBox('d','Daño mortal','Si el tipo es mortal, la intensidad también lo será. La causa de muerte se investiga en la Clase 3.'):''}</div></div></div>`};
+RICH.va15=()=>{const i=st('vii',-1);
+ return dkH('Paso 6','La intensidad del daño','Toca la intensidad que marque el péndulo en el anillo exterior.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="va-int">${[['Daño menor','Dejó una marca leve en esa vida.'],['Daño mayor','Marcó esa vida de forma importante.'],['Daño mortal','Terminó con esa vida. Se completa en la Clase 3 con Causas de Muerte.']].map((x,k)=>`<button ${rxa('vic','i',k)} ${pressed(i===k)}><i>${[0,1,2].map(j=>`<u class="${j<=k?'on':''}"></u>`).join('')}</i><b>${x[0]}</b><span>${x[1]}</span></button>`).join('')}</div>
+ <div style="max-width:560px;width:100%;justify-self:center">${viChart({ring:'i',cap:0})}</div>
+ ${niQ('A mayor intensidad, más cuidado al comunicar.')}</div>`};
+RICH.va16=()=>{const f=vfRead(),v=viRead(),R=[f[0],f[1],f[2],v[0],[v[1],v[2]].filter(Boolean).join(' · ')];
+ return dkH('Lectura','Cómo se lee','Siempre en el mismo orden. Abajo aparece lo que marcaste en los dos gráficos.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="nj-flow va-5">${[['Vida activa','Sí o no.'],['Vidas atrás','Del 0 al 9.'],['Época','Siglo y años.'],['Daño','Sí o no.'],['Tipo e intensidad','Uno o más tipos; menor, mayor o mortal.']].map((x,i)=>`<div class="lit" style="animation:niUp .45s ${i*.1}s both"><small>Paso ${i+1}</small><b>${x[0]}</b><span>${x[1]}</span><span style="font:400 1rem var(--f-display);color:${i===4?'#f2c66d':'var(--ni-lil2)'}">${R[i]||'—'}</span></div>`).join('')}</div>
+ ${R.every(Boolean)&&f[0]==='Sí'&&v[0]==='Sí'?`<div class="ni-hyp ni-in"><span class="ni-tag">Tu lectura, en hipótesis</span><p>El gráfico muestra una posible vida pasada activa, <mark>${f[1]==='1'?'la vida anterior':f[1]+' vidas atrás'}</mark>, ${vfEpoca(st('vfs',-1),st('vfa',-1))}, con un daño de tipo <mark>${v[1].toLowerCase().replace(/, ([^,]*)$/,' y $1')}</mark> y de intensidad <mark>${v[2]}</mark>.</p></div>`:
+ `<div class="dk-cta" style="justify-content:center">${vaGo(-1,'Marcar en Fechas')}<button class="btn btn-ghost btn-sm" data-slide="0">Marcar en Investigación</button></div>`}
+ ${niBox('l','Después','Limpiar lo encontrado como aprendiste en Radiestesia y Sanación del Alma.')}</div>`};
+
+/* ----- 8 · Ejemplo y práctica en parejas ----- */
+const VA_EJ=[['Vida activa','Sí'],['Vidas atrás','3'],['Época','Siglo XVII · 20 a 29'],['Daño','Sí'],['Tipo e intensidad','Físico · mortal']];
+RX.vaex=()=>{RS.vfq=0;RS.vfn=3;RS.vfs=5;RS.vfa=2;RS.vih=0;RS.vit={0:1};RS.vii=2;RS.va17v=1;render(false)};
+RICH.va17=()=>{const s=n3clamp(st('va17',0),0,5),v=st('va17v',0);
+ return dkH('Ejemplo','Ejemplo de lectura','Consultante: P. R., miedo intenso al agua desde niña, sin ningún hecho que lo explique.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="nj-flow va-5">${VA_EJ.map((x,i)=>`<div class="${i<s?'lit':''}"><small>${x[0]}</small><b>${x[1]}</b></div>`).join('')}</div>
+ ${s<5?`<div class="dk-cta" style="justify-content:center"><button class="btn btn-primary btn-sm" ${rxa('set','va17',s+1)}>${s?'Siguiente':'Empezar'}</button></div>`:
+ `<div class="ni-hyp ni-in"><span class="ni-tag">Comprensión posible</span><p>Hace tres vidas, alrededor de 1620, un daño físico terminó con esa vida. El miedo al agua puede ser la memoria de ese final.</p></div>
+ <div class="dk-cta" style="justify-content:center">${v?'':`<button class="btn btn-primary btn-sm" ${rxa('vaex',0)}>Verlo en los gráficos</button>`}<button class="btn btn-ghost btn-sm" ${rxa('set','va17',0)}>Ver de nuevo</button></div>
+ ${v?`<div class="dk-grid c2 ni-in" style="align-items:start"><div>${vfChart({cap:'Fechas: Sí, 3, siglo XVII, años 20 a 29.'})}</div><div>${viChart({cap:'Investigación: Sí, físico, daño mortal.'})}</div></div>`:''}`}</div>`+niNote('La causa de muerte se investiga en la Clase 3. Ejemplo ficticio.')};
+const VA_PS=[['Elige un tema','Un tema liviano que quieras mirar. Pide consentimiento.'],['Fechas','Tu pareja pregunta: vida activa, vidas atrás y época.'],['Investigación','Luego: daño, tipo e intensidad.'],['Limpien y cambien','Limpien lo encontrado, completen la ficha y cambien de rol.']];
+RICH.va18=()=>{const s=n3clamp(st('va18',0),0,3);
+ return dkH('Práctica en parejas','Práctica en parejas','Cuatro pasos. El botón llena la ficha con lo que marcaste en los gráficos.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="nj-steps h tg-st4">${VA_PS.map((x,i)=>`<div class="${i<s?'ok':i===s?'cur':''}" style="cursor:pointer" ${rxa('set','va18',i)}><span class="n">${i<s?'✓':i+1}</span><div><b>${x[0]}</b><p>${x[1]}</p></div></div>`).join('')}</div>
+ ${s<3?`<div class="dk-cta" style="justify-content:center"><button class="btn btn-primary btn-sm" ${rxa('set','va18',s+1)}>Siguiente paso</button></div>`:''}
+ ${s===1||s===2?`<div class="dk-cta" style="justify-content:center">${s===1?vaGo(-2,'Abrir Fechas'):vaGo(-1,'Abrir Investigación')}</div>`:''}
+ ${niFicha('vaf',['Fecha','Consultante','Motivo','Vida activa','Vidas atrás','Época','Daño','Tipo','Intensidad'],['Ej.: 04/11','P. R.','Miedo al agua','Sí','3','S. XVII · 20–29','Sí','Físico','Mortal'],()=>{const f=vfRead(),v=viRead();return [tbHoy(),'','',f[0],f[1],f[2],v[0],v[1],v[2]?v[2][0].toUpperCase()+v[2].slice(1):'']},980)}</div>`+niNote('Usa iniciales; la primera fila es un ejemplo ficticio.')};
+
+/* ----- 9 · Repaso y tarea ----- */
+RICH.va19=()=>dkH('Repaso en voz alta','Comprobemos lo aprendido','Respondan en voz alta y compartan cómo llegaron a su respuesta. Después toquen cada tarjeta.')+
+ `<div class="ni ni-cp">${n3flip('vacp',[['arbol','1 · ¿En qué se diferencia una memoria transgeneracional de una vida pasada?','<b>La transgeneracional viene del clan:</b> lo que vivieron padres, abuelos y bisabuelos. <b>La vida pasada es del alma:</b> una experiencia que ella misma vivió antes de esta vida.'],['camino','2 · ¿En qué orden se investiga una vida pasada?','<b>Vida activa, vidas atrás, época, daño, y tipo e intensidad.</b> Primero Fechas, después Investigación.'],['reloj','3 · El péndulo marca siglo XVIII y años 40 a 49. ¿En qué época fue esa vida?','<b>Alrededor de 1740 a 1749.</b> Primero el siglo, después los años del siglo.']],'c3',260)}</div>`;
+RICH.va20=()=>dkH('Cierre de la clase','Tarea para la próxima clase','Investiga una vida pasada en ti.')+
+ `<div class="ni dk-grid c2" style="align-items:start"><div class="ni-task">${n3ck('vata',[['diana','Elige un tema propio que quieras comprender'],['check','Pregunta si hay una vida pasada activa en ese tema'],['reloj','Mide cuántas vidas atrás y en qué época'],['lupa','Investiga el daño: si lo hubo, tipo e intensidad'],['limpia','Limpia lo encontrado y completa la ficha']],['Marca cada punto cuando lo tengas.','¡Listo! Trae tu ficha a la Clase 2.'])}</div>
+ <div style="display:grid;gap:10px">${niBox('d','Importante','Elige un tema liviano. Si aparece un daño mortal, anótalo y no profundices: lo veremos en la Clase 3. Trae tu ficha.')}<div class="dk-cta">${vaGo(-1,'Abrir mi ficha')}</div></div></div>`;
