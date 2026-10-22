@@ -2195,3 +2195,113 @@ RICH.vc20=()=>dkH('Repaso en voz alta','Comprobemos lo aprendido','Respondan en 
 RICH.vc21=()=>dkH('Cierre de la clase','Tarea para la próxima clase','Cierra la historia de tu vida pasada.')+
  `<div class="ni dk-grid c2" style="align-items:start"><div class="ni-task">${n3ck('vcta',[['reloj','Si hubo daño mortal, mide la causa y la edad al morir'],['nudo','Pregunta si esa vida dejó un voto: cuál, nivel y escala'],['limpia','Limpia lo encontrado y verifica'],['paloma','Anula el voto con la oración de Votos'],['corazon','Agradece a esa vida y completa la ficha']],['Marca cada punto cuando lo tengas.','¡Listo! Trae tu ficha a la Clase 4.'])}</div>
  <div style="display:grid;gap:10px">${niBox('d','Importante','Hazlo en un momento tranquilo. Si algo te remueve mucho, detente y pide apoyo. Trae tu ficha a la Clase 4.')}<div class="dk-cta">${vaGo(-1,'Abrir mi ficha')}</div></div></div>`;
+
+/* ---------- Nivel 4 · Especialización Vidas Pasadas · Clase 4 ---------- */
+const vdPhoto=alt=>`<div class="ni-ph"><img src="${N4P}vidas/c4-portada.webp" alt="${alt}"><svg class="ni-arc" viewBox="0 0 200 104" aria-hidden="true"><path pathLength="1" d="M10 100a90 90 0 0 1 180 0" stroke="#f3ecd8" stroke-width="16"/><path pathLength="1" d="M34 100a66 66 0 0 1 132 0" stroke="#d6e8e2" stroke-width="16"/><path pathLength="1" d="M58 100a42 42 0 0 1 84 0" stroke="#b9a3f1" stroke-width="16"/><circle cx="100" cy="100" r="18" fill="#3b4a24"/></svg></div>`;
+
+/* ----- 1 · Bienvenida y agenda ----- */
+RICH.vd1=()=>`<div class="ni">${nbHero('Especialización Vidas Pasadas · Clase 4','La sesión','de vidas pasadas','Todo lo aprendido se integra en una sesión completa: antes, durante y después, cómo comunicar en hipótesis y sin fantasía, cuándo derivar y la evaluación práctica.',['Encuadre','Protocolo','Cierre','Evaluación'],'Karen Oyarce · Maestra Holística',vdPhoto('Una mujer de perfil, con los ojos cerrados, entre columnas antiguas cubiertas de hiedra al atardecer'))}</div>`;
+RICH.vd2=()=>niAgenda('Clase 4',['Revisión de la tarea','El camino recorrido','La sesión: antes, durante y después','Comunicar y cuidar','Cierre y ficha de sesión','Demostración y evaluación práctica','Tres miradas y repaso','Certificación y cuidado de la facilitadora','Ritual, oración y cierre'],
+ ['Realizar una sesión de vidas pasadas completa','Comunicar en hipótesis, sin fantasía','Cuidar los temas sensibles y derivar','Aprobar la evaluación práctica']);
+
+/* ----- 2 · Revisión de la tarea ----- */
+RICH.vd3=()=>dkH('Lo que trajiste','Revisemos la tarea de la semana','El cierre de tu vida pasada. Marca las preguntas a medida que las conversan.')+
+ `<div class="ni dk-grid c2" style="align-items:start"><div class="nj-card l ni-in" style="min-height:0"><h3>El cierre de tu vida pasada</h3>${n3ck('vdt1',[['reloj','¿Apareció una causa de muerte? ¿A qué edad?'],['nudo','¿Qué voto encontraste, con qué nivel y escala?'],['voz','¿Cómo te sentiste al decir la oración de Votos?'],['hoja','¿Qué cambió en ti durante la semana?'],['chat','¿Qué duda te quedó?']])}</div>
+ <div style="display:grid;gap:10px"><div class="dk-sub">Lo que marcaste en los gráficos</div>${tcRow(['Causa','Edad al morir'],vmRead())}${tcRow(['Voto','Nivel','Escala'],vvRead())}<div class="dk-cta" style="flex-wrap:wrap"><button class="btn btn-ghost btn-sm" data-les="${S.lesson[0]},21">Causas de Muerte</button><button class="btn btn-ghost btn-sm" data-les="${S.lesson[0]},23">Votos o Pactos</button></div></div></div>`+
+ niNote('Compartir es voluntario. Lo que se dice en el grupo, queda en el grupo.');
+
+/* ----- 3 · El camino recorrido ----- */
+const VD_CA=[['Clase 1','La memoria del alma','Vida activa, vidas atrás, época, daño, tipo e intensidad.',0],['Clase 2','Quién fui y con quién','El anexo, los vínculos kármicos y cuándo se activó en esta vida.',9],['Clase 3','Cómo terminó y qué prometí','Causas de muerte, votos de otras vidas y su oración.',18],['Clase 4','La sesión completa','Antes, durante y después; comunicación, cuidado y evaluación.',27]];
+RICH.vd4=()=>dkH('El camino recorrido','El camino recorrido','Toca una clase para volver a ella.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="nl-path">${VD_CA.map((x,i)=>`<button data-les="${S.lesson[0]},${x[3]}" style="animation-delay:${i*.12}s"><small>${x[0]}</small><b>${x[1]}</b><span>${x[2]}</span><em>${i<3?'Repasar':'Hoy'}</em></button>`).join('')}</div>
+ ${niQ('Hoy todo se integra en una sesión completa.')}</div>`;
+
+/* ----- 4 · La sesión: antes, durante y después ----- */
+const VD_MO=[['Antes','Unos 10 minutos',10,['Encuadre y consentimiento','Motivo de consulta','Oración de conexión'],'#e6dcf2','#3b2a5a'],['Durante','Unos 40 minutos',40,['Fechas e Investigación','Anexo y Causas de Muerte si hace falta','Votos, limpieza y verificación'],'#3b4a24','#ece7d3'],['Después','Unos 10 minutos',10,['Volver al presente','Comunicar en hipótesis','Oraciones y ficha'],'#d6e8e2','#1f3f32']];
+RICH.vd5=()=>{const s=st('vdmo',-1);
+ return dkH('La sesión','La sesión en tres momentos','Una hora de sesión. Toca un momento en la barra.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="nl-bar">${VD_MO.map((x,i)=>`<button ${rxa('set','vdmo',s===i?-1:i)} ${pressed(s===i)} style="flex:${x[2]};background:${x[4]};color:${x[5]}">${x[0]} · ${x[2]} min</button>`).join('')}</div>
+ <div class="nl-mom">${VD_MO.map((x,i)=>`<div class="${s<0?'':s===i?'on':'off'}" style="background:${x[4]};color:${x[5]}"><h3>${x[0]}</h3><small>${x[1]}</small><ul>${x[3].map((y,j)=>`<li style="animation-delay:${j*.08}s">${y}</li>`).join('')}</ul></div>`).join('')}</div></div>`+
+ niNote('Tiempos de referencia para una sesión de una hora.')};
+RICH.vd6=()=>dkH('Momento 1','Antes: el encuadre','Marca cada paso a medida que lo haces.')+
+ `<div class="ni nl-say"><div>${n3ck('vdan',[['persona','Presentarte y explicar en qué consiste el trabajo con vidas pasadas'],['escudo','Aclarar lo que no es: no reemplaza una terapia ni la atención médica'],['candado','Explicar la confidencialidad y pedir el consentimiento'],['chat','Preguntar el motivo de consulta: qué le gustaría comprender'],['ojo','Recordar que lo que aparezca es una posibilidad'],['loto','Abrir con la oración de conexión']],['Sigue el orden: el encuadre va antes de medir.','¡Encuadre completo! Ya puedes empezar con Fechas.'])}</div>
+ <div class="nl-frase"><span class="ni-tag">Frase para empezar</span><p>«Vamos a mirar si hay una experiencia de tu alma que influye en lo que vives hoy. Lo que aparezca es una posibilidad que tú confirmas o descartas. ¿Estás de acuerdo en que comencemos?»</p></div></div>`;
+const VD_DU=[['Paso 1','Fechas','Vida activa, vidas atrás y época.',0,[['Abrir Fechas',5]]],['Paso 2','Investigación','Daño, tipo e intensidad.',0,[['Abrir Investigación',6]]],['Paso 3 · si hace falta','Anexo','Solo si falta completar la historia.',1,[['Abrir el anexo',11]]],['Paso 4 · si hace falta','Causas de Muerte','Si el daño fue mortal: causa y edad al morir.',1,[['Abrir Causas de Muerte',21]]],['Paso 5 · si hace falta','Votos o Pactos','Si aparece un voto: nivel y escala.',1,[['Abrir Votos',23]]],['Paso 6','Limpiar y verificar','Como aprendiste; los votos, con su oración.',2,[['Oración de Votos',24]]]];
+RICH.vd7=()=>{const s=n3clamp(st('vddu',0),0,5),x=VD_DU[s];
+ return dkH('Momento 2','Durante: el protocolo completo','Seis pasos. Toca uno para verlo o repasarlo.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="nj-proto vd-6">${VD_DU.map((p,i)=>`<button class="${p[3]===1?'vd-opt':p[3]===2?'new':''}" ${rxa('set','vddu',i)} ${pressed(i===s)} style="animation-delay:${i*.08}s"><small>${p[0]}</small><b>${p[1]}</b><span>${p[2]}</span></button>`).join('')}</div>
+ <div class="nj-det"><div><span class="ni-tag">${x[0]}</span><br><b>${x[1]}</b><p>${x[2]}</p></div><div style="display:flex;gap:6px;flex-wrap:wrap">${x[4].map(b=>`<button class="btn btn-ghost btn-sm" data-les="${S.lesson[0]},${b[1]}">${b[0]}</button>`).join('')}</div></div>
+ ${niBox('l','Solo los gráficos que hagan falta.','La sesión es una conversación, no una lectura en voz alta.')}</div>`};
+
+/* ----- 5 · Comunicar y cuidar ----- */
+RICH.vd8=()=>dkH('Comunicación','Comunicar en hipótesis y sin fantasía','¿Se dice así o se evita? Lleva cada frase a su columna.')+
+ niSort('vdco',[['«El gráfico muestra una posible vida en el siglo XVII, con un daño emocional. ¿Te hace sentido?»',0],['«Fuiste una princesa egipcia.»',1],['«¿Qué sientes al escuchar esto?»',0],['«Tu pareja te hizo daño en otra vida.»',1],['«Esa vida ya terminó; hoy puedes soltar lo que quedó.»',0],['«Por eso estás enferma.»',1],['«Esta sesión te libera de todo tu karma.»',1]],
+ [['Decir así','','t','Decir así'],['Evitar','','l','Evitar']],'Hablamos en hipótesis, sin agregar detalles, sin culpar y sin prometer resultados.','Mira otra vez: ¿la frase habla en hipótesis o agrega detalles, culpa o promete?');
+const VD_DO=['Detener la lectura y no profundizar','Volver al presente: respirar, sentir los pies, mirar el lugar','Sugerir la ayuda de un profesional de salud','Ante riesgo inmediato, contactar a los servicios de emergencia'];
+RICH.vd9=()=>{const o=st('vdse',{}),on=Object.values(o).some(Boolean);
+ return dkH('Cuidado','Temas sensibles y derivación','Marca una señal de alerta para ver qué hacer.')+
+ `<div class="ni nl-alert"><div class="nj-card" style="background:#f6e2e8;color:#5a2a3a"><h3>Señales de alerta</h3>${n3ck('vdse',[['escudo','La persona relata una violencia que vive hoy'],['gota','Angustia intensa que no baja con el cierre'],['xcirc','Ideas de hacerse daño'],['rayo','Confunde la vida pasada con lo que vive hoy']])}</div>
+ <div class="nj-card" style="background:var(--ni-olv);color:#ece7d3"><h3>Qué hacer</h3><div class="nl-do${on?' on':''}">${VD_DO.map((x,i)=>`<div style="animation-delay:${i*.12}s"><span class="n">${i+1}</span><span>${x}</span></div>`).join('')}</div>${on?'':'<p style="margin:0;color:#dfe3cf;font-size:.86rem">Marca una señal a la izquierda.</p>'}</div></div>`+
+ `<div class="ni">${niQ('Acompañar también es saber cuándo derivar.')}</div>`};
+
+/* ----- 6 · Cierre y ficha de sesión ----- */
+RICH.vd10=()=>dkH('Momento 3','Después: cierre de la sesión','Marca cada paso a medida que lo haces.')+
+ `<div class="ni nl-say"><div>${n3ck('vdde',[['hoja','Volver al presente: respirar, sentir los pies, abrir los ojos'],['chat','Resumir la lectura en una frase y preguntar cómo se siente'],['voz','Si hubo votos, decir juntas la oración de Votos'],['paloma','Agradecer a esa vida y al comité espiritual'],['libro','Registrar la ficha y sugerir descanso, agua y escribir lo vivido']],['Cierra con calma, sin apurar.','¡Sesión cerrada con cuidado!'])}
+ <div class="dk-cta" style="flex-wrap:wrap;margin-top:8px"><button class="btn btn-ghost btn-sm" data-les="${S.lesson[0]},24">Oración de Votos</button></div></div>
+ <div class="nl-frase d"><span class="ni-tag">Frase para cerrar</span><p>«Esa vida ya terminó y hoy pudiste mirarla con amor. Lo que reconociste ya no tiene que repetirse. ¿Cómo te sientes ahora?»</p></div></div>`;
+RICH.vd11=()=>dkH('Registro','Ficha de sesión de vidas pasadas','Vida pasada: vidas atrás · siglo · años. Muerte: causa · edad. Voto: cuál · nivel · escala. El botón la llena con lo que marcaste en los gráficos.')+
+ `<div class="ni" style="display:grid;gap:12px">${niFicha('vdf',['Fecha','Consultante','Motivo','Vida pasada','Daño','Anexo','Muerte','Voto','Verificada'],['Ej.: 25/11','P. R.','Miedo al agua','3 · S. XVII · 20–29','Físico · mortal','—','Inundación · 34','Sufrimiento · medio · 55','Sí'],
+ ()=>{const f=vfRead(),i=viRead(),x=vxRead(),m=vmRead(),v=vvRead();return [tbHoy(),'','',[f[1],f[2]].filter(Boolean).join(' · '),[i[1],i[2]].filter(Boolean).join(' · '),x.filter(Boolean).join(' · '),[m[0],m[1].replace(' años','')].filter(Boolean).join(' · '),v.filter(Boolean).join(' · '),'']},1140)}</div>`+
+ niNote('Usa iniciales; la primera fila es un ejemplo ficticio.');
+
+/* ----- 7 · Demostración y evaluación práctica ----- */
+RICH.vd12=()=>dkH('En vivo','Demostración en vivo','Observa la sesión completa y toma nota.')+
+ `<div class="ni dk-grid c2" style="align-items:start"><div class="nj-card l" style="min-height:0"><h3>Una sesión completa en vivo</h3><ul style="margin:0;padding-left:18px;display:grid;gap:6px;line-height:1.5" class="ni-st"><li>Con una voluntaria del grupo y un tema liviano</li><li>Antes, durante y después, sin saltar pasos</li><li>Solo los gráficos que hagan falta</li><li>Pausas breves para explicar cada decisión</li></ul></div>
+ <div class="nj-card" style="background:var(--ni-olv);color:#ece7d3;min-height:0"><h3>Mientras observas</h3><ul style="margin:0;padding-left:18px;display:grid;gap:6px;line-height:1.5;color:#dfe3cf" class="ni-st"><li>Observa el orden de los pasos</li><li>Anota una frase que quieras usar</li><li>Anota una pregunta para el final</li></ul></div></div>
+ <div class="ni dk-grid c2">${n3area('vdnf','Una frase que quiero usar','«…»')}${n3area('vdnq','Una pregunta para el final','¿…?')}</div>`+n3priv;
+const VD_RO=[['Consultante','Recibe la sesión','Trae un tema liviano y responde con honestidad.','l'],['Facilitadora','Realiza la sesión completa','Antes, durante y después, con la ficha.','t'],['Observadora','Observa y acompaña','Sigue la sesión paso a paso y da una devolución amable.','b']];
+RX.vdobr=()=>{delete RS.vdob;render(false)};
+const VD_OB=[['Antes','Encuadre y consentimiento'],['Antes','Motivo de consulta y oración de conexión'],['Durante','Fechas'],['Durante','Investigación'],['Durante','Anexo o Causas de Muerte, si hace falta'],['Durante','Votos, si aparece uno'],['Durante','Limpiar y verificar'],['Después','Volver al presente y comunicar en hipótesis'],['Después','Oraciones y ficha']];
+RICH.vd13=()=>{const r=n3clamp(st('vdr',0),0,2),A=['Alumna A','Alumna B','Alumna C'],o=st('vdob',{}),n=VD_OB.filter((_,i)=>o[i]).length;
+ return dkH('Evaluación práctica','Evaluación práctica en tríos','Tres rondas: todas pasan por los tres roles. Toca una ronda para ver quién hace qué.')+
+ `<div class="ni" style="display:grid;gap:14px">${chipRow('vdr',['Ronda 1','Ronda 2','Ronda 3'],r)}
+ <div class="nl-role">${VD_RO.map((x,i)=>`<div class="nj-card ${x[3]}" style="min-height:0"><span class="ni-tag">${x[0]}</span><span class="who" style="animation-delay:${i*.1}s">${A[(i+r)%3]}</span><h3>${x[1]}</h3><p>${x[2]}</p></div>`).join('')}</div>
+ ${niBox('d','Tres rondas','Todas pasan por los tres roles. Cada ronda, unos 30 minutos de sesión y 5 de devolución.')}
+ <div class="dk-sub">Para la observadora: sigue la sesión paso a paso</div><div class="tb-gold">${VD_OB.map((x,i)=>`<button ${rxa('tog','vdob',i)} ${pressed(!!o[i])} style="animation-delay:${i*.04}s"><i>${o[i]?'✓':''}</i><b>${x[1]}</b><span>${x[0]}</span></button>`).join('')}</div>
+ <div class="prog"><span>${n} de ${VD_OB.length} pasos observados</span><div class="bar"><i style="width:${n/VD_OB.length*100}%"></i></div></div>
+ ${n===VD_OB.length?`<div class="dk-call ni-in">Sesión completa, sin saltar pasos. Ahora, una devolución amable.</div><div class="dk-cta" style="justify-content:center"><button class="btn btn-ghost btn-sm" ${rxa('vdobr',0)}>Observar otra ronda</button></div>`:''}</div>`};
+
+/* ----- 8 · Tres miradas y repaso ----- */
+const VD_MI=[['Niño interno','Lo que viví','Las heridas de mi infancia y mis máscaras.','0,0','w'],['Transgeneracional','Lo que heredé','Las memorias, lealtades y votos del clan.','2,0','w'],['Vidas pasadas','Lo que mi alma trae','Daños, vínculos y votos de otras vidas.','','d']];
+RICH.vd14=()=>{const v=st('vd14',-1);
+ return dkH('Tres miradas','Tres miradas, una misma persona','¿Apareció una vida pasada activa en Fechas? Elige para ver por dónde seguir.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="va-3">${VD_MI.map((x,i)=>`<div class="tb-c ${x[4]}${v===1&&i<2?' vd-on':''}${v===0&&i===2?' vd-on':''}" style="animation-delay:${i*.1}s"><span class="ni-tag"${x[4]==='d'?' style="color:#d9c9ef"':''}>${x[0]}</span><h3${x[4]==='d'?' style="color:#fff"':''}>${x[1]}</h3><p>${x[2]}</p>${x[3]?`<div><button class="btn btn-ghost btn-sm" data-les="${x[3]}">Abrir</button></div>`:''}</div>`).join('')}</div>
+ <div class="dk-cta" style="justify-content:center;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" ${rxa('set','vd14',v===0?-1:0)} ${pressed(v===0)}>Sí, apareció</button><button class="btn btn-ghost btn-sm" ${rxa('set','vd14',v===1?-1:1)} ${pressed(v===1)}>No apareció</button></div>
+ ${v===0?niBox('d','Sigue con vidas pasadas','Continúa con Investigación y los gráficos que hagan falta.'):v===1?niBox('l','Mira el motivo desde otra especialización','Si en Fechas no aparece una vida pasada activa, el motivo se mira con Niño Interno o Transgeneracional.'):niQ('Si en Fechas no aparece una vida pasada activa, el motivo se mira con Niño Interno o Transgeneracional.')}</div>`};
+RICH.vd15=()=>dkH('Repaso en voz alta','Comprobemos lo aprendido','Respondan en voz alta y compartan cómo llegaron a su respuesta. Después toquen cada tarjeta.')+
+ `<div class="ni ni-cp">${n3flip('vdcp',[['reloj','1 · ¿En qué orden se recorren los gráficos en una sesión completa?','<b>Fechas, Investigación y, si hace falta, el anexo, Causas de Muerte y Votos o Pactos.</b> Después se limpia y se verifica; los votos se anulan con su oración.'],['chat','2 · Di como hipótesis: «Fuiste una sacerdotisa y por eso tienes este don.»','<b>Por ejemplo:</b> «El gráfico muestra una posible vida ligada a lo espiritual. ¿Te hace sentido? ¿Qué sientes al escuchar esto?» Sin agregar detalles ni explicar el presente por esa vida.'],['escudo','3 · ¿Qué haces si la persona confunde la vida pasada con lo que vive hoy?','<b>Detener la lectura y no profundizar.</b> Volver al presente: respirar, sentir los pies, mirar el lugar. Si no se aclara, sugerir la ayuda de un profesional de salud.']],'c3',280)}</div>`;
+
+/* ----- 9 · Certificación y cuidado de la facilitadora ----- */
+const VD_RQ=[['grupo','Asistencia','Participar en las cuatro clases de la especialización.'],['libro','Tareas','Entregar las tres tareas: tu vida activa y su daño, la historia completa, y el cierre y el voto.'],['check','Evaluación práctica','Aprobar la sesión observada en tríos.']];
+RICH.vd16=()=>{const o=st('vdrq',{}),n=VD_RQ.filter((_,i)=>o[i]).length;
+ return dkH('Certificación','Requisitos para la certificación','Marca los que ya cumples.')+
+ `<div class="ni" style="display:grid;gap:12px"><div class="nl-req td-3">${VD_RQ.map((x,i)=>`<button ${rxa('tog','vdrq',i)} ${pressed(!!o[i])} style="animation-delay:${i*.08}s"><i>${o[i]?'✓':''}</i><div><b>${x[1]}</b><span>${x[2]}</span></div></button>`).join('')}</div>
+ <div class="prog"><span>${n} de 3</span><div class="bar"><i style="width:${n/3*100}%"></i></div></div>
+ ${n===3?niQ('¡Cumples los tres requisitos para tu certificación en Vidas Pasadas!'):''}</div>`};
+RICH.vd17=()=>dkH('Autocuidado','Cuidar a quien acompaña','Antes, durante, después y siempre. Toca cada tarjeta.')+
+ `<div class="ni ni-cp">${n3flip('vdcu',[['loto','Antes · Prepararte','Oración de conexión y protección. Llegar descansada y presente.'],['escudo','Durante · No cargar la historia','Acompañar sin hacer tuyo lo que aparece. Volver a tu respiración.'],['limpia','Después · Limpiarte','Tu limpieza personal como aprendiste, agua y descanso.'],['chat','Siempre · Compartir lo difícil','Llevar los casos que te remuevan a tu facilitadora del programa.']],'c4',220)}</div>`;
+
+/* ----- 10 · Ritual, oración y cierre ----- */
+RICH.vd18=()=>dkH('Ritual de cierre','Honrar el camino del alma','Lo hacemos juntas, frase a frase.')+`<div class="ni">${n3pray('vdho',['Cierra los ojos y visualiza un camino que viene desde muy atrás, hasta este momento.','Agradece a cada vida lo que te enseñó.','Lo que ya no te pertenece, déjalo con amor en el camino.','Da un paso hacia adelante: hacia esta vida, hacia tu presente.'])}</div>`;
+RICH.vd19=()=>dkH('Cierre de la especialización','Oración de agradecimiento','La decimos juntas para cerrar el camino.')+`<div class="ni">${n3pray('vdor',['Amado Yo Superior, ángeles, arcángeles, seres de luz, todo mi comité espiritual: gracias por acompañarnos en este camino.','Gracias a mi alma por cada vida vivida, por cada aprendizaje, por cada promesa que hoy pudo liberarse.','Que lo aprendido se convierta en servicio, con humildad, respeto y amor.','Que cada sesión sea para el mayor bien de quien llega a nosotras y de su alma.','Gracias, gracias, gracias.'])}</div>`;
+RICH.vd20=()=>`<div class="ni">${nbHero('Especialización Vidas Pasadas','Gracias por','este camino','Sigue practicando, registra tus sesiones y camina hacia tu presente con lo aprendido.',['Clase 1','Clase 2','Clase 3','Clase 4'],'Karen Oyarce · Maestra Holística',vdPhoto('Una mujer de perfil, con los ojos cerrados, entre columnas antiguas cubiertas de hiedra al atardecer'))}</div>`;
+(function(){const c=document.createElement('style');c.id='vd-css';c.textContent=`
+.nj-proto.vd-6{grid-template-columns:repeat(3,minmax(0,1fr))}
+.nj-proto.vd-6 button{min-height:118px}
+.nj-proto.vd-6 button:nth-child(3)::after{display:none}
+.nj-proto.vd-6 button.vd-opt{background:#ece3f6;border-color:#ddd0ee}
+.nj-proto.vd-6 button.vd-opt small{color:#6b4fa0}
+.tb-c.vd-on{box-shadow:0 0 0 3px #b9a3f1;transform:translateY(-4px)}
+.va-3 .tb-c{transition:transform .35s,box-shadow .35s}
+@media (max-width:760px){.nj-proto.vd-6{grid-template-columns:1fr}.nj-proto.vd-6 button{min-height:0}}
+`;document.head.appendChild(c)})();
