@@ -1052,6 +1052,16 @@ const N3L8e=C2('Niño interno',[['n8a10','Sanar para recordar quién eres'],['n8
 const N3L8f=C2('Limpieza uterina',[['n8a12','Sanación de útero'],['n8a13','¿Qué es la limpieza uterina?'],['n3g_ute','Gráfico de limpieza uterina']]);
 const N3L8g=C2('Terapias, símbolos y protección',[['n3g_ter','Terapias y sanación'],['n8a14','Símbolos de radiestesia'],['n3g_sim','Símbolos y protección']]);
 const N3L8h=C2('Cierre de la formación',[['n8a15','Tu camino de transformación'],['n8a16','Gracias'],['n8a17','Repaso']]);
+const N5P='assets/n5/';
+const T1F=[F('pdf','Láminas de la Clase 1','19 láminas',N5P+'print/clase1_laminas.pdf')];
+const N5L1a=C2('Bienvenida y enfoque',[['t1a1','Introducción y El Loco'],['t1a2','Un tarot para mirarte, no para adivinar']],T1F);
+const N5L1b=C2('El tarot y el mazo',[['t1a3','Un poco de historia'],['t1a4','78 cartas, dos grandes grupos'],['t1a5','El Viaje del Loco en tres tramos'],['t1a6','Nuestro recorrido por los Mayores']]);
+const N5L1c=C2('Cómo estudiar una carta',[['t1a7','Siete pasos para conocer cada carta'],['t1a8','Los colores también hablan'],['t1a9','Cartas invertidas']]);
+const N5L1d=C2('El Loco',[['t1a10','El inicio del camino'],['t1a11','Lectura de la imagen'],['t1a12','Luz, sombra e invertida'],['t1a13','Mirada terapéutica y pregunta']]);
+const N5L1e=C2('Práctica con tu mazo',[['t1a14','Mirar antes de saber','Ejercicio en grupos pequeños'],['t1a15','Derecha e invertida']]);
+const N5L1f=C2('Tarea, cierre y repaso',[['t1a16','Para esta semana'],['t1a17','Próxima clase'],['t1a18','Repaso']]);
+/* clases del Nivel 5 que todavía no se publican: una por módulo, para que cada clase conserve su lugar (y su avance) al llegar */
+const T5PEND=(n,t)=>({title:'Clase '+n+' · '+t,lessons:[L('Clase '+n+' · '+t,'',[])]});
 
 const LEVELS=[
  {n:1,id:'pendulo',title:'Péndulo Hebreo Nivel 1',mode:'pres',dur:'1 jornada intensiva · 8 horas',status:'done',
@@ -1132,10 +1142,15 @@ const LEVELS=[
  {n:5,id:'tarot',title:'Tarot Terapéutico: El Camino del Ser',mode:'live',dur:'16 clases · 4 meses · online en vivo',status:'locked',
   desc:'El tarot como herramienta terapéutica de autoconocimiento. Cierra tu formación como Terapeuta Holístico Integral.',
   modules:[
-   {title:'Mes 1 · Los Arcanos Mayores I',lessons:['El Loco y el inicio del viaje','El Mago y la Sacerdotisa','La Emperatriz y el Emperador','Del Hierofante a la Rueda'].map((t,i)=>L('Clase '+(i+1)+' · '+t,'',[]))},
-   {title:'Mes 2 · Los Arcanos Mayores II',lessons:['La Fuerza y el Colgado','La Muerte y la Templanza','El Diablo y la Torre','De la Estrella al Mundo'].map((t,i)=>L('Clase '+(i+5)+' · '+t,'',[]))},
-   {title:'Mes 3 · Los Arcanos Menores',lessons:['Copas: emociones','Espadas: mente','Bastos: acción','Oros: materia y cuerpo'].map((t,i)=>L('Clase '+(i+9)+' · '+t,'',[]))},
-   {title:'Mes 4 · Tarot en la consulta',lessons:['Tiradas terapéuticas','La pregunta sanadora','Práctica supervisada','Cierre y certificación'].map((t,i)=>L('Clase '+(i+13)+' · '+t,'',[]))}
+   {title:'Clase 1 · Introducción y El Loco',lessons:[N5L1a,N5L1b,N5L1c,N5L1d,N5L1e,N5L1f]},
+   T5PEND(2,'El Mago, la Sacerdotisa y la Emperatriz'),
+   T5PEND(3,'El Emperador, el Hierofante y los Enamorados'),
+   T5PEND(4,'El Carro, la Fuerza y el Ermitaño'),
+   T5PEND(5,'La Rueda de la Fortuna, la Justicia y el Colgado'),
+   T5PEND(6,'La Muerte, la Templanza y el Diablo'),
+   T5PEND(7,'La Torre, la Estrella y la Luna'),
+   T5PEND(8,'El Sol, el Juicio y el Mundo'),
+   ...[9,10,11,12,13,14,15,16].map(n=>T5PEND(n,'Próximamente'))
   ]}
 ];
 /* especialidades aparte: no son parte de los cinco niveles. Su contenido (file) solo lo abre la Maestra por ahora (middleware.js) */
@@ -1185,6 +1200,7 @@ const RES=[
  {t:'Ficha de registro en blanco',type:'Plantilla',lvl:2,size:'1 hoja',k:'pdf',href:'assets/n2/print/ficha_de_registro.pdf'},
  {t:'Gráficos radiestésicos del Nivel 2',type:'PDF',lvl:2,size:'6 láminas',k:'pdf',href:'assets/n2/print/graficos_radiestesicos.pdf'},
  {t:'Mantras de los chakras',type:'PDF',lvl:3,size:'1 lámina',k:'pdf',href:'assets/n3/print/mantras_chakras.pdf',new:1},
+ {t:'Clase 1 · Láminas de Tarot',type:'PDF',lvl:5,size:'19 láminas',k:'pdf',href:'assets/n5/print/clase1_laminas.pdf',new:1},
  {t:'Clase 8 · Láminas',type:'PDF',lvl:3,size:'32 láminas',k:'pdf',href:'assets/n3/print/clase8_laminas.pdf',new:1},
  {t:'Clase 7 · Láminas',type:'PDF',lvl:3,size:'22 láminas',k:'pdf',href:'assets/n3/print/clase7_laminas.pdf',new:1},
  {t:'Clase 6 · Láminas',type:'PDF',lvl:3,size:'19 láminas',k:'pdf',href:'assets/n3/print/clase6_laminas.pdf',new:1},
@@ -1783,9 +1799,10 @@ function renderNotifs(){
 }
 
 // carga el contenido nivel por nivel (curso/n1.js, n2.js…); devuelve hasta qué nivel quedó disponible
-const COURSE_FILES=3;
+// el Nivel 4 todavía no tiene archivo propio: se salta
+const COURSE_FILES=[1,2,3,5];
 const loadScript=src=>new Promise(res=>{const s=document.createElement('script');s.src=src;s.onload=()=>res(true);s.onerror=()=>res(false);document.head.appendChild(s)});
-async function loadCourse(lvl){for(let n=1;n<=Math.min(lvl,COURSE_FILES);n++)if(!await loadScript('curso/n'+n+'.js'))return n-1;return lvl}
+async function loadCourse(lvl){let ok=0;for(const n of COURSE_FILES.filter(n=>n<=lvl)){if(!await loadScript('curso/n'+n+'.js'))return ok;ok=n}return lvl}
 
 // nombre y foto de la cuenta en el menú y en el resto del aula
 function syncMe(){
@@ -1815,7 +1832,7 @@ window.cmStart=async function(cm){
   if(cm.lvl>0)S.lvl=await loadCourse(cm.lvl);
   S.lvls=new Set(cm.lvls.filter(n=>n<=S.lvl));
   // las especialidades usan las piezas de los niveles 1 a 3; por ahora solo la Maestra las abre (middleware.js)
-  if(cm.isAdmin&&S.lvl>=COURSE_FILES)for(const sp of SPECS)sp.ready=await loadScript(sp.file);
+  if(cm.isAdmin&&S.lvl>=3)for(const sp of SPECS)sp.ready=await loadScript(sp.file);
   refreshDerived();
   if(S.lvl<cm.lvl)toast('No se pudo cargar el contenido de las clases. Recarga la página.');
   if(cm.paid==='ok')toast('¡Gracias! Estamos confirmando tu pago; tu aula se actualiza en unos segundos.');
