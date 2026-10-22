@@ -1881,3 +1881,164 @@ RICH.va19=()=>dkH('Repaso en voz alta','Comprobemos lo aprendido','Respondan en 
 RICH.va20=()=>dkH('Cierre de la clase','Tarea para la próxima clase','Investiga una vida pasada en ti.')+
  `<div class="ni dk-grid c2" style="align-items:start"><div class="ni-task">${n3ck('vata',[['diana','Elige un tema propio que quieras comprender'],['check','Pregunta si hay una vida pasada activa en ese tema'],['reloj','Mide cuántas vidas atrás y en qué época'],['lupa','Investiga el daño: si lo hubo, tipo e intensidad'],['limpia','Limpia lo encontrado y completa la ficha']],['Marca cada punto cuando lo tengas.','¡Listo! Trae tu ficha a la Clase 2.'])}</div>
  <div style="display:grid;gap:10px">${niBox('d','Importante','Elige un tema liviano. Si aparece un daño mortal, anótalo y no profundices: lo veremos en la Clase 3. Trae tu ficha.')}<div class="dk-cta">${vaGo(-1,'Abrir mi ficha')}</div></div></div>`;
+
+/* ---------- Nivel 4 · Especialización Vidas Pasadas · Clase 2 ---------- */
+(function(){const c=document.createElement('style');c.id='vb-css';c.textContent=`
+.vb-soc{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;position:relative}
+.vb-soc>button{all:unset;box-sizing:border-box;cursor:pointer;border-radius:16px;padding:16px 14px;display:grid;gap:8px;align-content:start;min-height:120px;color:#4a3a1f;animation:niUp .45s both;transition:transform .3s,box-shadow .3s}
+.vb-soc b{font:400 1.12rem/1.2 var(--f-display)}.vb-soc span{font-size:.86rem;line-height:1.45}
+.vb-soc>button[aria-pressed="true"]{transform:translateY(-5px);box-shadow:0 0 0 2px #a08a2a}
+.vb-arrow{display:grid;justify-items:center;gap:6px;color:var(--nb-soft);font-size:.86rem}
+.vb-arrow i{display:block;height:6px;width:min(320px,70%);border-radius:3px;background:linear-gradient(90deg,#f7f1c8,var(--ni-lil2));position:relative;animation:vbGrow 1.2s .2s both}
+.vb-arrow i::after{content:"";position:absolute;right:-10px;top:-6px;border:9px solid transparent;border-left:12px solid var(--ni-lil2)}
+@keyframes vbGrow{from{width:0}}
+.vb-grp{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.vb-grp>button{all:unset;box-sizing:border-box;cursor:pointer;border-radius:16px;padding:14px 16px;display:grid;gap:6px;align-content:start;border:1px solid var(--nb-line);background:var(--nb-paper);color:var(--nb-ink);animation:niUp .4s both;transition:transform .25s,background .25s,box-shadow .25s}
+.vb-grp b{font:400 1.08rem/1.2 var(--f-display)}.vb-grp span{font-size:.84rem;line-height:1.45;color:var(--nb-soft)}
+.vb-grp>button.k{background:var(--ni-olv);border-color:var(--ni-olv);color:#fff}.vb-grp>button.k span{color:#dfe3cf}
+.vb-grp>button.o{background:var(--ni-lil);border-color:var(--ni-lil)}
+.vb-grp>button[aria-pressed="true"]{transform:translateY(-3px);box-shadow:0 0 0 2px var(--ni-lil2)}
+.vb-et{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.vb-et>button{all:unset;box-sizing:border-box;cursor:pointer;text-align:center;padding:10px 6px;border-radius:12px;border:1px solid #efc9d9;background:#fbeef4;color:#6a2a48;font:400 .98rem/1.2 var(--f-display);animation:niUp .35s both;transition:transform .25s,background .25s}
+.vb-et>button[aria-pressed="true"]{background:#c0628f;color:#fff;transform:translateY(-3px)}
+.vb-ron{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.vb-ron>div{border-radius:18px;padding:16px;display:grid;gap:8px;align-content:start;background:var(--nb-paper);border:1px solid var(--nb-line);animation:niUp .45s both}
+.vb-ron>div:nth-child(2){animation-delay:.08s}.vb-ron>div:nth-child(3){animation-delay:.16s;background:var(--ni-lil);border-color:var(--ni-lil)}
+.vb-ron h3{margin:0;font:400 1.2rem/1.2 var(--f-display)}.vb-ron p{margin:0;font-size:.88rem;line-height:1.5;color:var(--nb-soft)}
+.vb-ron textarea{all:unset;box-sizing:border-box;width:100%;min-height:74px;padding:8px 2px;border-bottom:1.5px dashed var(--ni-lil2);font:italic 400 1rem/1.45 var(--f-display);color:var(--nb-ink);white-space:pre-wrap}
+@media (max-width:760px){.vb-soc{grid-template-columns:1fr}.vb-soc>button{min-height:0}.vb-grp,.vb-ron{grid-template-columns:1fr}.vb-et{grid-template-columns:1fr 1fr}}
+`;document.head.appendChild(c)})();
+
+const vbPhoto=alt=>`<div class="ni-ph"><img src="${N4P}vidas/c2-portada.webp" alt="${alt}"><svg class="ni-arc" viewBox="0 0 200 104" aria-hidden="true"><path pathLength="1" d="M10 100a90 90 0 0 1 180 0" stroke="#f3ecd8" stroke-width="16"/><path pathLength="1" d="M34 100a66 66 0 0 1 132 0" stroke="#d8d8f3" stroke-width="16"/><path pathLength="1" d="M58 100a42 42 0 0 1 84 0" stroke="#f6d8dc" stroke-width="16"/><circle cx="100" cy="100" r="18" fill="#3b4a24"/></svg></div>`;
+
+/* el gráfico del anexo: hombre o mujer al centro, clase social, tipo de relación y profesión */
+const VX_S=['Hombre','Mujer'],VX_C=['En la\nmiseria','Pobre','Media\nbaja','Media\nalta','Rico'];
+const VX_R=['Familiar','Apoyo\nmutuo','Amor','Amistad','Laboral','Estudio','Diversión','Sexual','Conflicto','Interés','Indiferente','Vecindad','Karma','Enemistad','Dependencia','Estima','Compromiso','Amantes','Otra'];
+const VX_P=['Sanador','Soldado','Político','Religioso','Comerciante','Campesino','Pescador','Cazador /\nrecolector','Marinero','Profesor /\nerudito','Artista','Criado / sir-\nviente / esclavo','Músico','Vagabundo','Noble','Artesano /\npeón','Brujo(a)','Otro'];
+RX.vxc=(k,v)=>{const K='vx'+k;RS[K]=st(K,-1)===+v?-1:+v;render(false)};
+const vxChart=o=>{o=o||{};return niFan({label:'Gráfico Vidas Pasadas, anexo de investigación',act:'vxc',inner:50,sel:(k,i)=>st('vx'+k,-1)===i,
+ hot:o.ring||o.hot?(k,i)=>o.hot?(o.hot(k,i)?1:-1):(k===o.ring?0:-1):0,
+ rings:[{k:'s',r0:62,r1:112,items:VX_S,fill:'#f6dde1',on:'#b0566a',m:'tan',fs:12},
+  {k:'c',r0:112,r1:160,items:VX_C,fill:'#f7f1c8',on:'#a08a2a',m:'rad',fs:8.6},
+  {k:'r',r0:160,r1:222,items:VX_R,fill:'#ffffff',on:'#5a5ab0',m:'rad',fs:7.6},
+  {k:'p',r0:222,r1:280,items:VX_P,fill:'#ffffff',on:'#3f7d6e',m:'rad',fs:7.4}],cap:o.cap===0?'':o.cap||'Toca hombre o mujer, la clase social, el tipo de relación y la profesión.'})};
+const vxRead=()=>{const s=st('vxs',-1),c=st('vxc',-1),r=st('vxr',-1),p=st('vxp',-1);return [s<0?'':VX_S[s],c<0?'':tcClean(VX_C[c]),r<0?'':tcClean(VX_R[r]),p<0?'':tcClean(VX_P[p])]};
+const vfAct=()=>{const v=st('vfv',-1);return v<0?'':tcClean(VF_V[v])};
+
+/* ----- 1 · Bienvenida y agenda ----- */
+RICH.vb1=()=>`<div class="ni">${nbHero('Especialización Vidas Pasadas · Clase 2','Quién fui','y con quién','Completamos la historia de una vida pasada con el anexo de investigación: hombre o mujer, clase social, profesión y tipo de relación. Reconocemos los vínculos kármicos y medimos en qué etapa de esta vida se activó la memoria.',['Anexo','Clase social','Profesión','Vínculos kármicos'],'Karen Oyarce · Maestra Holística',vbPhoto('Una mujer con un largo manto verde camina de espaldas por un jardín junto a un castillo de piedra'))}</div>`;
+RICH.vb2=()=>niAgenda('Clase 2',['Revisión de la tarea y ronda','El anexo de investigación','Hombre o mujer y clase social','Profesión','Tipo de relación y vínculos kármicos','Fechas: cuándo se activó en esta vida','Limpiar, ejemplo y práctica','Reglas de oro, repaso y tarea'],
+ ['Decidir cuándo usar el anexo','Completar la historia: sexo, clase social, profesión y relación','Reconocer un vínculo kármico con alguien de esta vida','Medir en qué etapa de esta vida se activó la memoria']);
+
+/* ----- 2 · Revisión de la tarea y ronda ----- */
+const VB_RV=['¿Qué tema elegiste y hubo una vida pasada activa?','¿Cuántas vidas atrás y en qué época?','¿Qué tipo de daño apareció y con qué intensidad?','¿Qué sentiste después de limpiar?','¿Qué te gustaría saber de esa vida?'];
+RICH.vb3=()=>{const s=st('vb3',-1),f=vfRead(),v=viRead();
+ return dkH('Lo que trajiste','Revisemos la tarea de la semana','La vida pasada que investigaste. Toca una pregunta para anotar tu respuesta.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="dk-grid c2" style="align-items:start">
+ <div style="display:grid;gap:10px"><div class="dk-sub" style="margin:0">Lo que marcaste en la Clase 1</div>${tcRow(['Vida activa','Vidas atrás','Época','Daño','Tipo','Intensidad'],[...f,...v])}${f.some(Boolean)?'':niNote('Aquí aparece lo que marcaste en los gráficos de Fechas e Investigación.')}<div class="dk-cta">${'<button class="btn btn-ghost btn-sm" data-les="1,5">Fechas</button><button class="btn btn-ghost btn-sm" data-les="1,6">Investigación</button>'}</div></div>
+ <div style="display:grid;gap:10px">${tbList('vb3',VB_RV)}${s>=0?`<div class="ni-in">${n3area('vb3a'+s,VB_RV[s],'Lo que noté…')}</div>`:''}</div></div>
+ ${niQ('Compartir es voluntario. Lo que se dice en el grupo, queda en el grupo.')}</div>`};
+RICH.vb4=()=>dkH('Lo que trajiste','Ronda: lo que resonó en ti','Una o dos frases por persona. Si quieres, anota la tuya.')+
+ `<div class="ni vb-ron">${[['Lo que reconocí','Algo de esa vida que se parece a mi vida de hoy.'],['Lo que sentí','Una emoción o sensación que apareció al investigar.'],['Lo que quiero saber','Una pregunta sobre esa vida que hoy podemos responder.']].map((x,i)=>`<div><h3>${x[0]}</h3><p>${x[1]}</p><textarea data-rsin="vb4${i}" aria-label="${x[0]}" placeholder="Escribe aquí…">${esc(st('vb4'+i,''))}</textarea></div>`).join('')}</div>`+n3priv;
+
+/* ----- 3 · El anexo de investigación ----- */
+RICH.vb5=()=>dkH('El anexo','El anexo de investigación','Se usa solo cuando falta completar la historia. Lleva cada caso a su columna.')+
+ niSort('vbus',[['El daño involucra a alguien de esta vida',0],['La investigación ya es clara',1],['El patrón tiene que ver con dinero, poder o trabajo',0],['La persona no lo necesita para comprender',1],['La persona necesita comprender el contexto para soltar',0],['Solo nace de la curiosidad',1]],
+ [['Úsalo cuando','','t','Úsalo'],['No hace falta cuando','','l','No hace falta']],'Más datos no siempre es más sanación.','Mira otra vez: ¿ese dato ayuda a completar la historia o solo agrega información?');
+const VX_RG=[['s','1. Hombre o mujer','En el centro.'],['c','2. Clase social','Cinco niveles, de la miseria a la riqueza.'],['r','3. Tipo de relación','Cómo se vinculó con alguien de esta vida.'],['p','4. Profesión','El oficio de esa vida.']];
+RICH.vb6=()=>{const s=st('vb6',-1);
+ return dkH('El anexo','El gráfico del anexo','Cuatro anillos. Toca uno para verlo o explora el gráfico.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="tc-side"><div class="nj-fig">${niOrig('vb6O','vidas/anexo.webp','Lámina original del gráfico Vidas Pasadas, anexo de investigación, de Casa Muladhara',vxChart({ring:s>=0?VX_RG[s][0]:null,cap:s>=0?0:undefined}))}</div>
+ <div style="display:grid;gap:10px">${tbList('vb6',VX_RG.map(x=>`<b>${x[1]}</b> · ${x[2]}`))}${tcRow(['Sexo','Clase social','Relación','Profesión'],vxRead())}</div></div>
+ ${niQ('Se lee de adentro hacia afuera, solo lo que hace falta.')}</div>`};
+
+/* ----- 4 · Hombre o mujer y clase social ----- */
+RICH.vb7=()=>{const s=st('vxs',-1);
+ return dkH('Centro del anexo','Hombre o mujer','Toca la respuesta en el centro del gráfico.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="tc-side"><div class="nj-fig">${vxChart({ring:'s',cap:0})}</div>
+ <div style="display:grid;gap:10px"><div class="va-yn${s>=0?' va-ch':''}">${VX_S.map((x,i)=>`<button class="${i?'va-n':'va-y'}" ${rxa('vxc','s',i)} ${pressed(s===i)}><b>${x}</b></button>`).join('')}</div>
+ ${niBox('t','Qué puede explicar','Afinidades, rechazos o formas de estar en el cuerpo y en los vínculos que no se explican por esta vida.')}${niBox('l','Qué no hace','No define la identidad de hoy. Es un dato de esa historia que ayuda a comprenderla.')}</div></div>
+ ${niBox('l','Pregunta al grupo','¿Sientes afinidad con formas de vivir que no son las de tu historia actual?')}</div>`};
+const VB_CS=[['Sobrevivir día a día.','#fbf6dc'],['Lo justo, con esfuerzo.','#f7f1c8'],['Estabilidad frágil.','#f1e7b0'],['Comodidad y prestigio.','#ead98e'],['Abundancia y poder.','#e2c96a']];
+RICH.vb8=()=>{const c=st('vxc',-1);
+ return dkH('Anillo 2','Clase social','Cinco niveles, de la miseria a la riqueza. Toca uno.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="vb-soc">${VB_CS.map((x,i)=>`<button ${rxa('vxc','c',i)} ${pressed(c===i)} style="background:${x[1]};animation-delay:${i*.07}s"><b>${tcClean(VX_C[i])}</b><span>${x[0]}</span></button>`).join('')}</div>
+ <div class="vb-arrow"><span>De la miseria a la riqueza</span><i></i></div>
+ <div style="max-width:560px;width:100%;justify-self:center">${vxChart({ring:'c',cap:0})}</div>
+ ${niBox('l','Pregunta al grupo','¿Cómo crees que vivió tu alma la abundancia o la escasez?')}</div>`};
+RICH.vb9=()=>{const q=st('vb9q',-1),H=[['Carencia','Miedo a que falte, dificultad para recibir o para disfrutar lo que se tiene.'],['Poder','Temor a destacar, a mandar o a abusar de una posición.'],['Culpa','Sentir culpa por tener más que otros o por haber tenido.'],['Exigencia','Sentir que todo se gana con esfuerzo y que nada llega fácil.']];
+ return dkH('Huellas','Lo que puede dejar la clase social','Cuatro huellas posibles. Toca cada tarjeta.')+
+ `<div class="ni" style="display:grid;gap:14px">${n3flip('vb9',[['gota',H[0][0],H[0][1]],['escudo',H[1][0],H[1][1]],['balanza',H[2][0],H[2][1]],['reloj',H[3][0],H[3][1]]],'c4',170)}
+ <div class="nj-card l"><span class="ni-tag">Pregunta al grupo</span><p style="opacity:1;font-size:.95rem">¿Cuál de estas huellas reconoces en tu relación con el dinero?</p>${chipRow('vb9q',H.map(x=>x[0]),q)}${q>=0?`<p class="ni-in" style="opacity:1;margin:0;font:italic 400 1.05rem/1.45 var(--f-display)">${H[q][1]}</p>`:''}</div></div>`};
+
+/* ----- 5 · Profesión ----- */
+const VB_PG=[['Cuidado y espíritu',[0,3,16]],['Tierra y mar',[5,6,7,8]],['Poder',[1,2,14]],['Comercio y trabajo',[4,15,11]],['Saber y arte',[9,10,12]],['Otros caminos',[13,17]]];
+RICH.vb10=()=>{const s=st('vb10',-1),p=st('vxp',-1);
+ return dkH('Anillo 4','Profesión','Dieciocho oficios en seis grupos. Toca un grupo para encontrarlo en el gráfico.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="vb-grp">${VB_PG.map((x,i)=>`<button class="${i===5?'o':''}" ${rxa('set','vb10',s===i?-1:i)} ${pressed(s===i)} style="animation-delay:${i*.05}s"><b>${x[0]}</b><span>${x[1].map(j=>tcClean(VX_P[j])).join(' · ')}</span></button>`).join('')}</div>
+ <div style="max-width:620px;width:100%;justify-self:center">${vxChart({hot:s>=0?(k,i)=>k==='p'&&VB_PG[s][1].includes(i):null,ring:s<0?'p':null,cap:'Toca un oficio en el anillo exterior para marcarlo.'})}</div>
+ ${p>=0?`<div class="nj-det ni-in"><div><span class="ni-tag">Profesión marcada</span><br><b>${tcClean(VX_P[p])}</b></div></div>`:''}</div>`};
+const VB_PH=[[0,'Sanador','Vocación de ayudar y, a veces, miedo a mostrar el don.','corazon'],[16,'Brujo(a)','Miedo a ser juzgada o perseguida por lo que sabe.','luna'],[3,'Religioso','Votos de pobreza, castidad u obediencia que siguen activos.','candado'],[1,'Soldado','Culpa, rabia o estado de alerta constante.','escudo'],[11,'Criado / esclavo','Dificultad para poner límites o sentirse merecedora.','nudo'],[14,'Noble','Exigencia de perfección o culpa por el privilegio.','diana']];
+RICH.vb11=()=>{const p=st('vxp',-1),h=VB_PH.find(x=>x[0]===p);
+ return dkH('Huellas','Profesiones que pueden dejar huella','Seis oficios y la huella que pueden dejar. Toca cada tarjeta.')+
+ `<div class="ni" style="display:grid;gap:14px">${n3flip('vb11',VB_PH.map(x=>[x[3],x[1],x[2]]),'c3',170)}
+ ${h?niBox('l','Tu profesión marcada: '+h[1],h[2]+(p===3?' Los votos se trabajan en la Clase 3 con el gráfico de Votos o Pactos.':'')):''}
+ ${niQ('Son huellas posibles: la persona confirma lo que le hace sentido.')}</div>`};
+
+/* ----- 6 · Tipo de relación y vínculos kármicos ----- */
+const VB_RG=[['Afecto',[0,2,3,1,15],''],['Pareja',[17,7,16],''],['Vida diaria',[4,5,6,11],''],['Tensión',[8,13,14,9,10],''],['Karma',[12],'Una deuda o un aprendizaje pendiente entre dos almas.'],['Otra',[18],'Una relación que no está en la lista.']];
+RICH.vb12=()=>{const s=st('vb12',-1),r=st('vxr',-1);
+ return dkH('Anillo 3','Tipo de relación','Diecinueve relaciones en seis grupos. Toca un grupo para encontrarlo en el gráfico.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="va-q">«¿Qué relación tuvo mi alma con esta persona en esa vida?»</div>
+ <div class="vb-grp">${VB_RG.map((x,i)=>`<button class="${i===4?'k':''}" ${rxa('set','vb12',s===i?-1:i)} ${pressed(s===i)} style="animation-delay:${i*.05}s"><b>${x[0]}</b><span>${x[2]||x[1].map(j=>tcClean(VX_R[j])).join(' · ')}</span></button>`).join('')}</div>
+ <div style="max-width:620px;width:100%;justify-self:center">${vxChart({hot:s>=0?(k,i)=>k==='r'&&VB_RG[s][1].includes(i):null,ring:s<0?'r':null,cap:'Toca una relación en el anillo 3 para marcarla.'})}</div>
+ ${r>=0?`<div class="nj-det ni-in"><div><span class="ni-tag">Relación marcada</span><br><b>${tcClean(VX_R[r])}</b>${r===12?'<p>Un vínculo kármico: lo vemos en la siguiente diapositiva.</p>':''}</div></div>`:''}</div>`};
+RICH.vb13=()=>dkH('Vínculos kármicos','Vínculos kármicos','¿Cómo puede sentirse? Marca lo que reconoces.')+
+ `<div class="ni dk-split" style="align-items:start"><div class="ni-obj"><span class="ni-tag" style="color:#d9c9ef">Qué es</span><p style="margin:0;font:400 1.12rem/1.55 var(--f-display);color:#ece7d3">Una relación con algo pendiente entre dos almas: una deuda, un daño o una promesa.</p><p style="margin:0;font:italic 400 1.05rem/1.5 var(--f-display);color:#f2c66d">No es un castigo: es una oportunidad de cerrar lo que quedó abierto.</p></div>
+ <div>${n3ck('vb13',[['enlace','Atracción o rechazo inmediato al conocer a alguien'],['espiral','Una relación que se repite con distintas personas'],['nudo','Una dependencia difícil de soltar'],['rayo','Conflictos intensos sin una causa clara']])}</div></div>
+ <div class="ni" style="margin-top:14px">${niBox('l','Pregunta al grupo','¿Hay alguien en tu vida a quien sentiste conocer desde siempre?')}${n3area('vb13a','Anota lo tuyo','Siento que conozco desde siempre a…')}</div>`;
+RICH.vb14=()=>{const s=st('vb14',-1),X=[['grupo','En la familia','Los roles pueden cambiar: quien hoy es madre pudo ser hija, hermana o amiga.'],['corazon','En la pareja','Uniones que se sienten conocidas o que repiten un mismo final.'],['enlace','En la amistad','Amistades profundas que nacen de inmediato o se reencuentran tras años.']];
+ return dkH('Reencuentros','Las almas que se reencuentran','Tres lugares donde se reencuentran. Toca cada uno.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="va-3">${X.map((x,i)=>`<button class="${i===1&&s<0?'':''}" ${rxa('set','vb14',s===i?-1:i)} ${pressed(s===i)}>${ic(x[0],28)}<h3>${x[1]}</h3><p>${x[2]}</p></button>`).join('')}</div>
+ <div class="ni-hyp"><p>Reencontrarse es una oportunidad para sanar lo pendiente, no una obligación de seguir juntas.</p></div></div>`};
+
+/* ----- 7 · Fechas: cuándo se activó ----- */
+RICH.vb15=()=>{const v=st('vfv',-1);
+ return dkH('Gráfico de Fechas','¿Cuándo se activó en esta vida?','El anillo «Esta vida»: gestación, nacimiento y tramos de edad. Toca una etapa.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="tc-side"><div class="nj-fig">${niOrig('vb15O','vidas/fechas.webp','Lámina original del gráfico de Fechas de Casa Muladhara',vfChart({ring:'v',cap:0}))}</div>
+ <div style="display:grid;gap:10px"><div class="vb-et">${VF_V.map((x,i)=>`<button ${rxa('vfc','v',i)} ${pressed(v===i)} style="animation-delay:${i*.04}s">${tcClean(x)}</button>`).join('')}</div>
+ ${niBox('l','Para qué sirve','Saber cuándo la memoria empezó a actuar hoy.')}${niBox('d','Qué observar','Qué pasó en esa etapa: una pérdida, un encuentro, un cambio.')}
+ ${v>=0?`<div class="ni-in">${n3area('vb15a','¿Qué pasó en tu vida '+(v<2?'en la '+tcClean(VF_V[v]).toLowerCase():'entre los '+tcClean(VF_V[v]))+'?','Una pérdida, un encuentro, un cambio…')}</div>`:''}</div></div>
+ ${niQ('La memoria suele activarse en una etapa que se parece a esa historia.')}</div>`};
+
+/* ----- 8 · Limpiar, ejemplo y práctica ----- */
+const VB_LM=[['Limpiar el daño','Como aprendiste en Radiestesia y Sanación del Alma.'],['Liberar el vínculo','Si hay una relación kármica con alguien de esta vida.'],['Verificar','Confirmar con el péndulo que la limpieza se completó.'],['Agradecer','A esa vida y a lo que vino a enseñar.']];
+RICH.vb16=()=>{const s=n3clamp(st('vb16',0),0,4);
+ return dkH('Limpieza','Limpiar la memoria','Cuatro pasos, en este orden.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="nj-flow">${VB_LM.map((x,i)=>`<div class="${i<s?'lit':''}"><small>Paso ${i+1}</small><b>${x[0]}</b><span>${x[1]}</span></div>`).join('')}</div>
+ ${s<4?`<div class="dk-cta" style="justify-content:center"><button class="btn btn-primary btn-sm" ${rxa('set','vb16',s+1)}>${s?'Siguiente paso':'Empezar'}</button></div>`:`<div class="dk-cta" style="justify-content:center"><button class="btn btn-ghost btn-sm" ${rxa('set','vb16',0)}>Ver de nuevo</button></div>`}
+ ${niQ('Comprender la historia prepara para soltarla.')}</div>`};
+const VB_EJ=[['Vida pasada','2 vidas atrás · S. XIX · 60 a 69'],['Daño','Emocional · mayor'],['Anexo','Mujer · pobre · criada'],['Relación','Dependencia'],['Activación','15 a 21 años']];
+RX.vbex=()=>{Object.assign(RS,{vfq:0,vfn:2,vfs:7,vfa:6,vfv:4,vih:0,vit:{1:1},vii:1,vxs:1,vxc:1,vxr:14,vxp:11,vb17v:1});render(false)};
+RICH.vb17=()=>{const s=n3clamp(st('vb17',0),0,5),v=st('vb17v',0);
+ return dkH('Ejemplo','Ejemplo de lectura completa','Consultante: M. S., una relación de dependencia con su hermana que no logra soltar.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="nj-flow va-5">${VB_EJ.map((x,i)=>`<div class="${i<s?'lit':''}"><small>${x[0]}</small><b>${x[1]}</b></div>`).join('')}</div>
+ ${s<5?`<div class="dk-cta" style="justify-content:center"><button class="btn btn-primary btn-sm" ${rxa('set','vb17',s+1)}>${s?'Siguiente':'Empezar'}</button></div>`:
+ `<div class="ni-hyp ni-in"><span class="ni-tag">Comprensión posible</span><p>En esa vida, siendo criada, dependía de ella para sobrevivir. A los 18 años, cuando su hermana se fue de casa, la memoria se activó y la dependencia se repitió.</p></div>
+ <div class="dk-cta" style="justify-content:center">${v?'':`<button class="btn btn-primary btn-sm" ${rxa('vbex',0)}>Verlo en los gráficos</button>`}<button class="btn btn-ghost btn-sm" ${rxa('set','vb17',0)}>Ver de nuevo</button></div>
+ ${v?`<div class="dk-grid c2 ni-in" style="align-items:start"><div>${vxChart({cap:'Anexo: mujer, pobre, dependencia, criada.'})}</div><div>${vfChart({ring:'v',cap:'Fechas: se activó entre los 15 y 21 años.'})}</div></div>`:''}`}</div>`+niNote('Se limpia el daño, se libera el vínculo, se verifica y se agradece. Ejemplo ficticio.')};
+const VB_PS=[['El anexo','Retoma la vida pasada de tu tarea y decidan si hace falta el anexo.'],['Completar','Tu pareja mide en el anexo solo lo que ayuda a completar la historia.'],['Fechas','Midan en qué etapa de esta vida se activó.'],['Limpiar y cambiar','Limpien, liberen el vínculo si lo hay, verifiquen y cambien de rol.']];
+RICH.vb18=()=>{const s=n3clamp(st('vb18',0),0,3);
+ return dkH('Práctica en parejas','Práctica en parejas','Cuatro pasos. El botón llena la ficha con lo que marcaste en los gráficos.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="nj-steps h tg-st4">${VB_PS.map((x,i)=>`<div class="${i<s?'ok':i===s?'cur':''}" style="cursor:pointer" ${rxa('set','vb18',i)}><span class="n">${i<s?'✓':i+1}</span><div><b>${x[0]}</b><p>${x[1]}</p></div></div>`).join('')}</div>
+ ${s<3?`<div class="dk-cta" style="justify-content:center"><button class="btn btn-primary btn-sm" ${rxa('set','vb18',s+1)}>Siguiente paso</button></div>`:''}
+ ${s===1?`<div class="dk-cta" style="justify-content:center">${vaGo(-5,'Abrir el anexo')}</div>`:s===2?`<div class="dk-cta" style="justify-content:center">${vaGo(-1,'Abrir Esta vida')}</div>`:''}
+ ${niFicha('vbf',['Consultante','Vida pasada','Daño','Sexo','Clase social','Profesión','Relación','Activación','Limpieza'],['M. S.','2 · S. XIX · 60–69','Emocional · mayor','Mujer','Pobre','Criada','Dependencia','15 a 21','Sí · verificada'],()=>{const f=vfRead(),v=viRead(),x=vxRead();return ['',[f[1],f[2]].filter(Boolean).join(' · '),[v[1],v[2]].filter(Boolean).join(' · '),x[0],x[1],x[3],x[2],vfAct().replace(' años',''),'']},1040)}</div>`+niNote('Usa iniciales; la primera fila es un ejemplo ficticio.')};
+
+/* ----- 9 · Reglas de oro, repaso y tarea ----- */
+RICH.vb19=()=>dkH('Reglas de oro','Reglas de oro y comprobemos','Marca cada regla. Después respondan en voz alta y toquen cada tarjeta.')+
+ `<div class="ni" style="display:grid;gap:14px">${n3ck('vbro',[['chat','Hablar siempre en hipótesis'],['balanza','No culpar a nadie de hoy por lo que pasó en otra vida'],['enlace','No usar una lectura para romper o forzar un vínculo'],['persona','No decidir por otra persona a partir de su historia']],['Marca cada regla de oro.','Estas reglas acompañan cada lectura del anexo.'])}
+ <div class="ni-cp">${n3flip('vbcp',[['libro','1 · ¿Cuándo se usa el anexo de investigación?','<b>Solo cuando falta completar la historia:</b> si el daño involucra a alguien de esta vida, si el patrón tiene que ver con dinero, poder o trabajo, o si la persona necesita el contexto para soltar.'],['enlace','2 · ¿Qué es un vínculo kármico?','<b>Una relación con algo pendiente entre dos almas:</b> una deuda, un daño o una promesa. No es un castigo, es una oportunidad de cerrar lo que quedó abierto.'],['reloj','3 · ¿Dónde se mide en qué etapa de esta vida se activó una memoria?','<b>En el gráfico de Fechas, en el anillo «Esta vida»:</b> gestación, nacimiento y tramos de edad.']],'c3',250)}</div></div>`;
+RICH.vb20=()=>dkH('Cierre de la clase','Tarea para la próxima clase','Completa la historia de tu vida pasada.')+
+ `<div class="ni dk-grid c2" style="align-items:start"><div class="ni-task">${n3ck('vbta',[['lupa','Decide si necesitas el anexo para comprenderla'],['diana','Si lo usas, mide solo lo que completa la historia'],['enlace','Pregunta si se relaciona con alguien de esta vida y qué relación tuvieron'],['reloj','Mide en qué etapa de esta vida se activó'],['limpia','Limpia, verifica, agradece y completa la ficha']],['Marca cada punto cuando lo tengas.','¡Listo! Trae tu ficha a la Clase 3.'])}</div>
+ <div style="display:grid;gap:10px">${niBox('d','Importante','Lo que descubras sobre una persona de tu vida es para tu comprensión. No se lo comuniques como un hecho. Trae tu ficha.')}<div class="dk-cta">${vaGo(-1,'Abrir mi ficha')}</div></div></div>`;
