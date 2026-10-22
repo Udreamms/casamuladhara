@@ -2042,3 +2042,156 @@ RICH.vb19=()=>dkH('Reglas de oro','Reglas de oro y comprobemos','Marca cada regl
 RICH.vb20=()=>dkH('Cierre de la clase','Tarea para la próxima clase','Completa la historia de tu vida pasada.')+
  `<div class="ni dk-grid c2" style="align-items:start"><div class="ni-task">${n3ck('vbta',[['lupa','Decide si necesitas el anexo para comprenderla'],['diana','Si lo usas, mide solo lo que completa la historia'],['enlace','Pregunta si se relaciona con alguien de esta vida y qué relación tuvieron'],['reloj','Mide en qué etapa de esta vida se activó'],['limpia','Limpia, verifica, agradece y completa la ficha']],['Marca cada punto cuando lo tengas.','¡Listo! Trae tu ficha a la Clase 3.'])}</div>
  <div style="display:grid;gap:10px">${niBox('d','Importante','Lo que descubras sobre una persona de tu vida es para tu comprensión. No se lo comuniques como un hecho. Trae tu ficha.')}<div class="dk-cta">${vaGo(-1,'Abrir mi ficha')}</div></div></div>`;
+
+/* ---------- Nivel 4 · Especialización Vidas Pasadas · Clase 3 ---------- */
+(function(){const c=document.createElement('style');c.id='vc-css';c.textContent=`
+.vc-cz{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.vc-cz>button{all:unset;box-sizing:border-box;cursor:pointer;padding:12px 14px;border-radius:12px;border:1px solid var(--nb-line);background:var(--nb-paper);color:var(--nb-ink);font:600 .92rem/1.3 var(--f-body,inherit);animation:niUp .35s both;transition:transform .25s,background .25s}
+.vc-cz.c>button{background:var(--ni-lil);border-color:var(--ni-lil);text-align:center;font-weight:600}
+.vc-cz>button[aria-pressed="true"]{background:var(--ni-olv);border-color:var(--ni-olv);color:#fff;transform:translateY(-3px)}
+.vc-cz.c5{grid-template-columns:repeat(5,minmax(0,1fr))}
+.vc-alert{border-radius:14px;padding:14px 18px;background:#f6dde4;color:#5a2337;font-weight:600;line-height:1.5;animation:niUp .45s both}
+.vc-born{display:grid;gap:8px}
+.vc-born>button{all:unset;box-sizing:border-box;cursor:pointer;display:grid;gap:4px;padding:12px 16px;border-radius:12px;border:1px solid var(--nb-line);background:var(--nb-paper);color:var(--nb-ink);animation:niUp .4s both;transition:transform .25s,background .25s}
+.vc-born small{font:600 .56rem/1 var(--f-caps);letter-spacing:.16em;text-transform:uppercase;color:var(--ni-lil2)}
+.vc-born b{font:italic 400 1.08rem/1.35 var(--f-display)}
+.vc-born>button[aria-pressed="true"]{background:var(--ni-olv);color:#fff;transform:translateX(5px)}.vc-born>button[aria-pressed="true"] small{color:#d9c9ef}
+.vc-vf{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.vc-vf>button{all:unset;box-sizing:border-box;cursor:pointer;border-radius:16px;padding:14px 16px;display:grid;gap:6px;align-content:start;min-height:108px;border:1px solid var(--nb-line);background:var(--nb-paper);color:var(--nb-ink);animation:niUp .4s both;transition:transform .25s,background .25s,box-shadow .25s}
+.vc-vf>button.l{background:var(--ni-lil);border-color:var(--ni-lil)}
+.vc-vf b{font:400 1.06rem/1.2 var(--f-display)}.vc-vf span{font-size:.84rem;line-height:1.45;color:var(--nb-soft)}
+.vc-vf>button[aria-pressed="true"]{transform:translateY(-3px);box-shadow:0 0 0 2px var(--ni-lil2)}
+.vc-calm{border-radius:18px;padding:18px 20px;background:var(--ni-lil);color:#3b2a5a;display:grid;gap:10px;align-content:start;position:relative;overflow:hidden}
+.vc-calm p{margin:0;font:italic 400 1.18rem/1.55 var(--f-display)}
+.vc-calm i{position:absolute;right:-30px;bottom:-30px;width:120px;height:120px;border-radius:50%;background:rgba(122,90,166,.18);animation:vcBreath 6s ease-in-out infinite}
+@keyframes vcBreath{0%,100%{transform:scale(.7);opacity:.5}50%{transform:scale(1.15);opacity:1}}
+@media (max-width:760px){.vc-cz,.vc-cz.c5,.vc-vf{grid-template-columns:1fr 1fr}}
+`;document.head.appendChild(c)})();
+
+const vcPhoto=alt=>`<div class="ni-ph"><img src="${N4P}vidas/c3-portada.webp" alt="${alt}"><svg class="ni-arc" viewBox="0 0 200 104" aria-hidden="true"><path pathLength="1" d="M10 100a90 90 0 0 1 180 0" stroke="#f3ecd8" stroke-width="16"/><path pathLength="1" d="M34 100a66 66 0 0 1 132 0" stroke="#efe4f3" stroke-width="16"/><path pathLength="1" d="M58 100a42 42 0 0 1 84 0" stroke="#b9a3f1" stroke-width="16"/><circle cx="100" cy="100" r="18" fill="#3b4a24"/></svg></div>`;
+
+/* el gráfico de Causas de Muerte: causa y edad al morir (0 a 100) */
+const VM_C=['Muerte natural','Vejez','Complicación de herida','Acto de violencia','Infecciones','Abortos','Parto','Ejecución','Sacrificios rituales','Hambruna','Asesinato','Suicidio','Sobredosis','Envenenamiento','Inquisición','Tortura','En prisión','Enfermedad','Violencia sexual','En terremoto','Por asfixia','En inundación','Quemado','Guerra','Caída accidental','Peste','Picadura de animal','Animal','Disparo','Accidente','Secuestro','Muerte súbita','Decapitado','Catástrofe','Cirugía','Otro'];
+RX.vmc=(k,v)=>{const K='vm'+k;RS[K]=st(K,-1)===+v?-1:+v;render(false)};
+const vmChart=o=>{o=o||{};return niFan({label:'Gráfico de Causas de Muerte',act:'vmc',inner:50,sel:(k,i)=>st('vm'+k,-1)===i,
+ hot:o.ring||o.hot?(k,i)=>o.hot?(o.hot(k,i)?1:-1):(k===o.ring?0:-1):0,
+ rings:[{k:'c',r0:62,r1:256,items:VM_C,fill:'#ffffff',on:'#3f7d6e',m:'rad',fs:7.6},
+  {k:'e',r0:256,r1:280,items:Array.from({length:21},(_,i)=>String(i*5)),fill:'#efe4f3',on:'#7a5aa6',m:'tan',fs:7.5}],cap:o.cap===0?'':o.cap||'Toca la causa y después la edad al morir en el borde.'})};
+const vmRead=()=>{const c=st('vmc',-1),e=st('vme',-1);return [c<0?'':VM_C[c],e<0?'':e*5+' años']};
+
+/* el gráfico de Votos o Pactos, con sus propias marcas para Vidas pasadas */
+RX.vvc=(k,v)=>{const K='vv'+k;RS[K]=st(K,-1)===+v?-1:+v;render(false)};
+const vvChart=o=>{o=o||{};return niFan({label:'Gráfico de Votos o Pactos',act:'vvc',inner:50,sel:(k,i)=>st('vv'+k,-1)===i,
+ hot:o.ring||o.hot?(k,i)=>o.hot?(o.hot(k,i)?1:-1):(k===o.ring?0:-1):0,
+ rings:[{k:'n',r0:62,r1:125,items:TV_N.map((t,i)=>({t,c:['#efeafa','#e1d8f7','#cfc3f4','#b9a3f1'][i]})),on:'#6a4aa6',m:'tan',fs:11},
+  {k:'v',r0:125,r1:258,items:TV_V,fill:'#ffffff',on:'#3f7d6e',m:'rad',fs:7.4},
+  {k:'e',r0:258,r1:280,items:Array.from({length:21},(_,i)=>String(i*5)),fill:'#efe4f3',on:'#7a5aa6',m:'tan',fs:7.5}],cap:o.cap===0?'':o.cap||'Toca el voto, el nivel y la escala.'})};
+const vvRead=()=>{const v=st('vvv',-1),n=st('vvn',-1),e=st('vve',-1);return [v<0?'':tcClean(TV_V[v]),n<0?'':TV_N[n],e<0?'':String(e*5)]};
+
+/* ----- 1 · Bienvenida y agenda ----- */
+RICH.vc1=()=>`<div class="ni">${nbHero('Especialización Vidas Pasadas · Clase 3','Cómo terminó','y qué prometí','Cómo terminó esa vida y qué promesa quedó activa: el gráfico de Causas de Muerte, cómo leer con cuidado las muertes delicadas, los votos de vidas pasadas y la oración para anularlos.',['Causas de Muerte','Leer con cuidado','Votos','Oración'],'Karen Oyarce · Maestra Holística',vcPhoto('Un reloj de arena, una vela encendida, un libro antiguo y una pluma sobre una mesa de madera junto a una ventana'))}</div>`;
+RICH.vc2=()=>niAgenda('Clase 3',['Revisión de la tarea y ronda','Por qué importa cómo terminó una vida','El gráfico de Causas de Muerte','Cómo se expresa hoy y cómo leer con cuidado','Los votos de vidas pasadas','La oración de Votos','Ejemplo, práctica y repaso','Tarea'],
+ ['Leer la causa de muerte y la edad al morir','Leer con cuidado las muertes delicadas y saber cuándo derivar','Detectar un voto de otra vida, su nivel y su escala','Anular un voto con la oración']);
+
+/* ----- 2 · Revisión de la tarea y ronda ----- */
+const VC_RV=['¿Usaste el anexo? ¿Qué te ayudó a comprender?','¿Apareció una relación con alguien de esta vida?','¿En qué etapa de esta vida se activó la memoria?','¿Qué sentiste después de limpiar y agradecer?','¿A quién le apareció un daño mortal? Lo vemos hoy'];
+RICH.vc3=()=>{const s=st('vc3',-1),x=vxRead(),m=viTipos().includes(4)||st('vii',-1)===2;
+ return dkH('Lo que trajiste','Revisemos la tarea de la semana','La historia completa de tu vida pasada. Toca una pregunta para anotar tu respuesta.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="dk-grid c2" style="align-items:start">
+ <div style="display:grid;gap:10px"><div class="dk-sub" style="margin:0">Lo que marcaste en la Clase 2</div>${tcRow(['Sexo','Clase social','Relación','Profesión','Activación'],[...x,vfAct()])}${x.some(Boolean)?'':niNote('Aquí aparece lo que marcaste en el anexo y en el anillo «Esta vida».')}
+ ${m?niBox('d','En tu tarea apareció un daño mortal','Es justo lo que vemos hoy con el gráfico de Causas de Muerte.'):''}</div>
+ <div style="display:grid;gap:10px">${tbList('vc3',VC_RV)}${s>=0?`<div class="ni-in">${n3area('vc3a'+s,VC_RV[s],'Lo que noté…')}</div>`:''}</div></div>
+ ${niQ('Compartir es voluntario. Lo que se dice en el grupo, queda en el grupo.')}</div>`};
+RICH.vc4=()=>dkH('Lo que trajiste','Ronda de descubrimientos','Una o dos frases por persona. Si quieres, anota la tuya.')+
+ `<div class="ni vb-ron">${[['Lo que comprendí','Algo de esa vida que hoy miro distinto.'],['Lo que solté','Algo que se sintió más liviano después de limpiar.'],['Lo que me pregunto','Lo que aún quiero saber de esa historia.']].map((x,i)=>`<div><h3>${x[0]}</h3><p>${x[1]}</p><textarea data-rsin="vc4${i}" aria-label="${x[0]}" placeholder="Escribe aquí…">${esc(st('vc4'+i,''))}</textarea></div>`).join('')}</div>`+n3priv;
+
+/* ----- 3 · Por qué importa cómo terminó una vida ----- */
+RICH.vc5=()=>{const s=st('vc5',-1),X=[['corazon','Lo que se sintió','Miedo, dolor, soledad o injusticia en los últimos momentos.'],['reloj','Lo que quedó pendiente','Despedidas, tareas o vínculos que no alcanzaron a cerrarse.'],['nudo','Lo que se prometió','Votos hechos en el sufrimiento: «nunca más», «nunca volveré a».']];
+ return dkH('El final de una vida','Por qué importa cómo terminó una vida','Tres cosas que pueden quedar sin cerrar. Toca cada una.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="ni-hyp"><p>El final de una vida es un momento intenso. Lo que el alma sintió o prometió en ese momento puede quedar sin cerrar.</p></div>
+ <div class="va-3">${X.map((x,i)=>`<button class="${i===2?'d':''}" ${rxa('set','vc5',s===i?-1:i)} ${pressed(s===i)}>${ic(x[0],28)}<h3>${x[1]}</h3><p>${x[2]}</p></button>`).join('')}</div>
+ ${s===2?niBox('l','Lo veremos hoy','Los votos hechos en el sufrimiento se miden en el gráfico de Votos o Pactos y se anulan con su oración.'):''}
+ ${niBox('l','Pregunta al grupo','¿Por qué crees que el momento de la muerte puede dejar huella en el alma?')}${n3area('vc5a','Anota lo tuyo','Creo que…')}</div>`};
+
+/* ----- 4 · El gráfico de Causas de Muerte ----- */
+const VM_RG=[['c','1. Causa','Cuál de las causas del gráfico, o «Otro».'],['e','2. Edad al morir','En el borde: de 0 a 100 años.']];
+RICH.vc6=()=>{const s=st('vc6',-1);
+ return dkH('Causas de Muerte','El gráfico de Causas de Muerte','Se mide primero la causa y después la edad al morir. Toca un paso o explora el gráfico.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="tc-side"><div class="nj-fig">${niOrig('vc6O','vidas/muerte.webp','Lámina original del gráfico de Causas de Muerte de Casa Muladhara',vmChart({ring:s>=0?VM_RG[s][0]:null,cap:s>=0?0:undefined}))}</div>
+ <div style="display:grid;gap:10px">${tbList('vc6',VM_RG.map(x=>`<b>${x[1]}</b> · ${x[2]}`))}${niBox('d','Cuándo se usa','Si el daño fue mortal o el final es parte del motivo.')}${tcRow(['Causa','Edad al morir'],vmRead())}</div></div>
+ ${niQ('Se mide primero la causa y después la edad al morir.')}</div>`};
+const VM_G=[[0,1,17,4,25,6,2,34],[29,24,31,19,21,22,20,33,27,26,9],[23,28,10,3,13,7,32,14,15,16,30],[11,12,18,8,5]];
+const vcGroup=(g,sub,box)=>{const c=st('vmc',-1),G=VM_G[g];
+ return `<div class="ni" style="display:grid;gap:14px">${sub?`<p class="dk-lede" style="margin:0">${sub}</p>`:''}<div class="vc-cz${g===3?' c c5':''}">${G.map((i,k)=>`<button ${rxa('vmc','c',i)} ${pressed(c===i)} style="animation-delay:${k*.04}s">${VM_C[i]}</button>`).join('')}</div>
+ ${box}<div style="max-width:620px;width:100%;justify-self:center">${vmChart({hot:(k,i)=>k==='c'&&G.includes(i),cap:'Las causas de este grupo, en el gráfico.'})}</div></div>`};
+RICH.vc7=()=>dkH('Causas de Muerte','Muertes naturales y por enfermedad','Finales que llegaron por el cuerpo, la edad o la enfermedad.')+vcGroup(0,'',`<div class="ni-hyp"><p>Pueden dejar miedo a enfermar, a envejecer o a dar a luz.</p></div>`);
+RICH.vc8=()=>dkH('Causas de Muerte','Accidente, catástrofe y escasez','Finales repentinos o causados por la naturaleza.')+vcGroup(1,'',`<div class="ni-hyp"><p>Pueden dejar miedos concretos: al agua, al fuego, a las alturas o a que falte el alimento.</p></div>`);
+RICH.vc9=()=>dkH('Causas de Muerte','Muertes por violencia','Finales causados por otras personas o por el poder de una época.')+vcGroup(2,'',`<div class="ni-hyp"><p>Se nombran sin buscar detalles. Pueden dejar desconfianza, miedo a mostrarse o sensación de injusticia.</p></div>`);
+RICH.vc10=()=>dkH('Causas de Muerte','Muertes que piden más cuidado','Se nombran con respeto, se limpian y no se profundiza.')+vcGroup(3,'',`<div class="ni-obj"><span class="ni-tag" style="color:#d9c9ef">Cómo se leen</span><ul class="ni-st" style="margin:0;padding-left:18px;display:grid;gap:8px;color:#dfe3cf;line-height:1.5"><li>Se nombran con respeto, se limpian y no se profundiza</li><li>No se pregunta cómo ocurrió</li><li>Si la persona relata algo propio de esta vida, o ideas de hacerse daño: se detiene la lectura, se acompaña y se deriva a un profesional</li></ul></div><div class="vc-alert">Ante cualquier riesgo actual para alguien, se contacta a los servicios de emergencia.</div>`);
+
+/* ----- 5 · Cómo se expresa hoy y cómo leer con cuidado ----- */
+RICH.vc11=()=>{const e=st('vme',-1);
+ return dkH('Huellas','Cómo puede expresarse hoy','Cuatro huellas posibles. Toca cada tarjeta.')+
+ `<div class="ni" style="display:grid;gap:14px">${n3flip('vc11',[['rayo','Miedos concretos','Al agua, al fuego, a las alturas, a los espacios cerrados.'],['persona','Sensaciones en el cuerpo','Molestias sin explicación aparente, siempre después de consultar a un profesional.'],['xcirc','Rechazos','A lugares, épocas, objetos o situaciones sin saber por qué.'],['reloj','Una edad sensible','Inquietud al acercarse a la edad en que terminó esa vida.']],'c4',180)}
+ ${e>=0?niBox('l','Edad al morir que marcaste: '+e*5+' años','Si hoy te acercas a esa edad, observa con calma lo que sientes.'):''}
+ ${niQ('Son huellas posibles, no pruebas.')}</div>`};
+RICH.vc12=()=>dkH('Cuidado','Leer con cuidado','Seis acuerdos para leer una causa de muerte. Márcalos a medida que los conversan.')+
+ `<div class="ni dk-split" style="align-items:start"><div>${n3ck('vc12',[['chat','Nombrar la causa sin agregar detalles'],['balanza','No afirmar: «el gráfico muestra una posible…»'],['xcirc','No preguntar cómo ocurrió ni pedir que lo imagine'],['ojo','Observar a la persona: su respiración, su cuerpo, sus palabras'],['limpia','Limpiar, verificar y volver al presente con calma'],['escudo','Si aparece algo propio de esta vida, detenerse y derivar']],['Marca cada acuerdo.','Así se lee una causa de muerte: con calma y sin detalles.'])}</div>
+ <div class="vc-calm"><i></i><span class="ni-tag">Frase para acompañar</span><p>«Esa vida ya terminó. Hoy estás aquí, a salvo. Lo que quedó de ese final lo podemos soltar ahora.»</p></div></div>`;
+
+/* ----- 6 · Los votos de vidas pasadas ----- */
+const VC_BN=[['En la vida religiosa','pobreza, castidad, obediencia'],['En el sufrimiento','«nunca más volveré a amar»'],['En el momento de morir','«nunca volveré a confiar»'],['En un pacto','con otra persona o con un grupo']];
+RICH.vc13=()=>{const s=st('vc13',-1);
+ return dkH('Votos','Los votos de vidas pasadas','¿Cómo puede nacer un voto? Toca cada forma.')+
+ `<div class="ni dk-split" style="align-items:start"><div class="ni-obj"><span class="ni-tag" style="color:#d9c9ef">Qué es</span><p style="margin:0;font:400 1.15rem/1.55 var(--f-display);color:#ece7d3">Una promesa, un juramento o un pacto que el alma hizo en otra vida y sigue cumpliendo en esta, aunque ya no tenga sentido.</p></div>
+ <div class="vc-born">${VC_BN.map((x,i)=>`<button ${rxa('set','vc13',s===i?-1:i)} ${pressed(s===i)} style="animation-delay:${i*.07}s"><small>${x[0]}</small><b>${x[1]}</b></button>`).join('')}</div></div>
+ <div class="ni" style="margin-top:14px">${niBox('l','Pregunta al grupo','¿Qué promesa podría estar cumpliendo tu alma sin saberlo?')}${n3area('vc13a','Anota lo tuyo','Quizás mi alma prometió…')}</div>`};
+const VV_RG=[['v','1. Voto','Cuál de los 27 votos está activo.'],['n','2. Nivel','Bajo, medio, alto o muy alto.'],['e','3. Escala','De 0 a 100: cuánto pesa hoy.']];
+RICH.vc14=()=>{const s=st('vc14',-1);
+ return dkH('Votos o Pactos','El gráfico de Votos o Pactos','Tres pasos. Toca uno para verlo o explora el gráfico.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="tc-side"><div class="nj-fig">${niOrig('vc14O','vidas/votos.webp','Lámina original del gráfico de Votos o Pactos de Casa Muladhara',vvChart({ring:s>=0?VV_RG[s][0]:null,cap:s>=0?0:undefined}))}</div>
+ <div style="display:grid;gap:10px">${tbList('vc14',VV_RG.map(x=>`<b>${x[1]}</b> · ${x[2]}`))}${tcRow(['Voto','Nivel','Escala'],vvRead())}</div></div>
+ ${niQ('Se anula con la oración de Votos.')}</div>`};
+const VC_VF=[[1,'Votos de pobreza','El dinero llega y no se queda.'],[4,'Votos de castidad','Bloqueo para disfrutar del cuerpo y la pareja.'],[5,'Votos de obediencia','Cuesta decir que no.'],[16,'Votos de silencio','No poder expresar lo que se siente.'],[22,'Votos de sacrificio','Darlo todo y no recibir.'],[14,'Votos de sufrimiento','Sentir que la vida tiene que doler.'],[3,'Seguir a un fallecido','Sentir que una parte se fue con alguien que murió.'],[19,'Renunciar al amor','Relaciones que no llegan a concretarse.']];
+RICH.vc15=()=>{const v=st('vvv',-1);
+ return dkH('Votos','Votos frecuentes de otras vidas','Ocho votos frecuentes. Toca uno para marcarlo en el gráfico.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="vc-vf">${VC_VF.map((x,k)=>`<button class="${k===0||k===5?'l':''}" ${rxa('vvc','v',x[0])} ${pressed(v===x[0])} style="animation-delay:${k*.04}s"><b>${x[1]}</b><span>${x[2]}</span></button>`).join('')}</div>
+ <div style="max-width:620px;width:100%;justify-self:center">${vvChart({hot:(k,i)=>k==='v'&&VC_VF.some(x=>x[0]===i),cap:'Los ocho votos frecuentes, en el gráfico.'})}</div>
+ ${niQ('Son huellas posibles: la persona confirma lo que le hace sentido.')}</div>`};
+RICH.vc16=()=>{const s=st('vc16',-1);
+ return dkH('Dos orígenes','Votos del linaje y votos de vidas pasadas','Toca cada origen.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="va-3" style="grid-template-columns:repeat(2,minmax(0,1fr))"><button ${rxa('set','vc16',s===0?-1:0)} ${pressed(s===0)}><span class="ni-tag">En Transgeneracional</span><h3>Votos heredados del linaje</h3><p>Promesas de padres, abuelos o bisabuelos que siguen actuando en el clan.</p></button>
+ <button class="d" ${rxa('set','vc16',s===1?-1:1)} ${pressed(s===1)}><span class="ni-tag">En Vidas Pasadas</span><h3>Votos de otras vidas</h3><p>Promesas que mi propia alma hizo en otra vida y sigue cumpliendo.</p></button></div>
+ ${s===0?`<div class="nj-det ni-in"><div><span class="ni-tag">Repasar</span><br><b>Los votos del linaje</b><p>Los viste en la Clase 3 de Transgeneracional.</p></div><button class="btn btn-ghost btn-sm" data-les="2,24">Ir a Votos del linaje</button></div>`:''}
+ ${niQ('La oración de Votos nombra a ambos: las vidas pasadas y lo heredado del linaje.')}</div>`};
+
+/* ----- 7 · La oración de Votos ----- */
+RICH.vc17=()=>{const n=esc(st('tcnm',''))||'…………',v=st('vvv',-1),vt=v>=0?tvDe(tcClean(TV_V[v])):'………';
+ return dkH('Anular un voto','La oración de Votos','Escribe tu nombre, elige el voto y dila frase a frase.')+`<div class="ni" style="display:grid;gap:12px">${tcName()}
+ <div><div class="dk-sub">El voto que vas a anular</div>${chipRow('vvv',TV_V.map(tcClean),v)}</div>
+ ${n3pray('vcvo',['Desde mi amada y divina presencia YO SOY, a todos mis guías y seres de luz que me acompañan,','pido permiso para anular todos los votos kármicos limitantes contraídos en cualquier vida pasada, simultánea, plano o dimensión en que mi ser exista, o heredados de mi linaje.',`Yo ${n} anulo y cancelo todos los votos de ${esc(vt)},`,'me libero de ellos para siempre y los transformo, recuperando así mi poder personal y mi voluntad.','Gracias, gracias, gracias.'])}</div>`};
+
+/* ----- 8 · Ejemplo, práctica y repaso ----- */
+const VC_EJ=[['Causa de muerte','En inundación'],['Edad al morir','34 años'],['Voto','Votos de sufrimiento'],['Nivel y escala','Medio · 55'],['Cierre','Oración de Votos']];
+RX.vcex=()=>{Object.assign(RS,{vmc:21,vme:-1,vvv:14,vvn:1,vve:11,vc18v:1});render(false)};
+RICH.vc18=()=>{const s=n3clamp(st('vc18',0),0,5),v=st('vc18v',0);
+ return dkH('Ejemplo','Ejemplo: de la causa de muerte al voto','Consultante: P. R., miedo intenso al agua. Clase 1: 3 vidas atrás, siglo XVII, daño físico mortal.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="nj-flow va-5">${VC_EJ.map((x,i)=>`<div class="${i<s?'lit':''}"><small>${x[0]}</small><b>${x[1]}</b></div>`).join('')}</div>
+ ${s<5?`<div class="dk-cta" style="justify-content:center"><button class="btn btn-primary btn-sm" ${rxa('set','vc18',s+1)}>${s?'Siguiente':'Empezar'}</button></div>`:
+ `<div class="ni-hyp ni-in"><span class="ni-tag">Comprensión posible</span><p>Esa vida terminó en una inundación a los 34 años. En ese final, el alma sintió que la vida tenía que doler. El miedo al agua y esa sensación pueden venir de ahí.</p></div>
+ <div class="dk-cta" style="justify-content:center">${v?'':`<button class="btn btn-primary btn-sm" ${rxa('vcex',0)}>Verlo en los gráficos</button>`}<button class="btn btn-ghost btn-sm" ${rxa('set','vc18',0)}>Ver de nuevo</button></div>
+ ${v?`<div class="dk-grid c2 ni-in" style="align-items:start"><div>${vmChart({hot:(k,i)=>k==='c'?i===21:i===6||i===7,cap:'Causas de Muerte: en inundación, a los 34 años (entre 30 y 35).'})}</div><div>${vvChart({cap:'Votos: sufrimiento, nivel medio, escala 55.'})}</div></div>`:''}`}</div>`+niNote('Se limpia, se anula el voto con la oración, se verifica y se agradece. Ejemplo ficticio.')};
+const VC_PS=[['Consentimiento','Retoma tu vida pasada y pide consentimiento.'],['Causa y edad','Midan la causa y la edad al morir, con cuidado.'],['El voto','Pregunten si hay un voto: cuál, nivel y escala.'],['Anular y cambiar','Limpien, anulen el voto con la oración y cambien de rol.']];
+RICH.vc19=()=>{const s=n3clamp(st('vc19',0),0,3);
+ return dkH('Práctica en parejas','Práctica en parejas','Cuatro pasos. El botón llena la ficha con lo que marcaste en los gráficos.')+
+ `<div class="ni" style="display:grid;gap:14px"><div class="nj-steps h tg-st4">${VC_PS.map((x,i)=>`<div class="${i<s?'ok':i===s?'cur':''}" style="cursor:pointer" ${rxa('set','vc19',i)}><span class="n">${i<s?'✓':i+1}</span><div><b>${x[0]}</b><p>${x[1]}</p></div></div>`).join('')}</div>
+ ${s<3?`<div class="dk-cta" style="justify-content:center"><button class="btn btn-primary btn-sm" ${rxa('set','vc19',s+1)}>Siguiente paso</button></div>`:''}
+ ${s===1?`<div class="dk-cta" style="justify-content:center">${vaGo(-4,'Abrir Causas de Muerte')}</div>`:s===2?`<div class="dk-cta" style="justify-content:center">${vaGo(-2,'Abrir Votos o Pactos')}</div>`:s===3?`<div class="dk-cta" style="justify-content:center">${vaGo(-1,'Abrir la oración')}</div>`:''}
+ ${niFicha('vcf',['Consultante','Vida pasada','Causa de muerte','Edad al morir','Voto','Nivel · escala','Anulado'],['P. R.','3 · S. XVII · físico mortal','En inundación','34','Votos de sufrimiento','Medio · 55','Sí · verificado'],()=>{const f=vfRead(),m=vmRead(),v=vvRead();return ['',[f[1],f[2]].filter(Boolean).join(' · '),m[0],m[1].replace(' años',''),v[0],[v[1],v[2]].filter(Boolean).join(' · '),'']},900)}</div>`+niNote('Usa iniciales; la primera fila es un ejemplo ficticio.')};
+RICH.vc20=()=>dkH('Repaso en voz alta','Comprobemos lo aprendido','Respondan en voz alta y compartan cómo llegaron a su respuesta. Después toquen cada tarjeta.')+
+ `<div class="ni ni-cp">${n3flip('vccp',[['reloj','1 · ¿Qué se mide en el gráfico de Causas de Muerte?','<b>La causa y la edad al morir,</b> en ese orden. Se usa si el daño fue mortal o el final es parte del motivo.'],['escudo','2 · ¿Cómo se lee una muerte que pide más cuidado?','<b>Se nombra con respeto, se limpia y no se profundiza.</b> No se pregunta cómo ocurrió. Si aparece algo propio de esta vida, se detiene la lectura, se acompaña y se deriva.'],['paloma','3 · ¿Cómo se anula un voto de otra vida?','<b>Con la oración de Votos,</b> nombrando el voto que apareció en el gráfico. Después se verifica y se agradece.']],'c3',260)}</div>`;
+
+/* ----- 9 · Tarea ----- */
+RICH.vc21=()=>dkH('Cierre de la clase','Tarea para la próxima clase','Cierra la historia de tu vida pasada.')+
+ `<div class="ni dk-grid c2" style="align-items:start"><div class="ni-task">${n3ck('vcta',[['reloj','Si hubo daño mortal, mide la causa y la edad al morir'],['nudo','Pregunta si esa vida dejó un voto: cuál, nivel y escala'],['limpia','Limpia lo encontrado y verifica'],['paloma','Anula el voto con la oración de Votos'],['corazon','Agradece a esa vida y completa la ficha']],['Marca cada punto cuando lo tengas.','¡Listo! Trae tu ficha a la Clase 4.'])}</div>
+ <div style="display:grid;gap:10px">${niBox('d','Importante','Hazlo en un momento tranquilo. Si algo te remueve mucho, detente y pide apoyo. Trae tu ficha a la Clase 4.')}<div class="dk-cta">${vaGo(-1,'Abrir mi ficha')}</div></div></div>`;
