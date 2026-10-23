@@ -1159,3 +1159,78 @@ const T5Q12=[
  {q:'¿Cuál es el riesgo del fuego y cuál el del agua?',o:['Quemarse y desbordarse','Congelarse y secarse','Ninguno'],a:0,e:'Bastos: ¿qué quiero hacer? Copas: ¿qué siento?'},
  {q:'En la tarea, cada noche anotas…',o:['Si el día tuvo más fuego o más agua, y qué te faltó','Tus sueños','Tu historia del Loco'],a:0,e:'Y cada mañana sacas una carta entre los 28 Menores vistos.'}];
 RICH.t12e3=()=>n3quiz('t5c12',T5Q12,['Dominas lo esencial de la Clase 12. ¡Fuego y agua en equilibrio!','Vas muy bien. Repasa lo que falló y sigue practicando.','Vale la pena repasar la clase. Puedes volver cuando quieras.']);
+
+/* ---------- Clase 13 · Espadas: el aire de la mente ---------- */
+const T5C13=N5P+'c13/';
+const t5esp=(i,...r)=>({...t5bas(i,...r),img:T5C13+'espadas_'+i+'.webp',palo:'Espadas'});
+Object.assign(T5ARC,{
+ e1:t5esp(1,'As de Espadas','As de Espadas del mazo Rider-Waite: una mano sale de una nube y alza una espada coronada, con ramas de olivo y de palma','Una mano sale de una nube y alza una espada coronada, con ramas de olivo y de palma. Es <b>la claridad que llega de golpe</b>: una idea, una verdad.',['Claridad','Verdad','Idea nueva','Decisión'],'Ver una verdad con claridad.','Usar la verdad para herir.','Confusión, ideas que no se aclaran.','¿Qué verdad necesito ver con claridad?','Necesito ver con claridad que…','Ve claro'),
+ e2:t5esp(2,'Dos de Espadas','Dos de Espadas del mazo Rider-Waite: una mujer con los ojos vendados cruza dos espadas sobre su pecho; detrás, el mar y una luna creciente','Una mujer con los ojos vendados cruza dos espadas sobre su pecho. Detrás, el mar y una luna creciente. <b>No quiere ver, y así no puede elegir</b>.',['Indecisión','Bloqueo','Tregua','Evitar'],'Una pausa para escuchar adentro.','No querer ver, postergar la decisión.','Se quita la venda: algo se ve y se decide.','¿Qué decisión estoy evitando mirar?','Estoy evitando mirar la decisión de…','Duda'),
+ e3:t5esp(3,'Tres de Espadas','Tres de Espadas del mazo Rider-Waite: un corazón rojo atravesado por tres espadas bajo la lluvia','Un corazón atravesado por tres espadas bajo la lluvia. Es la herida que deja una palabra, una verdad o una pérdida: <b>el dolor que también hace crecer</b>.',['Dolor','Herida','Tristeza','Desamor'],'Reconocer el dolor para sanarlo.','Quedarse en la herida, revivirla.','Recuperación, la herida empieza a cerrar.','¿Qué herida del corazón necesito reconocer?','Necesito reconocer la herida de…','Duele'),
+ e4:t5esp(4,'Cuatro de Espadas','Cuatro de Espadas del mazo Rider-Waite: un caballero yace en reposo sobre una tumba con las manos en oración; tres espadas cuelgan en la pared y una descansa bajo él','Un caballero yace en reposo sobre una tumba, con las manos en oración. Tres espadas cuelgan en la pared y una descansa bajo él. <b>Es tiempo de recuperarse</b>.',['Descanso','Recuperación','Retiro','Silencio'],'Descansar la mente para recuperarse.','Aislarse más de lo necesario.','Agotamiento, volver antes de tiempo.','¿Qué necesita mi mente para descansar?','Mi mente necesita…','Descansa'),
+ e5:t5esp(5,'Cinco de Espadas','Cinco de Espadas del mazo Rider-Waite: un joven recoge las espadas con una sonrisa mientras otros dos se alejan derrotados bajo un cielo revuelto','Un joven recoge las espadas con una sonrisa mientras otros dos se alejan derrotados. El cielo está revuelto. <b>Ganó la discusión, pero se quedó solo</b>.',['Conflicto','Derrota','Orgullo','Ganar perdiendo'],'Elegir qué batallas dar.','Querer tener la razón a cualquier costo.','Reconciliación, soltar el resentimiento.','¿Qué gané y qué perdí en mi última discusión?','Gané… y perdí…','Pelea'),
+ e6:t5esp(6,'Seis de Espadas','Seis de Espadas del mazo Rider-Waite: un barquero lleva en su bote a una mujer y a un niño hacia la otra orilla; el agua a un lado está agitada y delante, en calma','Un barquero lleva en su bote a una mujer y a un niño hacia la otra orilla. El agua a su derecha está agitada; <b>la que tienen delante, en calma</b>.',['Transición','Viaje','Dejar atrás','Calma'],'Alejarse de la tormenta hacia la calma.','Llevar el pasado a cuestas en el viaje.','Resistencia a partir, asuntos pendientes.','¿Hacia qué orilla más tranquila quiero ir?','Quiero ir hacia…','Se aleja'),
+ e7:t5esp(7,'Siete de Espadas','Siete de Espadas del mazo Rider-Waite: un hombre se aleja en puntas de pie de un campamento llevando cinco espadas y mirando hacia atrás; dos quedan clavadas en el suelo','Un hombre se aleja en puntas de pie de un campamento, llevando cinco espadas y mirando hacia atrás. <b>Dos quedan clavadas en el suelo</b>.',['Estrategia','Astucia','Secreto','Evasión'],'Actuar con estrategia e inteligencia.','Engañar o engañarse, evadir.','Una verdad que sale a la luz.','¿Dónde no estoy siendo honesta, con otros o conmigo?','No estoy siendo honesta cuando…','Esquiva')});
+const T5ES7=['e1','e2','e3','e4','e5','e6','e7'];
+const T5M35=[...T5M28,...T5ES7];
+
+/* ----- 1 · Bienvenida y repaso ----- */
+RICH.t13a1=()=>nbHero('Tarot Camino del Ser · Clase 13','<span style="font-size:.68em">Espadas: el aire</span>','de la mente','Clase 13 · Arcanos Menores. Las Espadas, del As al 7.',['Aire','Mente','Palabra'],'Casa Muladhara · Escuela de Formación Holística',
+ `<div class="nb-pw t5-fan">${['e2','e1','e6'].map(id=>t5card({...t5full(T5ARC[id]),sm:1})).join('')}</div>`);
+RICH.t13a2=()=>dkH('Repaso de la semana','Fuego y agua','Antes de pasar al aire, compartimos cómo fue la semana equilibrando fuego y agua.')+
+ `<div class="dk-sub">¿Tus días tuvieron más fuego o más agua?</div>${chipRow('t13rf',['Más fuego','Más agua','En equilibrio'],st('t13rf',-1))}`+
+ `<div class="dk-sub">¿Qué carta de Copas salió más?</div>`+t5mfila('t13rc',T5CP14,st('t13rc',-1))+
+ n3area('t13rr','¿Qué te quedó resonando de la clase 12?','Me quedó resonando…')+n3priv;
+RICH.t13a3=()=>dkH('Del agua al aire','Lo que pensamos también nos forma','Después del fuego que <b>actúa</b> y el agua que <b>siente</b>, llega el aire que <b>piensa</b>: las ideas, las palabras, las decisiones y también los miedos de la mente.')+
+ `<div class="t5-cols" style="grid-template-columns:repeat(3,minmax(0,140px));justify-content:center">${['b1','c1','e1'].map(id=>t5card({...t5full(T5ARC[id]),sm:1})).join('')}</div>
+ <div class="dk-grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))"><div class="detail" style="border-left:6px solid #c0442f"><span class="eyebrow">Bastos · fuego</span><h3>Actúa</h3><p>Lo que nos mueve.</p></div><div class="detail" style="border-left:6px solid #4573a8"><span class="eyebrow">Copas · agua</span><h3>Siente</h3><p>Lo que sentimos.</p></div><div class="detail" style="border-left:6px solid #7a8a96"><span class="eyebrow">Espadas · aire</span><h3>Piensa</h3><p>Lo que pensamos.</p></div></div>`;
+
+/* ----- 2 y 3 · El palo de Espadas ----- */
+RICH.t13b1=()=>dkH('El palo de Espadas · elemento aire','El mundo de la mente','Las Espadas hablan de pensamientos, palabras, decisiones, verdad y conflictos. La espada tiene <b>dos filos: corta y aclara, pero también puede herir</b>.')+
+ `<div class="dk-split" style="align-items:center">${t5card({...t5full(T5ARC.e1),sm:1})}<div style="display:grid;gap:10px">
+ <div class="detail"><span class="eyebrow">Cuando fluye</span>${c4li(['Claridad','Verdad','Comunicación','Justicia'].map(t=>['sol',t]))}</div>
+ <div class="detail"><span class="eyebrow">En sombra</span>${c4li(['Preocupación','Crítica','Ansiedad','Palabras que hieren'].map(t=>['luna',t]))}</div></div></div>`;
+['e1','e2','e3'].forEach((id,i)=>{RICH['t13b'+(i+2)]=()=>t5Menor(id)});
+['e4','e5','e6','e7'].forEach((id,i)=>{RICH['t13c'+(i+1)]=()=>t5Menor(id)});
+RICH.t13c5=()=>{const s=n3clamp(st('t13ra',0),0,6),a=T5ARC[T5ES7[s]];
+ return dkH('El recorrido del aire','De la claridad a la estrategia','Leídas en orden, las siete Espadas cuentan la historia de una mente. Toca cada carta.')+t5mfila('t13ra',T5ES7,s,1)+
+ `<div class="dk-split" style="align-items:center">${t5card({...t5full(a),sm:1})}<div class="detail"><span class="eyebrow">${a.n} · ${T5NUM[a.num-1][0]}</span><h3>${a.verbo}</h3><p>${a.caras[0][0]}.</p>${t5nav('t13ra',s,7)}</div></div>`+
+ n3quote('Una mente que <mark>ve claro, duda, se hiere, descansa, pelea, se aleja y aprende a moverse con estrategia</mark>.')};
+
+/* ----- 4 · Práctica con tu mazo ----- */
+RICH.t13d1=()=>{const s=st('t13ma',-1),a=s>=0?T5ARC[T5ES7[s]]:null;
+ return dkH('Ejercicio vivencial · en grupos pequeños','¿Cómo está mi mente hoy?','Tres pasos para escuchar tus pensamientos y compartirlos en tu grupo.')+
+ `<div class="dk-sub">1 · Elige: la Espada que muestra el pensamiento que más te acompaña</div>`+t5mfila('t13ma',T5ES7,s)+
+ (a?`<div class="dk-split" style="align-items:center">${t5card({...t5full(a),sm:1})}<div class="detail"><span class="eyebrow">Mi mente hoy</span><h3>${a.t}</h3><p><b>Palabras clave:</b> ${a.kw.join(' · ')}.</p><p><b>Luz:</b> ${a.caras[0][0]}. <b>Sombra:</b> ${a.caras[1][0]}.</p></div></div>`:'')+
+ n3area('t13me','2 · Escríbelo: ponle palabras a ese pensamiento, tal como suena','Lo que me digo es…')+
+ n3area('t13mr','3 · Reescríbelo: dilo de nuevo como se lo dirías a una amiga','Si se lo dijera a una amiga, le diría…')+n3priv};
+RICH.t13d2=()=>{const r=st('t13tz',-1),a=r>=0?T5ARC[T5ES7[r>>1]]:null;
+ return dkH('Práctica con tu mazo','Tirada de una carta','Con las 7 Espadas vistas. Practica con tu mazo y aquí mismo.')+
+ n3ck('t13tp',[['','Baraja las 7 Espadas vistas, derechas e invertidas.'],['','Pregunta: ¿qué necesita mi mente esta semana?'],['','Saca una carta, muéstrala a la cámara y léela uniendo su número con el aire.']])+
+ `<div class="t5-cols" style="grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:8px">${T5ES7.map(id=>t5card({...t5full(T5ARC[id]),sm:1})).join('')}</div>
+ <div class="dk-call">${ic('lupa',18)} <b>¿Qué necesita mi mente esta semana?</b></div>`+
+ t5tirada('t13tz','Sacar una carta',T5ES7)+
+ (a?`<div class="dk-call">${ic('espiral',18)} Su número: <b>${T5NUM[a.num-1][0]}</b> (${T5NUM[a.num-1][1].toLowerCase().replace(/\.$/,'')}) en el aire de la mente.</div>`:'')+
+ n3area('t13tl','Lo que me dice mi carta','Mi carta me dice…')+n3priv};
+
+/* ----- 5 · Tarea, cierre y repaso ----- */
+RICH.t13e1=()=>dkH('Para esta semana','Observar mis pensamientos','Una práctica diaria con los 35 Menores vistos: 14 Bastos, 14 Copas y 7 Espadas.')+
+ n3ck('t13ta',[['libro','Completa las fichas del As al 7 de Espadas.'],['sol','Cada mañana saca una carta entre los 35 Menores vistos.'],['hoja','Anota un pensamiento que se repita y reescríbelo con amabilidad.']])+
+ `<div class="dk-sub">Tu carta de hoy</div>`+t5tirada('t13cd','Sacar mi carta del día',T5M35)+
+ n3area('t13pp','Un pensamiento que se repite','Me repito que…')+
+ n3area('t13pk','Reescrito con amabilidad','Con amabilidad, me digo que…')+n3priv;
+RICH.t13e2=()=>dkH('Que tu mente sea clara','Próxima clase','8, 9 y 10 de Espadas · Sota, Caballo, Reina y Rey.')+
+ `<div class="t5-cols" style="grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:8px">${['8','9','10'].map(n=>t5card({n,t:'Espadas',sm:1})).join('')}${['Sota','Caballo','Reina','Rey'].map(n=>t5card({n:n[0],t:n,sm:1})).join('')}</div>`+
+ n3quote('Del agua al aire: <mark>que tu mente sea clara</mark>.')+`<small class="dk-sig" style="text-align:center;display:block">Casa Muladhara · Escuela de Formación Holística</small>`;
+const T5Q13=[
+ {q:'¿Qué elemento y qué tema tienen las Espadas?',o:['Aire: la mente, la palabra y las decisiones','Agua: emociones y vínculos','Fuego: acción y proyectos'],a:0,e:'Pensamientos, palabras, decisiones, verdad y conflictos.'},
+ {q:'¿Por qué la espada tiene dos filos?',o:['Corta y aclara, pero también puede herir','Porque es más fuerte','Porque son dos personas'],a:0,e:'Cuando fluye: claridad, verdad, comunicación y justicia.'},
+ {q:'¿Cuál es la sombra de las Espadas?',o:['Preocupación, crítica, ansiedad, palabras que hieren','Dependencia emocional','Impulsividad'],a:0,e:'La mente también puede herir.'},
+ {q:'En el As de Espadas, la espada está…',o:['Coronada, con ramas de olivo y de palma','Rota','Clavada en el suelo'],a:0,e:'La claridad que llega de golpe: una idea, una verdad.'},
+ {q:'La mujer del Dos de Espadas…',o:['Tiene los ojos vendados y cruza dos espadas','Baila','Navega en un bote'],a:0,e:'No quiere ver, y así no puede elegir.'},
+ {q:'¿Qué muestra el Tres de Espadas?',o:['Un corazón atravesado por tres espadas bajo la lluvia','Una celebración','Un viaje'],a:0,e:'El dolor que también hace crecer.'},
+ {q:'El Cuatro de Espadas habla de…',o:['Descanso y recuperación','Conflicto','Estrategia'],a:0,e:'Su sombra: aislarse más de lo necesario.'},
+ {q:'El joven del Cinco de Espadas…',o:['Ganó la discusión, pero se quedó solo','Perdió todo','Descansa'],a:0,e:'Su luz: elegir qué batallas dar.'},
+ {q:'En el Seis de Espadas, el bote va…',o:['De la tormenta hacia la calma','Hacia la tormenta','A ninguna parte'],a:0,e:'Su sombra: llevar el pasado a cuestas en el viaje.'},
+ {q:'En el recorrido del aire, el Siete de Espadas…',o:['Esquiva','Ve claro','Descansa'],a:0,e:'Ve claro, duda, duele, descansa, pelea, se aleja y esquiva.'}];
+RICH.t13e3=()=>n3quiz('t5c13',T5Q13,['Dominas lo esencial de la Clase 13. ¡Que tu mente sea clara!','Vas muy bien. Repasa lo que falló y sigue practicando.','Vale la pena repasar la clase. Puedes volver cuando quieras.']);
