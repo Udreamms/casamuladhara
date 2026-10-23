@@ -383,6 +383,8 @@ const T5C4=N5P+'c4/';
 .t5-two .ar{font:400 2rem/1 var(--f-display);color:var(--nb-gold)}
 .t5-nums small{overflow-wrap:anywhere}
 @media (max-width:560px){.t5-nums small{display:none}}
+.t5-q4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:560px){.t5-q4{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .t5-vj{display:grid;grid-template-columns:minmax(90px,130px) minmax(0,1fr);gap:16px;align-items:center}
 @media (max-width:560px){.t5-vj{grid-template-columns:1fr}.t5-vj>.t5-path{width:110px;justify-self:center}}
 @media (max-width:560px){.t5-path{grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}.t5-path small{display:none}}
@@ -1388,3 +1390,86 @@ const T5Q15=[
  {q:'El campesino del Siete de Oros…',o:['Espera y evalúa lo que sembró','Huye','Celebra'],a:0,e:'Su luz: esperar con paciencia el fruto.'},
  {q:'En el recorrido de la tierra, el Cuatro de Oros…',o:['Retiene','Comparte','Siembra'],a:0,e:'Siembra, equilibra, construye, retiene, carece, comparte y espera.'}];
 RICH.t15e3=()=>n3quiz('t5c15',T5Q15,['Dominas lo esencial de la Clase 15. ¡Que tus raíces te sostengan!','Vas muy bien. Repasa lo que falló y sigue practicando.','Vale la pena repasar la clase. Puedes volver cuando quieras.']);
+
+/* ---------- Clase 16 · Oros: la cosecha del camino ---------- */
+const T5C16=N5P+'c16/';
+const t5oro2=(i,...r)=>({...t5oro(i,...r),img:T5C16+'oros_'+i+'.webp'});
+const t5ocor=(k,...r)=>{const a=t5cor(k,...r);return {...a,img:T5C16+'oros_'+k+'.webp',palo:'Oros'}};
+Object.assign(T5ARC,{
+ o8:t5oro2(8,'Ocho de Oros','Ocho de Oros del mazo Rider-Waite: un artesano sentado en su banco talla un oro con martillo y cincel; los que ya terminó cuelgan a su lado','Un artesano sentado en su banco talla un oro con martillo y cincel. Los que ya terminó cuelgan a su lado: <b>cada uno es una práctica más</b>.',['Dedicación','Práctica','Maestría','Detalle'],'Perfeccionar un oficio con constancia.','Perfeccionismo, solo trabajar.','Desmotivación, trabajo sin sentido.','¿Qué quiero practicar con constancia?','Quiero practicar con constancia…','Practica'),
+ o9:t5oro2(9,'Nueve de Oros','Nueve de Oros del mazo Rider-Waite: una mujer elegante pasea por su viñedo con un halcón en la mano, rodeada de frutos maduros y nueve oros','Una mujer elegante pasea por su viñedo con un halcón en la mano. Los frutos maduros y los nueve oros la rodean: <b>disfruta lo que cultivó</b>.',['Autonomía','Abundancia','Disfrute','Merecimiento'],'Disfrutar lo que construí por mí misma.','Aislarse en la comodidad.','Dependencia, no sentirse merecedora.','¿Qué he logrado que merezco disfrutar?','He logrado… y merezco disfrutarlo.','Disfruta'),
+ o10:t5oro2(10,'Diez de Oros','Diez de Oros del mazo Rider-Waite: un anciano sentado acaricia a sus perros; bajo el arco, una pareja y un niño','Un anciano sentado acaricia a sus perros. Bajo el arco, una pareja y un niño. <b>Tres generaciones juntas</b> en la casa que se construyó con el tiempo.',['Legado','Familia','Raíces','Herencia'],'Construir algo que dure generaciones.','Cargar los mandatos de la familia.','Conflictos por herencias, raíces rotas.','¿Qué legado recibí y cuál quiero dejar?','Recibí… y quiero dejar…','Deja legado'),
+ oS:t5ocor('sota','Sota de Oros','Aprende','Sota de Oros del mazo Rider-Waite: un joven de pie en un campo verde sostiene un oro con las dos manos y lo mira con total atención','Un joven de pie en un campo verde sostiene un oro con las dos manos y lo mira con total atención, <b>como quien estudia algo valioso</b>.',['Estudio','Concentración','Nuevo proyecto','Paciencia'],'Aprender con dedicación y cuidado.','Quedarse planificando sin empezar.','Falta de foco, dejarlo a medias.','¿Qué quiero aprender paso a paso?','Quiero aprender paso a paso…'),
+ oC:t5ocor('caballo','Caballo de Oros','Actúa','Caballo de Oros del mazo Rider-Waite: un caballero sobre un caballo negro, completamente quieto, mira el oro que sostiene; frente a él, campos arados','Un caballero sobre un caballo negro y fuerte, completamente quieto, mira el oro que sostiene. Frente a él, <b>campos arados esperando la siembra</b>.',['Constancia','Responsabilidad','Método','Lentitud'],'Avanzar paso a paso sin rendirse.','Rutina, quedarse estancada.','Pereza o terquedad.','¿Qué compromiso sostengo con constancia?','Sostengo con constancia…'),
+ oR:t5ocor('reina','Reina de Oros','Cuida','Reina de Oros del mazo Rider-Waite: una reina sentada en un jardín florido sostiene un oro en su regazo y lo mira con ternura; a sus pies, un conejo','Una reina sentada en un jardín florido sostiene un oro en su regazo y lo mira con ternura. A sus pies, un conejo: <b>la fertilidad de la tierra</b>.',['Cuidado','Abundancia','Hogar','Sentido práctico'],'Nutrir con los pies en la tierra.','Cuidar a todos y olvidarse de sí.','Descuido de sí, desorden en casa.','¿Cómo cuido mi cuerpo y mi casa?','Cuido mi cuerpo y mi casa cuando…'),
+ oK:t5ocor('rey','Rey de Oros','Dirige','Rey de Oros del mazo Rider-Waite: un rey en un trono con cabezas de toro, el manto cubierto de uvas y su castillo detrás','Un rey en un trono con cabezas de toro, el manto cubierto de uvas y su castillo detrás. <b>Descansa entre la abundancia</b> que supo construir.',['Prosperidad','Estabilidad','Generosidad','Logro'],'Administrar con sabiduría y compartir.','Medir todo en dinero.','Avaricia, mal manejo de los recursos.','¿Cómo administro lo que tengo?','Administro lo que tengo…')});
+const T5OC=['oS','oC','oR','oK'];
+const T5OR14=[...T5OR7,'o8','o9','o10',...T5OC];
+const T5M56=[...T5M42,...T5OR14];
+const T5OCV=['Estudia con atención.','Avanza paso a paso.','Nutre con los pies en la tierra.','Administra con sabiduría.'];
+// los cuatro palos completos: id del As, nombre, elemento, pregunta, color, icono y las 14 cartas
+const T5ELEM=[['b1','Bastos','Fuego','¿Qué quiero hacer?','#c0442f','sol',T5B14],['c1','Copas','Agua','¿Qué siento?','#4573a8','agua',T5CP14],['e1','Espadas','Aire','¿Qué pienso?','#7a8a96','espiral',T5ES14],['o1','Oros','Tierra','¿Qué hago real?','#9b6f27','hoja',T5OR14]];
+
+/* ----- 1 · Bienvenida y repaso ----- */
+RICH.t16a1=()=>nbHero('Tarot Camino del Ser · Clase 16','<span style="font-size:.68em">Oros: la cosecha</span>','del camino','Clase 16 · Final del camino. El 8, 9 y 10 de Oros, las cuatro figuras y el cierre del Nivel 1.',['Cosechar','Unir','Celebrar'],'Casa Muladhara · Escuela de Formación Holística',
+ `<div class="nb-pw t5-fan">${['o9','o10','oR'].map(id=>t5card({...t5full(T5ARC[id]),sm:1})).join('')}</div>`);
+RICH.t16a2=()=>dkH('Repaso de la semana','Del As al 7 de Oros','Antes de la última clase, compartimos cómo fue la semana habitando la tierra.')+
+ n3area('t16rg','¿Qué gesto de cuidado elegiste?','Elegí…')+
+ n3area('t16rc','¿Cómo lo sintió tu cuerpo durante la semana?','Mi cuerpo lo sintió…')+
+ `<div class="dk-sub">¿Qué Oro te acompañó más?</div>`+t5mfila('t16ro',T5OR7,st('t16ro',-1))+n3priv;
+RICH.t16a3=()=>dkH('Final del camino','Las 78 cartas ya son tuyas','Hoy conocemos <b>las siete últimas cartas</b>, unimos <b>los cuatro elementos</b> y celebramos el camino de estos cuatro meses.')+
+ `<div class="t5-cols" style="grid-template-columns:repeat(3,minmax(0,150px));justify-content:center">${['o8','o9','o10'].map(id=>t5card({...t5full(T5ARC[id]),sm:1})).join('')}</div>
+ <div class="t5-cols" style="grid-template-columns:repeat(4,minmax(0,120px));justify-content:center">${T5OC.map(id=>t5card({...t5full(T5ARC[id]),sm:1})).join('')}</div>`;
+
+/* ----- 2 y 3 · Del 8 al 10 y la corte ----- */
+['o8','o9','o10'].forEach((id,i)=>{RICH['t16b'+(i+1)]=()=>t5Menor(id)});
+RICH.t16c1=()=>{const s=n3clamp(st('t16cv',0),0,3),a=T5ARC[T5OC[s]];
+ return dkH('Las cartas de la corte de Oros','Cuatro maneras de habitar la tierra','Toca cada figura.')+
+ `<div class="t5-big" style="grid-template-columns:repeat(auto-fit,minmax(110px,1fr))">${T5OC.map((id,i)=>`<button ${rxa('set','t16cv',i)} ${pressed(i===s)}><b>${T5ARC[id].t.split(' ')[0]}</b><small>${T5ARC[id].verbo}</small></button>`).join('')}</div>
+ <div class="dk-split" style="align-items:center">${t5card({...t5full(a),sm:1})}<div class="detail"><span class="eyebrow">${a.t}</span><h3>${a.verbo}</h3><p>${T5OCV[s]}</p>${t5nav('t16cv',s,4)}</div></div>`};
+T5OC.forEach((id,i)=>{RICH['t16c'+(i+2)]=()=>t5Menor(id)});
+
+/* ----- 4 · Los cuatro elementos ----- */
+RICH.t16d1=()=>{const s=n3clamp(st('t16po',0),0,13),a=T5ARC[T5OR14[s]];
+ return dkH('El palo completo','Los 14 Oros, la tierra entera','Del As que siembra al 10 que deja un legado, y de la Sota que estudia al Rey que administra: la tierra <b>recibe, trabaja, espera y cosecha</b>. Toca cada carta.')+t5mfila('t16po',T5OR14,s)+
+ `<div class="dk-split" style="align-items:center">${t5card({...t5full(a),sm:1})}<div class="detail"><span class="eyebrow">${a.corte?'Corte · '+a.verbo:a.n+' · '+T5NUM[a.num-1][0]}</span><h3>${a.t}</h3><p><b>Palabras clave:</b> ${a.kw.join(' · ')}.</p><p><b>Luz:</b> ${a.caras[0][0]}.</p>${t5nav('t16po',s,14)}</div></div>`};
+RICH.t16d2=()=>dkH('Dos elementos en diálogo','Aire y tierra: pensar y concretar','Dos elementos que se complementan.')+
+ `<div class="t5-two">${t5card({...t5full(T5ARC.e1),sm:1})}<span class="ar" aria-hidden="true">+</span>${t5card({...t5full(T5ARC.o1),sm:1})}</div>
+ <div class="dk-grid c2"><div class="detail" style="border-left:6px solid #7a8a96"><span class="eyebrow">Espadas · aire</span><h3>¿Qué pienso?</h3><p>Separa, nombra y decide.</p><p><b>Su riesgo:</b> quedarse en la cabeza.</p></div>
+ <div class="detail" style="border-left:6px solid #9b6f27"><span class="eyebrow">Oros · tierra</span><h3>¿Qué hago real?</h3><p>Concreta, cuida y sostiene.</p><p><b>Su riesgo:</b> estancarse.</p></div></div>
+ <div class="dk-call">${ic('lupa',18)} En una lectura, mira qué elemento predomina: ¿estás <b>pensando mucho sin dar pasos concretos</b>, o <b>haciendo sin detenerte a pensar</b>?</div>`;
+RICH.t16d3=()=>dkH('Los Arcanos Menores completos','Los cuatro elementos en ti','Cuatro palos, cuatro preguntas. Juntos forman los 56 Arcanos Menores.')+
+ `<div class="t5-cols" style="grid-template-columns:repeat(4,minmax(0,130px));justify-content:center">${T5ELEM.map(([id])=>t5card({...t5full(T5ARC[id]),sm:1})).join('')}</div>
+ <div class="t5-q4">${T5ELEM.map(([,p,el,q,c])=>`<div class="detail" style="border-left:6px solid ${c}"><span class="eyebrow">${p} · ${el.toLowerCase()}</span><h3>${q}</h3></div>`).join('')}</div>`;
+RICH.t16d4=()=>{const sacadas=T5ELEM.map(([,,,,,,ids],k)=>{const r=n3clamp(st('t16f'+k,-1),-1,13);return r>=0?T5ARC[ids[r]]:null});
+ return dkH('Ejercicio vivencial · en grupos pequeños','Mis cuatro elementos','1 · Separa los 56 Menores por palo y baraja cada pila. 2 · Saca una de cada pila: fuego, agua, aire y tierra.')+
+ `<div class="t5-q4">${T5ELEM.map(([,p,el,,c,,ids],k)=>{const a=sacadas[k];
+  return `<div style="display:grid;gap:8px;justify-items:center;text-align:center">${a?t5card({...t5full(a),sm:1}):t5card({n:'?',t:p,sm:1})}<span class="eyebrow" style="color:${c}">${el}</span>${a?`<b>${a.t}</b><small>${a.kw.slice(0,2).join(' · ')}</small>`:''}<button class="btn ${a?'btn-ghost':'btn-primary'} btn-sm" ${rxa('n3rnd','t16f'+k,ids.length)}>${a?'Sacar otra':'Sacar '+p}</button></div>`}).join('')}</div>`+
+ n3area('t16fm','3 · Un mensaje: ¿qué elemento está fuerte y cuál pide atención?','Está fuerte… y pide atención…')+n3priv};
+RICH.t16d5=()=>{const r=st('t16tz',-1),a=r>=0?T5ARC[T5M56[r>>1]]:null,el=a?T5ELEM.find(x=>x[1]===a.palo):null;
+ return dkH('Práctica con tu mazo','Tirada con los 56 Menores','Los cuatro palos juntos. Practica con tu mazo y aquí mismo.')+
+ n3ck('t16tp',[['','Junta y baraja los cuatro palos.'],['','Pregunta: ¿qué me llevo de este Nivel 1?'],['','Saca una carta y muéstrala a la cámara.'],['','Nombra su número, su elemento y su mensaje.']])+
+ `<div class="dk-call">${ic('lupa',18)} <b>¿Qué me llevo de este Nivel 1?</b></div>`+
+ t5tirada('t16tz','Sacar una carta',T5M56)+
+ (a?`<div class="dk-call">${ic(el[5],18)} Es ${t5numel(a)}. Su pregunta: <b>${el[3]}</b></div>`:'')+
+ n3area('t16tl','Lo que me llevo','Me llevo…')+n3priv};
+
+/* ----- 5 · Cierre del nivel ----- */
+RICH.t16e1=()=>dkH('El camino recorrido','Cuatro meses, 78 cartas','Del Loco que da el primer paso a la tierra que cosecha.')+
+ `<div class="t5-q4">${[['Mes 1','Mayores del 0 al 10: el viaje hacia afuera.',['loco','rueda']],['Mes 2','Mayores del 11 al 21: el viaje hacia adentro.',['justicia','mundo']],['Mes 3','Bastos y Copas: el fuego y el agua.',['b1','c1']],['Mes 4','Espadas y Oros: el aire y la tierra.',['e1','o1']]].map(([m,t,ids])=>`<div class="detail" style="display:grid;gap:10px;align-content:start"><span class="eyebrow">${m}</span><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${ids.map(id=>t5card({...t5full(t5arcOf(id)),sm:1})).join('')}</div><p style="margin:0">${t}</p></div>`).join('')}</div>`+
+ n3area('t16cm','¿Qué me llevo de estos cuatro meses?','De estos cuatro meses me llevo…')+n3priv;
+RICH.t16e2=()=>dkH('Nivel 1 completado','Gracias por caminar juntas','El camino del ser continúa.')+
+ `<div class="nb-pw t5-fan" style="justify-content:center">${['loco','mundo','o10'].map(id=>t5card({...t5full(t5arcOf(id)),sm:1})).join('')}</div>`+
+ n3quote('Las 78 cartas ya son tuyas: <mark>el camino del ser continúa</mark>.')+`<small class="dk-sig" style="text-align:center;display:block">Casa Muladhara · Escuela de Formación Holística</small>`;
+const T5Q16=[
+ {q:'El artesano del Ocho de Oros…',o:['Talla un oro con martillo y cincel','Duerme','Se aleja'],a:0,e:'Perfeccionar un oficio con constancia.'},
+ {q:'¿Qué sostiene en la mano la mujer del Nueve de Oros?',o:['Un halcón','Una copa','Una espada'],a:0,e:'Disfruta lo que cultivó por sí misma.'},
+ {q:'El Diez de Oros muestra…',o:['Tres generaciones juntas','Una pelea','Un viaje'],a:0,e:'Su pregunta: ¿qué legado recibí y cuál quiero dejar?'},
+ {q:'¿Cuál es la sombra de la Sota de Oros?',o:['Quedarse planificando sin empezar','Atropellar con palabras','Desbordarse'],a:0,e:'Su luz: aprender con dedicación y cuidado.'},
+ {q:'A diferencia de los otros caballos, el de Oros…',o:['Está completamente quieto','Galopa contra el viento','Se acerca con delicadeza'],a:0,e:'Avanza paso a paso sin rendirse.'},
+ {q:'A los pies de la Reina de Oros hay…',o:['Un conejo','Un gato negro','Un pez'],a:0,e:'La fertilidad de la tierra: nutre con los pies en la tierra.'},
+ {q:'¿Cuál es la sombra del Rey de Oros?',o:['Medir todo en dinero','Reprimir lo que siente','La rigidez del pensamiento'],a:0,e:'Su luz: administrar con sabiduría y compartir.'},
+ {q:'El riesgo del aire es quedarse en la cabeza, y el de la tierra…',o:['Estancarse','Quemarse','Desbordarse'],a:0,e:'Espadas: ¿qué pienso? Oros: ¿qué hago real?'},
+ {q:'¿Qué pregunta tiene cada elemento?',o:['Fuego: hacer; agua: sentir; aire: pensar; tierra: hacer real','Todos preguntan lo mismo','Fuego: sentir; agua: pensar'],a:0,e:'Los cuatro elementos en ti.'},
+ {q:'En el Mes 2 del camino vimos…',o:['Los Mayores del 11 al 21: el viaje hacia adentro','Bastos y Copas','Espadas y Oros'],a:0,e:'Mes 1: el viaje hacia afuera. Mes 3: fuego y agua. Mes 4: aire y tierra.'}];
+RICH.t16e3=()=>n3quiz('t5c16',T5Q16,['Dominas lo esencial de la Clase 16. ¡Nivel 1 completado!','Vas muy bien. Repasa lo que falló y sigue practicando.','Vale la pena repasar la clase. Puedes volver cuando quieras.']);
