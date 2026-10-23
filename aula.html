@@ -912,14 +912,6 @@ input[type=range].n2-range{width:100%;accent-color:var(--forest);padding:0;backg
 @keyframes c2fl{50%{opacity:.15}}
 @media (prefers-reduced-motion:reduce){.c2-live svg *{animation:none!important}}
 .c2-mud{margin:0;display:grid;gap:8px;justify-items:center;text-align:center}.c2-mud img{width:min(100%,260px);background:#fbf3e4;border-radius:16px;padding:8px;box-shadow:0 0 0 2px var(--c),0 6px 18px color-mix(in srgb,var(--c) 35%,transparent)}.c2-mud figcaption{font-size:.92rem}
-/* especialidades */
-.sp-card{grid-template-columns:minmax(0,220px) minmax(0,1fr);align-items:stretch;gap:22px;border-top:3px solid var(--sp)}
-.sp-card>img{width:100%;height:100%;min-height:220px;max-height:300px;object-fit:cover;border-radius:999px 999px 18px 18px;border:3px solid #e9e4d0;box-shadow:0 10px 30px -18px rgba(0,0,0,.5)}
-.sp-les{margin:4px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px;counter-reset:sp}
-.sp-les li{counter-increment:sp;font-size:.8rem;padding:5px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
-.sp-les li::before{content:counter(sp) " · ";opacity:.6}
-.sp-les li.on{border-color:var(--sp);background:color-mix(in srgb,var(--sp) 14%,transparent)}
-@media (max-width:640px){.sp-card{grid-template-columns:1fr}.sp-card>img{max-height:240px;max-width:240px;justify-self:center}}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -1063,6 +1055,156 @@ const N5L1f=C2('Tarea, cierre y repaso',[['t1a16','Para esta semana'],['t1a17','
 /* clases del Nivel 5 que todavía no se publican: una por módulo, para que cada clase conserve su lugar (y su avance) al llegar */
 const T5PEND=(n,t)=>({title:'Clase '+n+' · '+t,lessons:[L('Clase '+n+' · '+t,'',[])]});
 
+/* Nivel 4 · Especialización Niño interior · Clase 1 (contenido en curso/n4.js) */
+const N4N1a=C2('Clase 1 · Bienvenida y agenda',[['ni1','Lo que el niño interno nos enseña a sanar'],['ni2','Agenda de la clase']]);
+const N4N1b=C2('Clase 1 · Qué es el niño interno y cómo se forma',[['ni3','¿Qué es el niño interno?'],['ni4','¿Cómo se forma el niño interno?']]);
+const N4N1c=C2('Clase 1 · Qué podemos sanar con él',[['ni5','¿Qué podemos sanar con el niño interno?']]);
+const N4N1d=C2('Clase 1 · Cómo se forma una herida',[['ni6','De la necesidad al patrón adulto'],['ni7','Las cinco heridas de un vistazo']]);
+const N4N1e=C2('Clase 1 · Las cinco heridas, una por una',[['ni8','Herida de rechazo','Máscara evasiva'],['ni9','Herida de abandono','Máscara dependiente'],['ni10','Herida de humillación','Máscara masoquista'],['ni11','Herida de traición','Máscara controladora'],['ni12','Herida de injusticia','Máscara rígida']]);
+const N4N1f=C2('Clase 1 · Rechazo y abandono: diferencias',[['ni13','No son lo mismo']]);
+const N4N1g=C2('Clase 1 · El gráfico: la madre y el padre',[['nian','Volvamos al gráfico','Los anillos'],['ni14','La madre en el gráfico'],['ni15','El padre en el gráfico']]);
+const N4N1h=C2('Clase 1 · Lectura profunda y camino de sanación',[['ni16','De la lectura a la comprensión','Arma una lectura en el gráfico'],['ni17','El camino de sanación']]);
+const N4N1i=C2('Clase 1 · Meditación: encuentro con mi niño interior',[['ni18','Encuentro con mi niño interior','Meditación guiada · 15 minutos']]);
+const N4N1j=C2('Clase 1 · Práctica, repaso y tarea',[['ni19','Práctica: reconoce la herida'],['ni20','Reglas de oro del facilitador'],['nicp','Comprobemos lo aprendido'],['ni21','Repaso'],['ni22','Tarea de la semana']]);
+const N4N2a=C2('Clase 2 · Bienvenida y agenda',[['nj1','De la herida a la limpieza'],['nj2','Agenda de la clase']]);
+const N4N2b=C2('Clase 2 · Oración de conexión',[['nj3','Oración de conexión']]);
+const N4N2c=C2('Clase 2 · Revisión de la tarea',[['nj4','Revisemos la tarea de la semana'],['nj5','Ronda de descubrimientos']]);
+const N4N2d=C2('Clase 2 · El protocolo de Casa Muladhara',[['nj6','El protocolo de Casa Muladhara','Cinco pasos']]);
+const N4N2e=C2('Clase 2 · Paso 2: leer la herida',[['nj7','Paso 2: leer la herida','Gráfico del niño interno']]);
+const N4N2f=C2('Clase 2 · Paso 3: Energías Discordantes',[['nj8','Energías Discordantes','El gráfico'],['nj9','Heridas y las energías que suelen acompañarlas']]);
+const N4N2g=C2('Clase 2 · Paso 4: limpiar directo o investigar en el Mapa',[['nj10','Limpiar directo o investigar'],['nj11','El Mapa: investigar la emoción'],['nj12','Los seis sectores del Mapa']]);
+const N4N2h=C2('Clase 2 · Paso 5: la limpieza',[['nj13','La limpieza','Pedir permiso, nombrar, limpiar, verificar y agradecer']]);
+const N4N2i=C2('Clase 2 · Ejemplo y práctica en parejas',[['nj14','Ejemplo del protocolo completo'],['nj15','Práctica en parejas','Ficha de sesión']]);
+const N4N2j=C2('Clase 2 · Reglas de oro, repaso y tarea',[['nj16','Reglas de oro al limpiar'],['nj17','Comprobemos lo aprendido'],['nj18','Tarea de la semana']]);
+const N4N3a=C2('Clase 3 · Bienvenida y agenda',[['nk1','El tiempo y las figuras de la herida'],['nk2','Agenda de la clase']]);
+const N4N3b=C2('Clase 3 · Revisión de la tarea',[['nk3','Revisemos la tarea de la semana'],['nk4','Ronda de descubrimientos']]);
+const N4N3c=C2('Clase 3 · Los anillos que completamos hoy',[['nk5','Hoy completamos el gráfico','Anillos 1 y 4']]);
+const N4N3d=C2('Clase 3 · Anillo 1: el momento de la herida',[['nk6','El momento de la herida'],['nk7','La escala de 0 a 100']]);
+const N4N3e=C2('Clase 3 · Anillo 4: las doce figuras',[['nk8','Las doce figuras']]);
+const N4N3f=C2('Clase 3 · Figuras del vínculo y del entorno',[['nk9','Figuras del vínculo cercano'],['nk10','Figuras del entorno']]);
+const N4N3g=C2('Clase 3 · Lo femenino, lo masculino y uno mismo',[['nk11','Lo femenino y lo masculino'],['nk12','Cuando la figura es uno mismo']]);
+const N4N3h=C2('Clase 3 · Ejemplo y práctica en parejas',[['nk13','Ejemplo: una lectura completa'],['nk14','Práctica en parejas','Ficha de sesión']]);
+const N4N3i=C2('Clase 3 · Reglas de oro, repaso y tarea',[['nk15','Reglas de oro al leer figuras'],['nk16','Comprobemos lo aprendido'],['nk17','Tarea de la semana']]);
+const N4N4a=C2('Clase 4 · Bienvenida y agenda',[['nl1','La sesión completa'],['nl2','Agenda de la clase']]);
+const N4N4b=C2('Clase 4 · Revisión de la tarea',[['nl3','Revisemos la tarea de la semana']]);
+const N4N4c=C2('Clase 4 · El camino recorrido',[['nl4','Cuatro clases, un camino']]);
+const N4N4d=C2('Clase 4 · La sesión completa: antes, durante y después',[['nl5','La sesión completa en tres momentos'],['nl6','Antes: el encuadre'],['nl7','Durante: el protocolo']]);
+const N4N4e=C2('Clase 4 · Cómo comunicar la lectura',[['nl8','Cómo comunicar la lectura','Decir así o evitar']]);
+const N4N4f=C2('Clase 4 · Cierre, señales de alerta y registro',[['nl9','Después: cierre y acompañamiento'],['nl10','Señales de alerta y derivación'],['nl11','Ficha de sesión completa']]);
+const N4N4g=C2('Clase 4 · Demostración y evaluación práctica',[['nl12','Demostración en vivo'],['nl13','Evaluación práctica en tríos'],['nl14','Pauta de evaluación']]);
+const N4N4h=C2('Clase 4 · Repaso y certificación',[['nl15','Comprobemos lo aprendido'],['nl16','Requisitos para la certificación']]);
+const N4N4i=C2('Clase 4 · Oración de agradecimiento y cierre',[['nl17','Oración de agradecimiento'],['nl18','Gracias por este camino']]);
+const N4V1a=C2('Clase 1 · Bienvenida y agenda',[['va1','La memoria del alma'],['va2','Agenda de la clase']]);
+const N4V1b=C2('Clase 1 · Del linaje al alma',[['va3','Del linaje al alma']]);
+const N4V1c=C2('Clase 1 · Qué es una vida pasada y cómo se expresa',[['va4','¿Qué es una vida pasada?'],['va5','Cómo puede expresarse hoy']]);
+const N4V1d=C2('Clase 1 · Para qué se investiga y el encuadre ético',[['va6','Para qué se investiga'],['va7','El encuadre ético']]);
+const N4V1e=C2('Clase 1 · Los cinco gráficos de la especialización',[['va8','Los cinco gráficos de la especialización']]);
+const N4V1f=C2('Clase 1 · Fechas: vida activa, vidas atrás y época',[['va9','El gráfico de Fechas'],['va10','¿Hay una vida pasada activa?'],['va11','¿Cuántas vidas atrás y en qué época?']]);
+const N4V1g=C2('Clase 1 · Investigación: daño, tipo e intensidad',[['va12','El gráfico Vidas Pasadas (Investigación)'],['va13','¿Hubo daño o herida?'],['va14','Los siete tipos de daño'],['va15','La intensidad del daño'],['va16','Cómo se lee']]);
+const N4V1h=C2('Clase 1 · Ejemplo y práctica en parejas',[['va17','Ejemplo de lectura'],['va18','Práctica en parejas']]);
+const N4V1i=C2('Clase 1 · Repaso y tarea',[['va19','Comprobemos lo aprendido'],['va20','Tarea para la próxima clase']]);
+const N4V2a=C2('Clase 2 · Bienvenida y agenda',[['vb1','Quién fui y con quién'],['vb2','Agenda de la clase']]);
+const N4V2b=C2('Clase 2 · Revisión de la tarea y ronda',[['vb3','Revisemos la tarea de la semana'],['vb4','Ronda: lo que resonó en ti']]);
+const N4V2c=C2('Clase 2 · El anexo de investigación',[['vb5','El anexo de investigación'],['vb6','El gráfico del anexo']]);
+const N4V2d=C2('Clase 2 · Hombre o mujer y clase social',[['vb7','Hombre o mujer'],['vb8','Clase social'],['vb9','Lo que puede dejar la clase social']]);
+const N4V2e=C2('Clase 2 · Profesión',[['vb10','Profesión'],['vb11','Profesiones que pueden dejar huella']]);
+const N4V2f=C2('Clase 2 · Tipo de relación y vínculos kármicos',[['vb12','Tipo de relación'],['vb13','Vínculos kármicos'],['vb14','Las almas que se reencuentran']]);
+const N4V2g=C2('Clase 2 · Fechas: cuándo se activó en esta vida',[['vb15','¿Cuándo se activó en esta vida?']]);
+const N4V2h=C2('Clase 2 · Limpiar, ejemplo y práctica',[['vb16','Limpiar la memoria'],['vb17','Ejemplo de lectura completa'],['vb18','Práctica en parejas']]);
+const N4V2i=C2('Clase 2 · Reglas de oro, repaso y tarea',[['vb19','Reglas de oro y comprobemos'],['vb20','Tarea para la próxima clase']]);
+const N4V3a=C2('Clase 3 · Bienvenida y agenda',[['vc1','Cómo terminó y qué prometí'],['vc2','Agenda de la clase']]);
+const N4V3b=C2('Clase 3 · Revisión de la tarea y ronda',[['vc3','Revisemos la tarea de la semana'],['vc4','Ronda de descubrimientos']]);
+const N4V3c=C2('Clase 3 · Por qué importa cómo terminó una vida',[['vc5','Por qué importa cómo terminó una vida']]);
+const N4V3d=C2('Clase 3 · El gráfico de Causas de Muerte',[['vc6','El gráfico de Causas de Muerte'],['vc7','Muertes naturales y por enfermedad'],['vc8','Accidente, catástrofe y escasez'],['vc9','Muertes por violencia'],['vc10','Muertes que piden más cuidado']]);
+const N4V3e=C2('Clase 3 · Cómo se expresa hoy y cómo leer con cuidado',[['vc11','Cómo puede expresarse hoy'],['vc12','Leer con cuidado']]);
+const N4V3f=C2('Clase 3 · Los votos de vidas pasadas',[['vc13','Los votos de vidas pasadas'],['vc14','El gráfico de Votos o Pactos'],['vc15','Votos frecuentes de otras vidas'],['vc16','Votos del linaje y votos de vidas pasadas']]);
+const N4V3g=C2('Clase 3 · La oración de Votos',[['vc17','La oración de Votos']]);
+const N4V3h=C2('Clase 3 · Ejemplo, práctica y repaso',[['vc18','Ejemplo: de la causa de muerte al voto'],['vc19','Práctica en parejas'],['vc20','Comprobemos lo aprendido']]);
+const N4V3i=C2('Clase 3 · Tarea',[['vc21','Tarea para la próxima clase']]);
+const N4V4a=C2('Clase 4 · Bienvenida y agenda',[['vd1','La sesión de vidas pasadas'],['vd2','Agenda de la clase']]);
+const N4V4b=C2('Clase 4 · Revisión de la tarea',[['vd3','Revisemos la tarea de la semana']]);
+const N4V4c=C2('Clase 4 · El camino recorrido',[['vd4','El camino recorrido']]);
+const N4V4d=C2('Clase 4 · La sesión: antes, durante y después',[['vd5','La sesión en tres momentos'],['vd6','Antes: el encuadre'],['vd7','Durante: el protocolo completo']]);
+const N4V4e=C2('Clase 4 · Comunicar y cuidar',[['vd8','Comunicar en hipótesis y sin fantasía'],['vd9','Temas sensibles y derivación']]);
+const N4V4f=C2('Clase 4 · Cierre y ficha de sesión',[['vd10','Después: cierre de la sesión'],['vd11','Ficha de sesión de vidas pasadas']]);
+const N4V4g=C2('Clase 4 · Demostración y evaluación práctica',[['vd12','Demostración en vivo'],['vd13','Evaluación práctica en tríos']]);
+const N4V4h=C2('Clase 4 · Tres miradas y repaso',[['vd14','Tres miradas, una misma persona'],['vd15','Comprobemos lo aprendido']]);
+const N4V4i=C2('Clase 4 · Certificación y cuidado de la facilitadora',[['vd16','Requisitos para la certificación'],['vd17','Cuidar a quien acompaña']]);
+const N4V4j=C2('Clase 4 · Ritual, oración y cierre',[['vd18','Honrar el camino del alma'],['vd19','Oración de agradecimiento'],['vd20','Gracias por este camino']]);
+const N4U1a=C2('Clase 1 · Bienvenida y agenda',[['lu1','El útero y el linaje femenino'],['lu2','Agenda de la clase']]);
+const N4U1b=C2('Clase 1 · Del linaje al cuerpo',[['lu3','Del linaje al cuerpo']]);
+const N4U1c=C2('Clase 1 · Sanación de Útero',[['lu4','Sanación de Útero'],['lu5','Sanar no es traicionar']]);
+const N4U1d=C2('Clase 1 · Qué es y qué no es la limpieza de útero',[['lu6','¿Qué es la limpieza de útero?'],['lu7','Lo que no es'],['lu8','El útero como centro']]);
+const N4U1e=C2('Clase 1 · La fidelidad al linaje femenino',[['lu9','La fidelidad al linaje femenino']]);
+const N4U1f=C2('Clase 1 · El árbol femenino de siete generaciones',[['lu10','El árbol femenino de siete generaciones'],['lu11','Las dos líneas femeninas'],['lu12','Constelación Familiar como punto de partida']]);
+const N4U1g=C2('Clase 1 · El gráfico de Limpieza Uterina',[['lu13','El gráfico de Limpieza Uterina'],['lu14','Las siete generaciones'],['lu15','Los temas del gráfico'],['lu16','El porcentaje'],['lu17','Cómo se lee el gráfico']]);
+const N4U1h=C2('Clase 1 · Ejemplo y práctica',[['lu18','Ejemplo y práctica en parejas']]);
+const N4U1i=C2('Clase 1 · Repaso y tarea',[['lu19','Comprobemos lo aprendido'],['lu20','Tarea para la próxima clase']]);
+const N4U2a=C2('Clase 2 · Bienvenida y agenda',[['lv1','Las memorias del útero'],['lv2','Agenda de la clase']]);
+const N4U2b=C2('Clase 2 · Revisión de la tarea y ronda',[['lv3','Revisemos la tarea de la semana'],['lv4','Ronda: las mujeres de mi linaje']]);
+const N4U2c=C2('Clase 2 · Lo que el útero guarda',[['lv5','Lo que el útero guarda']]);
+const N4U2d=C2('Clase 2 · Memorias emocionales y de dolor',[['lv6','Tristeza, miedos e inseguridad'],['lv7','Ira, frustración, rencor y odio'],['lv8','Asco y rechazo'],['lv9','Memorias de dolor']]);
+const N4U2e=C2('Clase 2 · Abusos, abortos y el cuerpo: leer con cuidado',[['lv10','Abusos e impactos de abortos'],['lv11','El cuerpo: memorias, no diagnósticos']]);
+const N4U2f=C2('Clase 2 · El protocolo',[['lv12','El protocolo'],['lv13','Limpiar directo: Energías Discordantes'],['lv14','Investigar desde el Mapa'],['lv15','Cuándo ir al Transgeneracional']]);
+const N4U2g=C2('Clase 2 · Leer con cuidado y derivar',[['lv16','Leer con cuidado']]);
+const N4U2h=C2('Clase 2 · Ejemplo y práctica',[['lv17','Ejemplo de lectura y limpieza'],['lv18','Práctica en parejas']]);
+const N4U2i=C2('Clase 2 · Reglas de oro, repaso y tarea',[['lv19','Reglas de oro y comprobemos'],['lv20','Tarea para la próxima clase']]);
+const N4U3a=C2('Clase 3 · Bienvenida y agenda',[['lw1','Recuperar la energía femenina'],['lw2','Agenda de la clase']]);
+const N4U3b=C2('Clase 3 · Revisión de la tarea y ronda',[['lw3','Revisemos la tarea de la semana'],['lw4','Ronda de descubrimientos']]);
+const N4U3c=C2('Clase 3 · Limpiar y recuperar',[['lw5','Limpiar y recuperar'],['lw6','Los sectores de recuperación']]);
+const N4U3d=C2('Clase 3 · Sexualidad, creatividad, virtudes y fuerza',[['lw7','Recuperar la sexualidad'],['lw8','Manifestar la creatividad'],['lw9','Recuperar las virtudes'],['lw10','Recuperar la fuerza']]);
+const N4U3e=C2('Clase 3 · Honrar, respetar y perdonar',[['lw11','Honrar las experiencias'],['lw12','Respetar'],['lw13','Perdonar: liberar sin justificar']]);
+const N4U3f=C2('Clase 3 · Soltar y el equilibrio de energías',[['lw14','Soltar, confiar y dejar ir'],['lw15','El equilibrio de las energías']]);
+const N4U3g=C2('Clase 3 · Oración y meditación',[['lw16','La oración del linaje femenino'],['lw17','Meditación: conexión con el útero']]);
+const N4U3h=C2('Clase 3 · Ejemplo, práctica y repaso',[['lw18','De la memoria a la recuperación'],['lw19','Práctica en parejas y comprobemos']]);
+const N4U3i=C2('Clase 3 · Tarea',[['lw20','Tarea para la próxima clase']]);
+const N4U4a=C2('Clase 4 · Bienvenida y agenda',[['lx1','La sesión de limpieza de útero'],['lx2','Agenda de la clase']]);
+const N4U4b=C2('Clase 4 · Revisión de la tarea',[['lx3','Revisemos la tarea de la semana']]);
+const N4U4c=C2('Clase 4 · El camino recorrido',[['lx4','El camino recorrido']]);
+const N4U4d=C2('Clase 4 · La sesión: antes, durante y después',[['lx5','La sesión en tres momentos'],['lx6','Antes: el encuadre'],['lx7','Durante: el protocolo completo']]);
+const N4U4e=C2('Clase 4 · Comunicar y cuidar',[['lx8','Comunicar sin culpar a la madre ni a las abuelas'],['lx9','Temas sensibles y derivación']]);
+const N4U4f=C2('Clase 4 · Cierre y ficha de sesión',[['lx10','Después: cierre de la sesión'],['lx11','Ficha de sesión de limpieza de útero']]);
+const N4U4g=C2('Clase 4 · Demostración y evaluación práctica',[['lx12','Demostración en vivo'],['lx13','Evaluación práctica en tríos']]);
+const N4U4h=C2('Clase 4 · Cuatro miradas y repaso',[['lx14','Cuatro miradas, una misma persona'],['lx15','Comprobemos lo aprendido']]);
+const N4U4i=C2('Clase 4 · Certificación y cuidado de la facilitadora',[['lx16','Requisitos para la certificación'],['lx17','Cuidar a quien acompaña']]);
+const N4U4j=C2('Clase 4 · Ritual, oración y cierre',[['lx18','El hilo sagrado del linaje femenino'],['lx19','Oración de agradecimiento'],['lx20','Gracias por este camino']]);
+const N4T1a=C2('Clase 1 · Bienvenida y agenda',[['ta1','El árbol y el clan'],['ta2','Agenda de la clase']]);
+const N4T1b=C2('Clase 1 · Del niño interno al clan',[['ta3','Del niño interno al clan']]);
+const N4T1c=C2('Clase 1 · Qué es lo transgeneracional y cómo se transmite',[['ta4','¿Qué es lo transgeneracional?'],['ta5','Cómo se transmite una memoria']]);
+const N4T1d=C2('Clase 1 · El árbol y los dos linajes',[['ta6','El árbol de cuatro generaciones'],['ta7','Linaje materno y linaje paterno']]);
+const N4T1e=C2('Clase 1 · Las leyes del clan',[['ta8','Las tres leyes del clan'],['ta9','Qué pasa cuando una ley se rompe']]);
+const N4T1f=C2('Clase 1 · Los tres gráficos de la formación',[['ta10','Los tres gráficos de la formación']]);
+const N4T1g=C2('Clase 1 · El gráfico de Constelación Familiar',[['ta11','El gráfico de Constelación Familiar'],['ta12','El centro: ¿de qué linaje viene?'],['ta13','Las cuatro generaciones y la escala'],['ta14','Los temas del gráfico'],['ta15','Cómo se lee el gráfico'],['ta16','Ejemplo de lectura']]);
+const N4T1h=C2('Clase 1 · Práctica en parejas',[['ta17','Práctica en parejas']]);
+const N4T1i=C2('Clase 1 · Honrar, repaso y tarea',[['ta18','Comprender sin juzgar'],['ta19','Comprobemos lo aprendido'],['ta20','Tarea para la próxima clase']]);
+const N4T2a=C2('Clase 2 · Bienvenida y agenda',[['tb1','Lealtades, roles y repeticiones'],['tb2','Agenda de la clase']]);
+const N4T2b=C2('Clase 2 · Revisión de la tarea y ronda',[['tb3','Revisemos la tarea de la semana'],['tb4','Ronda: lo que descubrí en mi árbol']]);
+const N4T2c=C2('Clase 2 · Lealtades y repeticiones',[['tb5','Lo que el clan pide sin decirlo'],['tb6','Lealtades conscientes e inconscientes'],['tb7','Repetición de patrones']]);
+const N4T2d=C2('Clase 2 · Los lugares en el clan',[['tb8','Roles cambiados y ser hijo bastón'],['tb9','El doble, el yacente y el heredero universal'],['tb10','Excluidos en el árbol']]);
+const N4T2e=C2('Clase 2 · Madre, padre y abundancia',[['tb11','Bloqueos con la madre y con el padre'],['tb12','Herencias, abundancia, dinero y éxitos']]);
+const N4T2f=C2('Clase 2 · Pérdidas y cargas',[['tb13','Pérdidas y rupturas'],['tb14','Enfermedades, vínculos y cargas emocionales']]);
+const N4T2g=C2('Clase 2 · El protocolo y un ejemplo',[['tb15','El protocolo'],['tb16','Ejemplo de lectura y limpieza']]);
+const N4T2h=C2('Clase 2 · Práctica en parejas',[['tb17','Práctica en parejas']]);
+const N4T2i=C2('Clase 2 · Reglas de oro, repaso y tarea',[['tb18','Reglas de oro'],['tb19','Comprobemos lo aprendido'],['tb20','Tarea para la próxima clase']]);
+const N4T3a=C2('Clase 3 · Bienvenida y agenda',[['tc1','Memorias y votos del linaje'],['tc2','Agenda de la clase']]);
+const N4T3b=C2('Clase 3 · Revisión de la tarea y ronda',[['tc3','Revisemos la tarea de la semana'],['tc4','Ronda de descubrimientos']]);
+const N4T3c=C2('Clase 3 · El gráfico Transgeneracional',[['tc5','El gráfico Transgeneracional']]);
+const N4T3d=C2('Clase 3 · Las memorias del linaje',[['tc6','Lo que se ocultó'],['tc7','Las uniones'],['tc8','Fertilidad y nacimientos'],['tc9','Exclusión y poder'],['tc10','La historia colectiva'],['tc11','Pérdidas, deudas y muertes']]);
+const N4T3e=C2('Clase 3 · Memorias de violencia: leer con cuidado',[['tc12','Memorias de violencia: leer con cuidado']]);
+const N4T3f=C2('Clase 3 · La oración del linaje',[['tc13','La oración del linaje']]);
+const N4T3g=C2('Clase 3 · El gráfico de Votos o Pactos',[['tc14','Cuándo se va al gráfico de Votos'],['tc15','El gráfico de Votos o Pactos'],['tc16','Votos frecuentes en el linaje'],['tc17','Votos del linaje y votos de vidas pasadas']]);
+const N4T3h=C2('Clase 3 · La oración para anular votos',[['tc18','La oración de Votos']]);
+const N4T3i=C2('Clase 3 · Ejemplo, práctica, repaso y tarea',[['tc19','Ejemplo de lectura'],['tc20','Ahora en parejas'],['tc21','Comprobemos lo aprendido'],['tc22','Tarea para la Clase 4']]);
+const N4T4a=C2('Clase 4 · Bienvenida y agenda',[['td1','La sesión transgeneracional'],['td2','Agenda de la clase']]);
+const N4T4b=C2('Clase 4 · Revisión de la tarea',[['td3','Revisemos la tarea de la semana']]);
+const N4T4c=C2('Clase 4 · El camino recorrido',[['td4','El camino recorrido']]);
+const N4T4d=C2('Clase 4 · La sesión: antes, durante y después',[['td5','La sesión en tres momentos'],['td6','Antes: encuadre y datos del árbol'],['td7','Durante: el protocolo completo']]);
+const N4T4e=C2('Clase 4 · Comunicar y cuidar',[['td8','Comunicar sin culpar a los ancestros'],['td9','Temas sensibles y derivación']]);
+const N4T4f=C2('Clase 4 · Cierre y ficha de sesión',[['td10','Después: cierre de la sesión'],['td11','Ficha de sesión transgeneracional']]);
+const N4T4g=C2('Clase 4 · Demostración y evaluación práctica',[['td12','Demostración en vivo'],['td13','Evaluación práctica en tríos']]);
+const N4T4h=C2('Clase 4 · Niño interno y linaje',[['td14','Niño interno y linaje: cómo se complementan']]);
+const N4T4i=C2('Clase 4 · Repaso y certificación',[['td15','Comprobemos lo aprendido'],['td16','Requisitos para la certificación']]);
+const N4T4j=C2('Clase 4 · Ritual, oración y cierre',[['td17','Honrar a los ancestros'],['td18','Oración de agradecimiento'],['td19','Gracias por este camino']]);
 const LEVELS=[
  {n:1,id:'pendulo',title:'Péndulo Hebreo Nivel 1',mode:'pres',dur:'1 jornada intensiva · 8 horas',status:'done',
   desc:'La base de tu camino. Aprendes a usar el péndulo hebreo para limpiar, armonizar y sanar: su origen, los chakras, el aura y los cuerpos energéticos, las etiquetas, tu kit de trabajo y el protocolo de una sesión. La jornada es presencial; aquí lo repasas tocando, jugando y practicando.',
@@ -1134,10 +1276,10 @@ const LEVELS=[
  {n:4,id:'especializaciones',title:'Especializaciones en Radiestesia',mode:'live',dur:'4 especializaciones · 4 clases y 1 mes cada una',status:'locked',
   desc:'Cuatro especializaciones para trabajar temas profundos con la radiestesia. Cada una tiene su propia insignia.',
   modules:[
-   {title:'Vidas pasadas',lessons:[L('Clase 1 · El alma y sus encarnaciones','',[]),L('Clase 2 · Lectura de vidas pasadas','',[]),L('Clase 3 · Patrones que se repiten','',[]),L('Clase 4 · Sanación y cierre','',[])]},
-   {title:'Terapia transgeneracional',lessons:[L('Clase 1 · El árbol genealógico','',[]),L('Clase 2 · Lealtades familiares','',[]),L('Clase 3 · Herencias emocionales','',[]),L('Clase 4 · Liberación del linaje','',[])]},
-   {title:'Niño interior',lessons:[L('Clase 1 · Heridas de la infancia','',[]),L('Clase 2 · Diálogo con el niño interior','',[]),L('Clase 3 · Reparentalización','',[]),L('Clase 4 · Integración','',[])]},
-   {title:'Limpieza uterina',lessons:[L('Clase 1 · El útero como centro energético','',[]),L('Clase 2 · Memorias del útero','',[]),L('Clase 3 · Protocolo de limpieza','',[]),L('Clase 4 · Ritual de cierre','',[])]}
+   {title:'Niño interior',lessons:[N4N1a,N4N1b,N4N1c,N4N1d,N4N1e,N4N1f,N4N1g,N4N1h,N4N1i,N4N1j,N4N2a,N4N2b,N4N2c,N4N2d,N4N2e,N4N2f,N4N2g,N4N2h,N4N2i,N4N2j,N4N3a,N4N3b,N4N3c,N4N3d,N4N3e,N4N3f,N4N3g,N4N3h,N4N3i,N4N4a,N4N4b,N4N4c,N4N4d,N4N4e,N4N4f,N4N4g,N4N4h,N4N4i]},
+   {title:'Vidas pasadas',lessons:[N4V1a,N4V1b,N4V1c,N4V1d,N4V1e,N4V1f,N4V1g,N4V1h,N4V1i,N4V2a,N4V2b,N4V2c,N4V2d,N4V2e,N4V2f,N4V2g,N4V2h,N4V2i,N4V3a,N4V3b,N4V3c,N4V3d,N4V3e,N4V3f,N4V3g,N4V3h,N4V3i,N4V4a,N4V4b,N4V4c,N4V4d,N4V4e,N4V4f,N4V4g,N4V4h,N4V4i,N4V4j]},
+   {title:'Terapia transgeneracional',lessons:[N4T1a,N4T1b,N4T1c,N4T1d,N4T1e,N4T1f,N4T1g,N4T1h,N4T1i,N4T2a,N4T2b,N4T2c,N4T2d,N4T2e,N4T2f,N4T2g,N4T2h,N4T2i,N4T3a,N4T3b,N4T3c,N4T3d,N4T3e,N4T3f,N4T3g,N4T3h,N4T3i,N4T4a,N4T4b,N4T4c,N4T4d,N4T4e,N4T4f,N4T4g,N4T4h,N4T4i,N4T4j]},
+   {title:'Limpieza uterina',lessons:[N4U1a,N4U1b,N4U1c,N4U1d,N4U1e,N4U1f,N4U1g,N4U1h,N4U1i,N4U2a,N4U2b,N4U2c,N4U2d,N4U2e,N4U2f,N4U2g,N4U2h,N4U2i,N4U3a,N4U3b,N4U3c,N4U3d,N4U3e,N4U3f,N4U3g,N4U3h,N4U3i,N4U4a,N4U4b,N4U4c,N4U4d,N4U4e,N4U4f,N4U4g,N4U4h,N4U4i,N4U4j]}
   ]},
  {n:5,id:'tarot',title:'Tarot Terapéutico: El Camino del Ser',mode:'live',dur:'16 clases · 4 meses · online en vivo',status:'locked',
   desc:'El tarot como herramienta terapéutica de autoconocimiento. Cierra tu formación como Terapeuta Holístico Integral.',
@@ -1153,25 +1295,6 @@ const LEVELS=[
    ...[9,10,11,12,13,14,15,16].map(n=>T5PEND(n,'Próximamente'))
   ]}
 ];
-/* especialidades aparte: no son parte de los cinco niveles. Su contenido (file) solo lo abre la Maestra por ahora (middleware.js) */
-const SPECS=[
- {n:1,spec:1,id:'nino',title:'Niño interior',sub:'Especialización Niño Interno',img:'assets/esp/nino-abrazo.webp',hue:'#7a5aa6',file:'curso/esp/nino.js',mode:'live',dur:'Clase 1 · 8 bloques interactivos',status:'locked',
-  desc:'Las cinco heridas de la infancia, sus máscaras y las figuras de madre y padre, leídas en el gráfico del niño interno con mayor profundidad. Continuación de tu camino en Radiestesia y Sanación del Alma.',
-  modules:[
-   {title:'Clase 1 · Lo que el niño interno nos enseña a sanar',lessons:[
-    C2('Bienvenida y agenda',[['ni1','Lo que el niño interno nos enseña a sanar'],['ni2','Agenda y objetivo de hoy']]),
-    C2('El niño interno',[['ni3','¿Qué es el niño interno?'],['ni4','¿Cómo se forma?'],['ni5','¿Qué podemos sanar con él?']]),
-    C2('Cómo se forma una herida',[['ni6','De la necesidad al patrón adulto'],['ni7','Las cinco heridas de un vistazo']]),
-    C2('Las cinco heridas, una por una',[['ni8','Herida de rechazo','Máscara evasiva'],['ni9','Herida de abandono','Máscara dependiente'],['ni10','Herida de humillación','Máscara masoquista'],['ni11','Herida de traición','Máscara controladora'],['ni12','Herida de injusticia','Máscara rígida']]),
-    C2('Rechazo y abandono',[['ni13','No son lo mismo']]),
-    C2('La madre y el padre en el gráfico',[['ni14','La madre en el gráfico'],['ni15','El padre en el gráfico']]),
-    C2('Lectura profunda y sanación',[['ni16','De la lectura a la comprensión','Arma una lectura'],['ni17','El camino de sanación']]),
-    C2('Meditación, práctica y cierre',[['ni18','Encuentro con mi niño interior','Meditación guiada'],['ni19','Práctica: reconoce la herida'],['ni20','Reglas de oro del facilitador'],['ni21','Repaso'],['ni22','Tarea de la semana']])
-   ]}
-  ]}
-];
-const lvOf=id=>LEVELS.find(l=>l.id===id)||SPECS.find(l=>l.id===id);
-const lvTag=lv=>lv.spec?'Especialidad':'Nivel '+lv.n;
 const allLessons=lv=>lv.modules.flatMap(m=>m.lessons);
 const pct=lv=>{const a=allLessons(lv);return Math.round(a.filter(x=>x.done).length/a.length*100)};
 
@@ -1179,9 +1302,9 @@ const BADGES=[
  {id:'b1',lvl:1,name:'Iniciada del Péndulo',sub:'Nivel 1 · Péndulo Hebreo',hue:'#c98b3f',earned:'14 jun 2026'},
  {id:'b2',lvl:2,name:'Guardiana de Espacios',sub:'Nivel 2 · Limpieza de casas y espacios',hue:'#5d9c7f',earned:'12 sep 2026'},
  {id:'b3',lvl:3,name:'Sanadora del Alma',sub:'Nivel 3 · Radiestesia y Sanación del Alma',hue:'#7d6bb0'},
+ {id:'b4c',lvl:4,name:'Niño Interior',sub:'Especialización · Nivel 4',hue:'#d08a6a'},
  {id:'b4a',lvl:4,name:'Vidas Pasadas',sub:'Especialización · Nivel 4',hue:'#4f7fb0'},
  {id:'b4b',lvl:4,name:'Linaje Sanado',sub:'Especialización · Terapia transgeneracional',hue:'#a0654f'},
- {id:'b4c',lvl:4,name:'Niño Interior',sub:'Especialización · Nivel 4',hue:'#d08a6a'},
  {id:'b4d',lvl:4,name:'Útero Sagrado',sub:'Especialización · Limpieza uterina',hue:'#b5607a'},
  {id:'b5',lvl:5,name:'Camino del Ser',sub:'Nivel 5 · Tarot Terapéutico',hue:'#3b6d74'}
 ];
@@ -1242,7 +1365,6 @@ const S={overdue:false,plan:'none',paying:false,lvl:0,lvls:new Set(),view:'inici
 const NAV=[
  ['inicio','Inicio','<path d="M4 11 12 4l8 7v9h-5v-6H9v6H4z"/>'],
  ['formacion','Mi formación','<path d="M3 8 12 4l9 4-9 4z"/><path d="M7 10v5c3 2 7 2 10 0v-5"/>'],
- ['especialidades','Especialidades','<path d="M12 3c1.5 3.5 4.5 5 8 5-1 6-4 10-8 13-4-3-7-7-8-13 3.5 0 6.5-1.5 8-5z"/><circle cx="12" cy="12" r="2.2"/>'],
  ['insignias','Insignias','<circle cx="12" cy="9" r="6"/><path d="m9 14-2 7 5-3 5 3-2-7"/>'],
  ['comunidad','Comunidad','<path d="M4 5h16v11H9l-5 4z"/>'],
  ['calendario','Calendario','<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'],
@@ -1309,7 +1431,7 @@ function rxAct(p,el){const [a,k,v]=p;
  else if(a==='n3simask'){const c=st('n3cal',{}),ks=Object.keys(c).map(Number),s=st('n3sim',{});let t;do{t=ks[Math.floor(Math.random()*ks.length)]}while(ks.length>1&&t===s.t);
   RS.n3sim={t,n:s.n||0,ok:s.ok||0};const P=PND.sim;if(P){P.want=N3CALM[c[t]];if(P.cur==='free')P.cur='rest'}render(false)}
  else if(a==='n3simpick'){const s=st('n3sim',{}),c=st('n3cal',{});if(s.pick===undefined&&s.t!==undefined){s.pick=+k;s.n=(s.n||0)+1;if(c[+k]===c[s.t])s.ok=(s.ok||0)+1;render(false)}}
- else if(window.RX&&RX[a])RX[a](k,v,el); // acciones propias de cada especialidad (curso/esp/*.js)
+ else if(window.RX&&RX[a])RX[a](k,v,el); // acciones propias de un nivel (p. ej. curso/n4.js)
  else if(a==='n3yn'){const [i,x]=v.split('_');const o=st(k,{});o[i]=o[i]===+x?undefined:+x;render(false)}
 }
 document.addEventListener('click',e=>{const r=e.target.closest('[data-rx]');if(r)rxAct(r.dataset.rx.split('|'),r)});
@@ -1363,7 +1485,7 @@ const liveState=a=>{const n=Date.now();return n<a.start.toMillis()-LIVE_OPEN_MIN
 const fmtWhen=a=>a.start.toDate().toLocaleString('es',{weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
 const fmtHour=ms=>new Date(ms).toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
 const isHttps=u=>/^https:\/\/[^\s"<>]+$/i.test(u||'');
-const keyLesson=key=>{const [id,i,j]=String(key).split('_');const lv=lvOf(id);const les=lv&&lv.modules[+i]&&lv.modules[+i].lessons[+j];return les?{lv,i:+i,j:+j,les}:null};
+const keyLesson=key=>{const [id,i,j]=String(key).split('_');const lv=LEVELS.find(l=>l.id===id);const les=lv&&lv.modules[+i]&&lv.modules[+i].lessons[+j];return les?{lv,i:+i,j:+j,les}:null};
 // YouTube, Vimeo y Google Drive se ven dentro del aula; cualquier otro enlace se abre aparte
 function embedURL(u){try{const x=new URL(u);const h=x.hostname.replace(/^www\./,'');
   if(h==='youtu.be')return 'https://www.youtube-nocookie.com/embed/'+x.pathname.slice(1);
@@ -1436,33 +1558,18 @@ V.formacion=()=>`
   <section style="display:grid;gap:14px">${LEVELS.map(lv=>`<article class="card panel" style="grid-template-columns:minmax(0,1fr) auto;align-items:center">
     <div style="display:grid;gap:8px;min-width:0"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="eyebrow">Nivel ${lv.n}</span>${modePill(lv)}${statusPill(lv)}</div>
     <h3 style="font-size:1.35rem">${lv.title}</h3>${detailOpen(lv)?`<p class="muted" style="font-size:.9rem;max-width:60em">${lv.desc}</p><span class="muted" style="font-size:.8rem">${lv.dur} · ${allLessons(lv).length} clases</span>`:`<span class="muted" style="font-size:.8rem">${lv.dur}</span>`}</div>
-    ${detailOpen(lv)?`<button class="btn ${lv.status==='locked'?'btn-ghost':'btn-primary'}" data-open-level="${lv.id}">${lv.status==='done'?'Repasar':lv.status==='progress'?'Continuar':'Ver programa'}</button>`:`<button class="btn btn-ghost" data-go="pagos">Inscríbete para ver el programa</button>`}</article>`).join('')}</section>
-  <section class="card panel" style="grid-template-columns:minmax(0,1fr) auto;align-items:center"><div style="display:grid;gap:6px"><span class="eyebrow">Aparte de los cinco niveles</span><h3 style="font-size:1.25rem">Especialidades</h3><p class="muted" style="margin:0;font-size:.9rem">Formaciones para profundizar en un tema. La primera es <b>Niño interior</b>.</p></div><button class="btn btn-ghost" data-go="especialidades">Ver especialidades</button></section>`;
-
-const crumbsHTML=lv=>lv.spec?`<button data-go="especialidades">Especialidades</button><span>/</span><span>${lv.title}</span>`:`<button data-go="formacion">Mi formación</button><span>/</span><span>Nivel ${lv.n} · ${lv.title}</span>`;
-V.especialidades=()=>`
-  <div class="view-head"><div><span class="eyebrow">Escuela de Formación Holística</span><h1>Especialidades</h1><p>Formaciones para profundizar en un tema, aparte del camino de cinco niveles. Cada una tiene sus propias clases, prácticas y materiales.</p></div></div>
-  <section style="display:grid;gap:14px">${SPECS.map(sp=>`<article class="card panel sp-card" style="--sp:${sp.hue}">
-    <img src="${sp.img}" alt="" loading="lazy" decoding="async">
-    <div style="display:grid;gap:8px;min-width:0;align-content:center"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="eyebrow">${sp.sub}</span>${modePill(sp)}${sp.status==='locked'?'<span class="pill lock">Muy pronto</span>':statusPill(sp)}</div>
-    <h3 style="font-size:1.45rem">${sp.title}</h3><p class="muted" style="font-size:.9rem;max-width:60em;margin:0">${sp.desc}</p>
-    <span class="muted" style="font-size:.8rem">${sp.dur}</span>
-    ${sp.status!=='locked'?`<div class="bar"><i style="width:${pct(sp)}%"></i></div>`:''}
-    <ol class="sp-les">${allLessons(sp).map(l=>`<li class="${l.done?'on':''}">${esc(l.t)}</li>`).join('')}</ol>
-    <div><button class="btn ${sp.status==='locked'?'btn-ghost':'btn-primary'}" data-open-level="${sp.id}">${sp.status==='done'?'Repasar':sp.status==='locked'?'Ver detalle':pct(sp)?'Continuar':'Comenzar'}</button></div></div></article>`).join('')}</section>`;
+    ${detailOpen(lv)?`<button class="btn ${lv.status==='locked'?'btn-ghost':'btn-primary'}" data-open-level="${lv.id}">${lv.status==='done'?'Repasar':lv.status==='progress'?'Continuar':'Ver programa'}</button>`:`<button class="btn btn-ghost" data-go="pagos">Inscríbete para ver el programa</button>`}</article>`).join('')}</section>`;
 
 V.curso=()=>{
-  const lv=lvOf(S.level);const [mi,li]=S.lesson;const les=lv.modules[mi].lessons[li];
+  const lv=LEVELS.find(l=>l.id===S.level);const [mi,li]=S.lesson;const les=lv.modules[mi].lessons[li];
   const locked=lv.status==='locked';
   const flat=allLessons(lv);const doneN=flat.filter(l=>l.done).length;
   const upcoming=!locked&&!les.done&&/En vivo/.test(les.len);
   const isSl=!!les.slides;
-  if(!detailOpen(lv))return `<div class="crumbs">${crumbsHTML(lv)}</div>
-  <div style="max-width:900px">${playerMsg(`<span class="pill pres">${lvTag(lv)}</span><b style="font:400 clamp(1.2rem,3vw,1.8rem)/1.2 var(--f-display)">${lv.title}</b><span style="color:#b9c4b5;font-size:.9rem">${lv.dur}</span><span style="color:#b9c4b5;font-size:.9rem;max-width:30em">El programa de este nivel se muestra al inscribirte en la formación.</span><button ${lightBtn} data-go="pagos">${CTA_TXT}</button>`)}</div>`;
-  if(lv.spec&&locked)return `<div class="crumbs">${crumbsHTML(lv)}</div>
-  <div style="max-width:900px">${playerMsg(`<span class="pill pres">Especialidad</span><b style="font:400 clamp(1.2rem,3vw,1.8rem)/1.2 var(--f-display)">${lv.title}</b><span style="color:#b9c4b5;font-size:.9rem;max-width:30em">Esta especialidad todavía no está abierta en tu aula. La Maestra te avisará cuando puedas comenzar.</span><button ${lightBtn} data-go="especialidades">Ver especialidades</button>`)}</div>`;
+  if(!detailOpen(lv))return `<div class="crumbs"><button data-go="formacion">Mi formación</button><span>/</span><span>Nivel ${lv.n} · ${lv.title}</span></div>
+  <div style="max-width:900px">${playerMsg(`<span class="pill pres">Nivel ${lv.n}</span><b style="font:400 clamp(1.2rem,3vw,1.8rem)/1.2 var(--f-display)">${lv.title}</b><span style="color:#b9c4b5;font-size:.9rem">${lv.dur}</span><span style="color:#b9c4b5;font-size:.9rem;max-width:30em">El programa de este nivel se muestra al inscribirte en la formación.</span><button ${lightBtn} data-go="pagos">${CTA_TXT}</button>`)}</div>`;
   const live=!locked&&liveHTML(lv.id+'_'+mi+'_'+li,les);
-  if(S.overdue&&locked&&!CM.isAdmin)return `<div class="crumbs">${crumbsHTML(lv)}</div>
+  if(S.overdue&&locked&&!CM.isAdmin)return `<div class="crumbs"><button data-go="formacion">Mi formación</button><span>/</span><span>Nivel ${lv.n} · ${lv.title}</span></div>
   <div class="player" style="max-width:900px"><svg class="motif"><use href="#mark"/></svg><div style="position:relative;display:grid;gap:12px;justify-items:center;text-align:center;padding:20px"><span class="pill bad" style="background:rgba(239,138,115,.2);color:#ffd2c7">Acceso pausado</span><b style="font:400 clamp(1.2rem,3vw,1.8rem)/1.2 var(--f-display)">${esc(les.t)}</b><span style="color:#b9c4b5;font-size:.9rem;max-width:30em">Esta clase vuelve a estar disponible en cuanto se registre el pago de tu cuota. No pierdes tu avance.</span><button class="btn btn-sm" style="background:#e9e4d0;color:#1f3f32" data-checkout="portal">Actualizar mi pago</button></div></div>`;
   const tabs=[['temas','Temas de la clase'],['materiales','Materiales'],['preguntas','Preguntas'],['notas','Mis notas']];
   const key=lv.id+'_'+mi+'_'+li;
@@ -1477,13 +1584,13 @@ V.curso=()=>{
     notas:`<textarea id="notes" placeholder="Tus apuntes de esta clase. Solo tú los ves.">${esc(CM.notes[key]||'')}</textarea><div><button class="btn btn-ghost btn-sm" id="save-notes">Guardar notas</button></div>`
   };
   return `
-  <div class="crumbs">${crumbsHTML(lv)}</div>
+  <div class="crumbs"><button data-go="formacion">Mi formación</button><span>/</span><span>Nivel ${lv.n} · ${lv.title}</span></div>
   <div class="course">
     <div style="display:grid;gap:20px;min-width:0">
-      ${locked?`<div class="player"><svg class="motif"><use href="#mark"/></svg><div style="position:relative;display:grid;gap:12px;justify-items:center;text-align:center;padding:20px"><span class="pill pres">${lvTag(lv)}</span><b style="font:400 clamp(1.2rem,3vw,1.8rem)/1.2 var(--f-display)">${lv.title}</b>${S.paying?`<span style="color:#b9c4b5;font-size:.9rem">Se desbloquea al completar el Nivel ${lv.n-1}</span><button class="btn btn-primary btn-sm" style="background:#e9e4d0;color:#1f3f32" data-go="pagos">Ver mi plan</button>`:`<span style="color:#b9c4b5;font-size:.9rem;max-width:30em">Esta clase es parte de la formación completa. Inscríbete para abrir las clases, videos y materiales nivel a nivel.</span><button class="btn btn-primary btn-sm" style="background:#e9e4d0;color:#1f3f32" data-go="pagos">Ver cómo inscribirme</button>`}</div></div>`:
-      live&&!isSl?live:upcoming?`<div class="player"><svg class="motif"><use href="#mark"/></svg><div class="cap"><div><small>${lvTag(lv)} · Próxima clase en vivo</small><b>${esc(les.t)}</b></div></div><div style="position:relative;display:grid;gap:12px;justify-items:center;text-align:center"><span class="pill live" style="color:#ece7d3;border-color:rgba(236,231,211,.4)">${les.len.replace('En vivo','En vivo el')}</span><span style="color:#b9c4b5;font-size:.88rem">La Maestra publicará aquí la fecha y el enlace de la sala.</span><span style="color:#b9c4b5;font-size:.82rem">La grabación queda aquí al terminar</span></div></div>`:
+      ${locked?`<div class="player"><svg class="motif"><use href="#mark"/></svg><div style="position:relative;display:grid;gap:12px;justify-items:center;text-align:center;padding:20px"><span class="pill pres">Nivel ${lv.n}</span><b style="font:400 clamp(1.2rem,3vw,1.8rem)/1.2 var(--f-display)">${lv.title}</b>${S.paying?`<span style="color:#b9c4b5;font-size:.9rem">Se desbloquea al completar el Nivel ${lv.n-1}</span><button class="btn btn-primary btn-sm" style="background:#e9e4d0;color:#1f3f32" data-go="pagos">Ver mi plan</button>`:`<span style="color:#b9c4b5;font-size:.9rem;max-width:30em">Esta clase es parte de la formación completa. Inscríbete para abrir las clases, videos y materiales nivel a nivel.</span><button class="btn btn-primary btn-sm" style="background:#e9e4d0;color:#1f3f32" data-go="pagos">Ver cómo inscribirme</button>`}</div></div>`:
+      live&&!isSl?live:upcoming?`<div class="player"><svg class="motif"><use href="#mark"/></svg><div class="cap"><div><small>Nivel ${lv.n} · Próxima clase en vivo</small><b>${esc(les.t)}</b></div></div><div style="position:relative;display:grid;gap:12px;justify-items:center;text-align:center"><span class="pill live" style="color:#ece7d3;border-color:rgba(236,231,211,.4)">${les.len.replace('En vivo','En vivo el')}</span><span style="color:#b9c4b5;font-size:.88rem">La Maestra publicará aquí la fecha y el enlace de la sala.</span><span style="color:#b9c4b5;font-size:.82rem">La grabación queda aquí al terminar</span></div></div>`:
       isSl?(live||'')+deckHTML(les,si):`<div class="player" id="player"><svg class="motif"><use href="#mark"/></svg>
-        <div class="cap"><div><small>${lvTag(lv)} · ${esc(lv.modules[mi].title)}</small><b>${esc(les.t)}</b></div></div>
+        <div class="cap"><div><small>Nivel ${lv.n} · ${esc(lv.modules[mi].title)}</small><b>${esc(les.t)}</b></div></div>
         <button class="play" id="play" aria-label="${S.playing?'Pausar':'Reproducir'}">${S.playing?'<svg viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>':'<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>'}</button>
         ${les.topics.length?`<span class="chapter-now" id="chap-now">${esc(les.topics[curChapter(les)].t)}</span>`:''}
         <div class="controls"><button id="play2" aria-label="Reproducir o pausar">${S.playing?'<svg viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>':'<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>'}</button>
@@ -1494,13 +1601,13 @@ V.curso=()=>{
       `<div class="tabs" role="tablist">${tabs.map(([k,n])=>`<button role="tab" aria-selected="${S.tab===k}" data-tab="${k}">${n}${k==='preguntas'&&qa.length?` (${qa.length})`:''}</button>`).join('')}</div><div>${body[S.tab]}</div>`}
     </div>
     <aside class="card syllabus">
-      <div class="syl-top"><span class="eyebrow">${lvTag(lv)}</span><h3>${lv.title}</h3>${statusPill(lv)}<div class="bar"><i style="width:${pct(lv)}%"></i></div><div class="row"><span>${doneN} de ${flat.length} clases</span><span>${pct(lv)}%</span></div></div>
+      <div class="syl-top"><span class="eyebrow">Nivel ${lv.n}</span><h3>${lv.title}</h3>${statusPill(lv)}<div class="bar"><i style="width:${pct(lv)}%"></i></div><div class="row"><span>${doneN} de ${flat.length} clases</span><span>${pct(lv)}%</span></div></div>
       ${lv.modules.map((m,i)=>{const open=S.openMods[lv.id+i]!==undefined?S.openMods[lv.id+i]:i===mi;const md=m.lessons.filter(l=>l.done).length;
         return `<div class="mod"><button class="mod-h" aria-expanded="${open}" data-mod="${i}"><b>${esc(m.title)}</b><small>${md}/${m.lessons.length}</small><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
         <div ${open?'':'hidden'}>${m.lessons.map((l,j)=>`<button class="les ${i===mi&&j===li?'cur':''} ${locked?'locked':''}" data-les="${i},${j}" ${locked?'aria-disabled="true"':''}><span class="chk ${l.done?'on':''} ${locked?'lk':''}">${locked?icLock:''}</span><span>${esc(l.t)}</span><small>${esc(l.len)}</small></button>`).join('')}</div></div>`}).join('')}
       ${!S.paying&&!CM.isAdmin?`<div style="padding:18px;display:grid;gap:10px;border-top:1px solid var(--line)"><p class="muted" style="margin:0;font-size:.88rem">Las clases, videos y materiales se abren al inscribirte en la formación completa.</p><button class="btn btn-primary btn-sm" data-go="pagos">${CTA_TXT}</button></div>`:''}
     </aside>
-  </div>${CM.isAdmin&&!locked&&!lv.spec?liveEditor(lv,mi,li):''}`;
+  </div>${CM.isAdmin&&!locked?liveEditor(lv,mi,li):''}`;
 };
 // Solo la Maestra: programa la clase en vivo de esta lección y agrega la grabación
 function liveEditor(lv,mi,li){const key=lv.id+'_'+mi+'_'+li,a=liveOf(key),L=CM.liveLinks[key]||{};
@@ -1512,8 +1619,8 @@ function liveEditor(lv,mi,li){const key=lv.id+'_'+mi+'_'+li,a=liveOf(key),L=CM.l
     <label class="n2-f"><span>Grabación (YouTube, Vimeo o Drive)</span><input type="url" id="lv-rec" placeholder="https://" value="${esc(L.recordingUrl||'')}"></label>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn btn-primary btn-sm">Guardar</button>${a?'<button type="button" class="btn btn-ghost btn-sm" id="lv-del">Quitar esta clase en vivo</button>':''}</div>
   </form><p class="muted" style="margin:0;font-size:.82rem">Las alumnas con este nivel ven la fecha y el botón para entrar ${LIVE_OPEN_MIN} minutos antes. Al terminar, si agregas la grabación, la ven en esta misma clase.</p></details>`}
-function curLesson(){const lv=lvOf(S.level);return lv.modules[S.lesson[0]].lessons[S.lesson[1]]}
-function goSlide(v){const lv=lvOf(S.level),les=curLesson();if(!les.slides)return;
+function curLesson(){const lv=LEVELS.find(l=>l.id===S.level);return lv.modules[S.lesson[0]].lessons[S.lesson[1]]}
+function goSlide(v){const lv=LEVELS.find(l=>l.id===S.level),les=curLesson();if(!les.slides)return;
   if(v==='nextles'){S.full=0;document.body.style.overflow='';const nx=$('#next-les');nx&&nx.click();return}
   if(v==='zoom'){S.full=!S.full;document.body.style.overflow=S.full?'hidden':'';render(false);return}
   const key=lv.id+'_'+S.lesson[0]+'_'+S.lesson[1];const n=les.slides.length;let i=S.sl[key]||0;
@@ -1669,27 +1776,27 @@ const isLockedView=v=>LOCKED_VIEWS.includes(v)&&!CM.isAdmin;
 const LOCK_SVG='<svg class="lock" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
 function render(scrollTop=true){
   if(isLockedView(S.view))S.view='inicio';
-  $('#nav').innerHTML=NAV.filter(x=>x[0]!=='maestra'||CM.isAdmin).map(([k,n,ic,c])=>`${k==='maestra'?'<span class="nav-label">Solo para la Maestra</span>':''}<button data-go="${k}" ${isLockedView(k)?'class="locked" aria-disabled="true" title="Próximamente"':''} ${(S.view===k||(S.view==='curso'&&k===(lvOf(S.level).spec?'especialidades':'formacion')))?'aria-current="page"':''}><svg viewBox="0 0 24 24">${ic}</svg>${n}${isLockedView(k)?LOCK_SVG:''}${c?`<span class="count">${c}</span>`:''}</button>`).join('');
+  $('#nav').innerHTML=NAV.filter(x=>x[0]!=='maestra'||CM.isAdmin).map(([k,n,ic,c])=>`${k==='maestra'?'<span class="nav-label">Solo para la Maestra</span>':''}<button data-go="${k}" ${isLockedView(k)?'class="locked" aria-disabled="true" title="Próximamente"':''} ${(S.view===k||(S.view==='curso'&&k==='formacion'))?'aria-current="page"':''}><svg viewBox="0 0 24 24">${ic}</svg>${n}${isLockedView(k)?LOCK_SVG:''}${c?`<span class="count">${c}</span>`:''}</button>`).join('');
   $('#view').innerHTML=(CM.blocked?`<div class="alert"><div><b>Tu acceso está pausado</b><p>La Maestra pausó tu acceso a las clases. Escríbenos desde Ayuda si tienes dudas.</p></div></div>`:'')+(S.overdue&&S.view!=='maestra'?`<div class="alert"><div><b>Tu cuota está pendiente</b><p>Tu acceso a clases, grabaciones y materiales está pausado. Se reactiva apenas se registre el pago.</p></div><button class="btn btn-sm" data-checkout="portal">Actualizar mi pago</button></div>`:'')+V[S.view]();
   if(scrollTop)window.scrollTo(0,0);
   bindView();if(typeof pndMount==='function')pndMount();
 }
 function go(v){if(v==='maestra'){location.href='admin.html';return}if(isLockedView(v)){toast('Los recursos estarán disponibles muy pronto.');closeSide();return}S.view=v;stopPlay();closeSide();render()}
-function openLevel(id){const lv=lvOf(id);S.level=id;let pos=[0,0];
+function openLevel(id){const lv=LEVELS.find(l=>l.id===id);S.level=id;let pos=[0,0];
   outer:for(let i=0;i<lv.modules.length;i++)for(let j=0;j<lv.modules[i].lessons.length;j++){if(!lv.modules[i].lessons[j].done){pos=[i,j];break outer}}
   S.lesson=pos;S.tab='temas';S.t=0;stopPlay();S.view='curso';closeSide();render()}
 function stopPlay(){S.playing=false;clearInterval(timer)}
 function bindView(){
-  const play=()=>{const lv=lvOf(S.level);const les=lv.modules[S.lesson[0]].lessons[S.lesson[1]];const dur=toSec(les.len);
+  const play=()=>{const lv=LEVELS.find(l=>l.id===S.level);const les=lv.modules[S.lesson[0]].lessons[S.lesson[1]];const dur=toSec(les.len);
     S.playing=!S.playing;clearInterval(timer);
     if(S.playing)timer=setInterval(()=>{S.t=Math.min(dur,S.t+dur/90);updPlayer(les,dur);if(S.t>=dur){stopPlay();render(false)}},500);
     render(false)};
   $('#play')&&($('#play').onclick=play);$('#play2')&&($('#play2').onclick=play);
-  const tr=$('#track');if(tr)tr.onclick=e=>{const r=tr.getBoundingClientRect();const lv=lvOf(S.level);const les=lv.modules[S.lesson[0]].lessons[S.lesson[1]];S.t=(e.clientX-r.left)/r.width*toSec(les.len);render(false)};
+  const tr=$('#track');if(tr)tr.onclick=e=>{const r=tr.getBoundingClientRect();const lv=LEVELS.find(l=>l.id===S.level);const les=lv.modules[S.lesson[0]].lessons[S.lesson[1]];S.t=(e.clientX-r.left)/r.width*toSec(les.len);render(false)};
   const n=$('#notes');if(n){n.oninput=()=>{CM.notes[lkey()]=n.value};$('#save-notes').onclick=()=>CM.saveNote(lkey(),n.value).then(()=>toast('Notas guardadas')).catch(fail)}
   const qf=$('#qa-form');if(qf)qf.onsubmit=e=>{e.preventDefault();const v=$('#qa-in').value.trim();if(!v)return;CM.ask(lkey(),v).then(()=>{render(false);toast('Pregunta enviada a la Maestra Holística')}).catch(fail)};
-  const md=$('#mark-done');if(md)md.onclick=()=>{const lv=lvOf(S.level);const les=lv.modules[S.lesson[0]].lessons[S.lesson[1]];const nv=!les.done;md.disabled=true;CM.setDone(lkey(),nv).then(()=>{les.done=nv;refreshDerived();render(false);toast(nv?'Clase marcada como vista':'Clase marcada como no vista')}).catch(e=>{md.disabled=false;fail(e)})};
-  const nx=$('#next-les');if(nx)nx.onclick=()=>{const lv=lvOf(S.level);let [i,j]=S.lesson;j++;if(j>=lv.modules[i].lessons.length){i++;j=0}if(i>=lv.modules.length){toast('Terminaste las clases de este nivel');return}S.lesson=[i,j];S.openMods[lv.id+i]=true;S.t=0;stopPlay();render()};
+  const md=$('#mark-done');if(md)md.onclick=()=>{const lv=LEVELS.find(l=>l.id===S.level);const les=lv.modules[S.lesson[0]].lessons[S.lesson[1]];const nv=!les.done;md.disabled=true;CM.setDone(lkey(),nv).then(()=>{les.done=nv;refreshDerived();render(false);toast(nv?'Clase marcada como vista':'Clase marcada como no vista')}).catch(e=>{md.disabled=false;fail(e)})};
+  const nx=$('#next-les');if(nx)nx.onclick=()=>{const lv=LEVELS.find(l=>l.id===S.level);let [i,j]=S.lesson;j++;if(j>=lv.modules[i].lessons.length){i++;j=0}if(i>=lv.modules.length){toast('Terminaste las clases de este nivel');return}S.lesson=[i,j];S.openMods[lv.id+i]=true;S.t=0;stopPlay();render()};
   const cp=$('#composer');if(cp)cp.onsubmit=e=>{e.preventDefault();const v=$('#post-in').value.trim();if(!v)return;CM.post(S.ch,v).then(()=>{$('#post-in').value='';toast('Publicado')}).catch(fail)};
   document.querySelectorAll('form[data-reply]').forEach(f=>f.onsubmit=e=>{e.preventDefault();const inp=f.querySelector('input');const v=inp.value.trim();if(!v)return;CM.reply(f.dataset.reply,v,(POSTS.find(p=>p.id===f.dataset.reply)||{}).ch||S.ch).then(()=>{inp.value=''}).catch(fail)});
   const rl=$('#rlvl');if(rl)rl.onchange=()=>{S.resLvl=rl.value;render(false)};
@@ -1778,12 +1885,11 @@ function resumePoint(){
 function refreshDerived(){
   S.paying=CM.isAdmin||CM.profile.plan==='completo'||(CM.profile.plan==='mensual'&&CM.profile.paymentStatus==='ok');
   LEVELS.forEach(lv=>{lv.status=!hasLv(lv.n)?'locked':(pct(lv)===100?'done':'progress')});
-  SPECS.forEach(sp=>{sp.status=!sp.ready?'locked':(pct(sp)===100?'done':'progress')});
   const lastDone=lv=>{let t=0;lv.modules.forEach((m,i)=>m.lessons.forEach((l,j)=>{const d=CM.doneAt[lv.id+'_'+i+'_'+j];if(d&&d.toMillis)t=Math.max(t,d.toMillis())}));return t?fmtDay(new Date(t)):'hoy'};
   BADGES.forEach(b=>{
     const lv=LEVELS.find(l=>l.n===b.lvl);
     let ok;
-    if(b.lvl===4){const idx={b4a:0,b4b:1,b4c:2,b4d:3}[b.id];ok=lv.modules[idx].lessons.every(l=>l.done)}
+    if(b.lvl===4){const idx={b4c:0,b4a:1,b4b:2,b4d:3}[b.id];ok=lv.modules[idx].lessons.every(l=>l.done)}
     else ok=pct(lv)===100;
     b.earned=ok?lastDone(lv):undefined;
   });
@@ -1799,8 +1905,7 @@ function renderNotifs(){
 }
 
 // carga el contenido nivel por nivel (curso/n1.js, n2.js…); devuelve hasta qué nivel quedó disponible
-// el Nivel 4 todavía no tiene archivo propio: se salta
-const COURSE_FILES=[1,2,3,5];
+const COURSE_FILES=[1,2,3,4,5];
 const loadScript=src=>new Promise(res=>{const s=document.createElement('script');s.src=src;s.onload=()=>res(true);s.onerror=()=>res(false);document.head.appendChild(s)});
 async function loadCourse(lvl){let ok=0;for(const n of COURSE_FILES.filter(n=>n<=lvl)){if(!await loadScript('curso/n'+n+'.js'))return ok;ok=n}return lvl}
 
@@ -1826,13 +1931,11 @@ document.addEventListener('click',e=>{if(e.target.closest('#edit-profile'))openP
 window.cmStart=async function(cm){
   syncMe();
   // los datos de ejemplo del diseño original no se muestran: todo parte en blanco y se llena con su avance real
-  LEVELS.concat(SPECS).forEach(lv=>lv.modules.forEach((m,i)=>m.lessons.forEach((l,j)=>{l.done=!!cm.progress[lv.id+'_'+i+'_'+j]})));
+  LEVELS.forEach(lv=>lv.modules.forEach((m,i)=>m.lessons.forEach((l,j)=>{l.done=!!cm.progress[lv.id+'_'+i+'_'+j]})));
   // el contenido de las clases solo se descarga con acceso (middleware.js lo exige en el servidor)
   // el código de cada nivel usa piezas de los anteriores: se carga hasta el más alto, pero solo se abren los suyos
   if(cm.lvl>0)S.lvl=await loadCourse(cm.lvl);
   S.lvls=new Set(cm.lvls.filter(n=>n<=S.lvl));
-  // las especialidades usan las piezas de los niveles 1 a 3; por ahora solo la Maestra las abre (middleware.js)
-  if(cm.isAdmin&&S.lvl>=3)for(const sp of SPECS)sp.ready=await loadScript(sp.file);
   refreshDerived();
   if(S.lvl<cm.lvl)toast('No se pudo cargar el contenido de las clases. Recarga la página.');
   if(cm.paid==='ok')toast('¡Gracias! Estamos confirmando tu pago; tu aula se actualiza en unos segundos.');
