@@ -44,6 +44,9 @@ button.t5-card{cursor:pointer}button.t5-card:focus-visible{outline:2px solid var
 .t5-hs button:focus-visible{outline:2px solid #e8c680}
 @keyframes t5pulse{0%,100%{box-shadow:0 0 0 0 rgba(201,155,75,.55)}50%{box-shadow:0 0 0 9px rgba(201,155,75,0)}}
 .t5-q{border-left:3px solid var(--nb-gold);padding:6px 0 6px 18px;font:400 clamp(1.3rem,2.6vw,1.8rem)/1.35 var(--f-display);color:var(--nb-ink);margin:0}
+.t5-fan{width:100%;display:flex!important;justify-content:center;align-items:center}
+.t5-fan .t5-card{width:46%;max-width:150px;margin:0 -9%;box-shadow:0 14px 30px -14px rgba(0,0,0,.6)}
+.t5-fan .t5-card:nth-child(1){transform:rotate(-8deg) translateY(10px)}.t5-fan .t5-card:nth-child(3){transform:rotate(8deg) translateY(10px)}.t5-fan .t5-card:nth-child(2){z-index:1}
 .t5-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px;justify-items:center}
 @media (prefers-reduced-motion:reduce){.t5-card{transition:none}.t5-hs button{animation:none}}
 `;document.head.appendChild(c)})();
@@ -171,3 +174,117 @@ const T5Q1=[
  {q:'¿Cuál es una sombra de El Loco?',o:['Confiar en la vida','Evadir responsabilidades','Abrirse a lo nuevo'],a:1,e:'Su sombra: imprudencia, evadir responsabilidades y miedo al compromiso.'},
  {q:'En el ejercicio «Mirar antes de saber», compartes…',o:['Lo que sabes de la carta','Lo que ves y lo que sientes','El significado del libro'],a:1,e:'Primero se mira y se siente; el significado viene después.'}];
 RICH.t1a18=()=>n3quiz('t5c1',T5Q1,['Dominas lo esencial de la Clase 1. ¡Buen comienzo de viaje!','Vas muy bien. Repasa lo que falló y sigue practicando.','Vale la pena repasar la clase. Puedes volver cuando quieras.']);
+
+/* ---------- Clase 2 · Voluntad, intuición y creación ---------- */
+const T5C2=N5P+'c2/';
+// cada arcano: lugar en el viaje, palabras clave, símbolos (con su punto sobre la carta, en %), tres caras, mirada y pregunta
+const T5ARC={
+ mago:{n:'I',t:'El Mago',img:T5C2+'mago.webp',alt:'El Mago del mazo Rider-Waite: un joven de túnica blanca y manto rojo levanta una vara hacia el cielo y señala la tierra; sobre su cabeza, el infinito; en la mesa, una copa, una espada, un oro y un basto',
+  lugar:'Es el primer paso consciente del Loco: descubre que tiene <b>herramientas</b> y que puede usarlas para crear su camino.',
+  kw:['Voluntad','Acción','Habilidad','Manifestación','Concentración'],
+  im:[['El infinito','Un potencial sin límites.',45,20],['Mano arriba, mano abajo','Une la idea y su concreción.',19,14],['La mesa','Basto, copa, espada y oro.',24,63],['Rosas y lirios','El deseo y la pureza juntos.',50,83],['El cinturón serpiente','El ciclo eterno.',46,51],['Blanco y rojo','Intención pura y acción.',62,38]],
+  caras:[['Confiar en tus capacidades','Pasar de la idea a la acción','Comunicar con claridad'],['Manipulación','Dispersión','Hablar mucho y hacer poco'],['Dudar de tus talentos','Energía sin dirección','Engaño o autoengaño']],
+  mir:'El Mago te recuerda que <b>ya tienes lo que necesitas</b>. Trabaja la autoestima y el poder personal: dejar de esperar permiso para empezar.',
+  q:'¿Qué talento tengo sobre la mesa y todavía no uso?',ph:'El talento que tengo y no uso es…'},
+ sacerdotisa:{n:'II',t:'La Sacerdotisa',img:T5C2+'sacerdotisa.webp',alt:'La Sacerdotisa del mazo Rider-Waite: una mujer de manto azul sentada entre dos columnas, B negra y J blanca, con una corona lunar, un pergamino TORA en las manos y una luna creciente a sus pies',
+  lugar:'Después de aprender a actuar, el Loco aprende a <b>escuchar</b>: la sabiduría que no viene de afuera, sino del silencio interior.',
+  kw:['Intuición','Silencio','Misterio','Sabiduría interior','Receptividad'],
+  im:[['Las columnas B y J','Ella se sienta entre los opuestos.',12,44],['El velo de granadas','Lo oculto y fértil de lo interno.',65,15],['El pergamino TORA','Un saber sagrado, medio oculto.',47,57],['La luna a sus pies','Los ciclos y las emociones.',70,82],['La corona lunar','Crecer, plenitud y menguar.',50,24],['El manto azul','Agua que fluye: la intuición.',33,72]],
+  caras:[['Escuchar tu intuición','Hacer una pausa','Confiar en lo que sientes'],['Aislamiento','Guardar secretos','Frialdad emocional'],['Ignorar la intuición','Ruido mental','Saber reprimido']],
+  mir:'La Sacerdotisa invita al <b>silencio interior</b> y a validar lo que sabes aunque no puedas explicarlo. Sana la desconfianza en la propia percepción.',
+  q:'¿Qué sé por dentro y todavía no me permito escuchar?',ph:'Por dentro sé que…'},
+ emperatriz:{n:'III',t:'La Emperatriz',img:T5C2+'emperatriz.webp',alt:'La Emperatriz del mazo Rider-Waite: una mujer coronada de doce estrellas, sentada sobre cojines en un bosque con una cascada, con un vestido de granadas, un escudo en forma de corazón con el signo de Venus y trigo maduro a sus pies',
+  lugar:'Con la acción del Mago y la escucha de la Sacerdotisa, nace la <b>creación</b>: la vida que se nutre, florece y da frutos.',
+  kw:['Abundancia','Creatividad','Fertilidad','Naturaleza','Cuidado'],
+  im:[['El trigo maduro','Lo sembrado que da frutos.',30,86],['Doce estrellas','En su corona: los ciclos del año.',55,12],['El corazón con Venus','El amor y la belleza.',21,69],['El bosque y la cascada','La vida que fluye y se renueva.',93,57],['Granadas en su vestido','La fertilidad ya manifestada.',66,62],['Los cojines','El descanso y los sentidos.',9,52]],
+  caras:[['Crear y hacer crecer','Nutrir y nutrirte','Disfrutar con los sentidos'],['Sobreprotección','Dependencia','Descuidarse por cuidar a otros'],['Bloqueo creativo','Desconexión del cuerpo','Dar sin recibir']],
+  mir:'La Emperatriz es la <b>madre interior</b>: la forma en que te cuidas, te alimentas y te das permiso para disfrutar. Sana la relación con el propio cuerpo.',
+  q:'¿Cómo me estoy cuidando y nutriendo hoy?',ph:'Hoy me estoy cuidando…'}};
+const t5full=a=>({full:1,img:a.img,alt:a.alt});
+const t5Lugar=(id,cl)=>{const a=T5ARC[id],o=st('t5kw'+id,{});
+ return `<div class="dk-split" style="align-items:center">${t5card(t5full(a))}
+ <div style="display:grid;gap:14px">${dkH(cl+' · Arcano Mayor · '+a.n,a.t)}
+ <div class="detail"><span class="eyebrow">1 · Lugar en el viaje</span><p>${a.lugar}</p></div>
+ <div class="dk-sub">3 · Palabras clave · marca las que resuenan contigo hoy</div>
+ <div class="dk-chips" role="group">${a.kw.map((w,i)=>`<button class="chip" ${rxa('tog','t5kw'+id,i)} ${pressed(o[i])}>${w}</button>`).join('')}</div></div></div>`};
+const t5Lect=id=>{const a=T5ARC[id],k='t5im'+id,s=n3clamp(st(k,0),0,a.im.length-1),x=a.im[s];
+ return dkH('2 · Lectura de la imagen','Lo que nos cuenta '+a.t,'Toca los números sobre la carta para descubrir cada símbolo.')+
+ `<div class="dk-split" style="align-items:center"><div class="t5-hs"><img src="${a.img}" alt="${a.alt}" decoding="async">${a.im.map((y,i)=>`<button style="left:${y[2]}%;top:${y[3]}%" ${rxa('set',k,i)} ${pressed(i===s)} aria-label="${y[0]}">${i+1}</button>`).join('')}</div>
+ <div style="display:grid;gap:12px"><div class="detail"><span class="eyebrow">Símbolo ${s+1} de ${a.im.length}</span><h3>${x[0]}</h3><p>${x[1]}</p>${t5nav(k,s,a.im.length)}</div>
+ <div class="dk-chips" role="group">${a.im.map((y,i)=>`<button class="chip" ${rxa('set',k,i)} ${pressed(i===s)}>${i+1}. ${y[0]}</button>`).join('')}</div></div></div>`};
+const T5CAR=[['Mensaje luminoso','sol'],['Sombra','luna'],['Invertida','espiral']];
+const t5Caras=id=>{const a=T5ARC[id],k='t5ca'+id,s=n3clamp(st(k,0),0,2),x=T5CAR[s];
+ return dkH('4 y 5 · Luz, sombra e invertida','Las tres caras de '+a.t,'Su luz, su sombra y lo que pide cuando aparece invertida.')+chipRow(k,T5CAR.map(c=>c[0]),s)+
+ `<div class="dk-split" style="align-items:center">${t5card({...t5full(a),sm:1,rev:s===2})}
+ <div class="detail"><span class="eyebrow">Cara ${s+1} de 3</span><h3>${ic(x[1],26)} ${x[0]}</h3>${c4li(a.caras[s].map(t=>[x[1],t]))}${t5nav(k,s,3)}</div></div>`};
+const t5Mir=id=>{const a=T5ARC[id];
+ return dkH('6 · Mirada terapéutica',a.t,a.mir)+
+ `<div class="detail"><span class="eyebrow">7 · Pregunta de autoconocimiento</span><p class="t5-q">${a.q}</p></div>`+
+ n3area('t5mq'+id,'Tu respuesta',a.ph)+n3priv};
+const T5HOY=[['mago','Hacer','La voluntad que transforma una idea en acción.','#c0442f'],['sacerdotisa','Saber','La intuición que escucha en silencio.','#4573a8'],['emperatriz','Crear','La fuerza que nutre y hace florecer.','#4f7d4a']];
+
+/* ----- 1 · Bienvenida y repaso ----- */
+RICH.t2a1=()=>nbHero('Tarot Camino del Ser · Clase 2','<span style="font-size:.68em">Voluntad, intuición</span>','y creación','Clase 2 · Arcanos Mayores. El Mago, La Sacerdotisa y La Emperatriz.',['Hacer','Saber','Crear'],'Casa Muladhara · Escuela de Formación Holística',
+ `<div class="nb-pw t5-fan">${['mago','sacerdotisa','emperatriz'].map(id=>t5card({...t5full(T5ARC[id]),sm:1})).join('')}</div>`);
+RICH.t2a2=()=>dkH('Repaso de la semana','¿Cómo te fue con El Loco?','Antes de seguir, compartimos lo que dejó la primera clase. Toca cada tarjeta.')+
+ n3flip('t2rp',[['libro','Tu ficha','Comparte una palabra clave que hayas descubierto tú.'],['estrella','Tus cartas elegidas','Muestra una carta que te atrajo y una que te incomodó.'],['chat','Tus dudas','Lo que quedó dando vueltas de la primera clase.']],'c3',150)+
+ n3area('t2rw','Mi palabra clave de El Loco','La palabra que descubrí es…')+n3priv;
+RICH.t2a3=()=>{const s=n3clamp(st('t2hy',0),0,2),x=T5HOY[s],a=T5ARC[x[0]];
+ return dkH('Las cartas de hoy','El Loco descubre sus primeros recursos','Antes de caminar por el mundo, aprende que tiene una <b>voluntad</b>, una <b>voz interior</b> y una <b>fuerza creadora</b>. Tres energías que se complementan.')+
+ `<div class="t5-big" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr))">${T5HOY.map((y,i)=>`<button ${rxa('set','t2hy',i)} ${pressed(i===s)} style="border-top:4px solid ${y[3]}"><span class="k" style="font-size:2rem">${T5ARC[y[0]].n}</span><b>${T5ARC[y[0]].t}</b><small>${y[1]}</small></button>`).join('')}</div>
+ <div class="dk-split" style="align-items:center">${t5card({...t5full(a),sm:1})}<div class="detail" style="border-left:6px solid ${x[3]}"><span class="eyebrow">${a.n} · ${a.t}</span><h3>${x[1]}</h3><p>${x[2]}</p>${t5nav('t2hy',s,3)}</div></div>`};
+
+/* ----- 2, 3 y 4 · El Mago, La Sacerdotisa y La Emperatriz ----- */
+[['b','mago'],['c','sacerdotisa'],['d','emperatriz']].forEach(([l,id])=>{
+ RICH['t2'+l+'1']=()=>t5Lugar(id,'Clase 2');
+ RICH['t2'+l+'2']=()=>t5Lect(id);
+ RICH['t2'+l+'3']=()=>t5Caras(id);
+ RICH['t2'+l+'4']=()=>t5Mir(id)});
+
+/* ----- 5 · Práctica con tu mazo ----- */
+const T5EN=[['libro','Ordena','Pon El Mago, La Sacerdotisa y La Emperatriz frente a ti.'],['ojo','Reconoce','¿Cuál de las tres está más presente en tu vida hoy? ¿Cuál te falta?'],['grupo','Comparte','Cuenta un paso concreto para invitar a la que te falta.']];
+RICH.t2e1=()=>{const s=n3clamp(st('t2en',0),0,2),x=T5EN[s],ps=st('t2pr',-1),fa=st('t2fa',-1),nm=i=>T5ARC[T5HOY[i][0]].t;
+ return dkH('Ejercicio vivencial · en grupos pequeños','Mis tres energías','Tres pasos para mirar cómo viven hoy en ti el hacer, el saber y el crear.')+
+ `<div class="tl" style="grid-template-columns:repeat(3,minmax(0,1fr))">${T5EN.map((y,i)=>`<button ${rxa('set','t2en',i)} ${pressed(i===s)}><span class="n">${i+1}</span><span class="t">${y[1]}</span></button>`).join('')}</div>
+ <div class="detail"><span class="eyebrow">Paso ${s+1} de 3</span><h3>${ic(x[0],26)} ${x[1]}</h3><p>${x[2]}</p>${t5nav('t2en',s,3,'Siguiente paso')}</div>
+ <div class="dk-sub">La más presente hoy</div>${chipRow('t2pr',[0,1,2].map(nm),ps)}
+ <div class="dk-sub">La que me falta</div>${chipRow('t2fa',[0,1,2].map(nm),fa)}`+
+ (ps>=0&&ps===fa?`<div class="dk-call warn">Elegiste la misma carta en las dos. Mira de nuevo: ¿cuál está más presente y cuál te falta?</div>`:'')+
+ (fa>=0&&ps!==fa?`<div class="dk-call">${ic('camino',18)} Para invitar a <b>${nm(fa)}</b> (${T5HOY[fa][1].toLowerCase()}): ${T5HOY[fa][2].charAt(0).toLowerCase()+T5HOY[fa][2].slice(1)}</div>`:'')+
+ n3area('t2ep','Mi paso concreto','Esta semana voy a…')+n3priv};
+const T5TZ=['loco','mago','sacerdotisa','emperatriz'];
+const t5arcOf=id=>id==='loco'?{n:'0',t:'El Loco',img:T5FOOL.img,alt:T5FOOL.alt,kw:T5KW,caras:T5CA.map(c=>c[2])}:T5ARC[id];
+// una tirada: 8 resultados posibles (4 cartas, derecha o invertida)
+const t5tirada=(key,btn)=>{const r=st(key,-1);
+ if(r<0)return `<div class="dk-cta" style="justify-content:center"><button class="btn btn-primary" ${rxa('n3rnd',key,8)}>${btn}</button></div>`;
+ const a=t5arcOf(T5TZ[r>>1]),inv=r%2===1,c=inv?a.caras[2]:a.caras[0];
+ return `<div class="dk-split" style="align-items:center"><div style="display:grid;gap:8px;justify-items:center">${t5card({...t5full(a),sm:1,rev:inv})}</div>
+ <div class="detail"><span class="eyebrow">Tu carta · ${inv?'invertida':'derecha'}</span><h3>${a.n} ${a.t}</h3><p><b>Palabras clave:</b> ${a.kw.join(' · ')}.</p>
+ <p><b>${inv?'Invertida':'Mensaje luminoso'}:</b> ${c.join(' · ')}.</p>
+ <div class="row"><button class="btn btn-ghost btn-sm" ${rxa('n3rnd',key,8)}>Sacar otra carta</button></div></div></div>`};
+RICH.t2e2=()=>dkH('Práctica con tu mazo','Tu primera tirada de una carta','Con tu mazo, frente a la cámara. Aquí también puedes practicar con las 4 cartas vistas.')+
+ `<div class="dk-grid c2" style="align-items:start"><div>${n3ck('t2tp',[['','1. Baraja solo las 4 cartas vistas, derechas e invertidas.'],['','2. Pregunta: ¿qué energía necesito esta semana?'],['','3. Saca una carta y muéstrala a la cámara.'],['','4. Léela con tu ficha y con lo que sientes.']])}</div>
+ <div class="t5-cols" style="grid-template-columns:repeat(2,minmax(0,1fr))">${T5TZ.map(id=>t5card({...t5full(t5arcOf(id)),sm:1})).join('')}</div></div>
+ <div class="dk-call">${ic('lupa',18)} <b>¿Qué energía necesito esta semana?</b> Respira, formula la pregunta y saca tu carta.</div>`+
+ t5tirada('t2tz','Sacar una carta')+n3area('t2tl','Lo que siento con mi carta','Mi carta me dice…')+n3priv;
+
+/* ----- 6 · Tarea, cierre y repaso ----- */
+RICH.t2f1=()=>dkH('Para esta semana','Tu carta del día','Una práctica diaria para conversar con las 4 cartas vistas.')+
+ n3ck('t2ta',[['libro','Completa las fichas de El Mago, La Sacerdotisa y La Emperatriz.'],['sol','Cada mañana saca una carta entre las 4 vistas, derecha o invertida.'],['luna','En la noche anota cómo se reflejó esa carta en tu día.']])+
+ `<div class="dk-sub">Tu carta de hoy</div>`+t5tirada('t2cd','Sacar mi carta del día')+
+ n3area('t2cn','En la noche: ¿cómo se reflejó en mi día?','Hoy mi carta se reflejó en…')+n3priv;
+RICH.t2f2=()=>dkH('Hacer, saber y crear','Próxima clase','Seguimos el viaje por el mundo exterior.')+
+ `<div class="t5-cols">${[4,5,6].map(i=>t5card({n:T5ROM[i],t:T5MAY[i],sm:1})).join('')}</div>`+
+ n3quote('El Loco ya tiene una voluntad, una voz interior y una fuerza creadora: <mark>hacer, saber y crear</mark>.')+`<small class="dk-sig" style="text-align:center;display:block">Casa Muladhara · Escuela de Formación Holística</small>`;
+const T5Q2=[
+ {q:'¿Qué energía representa El Mago?',o:['Hacer: la voluntad que transforma una idea en acción','Saber: la intuición que escucha en silencio','Crear: la fuerza que nutre y hace florecer'],a:0,e:'El Mago es el hacer; La Sacerdotisa, el saber; La Emperatriz, el crear.'},
+ {q:'En la mesa de El Mago hay…',o:['Trigo y granadas','Basto, copa, espada y oro','Un pergamino y una luna'],a:1,e:'Son los cuatro palos de los Arcanos Menores: sus herramientas.'},
+ {q:'Mano arriba, mano abajo en El Mago…',o:['Une la idea y su concreción','Pide permiso para empezar','Muestra dispersión'],a:0,e:'Lo que se piensa arriba se concreta abajo.'},
+ {q:'¿Cuál es una sombra de El Mago?',o:['Comunicar con claridad','Hablar mucho y hacer poco','Confiar en tus capacidades'],a:1,e:'Su sombra: manipulación, dispersión y hablar mucho y hacer poco.'},
+ {q:'La Sacerdotisa se sienta entre…',o:['Dos columnas, B y J: los opuestos','Dos árboles','Dos esfinges'],a:0,e:'Entre los opuestos, con el velo de granadas detrás.'},
+ {q:'Cuando La Sacerdotisa sale invertida, puede hablar de…',o:['Escuchar tu intuición','Ruido mental y saber reprimido','Disfrutar con los sentidos'],a:1,e:'Invertida: ignorar la intuición, ruido mental y saber reprimido.'},
+ {q:'Las doce estrellas de la corona de La Emperatriz representan…',o:['Los ciclos del año','Los doce apóstoles','Las doce horas'],a:0,e:'Su corona habla de los ciclos del año.'},
+ {q:'La mirada terapéutica de La Emperatriz habla de…',o:['La madre interior y la relación con el propio cuerpo','El poder personal','El silencio interior'],a:0,e:'La forma en que te cuidas, te alimentas y te das permiso para disfrutar.'},
+ {q:'En tu primera tirada barajas…',o:['Los 22 Mayores','Solo las 4 cartas vistas, derechas e invertidas','Solo las cartas derechas'],a:1,e:'El Loco, El Mago, La Sacerdotisa y La Emperatriz.'},
+ {q:'En la tarea «Tu carta del día», ¿qué haces en la noche?',o:['Sacas otra carta','Anotas cómo se reflejó la carta en tu día','Lees el libro'],a:1,e:'En la mañana sacas la carta; en la noche anotas cómo se reflejó.'}];
+RICH.t2f3=()=>n3quiz('t5c2',T5Q2,['Dominas lo esencial de la Clase 2. ¡Hacer, saber y crear!','Vas muy bien. Repasa lo que falló y sigue practicando.','Vale la pena repasar la clase. Puedes volver cuando quieras.']);
