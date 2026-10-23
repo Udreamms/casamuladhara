@@ -1101,6 +1101,13 @@ const N5L8c=C2('XX · El Juicio',[['t8c1','Lugar en el viaje y palabras clave'],
 const N5L8d=C2('XXI · El Mundo',[['t8d1','Lugar en el viaje y palabras clave'],['t8d2','Lectura de la imagen'],['t8d3','Luz, sombra e invertida'],['t8d4','Mirada terapéutica y pregunta']]);
 const N5L8e=C2('Cierre de los Arcanos Mayores',[['t8e1','El Viaje del Loco completo'],['t8e2','Mi propio Viaje del Loco','Ejercicio en grupos pequeños'],['t8e3','Tirada con los 22 Mayores']]);
 const N5L8f=C2('Tarea, cierre y repaso',[['t8f1','Cerrar el viaje, preparar el siguiente'],['t8f2','Próxima clase'],['t8f3','Repaso']]);
+const T9F=[F('pdf','Láminas de la Clase 9','20 láminas',N5P+'print/clase9_laminas.pdf')];
+const N5L9a=C2('Bienvenida y repaso',[['t9a1','Los Menores y el fuego de los Bastos'],['t9a2','Repaso de la semana'],['t9a3','Del alma a la vida cotidiana']],T9F);
+const N5L9b=C2('Los Arcanos Menores',[['t9b1','Cuatro palos, cuatro elementos'],['t9b2','El lenguaje de los números'],['t9b3','Las cartas de la corte'],['t9b4','Cartas invertidas en los Menores']]);
+const N5L9c=C2('Bastos · del As al 3',[['t9c1','El palo de Bastos · elemento fuego'],['t9c2','As de Bastos · el inicio'],['t9c3','Dos de Bastos · la elección'],['t9c4','Tres de Bastos · el crecimiento']]);
+const N5L9d=C2('Bastos · del 4 al 7',[['t9d1','Cuatro de Bastos · la estabilidad'],['t9d2','Cinco de Bastos · la crisis'],['t9d3','Seis de Bastos · la armonía'],['t9d4','Siete de Bastos · la prueba'],['t9d5','El recorrido del fuego']]);
+const N5L9e=C2('Práctica con tu mazo',[['t9e1','¿Cómo está mi fuego hoy?','Ejercicio en grupos pequeños'],['t9e2','Tirada de una carta']]);
+const N5L9f=C2('Tarea, cierre y repaso',[['t9f1','Observar mi fuego'],['t9f2','Próxima clase'],['t9f3','Repaso']]);
 /* clases del Nivel 5 que todavía no se publican: una por módulo, para que cada clase conserve su lugar (y su avance) al llegar */
 const T5PEND=(n,t)=>({title:'Clase '+n+' · '+t,lessons:[L('Clase '+n+' · '+t,'',[])]});
 
@@ -1341,8 +1348,9 @@ const LEVELS=[
    {title:'Clase 6 · Transformación, sanación y sombra',lessons:[N5L6a,N5L6b,N5L6c,N5L6d,N5L6e,N5L6f]},
    {title:'Clase 7 · Ruptura, esperanza y mundo emocional',lessons:[N5L7a,N5L7b,N5L7c,N5L7d,N5L7e,N5L7f]},
    {title:'Clase 8 · Plenitud y cierre del viaje',lessons:[N5L8a,N5L8b,N5L8c,N5L8d,N5L8e,N5L8f]},
-   T5PEND(9,'Arcanos Menores: los cuatro palos y Bastos'),
-   ...[10,11,12,13,14,15,16].map(n=>T5PEND(n,'Próximamente'))
+   {title:'Clase 9 · Los Menores y el fuego de los Bastos',lessons:[N5L9a,N5L9b,N5L9c,N5L9d,N5L9e,N5L9f]},
+   T5PEND(10,'Bastos: del 8 a la corte'),
+   ...[11,12,13,14,15,16].map(n=>T5PEND(n,'Próximamente'))
   ]}
 ];
 const allLessons=lv=>lv.modules.flatMap(m=>m.lessons);
@@ -1379,6 +1387,7 @@ const RES=[
  {t:'Clase 6 · Láminas de Tarot',type:'PDF',lvl:5,size:'20 láminas',k:'pdf',href:'assets/n5/print/clase6_laminas.pdf',new:1},
  {t:'Clase 7 · Láminas de Tarot',type:'PDF',lvl:5,size:'20 láminas',k:'pdf',href:'assets/n5/print/clase7_laminas.pdf',new:1},
  {t:'Clase 8 · Láminas de Tarot',type:'PDF',lvl:5,size:'21 láminas',k:'pdf',href:'assets/n5/print/clase8_laminas.pdf',new:1},
+ {t:'Clase 9 · Láminas de Tarot',type:'PDF',lvl:5,size:'20 láminas',k:'pdf',href:'assets/n5/print/clase9_laminas.pdf',new:1},
  {t:'Clase 2 · Láminas de Tarot',type:'PDF',lvl:5,size:'20 láminas',k:'pdf',href:'assets/n5/print/clase2_laminas.pdf',new:1},
  {t:'Clase 1 · Láminas de Tarot',type:'PDF',lvl:5,size:'19 láminas',k:'pdf',href:'assets/n5/print/clase1_laminas.pdf',new:1},
  {t:'Clase 8 · Láminas',type:'PDF',lvl:3,size:'32 láminas',k:'pdf',href:'assets/n3/print/clase8_laminas.pdf',new:1},
