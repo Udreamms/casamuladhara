@@ -1059,6 +1059,13 @@ const N5L2c=C2('II · La Sacerdotisa',[['t2c1','Lugar en el viaje y palabras cla
 const N5L2d=C2('III · La Emperatriz',[['t2d1','Lugar en el viaje y palabras clave'],['t2d2','Lectura de la imagen'],['t2d3','Luz, sombra e invertida'],['t2d4','Mirada terapéutica y pregunta']]);
 const N5L2e=C2('Práctica con tu mazo',[['t2e1','Mis tres energías','Ejercicio en grupos pequeños'],['t2e2','Tu primera tirada de una carta']]);
 const N5L2f=C2('Tarea, cierre y repaso',[['t2f1','Tu carta del día'],['t2f2','Próxima clase'],['t2f3','Repaso']]);
+const T3F=[F('pdf','Láminas de la Clase 3','20 láminas',N5P+'print/clase3_laminas.pdf')];
+const N5L3a=C2('Bienvenida y repaso',[['t3a1','Estructura, enseñanza y elección'],['t3a2','Repaso de la semana'],['t3a3','Las cartas de hoy']],T3F);
+const N5L3b=C2('IV · El Emperador',[['t3b1','Lugar en el viaje y palabras clave'],['t3b2','Lectura de la imagen'],['t3b3','Luz, sombra e invertida'],['t3b4','Mirada terapéutica y pregunta']]);
+const N5L3c=C2('V · El Hierofante',[['t3c1','Lugar en el viaje y palabras clave'],['t3c2','Lectura de la imagen'],['t3c3','Luz, sombra e invertida'],['t3c4','Mirada terapéutica y pregunta']]);
+const N5L3d=C2('VI · Los Enamorados',[['t3d1','Lugar en el viaje y palabras clave'],['t3d2','Lectura de la imagen'],['t3d3','Luz, sombra e invertida'],['t3d4','Mirada terapéutica y pregunta']]);
+const N5L3e=C2('Práctica con tu mazo',[['t3e1','Mi límite, mi creencia, mi elección','Ejercicio en grupos pequeños'],['t3e2','Tirada de una carta']]);
+const N5L3f=C2('Tarea, cierre y repaso',[['t3f1','Tu carta del día, con 7 cartas'],['t3f2','Próxima clase'],['t3f3','Repaso']]);
 /* clases del Nivel 5 que todavía no se publican: una por módulo, para que cada clase conserve su lugar (y su avance) al llegar */
 const T5PEND=(n,t)=>({title:'Clase '+n+' · '+t,lessons:[L('Clase '+n+' · '+t,'',[])]});
 
@@ -1293,7 +1300,7 @@ const LEVELS=[
   modules:[
    {title:'Clase 1 · Introducción y El Loco',lessons:[N5L1a,N5L1b,N5L1c,N5L1d,N5L1e,N5L1f]},
    {title:'Clase 2 · Voluntad, intuición y creación',lessons:[N5L2a,N5L2b,N5L2c,N5L2d,N5L2e,N5L2f]},
-   T5PEND(3,'El Emperador, el Hierofante y los Enamorados'),
+   {title:'Clase 3 · Estructura, enseñanza y elección',lessons:[N5L3a,N5L3b,N5L3c,N5L3d,N5L3e,N5L3f]},
    T5PEND(4,'El Carro, la Fuerza y el Ermitaño'),
    T5PEND(5,'La Rueda de la Fortuna, la Justicia y el Colgado'),
    T5PEND(6,'La Muerte, la Templanza y el Diablo'),
@@ -1330,6 +1337,7 @@ const RES=[
  {t:'Ficha de registro en blanco',type:'Plantilla',lvl:2,size:'1 hoja',k:'pdf',href:'assets/n2/print/ficha_de_registro.pdf'},
  {t:'Gráficos radiestésicos del Nivel 2',type:'PDF',lvl:2,size:'6 láminas',k:'pdf',href:'assets/n2/print/graficos_radiestesicos.pdf'},
  {t:'Mantras de los chakras',type:'PDF',lvl:3,size:'1 lámina',k:'pdf',href:'assets/n3/print/mantras_chakras.pdf',new:1},
+ {t:'Clase 3 · Láminas de Tarot',type:'PDF',lvl:5,size:'20 láminas',k:'pdf',href:'assets/n5/print/clase3_laminas.pdf',new:1},
  {t:'Clase 2 · Láminas de Tarot',type:'PDF',lvl:5,size:'20 láminas',k:'pdf',href:'assets/n5/print/clase2_laminas.pdf',new:1},
  {t:'Clase 1 · Láminas de Tarot',type:'PDF',lvl:5,size:'19 láminas',k:'pdf',href:'assets/n5/print/clase1_laminas.pdf',new:1},
  {t:'Clase 8 · Láminas',type:'PDF',lvl:3,size:'32 láminas',k:'pdf',href:'assets/n3/print/clase8_laminas.pdf',new:1},
