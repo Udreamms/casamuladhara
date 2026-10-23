@@ -636,3 +636,86 @@ const T5Q6=[
  {q:'Invertido, El Diablo puede hablar de…',o:['Apegos y dependencias','Romper una cadena','Vínculos que atan'],a:1,e:'Invertido: romper una cadena, darse cuenta de un apego y comenzar a liberarse.'},
  {q:'En la tarea de esta semana escribes…',o:['Tu historia del Loco','Una carta de despedida a algo que eliges soltar','Las palabras clave de las 16 cartas'],a:1,e:'Un pequeño ritual de cierre.'}];
 RICH.t6f3=()=>n3quiz('t5c6',T5Q6,['Dominas lo esencial de la Clase 6. ¡Soltar, integrar y liberarse!','Vas muy bien. Repasa lo que falló y sigue practicando.','Vale la pena repasar la clase. Puedes volver cuando quieras.']);
+
+/* ---------- Clase 7 · Ruptura, esperanza y mundo emocional ---------- */
+const T5C7=N5P+'c7/';
+Object.assign(T5ARC,{
+ torre:{n:'XVI',t:'La Torre',img:T5C7+'torre.webp',alt:'La Torre del mazo Rider-Waite: un rayo golpea una torre alta sobre una roca, la corona de su cima cae, salen llamas por las ventanas y dos figuras caen al vacío entre gotas de luz',
+  lugar:'Después de ver su sombra, el Loco vive <b>una sacudida</b>: se derrumba lo que estaba construido sobre bases falsas.',
+  kw:['Ruptura','Revelación','Cambio repentino','Liberación','Despertar'],
+  im:[['El rayo','Una verdad que llega de golpe.',82,14],['La corona que cae','El ego pierde el control.',28,8],['Las dos figuras','Caen de lo que creían seguro.',18,58],['Las llamas','El fuego que limpia y purifica.',68,22],['Las gotas de luz','En medio de la caída, cae también luz.',10,40],['La roca','Una torre alta, aislada y rígida.',55,80]],
+  caras:[['Ver la verdad','Liberarse de lo falso','Reconstruir sobre bases reales'],['Miedo al caos','Sostener lo insostenible','Vivir en alerta'],['Evitar una crisis necesaria','Un cambio interno silencioso','Postergar lo inevitable']],
+  mir:'La Torre enseña que <b>algunas crisis son despertares</b>: lo que se derrumba abre espacio para construir una vida más verdadera.',
+  q:'¿Qué estructura de mi vida necesita caer para que pueda ser más yo?',ph:'Necesita caer… para que pueda ser más yo.'},
+ estrella:{n:'XVII',t:'La Estrella',img:T5C7+'estrella.webp',alt:'La Estrella del mazo Rider-Waite: una mujer desnuda, con una rodilla en la tierra y un pie en el agua, vierte dos cántaros sobre el estanque y la tierra, bajo una gran estrella y siete estrellas blancas; un ave se posa en un árbol',
+  lugar:'Después de la tormenta, el Loco <b>se queda sin máscaras</b>. En la calma vuelve la esperanza y la conexión con algo más grande.',
+  kw:['Esperanza','Renovación','Fe','Autenticidad','Inspiración'],
+  im:[['La mujer desnuda','Sin máscaras: vulnerable y auténtica.',55,46],['Los dos cántaros','Da al agua y a la tierra: nutre todo.',86,50],['La gran estrella','Una guía que brilla después de la noche.',47,17],['Las siete estrellas','Los chakras que vuelven a encenderse.',15,10],['Un pie en el agua','Y la rodilla en la tierra: equilibrio.',42,72],['El ave en el árbol','El pensamiento que se eleva.',85,30]],
+  caras:[['Recuperar la esperanza','Mostrarme tal como soy','Confiar en la vida'],['Esperar sin actuar','Dar sin recibir','Idealizar el futuro'],['Desesperanza','Desconexión','Dudar de mí misma']],
+  mir:'La Estrella nos muestra que <b>después de cada crisis hay sanación</b>: cuando nos mostramos tal como somos, la vida vuelve a fluir.',
+  q:'¿Qué me devuelve la esperanza y cómo puedo cuidarlo?',ph:'Me devuelve la esperanza… y puedo cuidarlo…'},
+ luna:{n:'XVIII',t:'La Luna',img:T5C7+'luna.webp',alt:'La Luna del mazo Rider-Waite: una luna con rostro brilla entre dos torres; abajo, un perro y un lobo le aúllan, un cangrejo sale de un estanque y un camino se pierde hacia las montañas',
+  lugar:'Guiado por la Estrella, el Loco <b>entra en la noche</b>: el mundo de las emociones, los sueños y los miedos que aún no ve con claridad.',
+  kw:['Intuición','Emociones','Sueños','Inconsciente','Incertidumbre'],
+  im:[['La luna con rostro','Una luz suave que no lo muestra todo.',55,22],['El perro y el lobo','Lo domesticado y lo salvaje en nosotras.',35,57],['El cangrejo','Sale del agua: lo que emerge del inconsciente.',45,82],['El camino','Sigue entre las torres hacia las montañas.',56,68],['Las dos torres','El umbral hacia lo desconocido.',12,42],['El estanque','El mundo emocional profundo.',20,80]],
+  caras:[['Escuchar mi intuición','Honrar mis emociones','Prestar atención a los sueños'],['Miedos sin nombre','Confusión','Engañarme a mí misma'],['La niebla empieza a disiparse','Un miedo que sale a la luz','Claridad que llega de a poco']],
+  mir:'La Luna nos invita a <b>atravesar la noche emocional sin huir</b>: los miedos pierden fuerza cuando los miramos, y la intuición nos guía donde la razón no alcanza.',
+  q:'¿Qué emoción estoy evitando sentir y qué me diría si la escuchara?',ph:'Estoy evitando sentir… y si la escuchara me diría…'}});
+const T5HOY7=[['torre','Despertar','Lo falso que se derrumba.','#c0442f'],['estrella','Confiar','La esperanza que vuelve.','#4573a8'],['luna','Sentir','El mundo emocional y la intuición.','#9b6f27']];
+const T5TZ19=[...T5TZ16,'torre','estrella','luna'];
+
+/* ----- 1 · Bienvenida y repaso ----- */
+RICH.t7a1=()=>nbHero('Tarot Camino del Ser · Clase 7','<span style="font-size:.68em">Ruptura, esperanza</span>','y mundo emocional','Clase 7 · Arcanos Mayores. La Torre, La Estrella y La Luna.',['Despertar','Confiar','Sentir'],'Casa Muladhara · Escuela de Formación Holística',
+ `<div class="nb-pw t5-fan">${T5HOY7.map(y=>t5card({...t5full(T5ARC[y[0]]),sm:1})).join('')}</div>`);
+RICH.t7a2=()=>dkH('Repaso de la semana','Transformación, sanación y sombra','Antes de seguir, compartimos cómo fue la semana con tu carta del día y tu ritual de cierre.')+
+ `<div class="t5-cols" style="grid-template-columns:repeat(3,minmax(0,150px));justify-content:center">${['muerte','templanza','diablo'].map(id=>t5card({...t5full(T5ARC[id]),sm:1})).join('')}</div>
+ <div class="dk-sub">¿Qué carta salió más en tu carta del día?</div>${chipRow('t7rc',T5TZ16.map(id=>t5arcOf(id).t),st('t7rc',-1))}`+
+ n3area('t7rh','¿Cómo te sentiste al escribir tu carta de despedida?','Al escribirla me sentí…')+
+ n3area('t7rr','¿Qué te quedó resonando de la clase 6?','Me quedó resonando…')+n3priv;
+RICH.t7a3=()=>{const s=n3clamp(st('t7hy',0),0,2),x=T5HOY7[s],a=T5ARC[x[0]];
+ return dkH('Las cartas de hoy','De la sacudida a la intuición','Después de la tormenta, la luz: el Loco ve caer lo que no era verdadero, recupera la <b>esperanza</b> y aprende a atravesar la <b>noche de sus emociones</b>.')+
+ `<div class="t5-big" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr))">${T5HOY7.map((y,i)=>`<button ${rxa('set','t7hy',i)} ${pressed(i===s)} style="border-top:4px solid ${y[3]}"><span class="k" style="font-size:2rem">${T5ARC[y[0]].n}</span><b>${T5ARC[y[0]].t}</b><small>${y[1]}</small></button>`).join('')}</div>
+ <div class="dk-split" style="align-items:center">${t5card({...t5full(a),sm:1})}<div class="detail" style="border-left:6px solid ${x[3]}"><span class="eyebrow">${a.n} · ${a.t}</span><h3>${x[1]}</h3><p>${x[2]}</p>${t5nav('t7hy',s,3)}</div></div>
+ <div class="dk-call">${ic('estrella',18)} La Torre <b>derrumba</b>, La Estrella <b>renueva</b> y La Luna nos <b>guía</b> por lo que aún no vemos.</div>`};
+
+/* ----- 2, 3 y 4 · La Torre, La Estrella y La Luna ----- */
+[['b','torre'],['c','estrella'],['d','luna']].forEach(([l,id])=>{
+ RICH['t7'+l+'1']=()=>t5Lugar(id,'Clase 7');
+ RICH['t7'+l+'2']=()=>t5Lect(id);
+ RICH['t7'+l+'3']=()=>t5Caras(id);
+ RICH['t7'+l+'4']=()=>t5Mir(id)});
+
+/* ----- 5 · Práctica con tu mazo ----- */
+const T5TEL=[['torre','Mi torre','Recuerda algo que se derrumbó en tu vida.','Se derrumbó…'],['estrella','Mi estrella','¿Qué nació o se aclaró después de esa caída?','Después de esa caída nació…'],['luna','Mi luna','¿Qué te dijo tu intuición en ese momento?','Mi intuición me dijo…']];
+RICH.t7e1=()=>{const s=n3clamp(st('t7te',0),0,2),x=T5TEL[s],a=T5ARC[x[0]];
+ return dkH('Ejercicio vivencial · en grupos pequeños','Mi tormenta y mi estrella','Con cada carta de hoy, anota lo tuyo y compártelo en tu grupo.')+
+ `<div class="t5-big" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr))">${T5TEL.map((y,i)=>`<button ${rxa('set','t7te',i)} ${pressed(i===s)}><span class="k" style="font-size:2rem">${i+1}</span><b>${y[1]}</b><small>${T5ARC[y[0]].t}</small>${st('t7tw'+i,'').trim()?`<small>${ic('check',14)} Anotado</small>`:''}</button>`).join('')}</div>
+ <div class="dk-split" style="align-items:center">${t5card({...t5full(a),sm:1})}<div style="display:grid;gap:10px"><div class="detail"><span class="eyebrow">Paso ${s+1} de 3 · ${a.t}</span><h3>${x[1]}</h3><p>${x[2]}</p>${t5nav('t7te',s,3)}</div>${n3area('t7tw'+s,x[1],x[3])}</div></div>`+n3priv};
+RICH.t7e2=()=>dkH('Práctica con tu mazo','Tirada de una carta','Ahora con las 19 cartas vistas, del 0 al XVIII. Practica con tu mazo y aquí mismo.')+
+ n3ck('t7tp',[['','Baraja las 19 cartas vistas, del 0 al XVIII, derechas e invertidas.'],['','Pregunta: ¿qué me quiere mostrar mi intuición hoy?'],['','Saca una carta, muéstrala a la cámara y léela con tu ficha y con lo que sientes.']])+
+ `<div class="t5-cols" style="grid-template-columns:repeat(auto-fit,minmax(60px,1fr));gap:8px">${T5TZ19.map(id=>t5card({...t5full(t5arcOf(id)),sm:1})).join('')}</div>
+ <div class="dk-call">${ic('lupa',18)} <b>¿Qué me quiere mostrar mi intuición hoy?</b></div>`+
+ t5tirada('t7tz','Sacar una carta',T5TZ19)+n3area('t7tl','Lo que siento con mi carta','Mi carta me dice…')+n3priv;
+
+/* ----- 6 · Tarea, cierre y repaso ----- */
+const T5EMO=['Calma','Alegría','Tristeza','Miedo','Enojo','Confusión','Nostalgia','Esperanza'];
+RICH.t7f1=()=>dkH('Para esta semana','Diario de sueños','Seguimos la carta del día, ahora con las 19 cartas, y escuchamos lo que nos dice la noche.')+
+ n3ck('t7ta',[['libro','Completa las fichas de La Torre, La Estrella y La Luna.'],['sol','Cada mañana saca una carta entre las 19 vistas, derecha o invertida.'],['luna','Al despertar, anota tus sueños y la emoción con la que despertaste.']])+
+ `<div class="dk-sub">Tu carta de hoy</div>`+t5tirada('t7cd','Sacar mi carta del día',T5TZ19)+
+ n3area('t7su','Mi sueño de hoy','Soñé que…')+
+ `<div class="dk-sub">La emoción con la que desperté</div>${chipRow('t7em',T5EMO,st('t7em',-1))}`+n3priv;
+RICH.t7f2=()=>dkH('También en la noche hay un camino','Próxima clase','Llegamos a las últimas cartas del viaje del Loco.')+
+ `<div class="t5-cols">${[19,20,21].map(i=>t5card({n:T5ROM[i],t:T5MAY[i],sm:1})).join('')}</div>`+
+ n3quote('Después de la tormenta, la luz: <mark>también en la noche hay un camino</mark>.')+`<small class="dk-sig" style="text-align:center;display:block">Casa Muladhara · Escuela de Formación Holística</small>`;
+const T5Q7=[
+ {q:'¿Qué se derrumba en La Torre?',o:['Lo que estaba construido sobre bases falsas','Todo lo bueno','Solo lo material'],a:0,e:'Algunas crisis son despertares.'},
+ {q:'El rayo de La Torre representa…',o:['Un castigo','Una verdad que llega de golpe','La suerte'],a:1,e:'Y la corona que cae: el ego pierde el control.'},
+ {q:'¿Cuál es una sombra de La Torre?',o:['Ver la verdad','Sostener lo insostenible','Liberarse de lo falso'],a:1,e:'Su sombra: miedo al caos, sostener lo insostenible y vivir en alerta.'},
+ {q:'En medio de la caída de La Torre, también caen…',o:['Gotas de luz','Piedras','Estrellas negras'],a:0,e:'En medio de la caída, cae también luz.'},
+ {q:'La mujer de La Estrella está desnuda porque…',o:['Está sin máscaras: vulnerable y auténtica','Tiene frío','Se esconde'],a:0,e:'Después de la tormenta, el Loco se queda sin máscaras.'},
+ {q:'Las siete estrellas pequeñas de La Estrella representan…',o:['Los días de la semana','Los chakras que vuelven a encenderse','Los planetas'],a:1,e:'Y la gran estrella: una guía que brilla después de la noche.'},
+ {q:'¿Cuál es una sombra de La Estrella?',o:['Esperar sin actuar','Confiar en la vida','Recuperar la esperanza'],a:0,e:'Su sombra: esperar sin actuar, dar sin recibir e idealizar el futuro.'},
+ {q:'En La Luna, el perro y el lobo representan…',o:['Lo domesticado y lo salvaje en nosotras','El bien y el mal','Dos amigos'],a:0,e:'Y el cangrejo que sale del agua: lo que emerge del inconsciente.'},
+ {q:'Invertida, La Luna puede hablar de…',o:['Miedos sin nombre','La niebla que empieza a disiparse','Confusión'],a:1,e:'Invertida: la niebla empieza a disiparse, un miedo sale a la luz y llega claridad de a poco.'},
+ {q:'En la tarea «Diario de sueños», al despertar anotas…',o:['Tus sueños y la emoción con la que despertaste','Solo tu carta del día','Tus metas de la semana'],a:0,e:'Y cada mañana sacas una carta entre las 19 vistas.'}];
+RICH.t7f3=()=>n3quiz('t5c7',T5Q7,['Dominas lo esencial de la Clase 7. ¡Despertar, confiar y sentir!','Vas muy bien. Repasa lo que falló y sigue practicando.','Vale la pena repasar la clase. Puedes volver cuando quieras.']);
