@@ -472,3 +472,85 @@ const T5Q4=[
  {q:'¿Cuál es la diferencia entre la luz y la sombra de El Ermitaño?',o:['Soledad elegida frente a aislamiento','Avanzar frente a detenerse','Hablar frente a callar'],a:0,e:'Su luz es retirarse para escucharse; su sombra, el aislamiento y encerrarse en sí misma.'},
  {q:'En la tarea de esta semana escribes…',o:['Una carta a tu Ermitaño','El viaje del Loco del 0 al IX como tu propia historia','Las palabras clave de los 22 Mayores'],a:1,e:'Y sigues con tu carta del día entre las 10 vistas.'}];
 RICH.t4f3=()=>n3quiz('t5c4',T5Q4,['Dominas lo esencial de la Clase 4. ¡Cerraste el primer mes!','Vas muy bien. Repasa lo que falló y sigue practicando.','Vale la pena repasar la clase. Puedes volver cuando quieras.']);
+
+/* ---------- Clase 5 · Ciclos, equilibrio y entrega ---------- */
+const T5C5=N5P+'c5/';
+Object.assign(T5ARC,{
+ rueda:{n:'X',t:'La Rueda de la Fortuna',img:T5C5+'rueda.webp',alt:'La Rueda de la Fortuna del mazo Rider-Waite: una gran rueda con letras entre las nubes, una esfinge con espada arriba, Anubis que sube por la derecha, una serpiente que baja por la izquierda y cuatro seres alados que leen libros en las esquinas',
+  lugar:'Después del retiro del Ermitaño, el Loco comprende que <b>la vida se mueve en ciclos</b>: lo que sube baja, y lo que baja vuelve a subir.',
+  kw:['Ciclos','Cambio','Destino','Oportunidad','Fluir'],
+  im:[['La rueda con letras','TARO y ROTA: la vida es una rueda que gira.',50,37],['La esfinge arriba','El centro sereno en medio del cambio.',45,15],['Anubis que sube','Lo que asciende y renace.',85,55],['La serpiente que baja','Lo que desciende y se suelta.',12,55],['Los cuatro seres alados','Leen sus libros: aprender del cambio.',22,13],['Las nubes','Lo que no depende de nosotras.',88,34]],
+  caras:[['Aceptar los ciclos','Aprovechar una oportunidad','Fluir con el cambio'],['Querer controlar lo incontrolable','Sentirse víctima del destino','Repetir los mismos ciclos'],['Resistencia al cambio','Un ciclo que se estanca','Sensación de mala racha']],
+  mir:'La Rueda enseña que <b>nada es permanente</b>: los ciclos se repiten hasta que aprendemos lo que vienen a mostrarnos.',
+  q:'¿Qué ciclo se repite en mi vida y qué me está pidiendo aprender?',ph:'El ciclo que se repite es… y me pide aprender…'},
+ justicia:{n:'XI',t:'La Justicia',img:T5C5+'justicia.webp',alt:'La Justicia del mazo Rider-Waite: una figura coronada y de manto rojo, sentada entre dos columnas, sostiene una espada alzada en una mano y una balanza en la otra; asoma un pie blanco bajo el manto',
+  lugar:'El Loco mira con honestidad <b>sus actos y sus consecuencias</b>. Aprende a equilibrar lo que da y lo que recibe.',
+  kw:['Equilibrio','Verdad','Responsabilidad','Causa y efecto','Claridad'],
+  im:[['La balanza','Pesar con equilibrio antes de decidir.',88,58],['La espada alzada','La claridad que corta y decide.',17,18],['Los ojos abiertos','No es ciega: ve la verdad.',46,35],['El pie blanco','La decisión que pasa a la acción.',45,83],['Las dos columnas','Los opuestos, como en La Sacerdotisa.',8,65],['La corona','Una mente clara que gobierna.',50,22]],
+  caras:[['Actuar con honestidad','Asumir mis decisiones','Buscar el equilibrio'],['Juzgar con dureza','Exigirme perfección','Vivir cargando culpas'],['Desequilibrio','Evitar responsabilidades','Autoengaño']],
+  mir:'La Justicia invita a hacernos <b>responsables de lo que elegimos, sin culpa</b>: cada acto tiene un efecto y de cada efecto podemos aprender.',
+  q:'¿Dónde necesito recuperar el equilibrio entre lo que doy y lo que recibo?',ph:'Necesito recuperar el equilibrio en…'},
+ colgado:{n:'XII',t:'El Colgado',img:T5C5+'colgado.webp',alt:'El Colgado del mazo Rider-Waite: un hombre cuelga cabeza abajo de un árbol con hojas, atado de un pie, con las piernas en cruz, las manos atrás y una aureola dorada alrededor de su rostro sereno',
+  lugar:'El Loco descubre que no todo se resuelve actuando: a veces hay que <b>detenerse, soltar el control</b> y mirar la vida desde otro ángulo.',
+  kw:['Pausa','Entrega','Nueva perspectiva','Soltar','Rendición consciente'],
+  im:[['Cabeza abajo','Ver el mundo desde otro ángulo.',50,50],['El rostro sereno','No sufre: elige estar ahí.',44,77],['La aureola','La comprensión que llega al soltar.',72,68],['El árbol con hojas','La vida sigue creciendo en la pausa.',12,15],['Las piernas en cruz','Forman un 4: estabilidad al detenerse.',58,35],['Las manos atrás','Deja de hacer y se entrega.',25,62]],
+  caras:[['Hacer una pausa consciente','Mirar desde otro lugar','Soltar el control'],['Sacrificarme de más','Postergarme siempre','Quedarme esperando'],['Resistirse a soltar','Una pausa que se alarga','Sacrificio sin sentido']],
+  mir:'El Colgado enseña que <b>la pausa también es camino</b>: cuando dejamos de forzar, aparece una nueva forma de ver.',
+  q:'¿Qué estoy forzando y qué vería distinto si lo soltara?',ph:'Estoy forzando… Si lo soltara, vería…'}});
+const T5HOY5=[['rueda','Fluir','Los ciclos que no controlamos.','#c0442f'],['justicia','Equilibrar','La responsabilidad de lo que elijo.','#9b6f27'],['colgado','Entregarse','Una nueva mirada al soltar.','#4573a8']];
+const T5TZ13=[...T5TZ10,'rueda','justicia','colgado'];
+
+/* ----- 1 · Bienvenida y repaso ----- */
+RICH.t5a1=()=>nbHero('Tarot Camino del Ser · Clase 5','<span style="font-size:.68em">Ciclos, equilibrio</span>','y entrega','Clase 5 · Arcanos Mayores. La Rueda de la Fortuna, La Justicia y El Colgado.',['Fluir','Equilibrar','Entregarse'],'Casa Muladhara · Escuela de Formación Holística',
+ `<div class="nb-pw t5-fan">${T5HOY5.map(y=>t5card({...t5full(T5ARC[y[0]]),sm:1})).join('')}</div>`);
+RICH.t5a2=()=>dkH('Repaso de la semana','Avanzar, sostener y mirar adentro','Antes de seguir, compartimos cómo fue la semana con tu carta del día y tu historia del Loco.')+
+ `<div class="t5-cols" style="grid-template-columns:repeat(3,minmax(0,150px));justify-content:center">${['carro','fuerza','ermitano'].map(id=>t5card({...t5full(T5ARC[id]),sm:1})).join('')}</div>
+ <div class="dk-sub">¿Qué carta salió más en tu carta del día?</div>${chipRow('t5rc',T5TZ10.map(id=>t5arcOf(id).t),st('t5rc',-1))}`+
+ n3area('t5rh','¿Cómo te fue escribiendo tu historia del Loco?','Al escribir mi historia…')+
+ n3area('t5rr','¿Qué te quedó resonando de la clase 4?','Me quedó resonando…')+n3priv;
+RICH.t5a3=()=>{const s=n3clamp(st('t5hy',0),0,2),x=T5HOY5[s],a=T5ARC[x[0]];
+ return dkH('Las cartas de hoy','Tres leyes de la vida','La vida gira, la vida enseña: el Loco aprende que todo se mueve en <b>ciclos</b>, que cada acto tiene un <b>efecto</b> y que a veces avanzar es <b>soltar</b>.')+
+ `<div class="t5-big" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr))">${T5HOY5.map((y,i)=>`<button ${rxa('set','t5hy',i)} ${pressed(i===s)} style="border-top:4px solid ${y[3]}"><span class="k" style="font-size:2rem">${T5ARC[y[0]].n}</span><b>${T5ARC[y[0]].t}</b><small>${y[1]}</small></button>`).join('')}</div>
+ <div class="dk-split" style="align-items:center">${t5card({...t5full(a),sm:1})}<div class="detail" style="border-left:6px solid ${x[3]}"><span class="eyebrow">${a.n} · ${a.t}</span><h3>${x[1]}</h3><p>${x[2]}</p>${t5nav('t5hy',s,3)}</div></div>
+ <div class="dk-call">${ic('espiral',18)} La Rueda <b>gira</b>, La Justicia <b>equilibra</b> y El Colgado <b>suelta</b> para ver distinto.</div>`};
+
+/* ----- 2, 3 y 4 · La Rueda de la Fortuna, La Justicia y El Colgado ----- */
+[['b','rueda'],['c','justicia'],['d','colgado']].forEach(([l,id])=>{
+ RICH['t5'+l+'1']=()=>t5Lugar(id,'Clase 5');
+ RICH['t5'+l+'2']=()=>t5Lect(id);
+ RICH['t5'+l+'3']=()=>t5Caras(id);
+ RICH['t5'+l+'4']=()=>t5Mir(id)});
+
+/* ----- 5 · Práctica con tu mazo ----- */
+const T5CI=[['ojo','Observa','Mira La Rueda en silencio y cuenta lo que ves.','rueda','Veo…'],['espiral','Reconoce','Nombra un ciclo que se repite en tu vida.','rueda','Un ciclo que se repite en mi vida es…'],['luna','Mira distinto','Como El Colgado, ¿qué verías si lo miraras desde otro lugar?','colgado','Si lo mirara desde otro lugar, vería…']];
+RICH.t5e1=()=>{const s=n3clamp(st('t5ci',0),0,2),x=T5CI[s],a=T5ARC[x[3]];
+ return dkH('Ejercicio vivencial · en grupos pequeños','La rueda de mis ciclos','Tres pasos para mirar un ciclo de tu vida. Anota lo tuyo y compártelo en tu grupo.')+
+ `<div class="tl" style="grid-template-columns:repeat(3,minmax(0,1fr))">${T5CI.map((y,i)=>`<button ${rxa('set','t5ci',i)} ${pressed(i===s)}><span class="n">${i+1}</span><span class="t">${y[1]}</span></button>`).join('')}</div>
+ <div class="dk-split" style="align-items:center">${t5card({...t5full(a),sm:1})}<div style="display:grid;gap:10px"><div class="detail"><span class="eyebrow">Paso ${s+1} de 3 · ${a.t}</span><h3>${ic(x[0],26)} ${x[1]}</h3><p>${x[2]}</p>${t5nav('t5ci',s,3,'Siguiente paso')}</div>${n3area('t5cw'+s,x[1],x[4])}</div></div>`+n3priv};
+RICH.t5e2=()=>dkH('Práctica con tu mazo','Tirada de una carta','Ahora con las 13 cartas vistas, del 0 al XII. Practica con tu mazo y aquí mismo.')+
+ n3ck('t5tp',[['','Baraja las 13 cartas vistas, del 0 al XII, derechas e invertidas.'],['','Pregunta: ¿qué ciclo estoy viviendo hoy?'],['','Saca una carta, muéstrala a la cámara y léela con tu ficha y con lo que sientes.']])+
+ `<div class="t5-cols" style="grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:8px">${T5TZ13.map(id=>t5card({...t5full(t5arcOf(id)),sm:1})).join('')}</div>
+ <div class="dk-call">${ic('lupa',18)} <b>¿Qué ciclo estoy viviendo hoy?</b></div>`+
+ t5tirada('t5tz','Sacar una carta',T5TZ13)+n3area('t5tl','Lo que siento con mi carta','Mi carta me dice…')+n3priv;
+
+/* ----- 6 · Tarea, cierre y repaso ----- */
+// las tres preguntas usan las mismas notas que la mirada terapéutica de cada carta
+RICH.t5f1=()=>dkH('Para esta semana','Observar mis ciclos','Seguimos la carta del día, ahora con las 13 cartas, y respondemos las preguntas de hoy.')+
+ n3ck('t5ta',[['libro','Completa las fichas de La Rueda de la Fortuna, La Justicia y El Colgado.'],['sol','Cada mañana saca una carta entre las 13 vistas, derecha o invertida.'],['hoja','Responde en tu cuaderno las tres preguntas de autoconocimiento de hoy.']])+
+ `<div class="dk-sub">Tu carta de hoy</div>`+t5tirada('t5cd','Sacar mi carta del día',T5TZ13)+
+ `<div class="dk-sub">Las tres preguntas de hoy</div>`+T5HOY5.map(y=>{const a=T5ARC[y[0]];return n3area('t5mq'+y[0],a.n+' · '+a.q,a.ph)}).join('')+n3priv;
+RICH.t5f2=()=>dkH('Lo que gira también enseña','Próxima clase','Seguimos el viaje hacia las grandes transformaciones.')+
+ `<div class="t5-cols">${[13,14,15].map(i=>t5card({n:T5ROM[i],t:T5MAY[i],sm:1})).join('')}</div>`+
+ n3quote('La vida gira, la vida enseña: <mark>a veces avanzar es soltar</mark>.')+`<small class="dk-sig" style="text-align:center;display:block">Casa Muladhara · Escuela de Formación Holística</small>`;
+const T5Q5=[
+ {q:'¿Qué ley de la vida representa La Rueda de la Fortuna?',o:['Fluir: los ciclos que no controlamos','Equilibrar: la responsabilidad de lo que elijo','Entregarse: una nueva mirada al soltar'],a:0,e:'La Rueda gira, La Justicia equilibra y El Colgado suelta para ver distinto.'},
+ {q:'En La Rueda, Anubis que sube y la serpiente que baja hablan de…',o:['Lo que asciende y renace, y lo que desciende y se suelta','Dos fuerzas en guerra','El bien y el mal'],a:0,e:'Lo que sube baja, y lo que baja vuelve a subir.'},
+ {q:'¿Cuál es una sombra de La Rueda?',o:['Aprovechar una oportunidad','Sentirse víctima del destino','Fluir con el cambio'],a:1,e:'Su sombra: querer controlar lo incontrolable, sentirse víctima del destino y repetir los mismos ciclos.'},
+ {q:'La mirada terapéutica de La Rueda dice que los ciclos se repiten…',o:['Para castigarnos','Hasta que aprendemos lo que vienen a mostrarnos','Siempre igual, sin sentido'],a:1,e:'Nada es permanente.'},
+ {q:'¿Por qué La Justicia de este mazo tiene los ojos abiertos?',o:['Porque no es ciega: ve la verdad','Porque desconfía','Porque vigila a los demás'],a:0,e:'Y el pie blanco que asoma es la decisión que pasa a la acción.'},
+ {q:'¿Cuál es una sombra de La Justicia?',o:['Asumir mis decisiones','Vivir cargando culpas','Actuar con honestidad'],a:1,e:'Su sombra: juzgar con dureza, exigirme perfección y vivir cargando culpas.'},
+ {q:'La Justicia invita a hacernos responsables de lo que elegimos…',o:['Con culpa','Sin culpa','Solo cuando nos equivocamos'],a:1,e:'Cada acto tiene un efecto y de cada efecto podemos aprender.'},
+ {q:'Las piernas en cruz de El Colgado forman…',o:['Una X','Un 4: estabilidad al detenerse','Un triángulo'],a:1,e:'Cabeza abajo, ve el mundo desde otro ángulo.'},
+ {q:'El rostro de El Colgado está…',o:['Sereno: elige estar ahí','Sufriendo','Enojado'],a:0,e:'No sufre: la aureola es la comprensión que llega al soltar.'},
+ {q:'En la tirada de esta clase, ¿con cuántas cartas trabajas?',o:['Con las 10 de la clase pasada','Con las 13 cartas vistas, del 0 al XII','Con los 22 Mayores'],a:1,e:'Derechas e invertidas.'}];
+RICH.t5f3=()=>n3quiz('t5c5',T5Q5,['Dominas lo esencial de la Clase 5. ¡Fluir, equilibrar y entregarse!','Vas muy bien. Repasa lo que falló y sigue practicando.','Vale la pena repasar la clase. Puedes volver cuando quieras.']);
