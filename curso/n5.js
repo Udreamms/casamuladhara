@@ -208,7 +208,7 @@ const t5Lugar=(id,cl)=>{const a=T5ARC[id],o=st('t5kw'+id,{});
  <div class="dk-sub">3 · Palabras clave · marca las que resuenan contigo hoy</div>
  <div class="dk-chips" role="group">${a.kw.map((w,i)=>`<button class="chip" ${rxa('tog','t5kw'+id,i)} ${pressed(o[i])}>${w}</button>`).join('')}</div></div></div>`};
 const t5Lect=id=>{const a=T5ARC[id],k='t5im'+id,s=n3clamp(st(k,0),0,a.im.length-1),x=a.im[s];
- return dkH('2 · Lectura de la imagen','Lo que nos cuenta '+a.t,'Toca los números sobre la carta para descubrir cada símbolo.')+
+ return dkH('2 · Lectura de la imagen',(a.cuentan?'Lo que nos cuentan ':'Lo que nos cuenta ')+a.t,'Toca los números sobre la carta para descubrir cada símbolo.')+
  `<div class="dk-split" style="align-items:center"><div class="t5-hs"><img src="${a.img}" alt="${a.alt}" decoding="async">${a.im.map((y,i)=>`<button style="left:${y[2]}%;top:${y[3]}%" ${rxa('set',k,i)} ${pressed(i===s)} aria-label="${y[0]}">${i+1}</button>`).join('')}</div>
  <div style="display:grid;gap:12px"><div class="detail"><span class="eyebrow">Símbolo ${s+1} de ${a.im.length}</span><h3>${x[0]}</h3><p>${x[1]}</p>${t5nav(k,s,a.im.length)}</div>
  <div class="dk-chips" role="group">${a.im.map((y,i)=>`<button class="chip" ${rxa('set',k,i)} ${pressed(i===s)}>${i+1}. ${y[0]}</button>`).join('')}</div></div></div>`};
@@ -254,14 +254,14 @@ RICH.t2e1=()=>{const s=n3clamp(st('t2en',0),0,2),x=T5EN[s],ps=st('t2pr',-1),fa=s
  n3area('t2ep','Mi paso concreto','Esta semana voy a…')+n3priv};
 const T5TZ=['loco','mago','sacerdotisa','emperatriz'];
 const t5arcOf=id=>id==='loco'?{n:'0',t:'El Loco',img:T5FOOL.img,alt:T5FOOL.alt,kw:T5KW,caras:T5CA.map(c=>c[2])}:T5ARC[id];
-// una tirada: 8 resultados posibles (4 cartas, derecha o invertida)
-const t5tirada=(key,btn)=>{const r=st(key,-1);
- if(r<0)return `<div class="dk-cta" style="justify-content:center"><button class="btn btn-primary" ${rxa('n3rnd',key,8)}>${btn}</button></div>`;
- const a=t5arcOf(T5TZ[r>>1]),inv=r%2===1,c=inv?a.caras[2]:a.caras[0];
+// una tirada entre las cartas vistas: cada una puede salir derecha o invertida
+const t5tirada=(key,btn,ids)=>{ids=ids||T5TZ;const N=ids.length*2,r=n3clamp(st(key,-1),-1,N-1);
+ if(r<0)return `<div class="dk-cta" style="justify-content:center"><button class="btn btn-primary" ${rxa('n3rnd',key,N)}>${btn}</button></div>`;
+ const a=t5arcOf(ids[r>>1]),inv=r%2===1,c=inv?a.caras[2]:a.caras[0];
  return `<div class="dk-split" style="align-items:center"><div style="display:grid;gap:8px;justify-items:center">${t5card({...t5full(a),sm:1,rev:inv})}</div>
  <div class="detail"><span class="eyebrow">Tu carta · ${inv?'invertida':'derecha'}</span><h3>${a.n} ${a.t}</h3><p><b>Palabras clave:</b> ${a.kw.join(' · ')}.</p>
  <p><b>${inv?'Invertida':'Mensaje luminoso'}:</b> ${c.join(' · ')}.</p>
- <div class="row"><button class="btn btn-ghost btn-sm" ${rxa('n3rnd',key,8)}>Sacar otra carta</button></div></div></div>`};
+ <div class="row"><button class="btn btn-ghost btn-sm" ${rxa('n3rnd',key,N)}>Sacar otra carta</button></div></div></div>`};
 RICH.t2e2=()=>dkH('Práctica con tu mazo','Tu primera tirada de una carta','Con tu mazo, frente a la cámara. Aquí también puedes practicar con las 4 cartas vistas.')+
  `<div class="dk-grid c2" style="align-items:start"><div>${n3ck('t2tp',[['','1. Baraja solo las 4 cartas vistas, derechas e invertidas.'],['','2. Pregunta: ¿qué energía necesito esta semana?'],['','3. Saca una carta y muéstrala a la cámara.'],['','4. Léela con tu ficha y con lo que sientes.']])}</div>
  <div class="t5-cols" style="grid-template-columns:repeat(2,minmax(0,1fr))">${T5TZ.map(id=>t5card({...t5full(t5arcOf(id)),sm:1})).join('')}</div></div>
@@ -288,3 +288,83 @@ const T5Q2=[
  {q:'En tu primera tirada barajas…',o:['Los 22 Mayores','Solo las 4 cartas vistas, derechas e invertidas','Solo las cartas derechas'],a:1,e:'El Loco, El Mago, La Sacerdotisa y La Emperatriz.'},
  {q:'En la tarea «Tu carta del día», ¿qué haces en la noche?',o:['Sacas otra carta','Anotas cómo se reflejó la carta en tu día','Lees el libro'],a:1,e:'En la mañana sacas la carta; en la noche anotas cómo se reflejó.'}];
 RICH.t2f3=()=>n3quiz('t5c2',T5Q2,['Dominas lo esencial de la Clase 2. ¡Hacer, saber y crear!','Vas muy bien. Repasa lo que falló y sigue practicando.','Vale la pena repasar la clase. Puedes volver cuando quieras.']);
+
+/* ---------- Clase 3 · Estructura, enseñanza y elección ---------- */
+const T5C3=N5P+'c3/';
+Object.assign(T5ARC,{
+ emperador:{n:'IV',t:'El Emperador',img:T5C3+'emperador.webp',alt:'El Emperador del mazo Rider-Waite: un rey de barba blanca con armadura, sentado en un trono de piedra con cabezas de carnero, con un cetro ankh y un orbe, ante montañas áridas',
+  lugar:'Después de la madre que crea, llega el <b>padre que ordena</b>: el Loco aprende límites, estructura y responsabilidad.',
+  kw:['Estructura','Autoridad','Orden','Estabilidad','Protección'],
+  im:[['El trono de piedra','Firmeza y bases sólidas.',80,12],['Las cabezas de carnero','Aries: iniciativa y fuerza.',12,57],['El cetro ankh','El poder al servicio de la vida.',13,28],['El orbe','El dominio del mundo material.',80,46],['La armadura','Protección, siempre preparado.',64,72],['Montañas áridas','Disciplina, y a veces rigidez.',92,36]],
+  caras:[['Poner límites sanos','Liderar con responsabilidad','Construir bases firmes'],['Rigidez','Autoritarismo','Necesidad de controlar'],['Falta de límites','Desorden','Autoridad ausente o abusiva']],
+  mir:'El Emperador es el <b>padre interior</b>: la forma en que te sostienes, te pones límites y te haces cargo de tu vida. Sana la relación con la autoridad.',
+  q:'¿Dónde necesito poner límites sanos en mi vida?',ph:'Necesito poner límites en…'},
+ hierofante:{n:'V',t:'El Hierofante',img:T5C3+'hierofante.webp',alt:'El Hierofante del mazo Rider-Waite: un guía espiritual con triple corona y manto rojo, sentado entre dos columnas, bendice con una mano y sostiene un báculo de triple cruz; a sus pies, dos llaves cruzadas y dos discípulos',
+  lugar:'El Loco busca un <b>sentido</b>: entra en la tradición, el aprendizaje y los valores que comparte con otros.',
+  kw:['Enseñanza','Tradición','Guía espiritual','Valores','Pertenencia'],
+  im:[['La triple corona','Cuerpo, mente y espíritu.',50,15],['La mano que bendice','Lo visible y lo invisible.',19,24],['Las llaves cruzadas','El acceso a lo sagrado.',52,88],['Los dos discípulos','El saber que se transmite.',13,80],['Las dos columnas','Como la Sacerdotisa, pero hacia afuera.',8,42],['El báculo de triple cruz','La autoridad espiritual.',78,22]],
+  caras:[['Aprender de una guía','Encontrar tus valores','Pertenecer a una comunidad'],['Dogmatismo','Obediencia ciega','Juzgar a quien piensa distinto'],['Romper con las normas','Buscar tu propia verdad','Desconfiar de toda guía']],
+  mir:'El Hierofante invita a revisar las <b>creencias que recibimos</b> de la familia, la escuela y la religión: cuáles nos sostienen y cuáles ya nos limitan.',
+  q:'¿Qué creencias heredé que ya no me representan?',ph:'Una creencia que heredé y ya no me representa es…'},
+ enamorados:{n:'VI',t:'Los Enamorados',cuentan:1,img:T5C3+'enamorados.webp',alt:'Los Enamorados del mazo Rider-Waite: un ángel bajo un sol radiante bendice a un hombre y una mujer; detrás de ella, un árbol con una serpiente; detrás de él, un árbol de llamas',
+  lugar:'El Loco enfrenta su <b>primera gran elección</b> personal: elegir desde el corazón y desde sus propios valores.',
+  kw:['Amor','Elección','Unión','Valores','Coherencia'],
+  im:[['El ángel','Una bendición que viene de lo alto.',50,22],['El sol radiante','La conciencia que ilumina la elección.',76,5],['Hombre y mujer','La unión de los opuestos.',78,62],['Las miradas','Él la mira a ella, ella mira al ángel.',32,48],['El árbol con la serpiente','La tentación y el conocimiento.',8,60],['El árbol de llamas','La pasión y el deseo.',92,40]],
+  caras:[['Elegir con el corazón','Vínculos sanos','Coherencia entre sentir y hacer'],['Dependencia emocional','Indecisión','Elegir para complacer'],['Desequilibrio en un vínculo','Conflicto de valores','Evitar elegir']],
+  mir:'Cada elección nos define. Los Enamorados nos recuerdan que para elegir con libertad primero necesitamos <b>elegirnos y amarnos</b> a nosotras mismas.',
+  q:'¿Qué estoy eligiendo hoy desde el miedo y qué desde el amor?',ph:'Desde el miedo elijo… Desde el amor elijo…'}});
+const T5HOY3=[['emperador','Ordenar','Los límites que dan estructura.','#c0442f'],['hierofante','Aprender','La enseñanza que da sentido.','#9b6f27'],['enamorados','Elegir','La elección que nace del corazón.','#4573a8']];
+const T5TZ7=['loco','mago','sacerdotisa','emperatriz','emperador','hierofante','enamorados'];
+
+/* ----- 1 · Bienvenida y repaso ----- */
+RICH.t3a1=()=>nbHero('Tarot Camino del Ser · Clase 3','<span style="font-size:.68em">Estructura, enseñanza</span>','y elección','Clase 3 · Arcanos Mayores. El Emperador, El Hierofante y Los Enamorados.',['Ordenar','Aprender','Elegir'],'Casa Muladhara · Escuela de Formación Holística',
+ `<div class="nb-pw t5-fan">${T5HOY3.map(y=>t5card({...t5full(T5ARC[y[0]]),sm:1})).join('')}</div>`);
+RICH.t3a2=()=>dkH('Repaso de la semana','Voluntad, intuición y creación','Antes de seguir, compartimos cómo fue la semana con tu carta del día.')+
+ `<div class="t5-cols" style="grid-template-columns:repeat(3,minmax(0,150px));justify-content:center">${['mago','sacerdotisa','emperatriz'].map(id=>t5card({...t5full(T5ARC[id]),sm:1})).join('')}</div>
+ <div class="dk-sub">¿Qué carta salió más en tu carta del día?</div>${chipRow('t3rc',T5TZ.map(id=>t5arcOf(id).t),st('t3rc',-1))}`+
+ n3area('t3rs','¿Cómo se reflejó en tu semana?','Esta semana…')+
+ `<div class="dk-sub">¿Cuál de las tres energías invitaste?</div>`+chipRow('t3ri',['Hacer · El Mago','Saber · La Sacerdotisa','Crear · La Emperatriz'],st('t3ri',-1))+n3priv;
+RICH.t3a3=()=>{const s=n3clamp(st('t3hy',0),0,2),x=T5HOY3[s],a=T5ARC[x[0]];
+ return dkH('Las cartas de hoy','El Loco aprende a vivir en el mundo','Conoce los <b>límites</b> que lo sostienen, las <b>enseñanzas</b> que lo guían y su primera gran <b>elección</b>.')+
+ `<div class="t5-big" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr))">${T5HOY3.map((y,i)=>`<button ${rxa('set','t3hy',i)} ${pressed(i===s)} style="border-top:4px solid ${y[3]}"><span class="k" style="font-size:2rem">${T5ARC[y[0]].n}</span><b>${T5ARC[y[0]].t}</b><small>${y[1]}</small></button>`).join('')}</div>
+ <div class="dk-split" style="align-items:center">${t5card({...t5full(a),sm:1})}<div class="detail" style="border-left:6px solid ${x[3]}"><span class="eyebrow">${a.n} · ${a.t}</span><h3>${x[1]}</h3><p>${x[2]}</p>${t5nav('t3hy',s,3)}</div></div>`};
+
+/* ----- 2, 3 y 4 · El Emperador, El Hierofante y Los Enamorados ----- */
+[['b','emperador'],['c','hierofante'],['d','enamorados']].forEach(([l,id])=>{
+ RICH['t3'+l+'1']=()=>t5Lugar(id,'Clase 3');
+ RICH['t3'+l+'2']=()=>t5Lect(id);
+ RICH['t3'+l+'3']=()=>t5Caras(id);
+ RICH['t3'+l+'4']=()=>t5Mir(id)});
+
+/* ----- 5 · Práctica con tu mazo ----- */
+const T5LCE=[['emperador','Un límite','Que necesito poner o respetar.','Necesito poner o respetar el límite de…'],['hierofante','Una creencia','Que heredé y quiero revisar.','Heredé la creencia de que…'],['enamorados','Una elección','Que estoy lista para tomar.','Estoy lista para elegir…']];
+RICH.t3e1=()=>{const s=n3clamp(st('t3lc',0),0,2),x=T5LCE[s],a=T5ARC[x[0]];
+ return dkH('Ejercicio vivencial · en grupos pequeños','Mi límite, mi creencia, mi elección','Con cada carta de hoy, anota lo tuyo y compártelo en tu grupo.')+
+ `<div class="t5-big" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr))">${T5LCE.map((y,i)=>`<button ${rxa('set','t3lc',i)} ${pressed(i===s)}><b>${y[1]}</b><small>${T5ARC[y[0]].t} · ${y[2]}</small>${st('t3lw'+i,'').trim()?`<small>${ic('check',14)} Anotado</small>`:''}</button>`).join('')}</div>
+ <div class="dk-split" style="align-items:center">${t5card({...t5full(a),sm:1})}<div style="display:grid;gap:10px"><div class="detail"><span class="eyebrow">${a.n} · ${a.t}</span><h3>${x[1]}</h3><p>${x[2]}</p>${t5nav('t3lc',s,3)}</div>${n3area('t3lw'+s,x[1],x[3])}</div></div>`+n3priv};
+RICH.t3e2=()=>dkH('Práctica con tu mazo','Tirada de una carta','Ahora con las 7 cartas vistas. Practica con tu mazo y aquí mismo.')+
+ n3ck('t3tp',[['','Baraja las 7 cartas vistas, derechas e invertidas.'],['','Pregunta: ¿qué necesito ordenar, aprender o elegir esta semana?'],['','Saca una carta, muéstrala a la cámara y léela con tu ficha y con lo que sientes.']])+
+ `<div class="t5-cols" style="grid-template-columns:repeat(auto-fit,minmax(78px,1fr));gap:8px">${T5TZ7.map(id=>t5card({...t5full(t5arcOf(id)),sm:1})).join('')}</div>
+ <div class="dk-call">${ic('lupa',18)} <b>¿Qué necesito ordenar, aprender o elegir esta semana?</b></div>`+
+ t5tirada('t3tz','Sacar una carta',T5TZ7)+n3area('t3tl','Lo que siento con mi carta','Mi carta me dice…')+n3priv;
+
+/* ----- 6 · Tarea, cierre y repaso ----- */
+RICH.t3f1=()=>dkH('Para esta semana','Tu carta del día, con 7 cartas','Seguimos la práctica diaria, ahora con las 7 cartas vistas.')+
+ n3ck('t3ta',[['libro','Completa las fichas de El Emperador, El Hierofante y Los Enamorados.'],['sol','Cada mañana saca una carta entre las 7 vistas, derecha o invertida.'],['camino','Da un paso concreto con el límite, la creencia o la elección que anotaste hoy.']])+
+ `<div class="dk-sub">Tu carta de hoy</div>`+t5tirada('t3cd','Sacar mi carta del día',T5TZ7)+
+ n3area('t3cp','Mi paso concreto de la semana','Esta semana voy a…')+n3priv;
+RICH.t3f2=()=>dkH('Ordenar, aprender y elegir','Próxima clase','Cerramos el mundo exterior y empezamos a mirar hacia adentro.')+
+ `<div class="t5-cols">${[7,8,9].map(i=>t5card({n:T5ROM[i],t:T5MAY[i],sm:1})).join('')}</div>`+
+ n3quote('El Loco aprende a vivir en el mundo: <mark>ordenar, aprender y elegir</mark>.')+`<small class="dk-sig" style="text-align:center;display:block">Casa Muladhara · Escuela de Formación Holística</small>`;
+const T5Q3=[
+ {q:'¿Qué energía representa El Emperador?',o:['Ordenar: los límites que dan estructura','Aprender: la enseñanza que da sentido','Elegir: la elección que nace del corazón'],a:0,e:'El Emperador ordena; El Hierofante enseña; Los Enamorados eligen.'},
+ {q:'Las cabezas de carnero del trono de El Emperador hablan de…',o:['Aries: iniciativa y fuerza','La tentación','El acceso a lo sagrado'],a:0,e:'El carnero es el símbolo de Aries.'},
+ {q:'¿Cuál es una sombra de El Emperador?',o:['Poner límites sanos','Necesidad de controlar','Construir bases firmes'],a:1,e:'Su sombra: rigidez, autoritarismo y necesidad de controlar.'},
+ {q:'La mirada terapéutica de El Emperador habla de…',o:['La madre interior','El padre interior y la relación con la autoridad','La intuición'],a:1,e:'La forma en que te sostienes, te pones límites y te haces cargo de tu vida.'},
+ {q:'Las llaves cruzadas de El Hierofante representan…',o:['El acceso a lo sagrado','El dominio del mundo material','La pasión'],a:0,e:'Y los dos discípulos, el saber que se transmite.'},
+ {q:'Invertido, El Hierofante puede hablar de…',o:['Pertenecer a una comunidad','Buscar tu propia verdad','Aprender de una guía'],a:1,e:'Invertido: romper con las normas, buscar tu propia verdad o desconfiar de toda guía.'},
+ {q:'El Hierofante invita a revisar…',o:['Las creencias que heredamos','Los límites del cuerpo','Las cartas invertidas'],a:0,e:'Cuáles nos sostienen y cuáles ya nos limitan.'},
+ {q:'En Los Enamorados, ¿hacia dónde mira ella?',o:['Al hombre','Al ángel','Al árbol de llamas'],a:1,e:'Él la mira a ella, ella mira al ángel.'},
+ {q:'¿Cuál es una sombra de Los Enamorados?',o:['Elegir para complacer','Vínculos sanos','Elegir con el corazón'],a:0,e:'Su sombra: dependencia emocional, indecisión y elegir para complacer.'},
+ {q:'En la tirada de esta clase, ¿con cuántas cartas trabajas?',o:['Con las 4 de la clase pasada','Con las 7 cartas vistas','Con los 22 Mayores'],a:1,e:'De El Loco a Los Enamorados, derechas e invertidas.'}];
+RICH.t3f3=()=>n3quiz('t5c3',T5Q3,['Dominas lo esencial de la Clase 3. ¡Ordenar, aprender y elegir!','Vas muy bien. Repasa lo que falló y sigue practicando.','Vale la pena repasar la clase. Puedes volver cuando quieras.']);
