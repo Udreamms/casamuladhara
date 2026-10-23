@@ -5,6 +5,8 @@
 .t5-card{all:unset;box-sizing:border-box;display:block;width:min(100%,220px);aspect-ratio:7/12;justify-self:center;border-radius:16px;border:1.5px solid var(--nb-gold2);background:var(--nb-paper);padding:9px;box-shadow:0 20px 44px -26px rgba(28,58,43,.65);transition:transform .7s cubic-bezier(.3,.7,.2,1)}
 button.t5-card{cursor:pointer}button.t5-card:focus-visible{outline:2px solid var(--nb-gold)}
 .t5-card.sm{width:min(100%,150px)}
+.t5-card.full{aspect-ratio:auto;padding:6px}
+.t5-card.full img{display:block;width:100%;height:auto;border-radius:8px}
 .t5-card.on,.t5-card.rev{transform:rotate(180deg)}
 .t5-in{display:grid;grid-template-rows:auto minmax(0,1fr) auto;height:100%;border:1px solid var(--nb-line);border-radius:10px;overflow:hidden;justify-items:center;align-items:center;gap:6px;padding:8px 6px}
 .t5-in img{width:100%;height:100%;object-fit:cover;border-radius:6px;min-height:0}
@@ -47,10 +49,11 @@ button.t5-card{cursor:pointer}button.t5-card:focus-visible{outline:2px solid var
 `;document.head.appendChild(c)})();
 
 const T5C1=N5P+'c1/';
-const t5card=o=>{const inner=`<span class="t5-in"><span class="t5-num">${o.n}</span>${o.img?`<img src="${o.img}" alt="${o.alt||''}" loading="lazy" decoding="async">`:`<svg class="t5-mk" aria-hidden="true"><use href="#mark"/></svg>`}<span class="t5-nm">${o.t}</span></span>`;
- return o.key?`<button class="t5-card${o.sm?' sm':''}${st(o.key,{})[0]?' on':''}" ${rxa('flip',o.key,0)} ${pressed(st(o.key,{})[0])} aria-label="${o.label||'Dar vuelta la carta'}">${inner}</button>`
- :`<div class="t5-card${o.sm?' sm':''}${o.rev?' rev':''}">${inner}</div>`};
+const t5card=o=>{const inner=o.full?`<img src="${o.img}" alt="${o.alt||''}" loading="lazy" decoding="async">`:`<span class="t5-in"><span class="t5-num">${o.n}</span>${o.img?`<img src="${o.img}" alt="${o.alt||''}" loading="lazy" decoding="async">`:`<svg class="t5-mk" aria-hidden="true"><use href="#mark"/></svg>`}<span class="t5-nm">${o.t}</span></span>`;
+ return o.key?`<button class="t5-card${o.full?' full':''}${o.sm?' sm':''}${st(o.key,{})[0]?' on':''}" ${rxa('flip',o.key,0)} ${pressed(st(o.key,{})[0])} aria-label="${o.label||'Dar vuelta la carta'}">${inner}</button>`
+ :`<div class="t5-card${o.full?' full':''}${o.sm?' sm':''}${o.rev?' rev':''}">${inner}</div>`};
 const T5LOCO={n:'0',t:'El Loco',img:T5C1+'loco_carta.webp',alt:'El Loco: un joven con una rosa blanca y un hatillo camina hacia el borde de un precipicio, con un perro blanco a sus pies y el sol detrás'};
+const T5FOOL={full:1,img:T5C1+'el_loco_rw.webp',alt:'El Loco del mazo Rider-Waite: un joven con una rosa blanca y un hatillo camina hacia el borde de un precipicio bajo el sol, con un perro blanco a sus pies'};
 const T5MAY=['El Loco','El Mago','La Sacerdotisa','La Emperatriz','El Emperador','El Hierofante','Los Enamorados','El Carro','La Fuerza','El Ermitaño','La Rueda de la Fortuna','La Justicia','El Colgado','La Muerte','La Templanza','El Diablo','La Torre','La Estrella','La Luna','El Sol','El Juicio','El Mundo'];
 const T5ROM=['0','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV','XVI','XVII','XVIII','XIX','XX','XXI'];
 const t5arc=i=>T5ROM[i]+' '+T5MAY[i];
@@ -105,27 +108,27 @@ RICH.t1a8=()=>{const s=n3clamp(st('t1co',0),0,5),x=T5CO[s];
  <div class="detail" style="border-left:8px solid ${x[1]}"><span class="eyebrow">Color ${s+1} de 6</span><h3>${x[0]}</h3><p>${x[2]}.</p></div>
  <div class="dk-call">${ic('ojo',18)} Mira también <b>los cielos, las posturas, lo que llevan las manos</b> y <b>hacia dónde mira</b> cada personaje.</div>`};
 RICH.t1a9=()=>dkH('Cartas invertidas','No es un mal augurio: es una invitación a mirar','Toca la carta para darla vuelta y luego descubre las cuatro formas de leer una carta invertida.')+
- `<div class="dk-split" style="align-items:center"><div style="display:grid;gap:8px;justify-items:center">${t5card({...T5LOCO,key:'t1inv',sm:1})}<p class="dk-note" style="text-align:center">Toca la carta para darla vuelta.</p></div>`+
+ `<div class="dk-split" style="align-items:center"><div style="display:grid;gap:8px;justify-items:center">${t5card({...T5FOOL,key:'t1inv',sm:1})}<p class="dk-note" style="text-align:center">Toca la carta para darla vuelta.</p></div>`+
  n3flip('t1iv',[['candado','Energía bloqueada','Lo que la carta ofrece aún no logra fluir.'],['espiral','Energía hacia adentro','El proceso es interno, todavía no se ve afuera.'],['balanza','En exceso o en falta','La cualidad de la carta está desequilibrada.'],['libro','Aprendizaje pendiente','Un tema que pide atención y cuidado.']],'c2',140)+`</div>`;
 
 /* ----- 4 · El Loco ----- */
 const T5KW=['Inicio','Confianza','Libertad','Espontaneidad','Salto de fe'];
 RICH.t1a10=()=>{const o=st('t1kw',{});
- return `<div class="dk-split" style="align-items:center">${t5card(T5LOCO)}
+ return `<div class="dk-split" style="align-items:center">${t5card(T5FOOL)}
  <div style="display:grid;gap:14px">${dkH('Arcano Mayor · 0','El Loco','El inicio del camino.')}
  <div class="detail"><span class="eyebrow">1 · Lugar en el viaje</span><p>Es el viajero que todavía no empieza. Lleva el <b>número cero</b>: está antes de todo y puede ir a cualquier lugar.</p></div>
  <div class="dk-sub">3 · Palabras clave · marca las que resuenan contigo hoy</div>
  <div class="dk-chips" role="group">${T5KW.map((w,i)=>`<button class="chip" ${rxa('tog','t1kw',i)} ${pressed(o[i])}>${w}</button>`).join('')}</div></div></div>`};
-const T5IM=[['El precipicio','El salto a lo desconocido.',33,86],['El perro blanco','El instinto que acompaña y avisa.',77,59],['La rosa blanca','La pureza de la intención.',8,27],['El hatillo','Lo poco que lleva: su historia y sus dones.',77,26],['El sol','La conciencia que ilumina el camino.',89,8],['Las montañas','Los desafíos que vendrán.',10,69]];
+const T5IM=[['El precipicio','El salto a lo desconocido.',28,79],['El perro blanco','El instinto que acompaña y avisa.',80,69],['La rosa blanca','La pureza de la intención.',86,27],['El hatillo','Su historia y sus dones.',71,18],['El sol y el cielo amarillo','La conciencia que ilumina.',87,7],['Las montañas','Los desafíos que vendrán.',13,73]];
 RICH.t1a11=()=>{const s=n3clamp(st('t1im',0),0,5),x=T5IM[s];
  return dkH('2 · Lectura de la imagen','Lo que nos cuenta El Loco','Toca los números sobre la carta para descubrir cada símbolo.')+
- `<div class="dk-split" style="align-items:center"><div class="t5-hs"><img src="${T5LOCO.img}" alt="${T5LOCO.alt}" decoding="async">${T5IM.map((y,i)=>`<button style="left:${y[2]}%;top:${y[3]}%" ${rxa('set','t1im',i)} ${pressed(i===s)} aria-label="${y[0]}">${i+1}</button>`).join('')}</div>
+ `<div class="dk-split" style="align-items:center"><div class="t5-hs"><img src="${T5FOOL.img}" alt="${T5FOOL.alt}" decoding="async">${T5IM.map((y,i)=>`<button style="left:${y[2]}%;top:${y[3]}%" ${rxa('set','t1im',i)} ${pressed(i===s)} aria-label="${y[0]}">${i+1}</button>`).join('')}</div>
  <div style="display:grid;gap:12px"><div class="detail"><span class="eyebrow">Símbolo ${s+1} de 6</span><h3>${x[0]}</h3><p>${x[1]}</p>${t5nav('t1im',s,6)}</div>
  <div class="dk-chips" role="group">${T5IM.map((y,i)=>`<button class="chip" ${rxa('set','t1im',i)} ${pressed(i===s)}>${i+1}. ${y[0]}</button>`).join('')}</div></div></div>`};
 const T5CA=[['Mensaje luminoso','sol',['Confiar en la vida','Empezar de nuevo con inocencia','Abrirse a lo nuevo']],['Sombra','luna',['Imprudencia','Evadir responsabilidades','Miedo al compromiso']],['Invertida','espiral',['Miedo a dar el paso','Impulso sin dirección','Ingenuidad que expone']]];
 RICH.t1a12=()=>{const s=n3clamp(st('t1ca',0),0,2),x=T5CA[s];
  return dkH('4 y 5 · Luz, sombra e invertida','Las tres caras de El Loco','Una misma carta muestra su luz, su sombra y lo que pide cuando aparece invertida.')+chipRow('t1ca',T5CA.map(c=>c[0]),s)+
- `<div class="dk-split" style="align-items:center">${t5card({...T5LOCO,sm:1,rev:s===2})}
+ `<div class="dk-split" style="align-items:center">${t5card({...T5FOOL,sm:1,rev:s===2})}
  <div class="detail"><span class="eyebrow">Cara ${s+1} de 3</span><h3>${ic(x[1],26)} ${x[0]}</h3>${c4li(x[2].map(t=>[x[1],t]))}${t5nav('t1ca',s,3)}</div></div>`};
 RICH.t1a13=()=>dkH('6 · Mirada terapéutica','El Loco es la parte de ti que se atreve a empezar','Aparece cuando la vida te invita a <b>soltar el control</b> y <b>confiar en el proceso</b>.')+
  `<div class="detail"><span class="eyebrow">7 · Pregunta de autoconocimiento</span><p class="t5-q">¿Hacia dónde estoy lista para dar un salto de confianza?</p></div>`+
@@ -139,7 +142,7 @@ RICH.t1a14=()=>{const s=n3clamp(st('t1ej',0),0,2),x=T5EJ[s];
  <div class="detail"><span class="eyebrow">Paso ${s+1} de 3</span><h3>${ic(x[0],26)} ${x[1]}</h3><p>${x[2]}</p>${t5nav('t1ej',s,3,'Siguiente paso')}</div>`+
  n3area('t1vs','Lo que veo y lo que siento','Veo… Siento…')+n3priv};
 RICH.t1a15=()=>dkH('Práctica con tu mazo','Derecha e invertida','Toma El Loco de tu mazo y sigue los pasos. Aquí puedes darle vuelta a la carta tocándola.')+
- `<div class="dk-split" style="align-items:center"><div style="display:grid;gap:8px;justify-items:center">${t5card({...T5LOCO,key:'t1dv'})}<p class="dk-note" style="text-align:center">Toca la carta para verla invertida.</p></div>
+ `<div class="dk-split" style="align-items:center"><div style="display:grid;gap:8px;justify-items:center">${t5card({...T5FOOL,key:'t1dv'})}<p class="dk-note" style="text-align:center">Toca la carta para verla invertida.</p></div>
  <div style="display:grid;gap:12px">${n3ck('t1dp',[['','1. Pon El Loco derecho frente a la cámara.'],['','2. Respira y nota qué sientes en el cuerpo.'],['','3. Dalo vuelta y míralo invertido.'],['','4. Comparte en una frase qué cambió.']],['Marca cada paso a medida que lo haces.','¡Lista! Escribe abajo qué cambió.'])}</div></div>`+
  n3area('t1dq','En una frase, ¿qué cambió?','Cuando lo vi invertido…')+n3priv;
 
