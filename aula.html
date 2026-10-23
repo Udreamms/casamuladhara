@@ -1073,6 +1073,13 @@ const N5L4c=C2('VIII · La Fuerza',[['t4c1','Lugar en el viaje y palabras clave'
 const N5L4d=C2('IX · El Ermitaño',[['t4d1','Lugar en el viaje y palabras clave'],['t4d2','Lectura de la imagen'],['t4d3','Luz, sombra e invertida'],['t4d4','Mirada terapéutica y pregunta']]);
 const N5L4e=C2('Cierre del primer mes',[['t4e1','Las 10 primeras cartas del viaje'],['t4e2','Mi lugar en el viaje','Ejercicio en grupos pequeños'],['t4e3','Tirada de una carta']]);
 const N5L4f=C2('Tarea, cierre y repaso',[['t4f1','Tu propia historia del Loco'],['t4f2','Próxima clase'],['t4f3','Repaso']]);
+const T5F=[F('pdf','Láminas de la Clase 5','20 láminas',N5P+'print/clase5_laminas.pdf')];
+const N5L5a=C2('Bienvenida y repaso',[['t5a1','Ciclos, equilibrio y entrega'],['t5a2','Repaso de la semana'],['t5a3','Las cartas de hoy']],T5F);
+const N5L5b=C2('X · La Rueda de la Fortuna',[['t5b1','Lugar en el viaje y palabras clave'],['t5b2','Lectura de la imagen'],['t5b3','Luz, sombra e invertida'],['t5b4','Mirada terapéutica y pregunta']]);
+const N5L5c=C2('XI · La Justicia',[['t5c1','Lugar en el viaje y palabras clave'],['t5c2','Lectura de la imagen'],['t5c3','Luz, sombra e invertida'],['t5c4','Mirada terapéutica y pregunta']]);
+const N5L5d=C2('XII · El Colgado',[['t5d1','Lugar en el viaje y palabras clave'],['t5d2','Lectura de la imagen'],['t5d3','Luz, sombra e invertida'],['t5d4','Mirada terapéutica y pregunta']]);
+const N5L5e=C2('Práctica con tu mazo',[['t5e1','La rueda de mis ciclos','Ejercicio en grupos pequeños'],['t5e2','Tirada de una carta']]);
+const N5L5f=C2('Tarea, cierre y repaso',[['t5f1','Observar mis ciclos'],['t5f2','Próxima clase'],['t5f3','Repaso']]);
 /* clases del Nivel 5 que todavía no se publican: una por módulo, para que cada clase conserve su lugar (y su avance) al llegar */
 const T5PEND=(n,t)=>({title:'Clase '+n+' · '+t,lessons:[L('Clase '+n+' · '+t,'',[])]});
 
@@ -1309,7 +1316,7 @@ const LEVELS=[
    {title:'Clase 2 · Voluntad, intuición y creación',lessons:[N5L2a,N5L2b,N5L2c,N5L2d,N5L2e,N5L2f]},
    {title:'Clase 3 · Estructura, enseñanza y elección',lessons:[N5L3a,N5L3b,N5L3c,N5L3d,N5L3e,N5L3f]},
    {title:'Clase 4 · Avanzar, sostener y mirar adentro',lessons:[N5L4a,N5L4b,N5L4c,N5L4d,N5L4e,N5L4f]},
-   T5PEND(5,'La Rueda de la Fortuna, la Justicia y el Colgado'),
+   {title:'Clase 5 · Ciclos, equilibrio y entrega',lessons:[N5L5a,N5L5b,N5L5c,N5L5d,N5L5e,N5L5f]},
    T5PEND(6,'La Muerte, la Templanza y el Diablo'),
    T5PEND(7,'La Torre, la Estrella y la Luna'),
    T5PEND(8,'El Sol, el Juicio y el Mundo'),
@@ -1346,6 +1353,7 @@ const RES=[
  {t:'Mantras de los chakras',type:'PDF',lvl:3,size:'1 lámina',k:'pdf',href:'assets/n3/print/mantras_chakras.pdf',new:1},
  {t:'Clase 3 · Láminas de Tarot',type:'PDF',lvl:5,size:'20 láminas',k:'pdf',href:'assets/n5/print/clase3_laminas.pdf',new:1},
  {t:'Clase 4 · Láminas de Tarot',type:'PDF',lvl:5,size:'21 láminas',k:'pdf',href:'assets/n5/print/clase4_laminas.pdf',new:1},
+ {t:'Clase 5 · Láminas de Tarot',type:'PDF',lvl:5,size:'20 láminas',k:'pdf',href:'assets/n5/print/clase5_laminas.pdf',new:1},
  {t:'Clase 2 · Láminas de Tarot',type:'PDF',lvl:5,size:'20 láminas',k:'pdf',href:'assets/n5/print/clase2_laminas.pdf',new:1},
  {t:'Clase 1 · Láminas de Tarot',type:'PDF',lvl:5,size:'19 láminas',k:'pdf',href:'assets/n5/print/clase1_laminas.pdf',new:1},
  {t:'Clase 8 · Láminas',type:'PDF',lvl:3,size:'32 láminas',k:'pdf',href:'assets/n3/print/clase8_laminas.pdf',new:1},
