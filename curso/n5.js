@@ -836,7 +836,7 @@ Object.assign(T5ARC,{
 const T5B7=['b1','b2','b3','b4','b5','b6','b7'];
 const T5CAM=['Luz','Sombra','Invertida'];
 const t5Menor=id=>{const a=T5ARC[id],o=st('t5kw'+id,{}),k='t5ca'+id,s=n3clamp(st(k,0),0,2);
- return dkH('Bastos · '+(a.lbl||a.n+': '+T5NUM[a.num-1][0].toLowerCase()),a.t,a.desc)+
+ return dkH((a.palo||'Bastos')+' · '+(a.lbl||a.n+': '+T5NUM[a.num-1][0].toLowerCase()),a.t,a.desc)+
  `<div class="dk-split" style="align-items:center">${t5card({...t5full(a),sm:1,rev:s===2})}
  <div style="display:grid;gap:12px"><div class="dk-sub">Palabras clave · marca las que resuenan contigo hoy</div>
  <div class="dk-chips" role="group">${a.kw.map((w,i)=>`<button class="chip" ${rxa('tog','t5kw'+id,i)} ${pressed(o[i])}>${w}</button>`).join('')}</div>
@@ -1000,3 +1000,79 @@ const T5Q10=[
  {q:'A los pies de la Reina de Bastos hay…',o:['Una salamandra','Un gato negro','Un perro'],a:1,e:'Sostiene su vara y un girasol: su fuego es cálido, seguro y magnético.'},
  {q:'El Rey de Bastos nos invita a…',o:['Guiar sin imponer','Cargar con todo','Esperar'],a:0,e:'Es el fuego que lidera con visión.'}];
 RICH.t10e3=()=>n3quiz('t5c10',T5Q10,['Dominas lo esencial de la Clase 10. ¡El fuego entero es tuyo!','Vas muy bien. Repasa lo que falló y sigue practicando.','Vale la pena repasar la clase. Puedes volver cuando quieras.']);
+
+/* ---------- Clase 11 · Copas: el agua del corazón ---------- */
+const T5C11=N5P+'c11/';
+const t5cop=(i,...r)=>({...t5bas(i,...r),img:T5C11+'copas_'+i+'.webp',palo:'Copas'});
+Object.assign(T5ARC,{
+ c1:t5cop(1,'As de Copas','As de Copas del mazo Rider-Waite: una mano sale de una nube con una copa que desborda en cinco chorros de agua; una paloma desciende hacia ella sobre un estanque con nenúfares','Una mano sale de una nube con una copa que desborda en cinco chorros de agua. Una paloma desciende hacia ella. Abajo, un estanque con nenúfares: <b>un corazón que se abre</b>.',['Amor','Apertura','Compasión','Emoción nueva'],'Un corazón que se abre.','Desbordarse sin cuidar el recipiente.','Emociones bloqueadas, cerrarse al amor.','¿Qué necesita mi corazón recibir hoy?','Hoy mi corazón necesita recibir…','Se abre'),
+ c2:t5cop(2,'Dos de Copas','Dos de Copas del mazo Rider-Waite: dos jóvenes se miran e intercambian sus copas bajo un caduceo con una cabeza de león alada','Dos jóvenes se miran a los ojos e intercambian sus copas. Sobre ellos, un caduceo con una cabeza de león alada: <b>la unión que sana</b>.',['Unión','Vínculo','Reciprocidad','Encuentro'],'Un vínculo de igual a igual.','Perderse en el otro.','Desequilibrio o distancia en un vínculo.','¿Qué vínculos de mi vida son recíprocos?','Son recíprocos mis vínculos con…','Se une'),
+ c3:t5cop(3,'Tres de Copas','Tres de Copas del mazo Rider-Waite: tres mujeres bailan en círculo y alzan sus copas; a sus pies, frutos de la cosecha','Tres mujeres bailan en círculo y alzan sus copas. A sus pies, frutos de la cosecha. Es <b>la alegría que crece al compartirla</b>.',['Celebración','Amistad','Comunidad','Alegría'],'Compartir la alegría con otras.','Celebrar para no sentir, el exceso.','Aislamiento o tensiones en el grupo.','¿Con quiénes celebro mi vida?','Celebro mi vida con…','Celebra'),
+ c4:t5cop(4,'Cuatro de Copas','Cuatro de Copas del mazo Rider-Waite: un joven sentado bajo un árbol, de brazos cruzados, mira tres copas sin ver la cuarta que una mano le ofrece desde una nube','Un joven sentado bajo un árbol, de brazos cruzados, mira tres copas frente a él. <b>No ve la cuarta</b> que una mano le ofrece desde una nube.',['Apatía','Introspección','Insatisfacción','Pausa'],'Una pausa para mirar hacia adentro.','No ver lo que la vida ofrece.','Despertar, volver a abrirse.','¿Qué me ofrece la vida que no estoy viendo?','La vida me ofrece… y no lo estoy viendo porque…','Se cierra'),
+ c5:t5cop(5,'Cinco de Copas','Cinco de Copas del mazo Rider-Waite: una figura con manto negro mira tres copas derramadas; detrás quedan dos copas de pie y un puente hacia un castillo','Una figura con manto negro mira tres copas derramadas. Detrás de ella hay <b>dos copas de pie que todavía no ve</b>, y un puente que cruza el río hacia un castillo.',['Pérdida','Duelo','Tristeza','Arrepentimiento'],'Honrar el duelo y la tristeza.','Mirar solo lo que se perdió.','Aceptación, volver a mirar lo que queda.','¿Qué sigue en pie en mi vida después de una pérdida?','Después de esa pérdida, sigue en pie…','Pierde'),
+ c6:t5cop(6,'Seis de Copas','Seis de Copas del mazo Rider-Waite: en un patio antiguo, un niño le ofrece a una niña una copa con flores blancas','En un patio antiguo, un niño le ofrece a una niña una copa con flores blancas. Es <b>la ternura de la infancia</b> y los recuerdos que nos dan refugio.',['Nostalgia','Infancia','Inocencia','Ternura'],'Reconectar con la niña interior.','Quedarse viviendo en el pasado.','Soltar el pasado y mirar hacia adelante.','¿Qué recuerdo de mi infancia me nutre hoy?','Me nutre el recuerdo de…','Recuerda'),
+ c7:t5cop(7,'Siete de Copas','Siete de Copas del mazo Rider-Waite: una figura en sombra mira siete copas flotando en las nubes con un rostro, una figura velada, una serpiente, un castillo, joyas, una corona de laurel y un dragón','Una figura en sombra mira siete copas flotando en las nubes: un rostro, una figura velada, una serpiente, un castillo, joyas, una corona de laurel y un dragón. <b>Todo parece posible</b>.',['Ilusión','Fantasía','Opciones','Imaginación'],'Soñar e imaginar posibilidades.','Confusión, vivir en la fantasía.','Claridad, elegir con los pies en la tierra.','¿Cuál de mis sueños quiero hacer realidad?','Quiero hacer realidad el sueño de…','Sueña')});
+const T5CP7=['c1','c2','c3','c4','c5','c6','c7'];
+const T5M21=[...T5B14,...T5CP7];
+const t5mfila=(key,ids,cur,lbl)=>`<div class="t5-path" role="group" style="grid-template-columns:repeat(7,minmax(0,1fr))">${ids.map((id,i)=>{const a=T5ARC[id];return `<button ${rxa('set',key,i)} ${pressed(i===cur)} aria-label="${a.t}"><img src="${a.img}" alt="" decoding="async"><small>${lbl?a.n+' · '+a.verbo:a.n||a.t.split(' ')[0]}</small></button>`}).join('')}</div>`;
+
+/* ----- 1 · Bienvenida y repaso ----- */
+RICH.t11a1=()=>nbHero('Tarot Camino del Ser · Clase 11','<span style="font-size:.68em">Copas: el agua</span>','del corazón','Clase 11 · Arcanos Menores. Las Copas, del As al 7.',['Agua','Emoción','Vínculo'],'Casa Muladhara · Escuela de Formación Holística',
+ `<div class="nb-pw t5-fan">${['c2','c1','c3'].map(id=>t5card({...t5full(T5ARC[id]),sm:1})).join('')}</div>`);
+RICH.t11a2=()=>dkH('Repaso de la semana','Los 14 Bastos','Antes de pasar al agua, compartimos cómo fue la semana con tu fuego.')+
+ `<div class="dk-sub">¿Qué Basto salió más en tu carta del día?</div>`+t5b14('t11rc',st('t11rc',-1))+
+ n3area('t11rh','¿Qué figura de fuego reconociste a tu alrededor?','Reconocí a…')+
+ n3area('t11rr','¿Qué te quedó resonando de la clase 10?','Me quedó resonando…')+n3priv;
+RICH.t11a3=()=>dkH('Del fuego al agua','De lo que nos mueve a lo que sentimos','Si los Bastos nos mostraron <b>lo que nos mueve a actuar</b>, las Copas nos muestran <b>lo que sentimos</b>: el amor, los vínculos, las pérdidas y los sueños.')+
+ `<div class="t5-two">${t5card({...t5full(T5ARC.b1),sm:1})}<span class="ar" aria-hidden="true">→</span>${t5card({...t5full(T5ARC.c1),sm:1})}</div>
+ <div class="dk-grid c2"><div class="detail" style="border-left:6px solid #c0442f"><span class="eyebrow">Bastos · fuego</span><h3>Lo que nos mueve</h3><p>Acción, pasión y proyectos.</p></div><div class="detail" style="border-left:6px solid #4573a8"><span class="eyebrow">Copas · agua</span><h3>Lo que sentimos</h3><p>Emociones y vínculos.</p></div></div>`;
+
+/* ----- 2 y 3 · El palo de Copas ----- */
+RICH.t11b1=()=>dkH('El palo de Copas · elemento agua','El mundo de lo que sentimos','Las Copas hablan de las emociones, el amor, los vínculos, la intuición y los sueños. Como el agua, <b>las emociones necesitan un recipiente y también fluir</b>.')+
+ `<div class="dk-split" style="align-items:center">${t5card({...t5full(T5ARC.c1),sm:1})}<div style="display:grid;gap:10px">
+ <div class="detail"><span class="eyebrow">Cuando fluye</span>${c4li(['Amor','Empatía','Sensibilidad','Creatividad'].map(t=>['corazon',t]))}</div>
+ <div class="detail"><span class="eyebrow">En sombra</span>${c4li(['Dependencia emocional','Desborde','Ilusiones'].map(t=>['luna',t]))}</div></div></div>`;
+['c1','c2','c3'].forEach((id,i)=>{RICH['t11b'+(i+2)]=()=>t5Menor(id)});
+['c4','c5','c6','c7'].forEach((id,i)=>{RICH['t11c'+(i+1)]=()=>t5Menor(id)});
+RICH.t11c5=()=>{const s=n3clamp(st('t11ra',0),0,6),a=T5ARC[T5CP7[s]];
+ return dkH('El recorrido del agua','Del corazón que se abre al sueño','Leídas en orden, las siete Copas cuentan la historia de un corazón. Toca cada carta.')+t5mfila('t11ra',T5CP7,s,1)+
+ `<div class="dk-split" style="align-items:center">${t5card({...t5full(a),sm:1})}<div class="detail"><span class="eyebrow">${a.n} · ${T5NUM[a.num-1][0]}</span><h3>${a.verbo}</h3><p>${a.caras[0][0]}.</p>${t5nav('t11ra',s,7)}</div></div>`+
+ n3quote('Un corazón que <mark>se abre, se une, celebra, se cierra, pierde, recuerda y vuelve a soñar</mark>.')};
+
+/* ----- 4 · Práctica con tu mazo ----- */
+RICH.t11d1=()=>{const s=st('t11ma',-1),a=s>=0?T5ARC[T5CP7[s]]:null;
+ return dkH('Ejercicio vivencial · en grupos pequeños','¿Cómo está mi agua hoy?','Tres pasos para escuchar tu corazón y compartirlo en tu grupo.')+
+ `<div class="dk-sub">1 · Elige: entre las siete Copas, la que muestra cómo está tu corazón</div>`+t5mfila('t11ma',T5CP7,s)+
+ (a?`<div class="dk-split" style="align-items:center">${t5card({...t5full(a),sm:1})}<div class="detail"><span class="eyebrow">Mi corazón hoy</span><h3>${a.t}</h3><p><b>Palabras clave:</b> ${a.kw.join(' · ')}.</p><p><b>Luz:</b> ${a.caras[0][0]}. <b>Sombra:</b> ${a.caras[1][0]}.</p></div></div>`:'')+
+ n3area('t11ms','2 · Siente: ¿qué emoción aparece y dónde la sientes en el cuerpo?','Aparece… y la siento en…')+
+ n3area('t11mc','3 · Comparte: ¿qué necesita tu corazón esta semana?','Esta semana mi corazón necesita…')+n3priv};
+RICH.t11d2=()=>{const r=st('t11tz',-1),a=r>=0?T5ARC[T5CP7[r>>1]]:null;
+ return dkH('Práctica con tu mazo','Tirada de una carta','Con las 7 Copas vistas. Practica con tu mazo y aquí mismo.')+
+ n3ck('t11tp',[['','Baraja las 7 Copas vistas, derechas e invertidas.'],['','Pregunta: ¿qué necesita mi corazón esta semana?'],['','Saca una carta, muéstrala a la cámara y léela uniendo su número con el agua.']])+
+ `<div class="t5-cols" style="grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:8px">${T5CP7.map(id=>t5card({...t5full(T5ARC[id]),sm:1})).join('')}</div>
+ <div class="dk-call">${ic('lupa',18)} <b>¿Qué necesita mi corazón esta semana?</b></div>`+
+ t5tirada('t11tz','Sacar una carta',T5CP7)+
+ (a?`<div class="dk-call">${ic('agua',18)} Su número: <b>${T5NUM[a.num-1][0]}</b> (${T5NUM[a.num-1][1].toLowerCase().replace(/\.$/,'')}) en el agua de las emociones.</div>`:'')+
+ n3area('t11tl','Lo que siento con mi carta','Mi carta me dice…')+n3priv};
+
+/* ----- 5 · Tarea, cierre y repaso ----- */
+RICH.t11e1=()=>dkH('Para esta semana','Diario de emociones','Una práctica diaria con los 21 Menores vistos: 14 Bastos y 7 Copas.')+
+ n3ck('t11ta',[['libro','Completa las fichas del As al 7 de Copas.'],['sol','Cada mañana saca una carta entre los 21 Menores vistos: 14 Bastos y 7 Copas.'],['luna','Cada noche anota la emoción principal del día y qué la despertó.']])+
+ `<div class="dk-sub">Tu carta de hoy</div>`+t5tirada('t11cd','Sacar mi carta del día',T5M21)+
+ `<div class="dk-sub">La emoción principal de hoy</div>${chipRow('t11em',T5EMO,st('t11em',-1))}`+
+ n3area('t11eq','¿Qué la despertó?','Hoy la despertó…')+n3priv;
+RICH.t11e2=()=>dkH('Que tus emociones fluyan','Próxima clase','8, 9 y 10 de Copas · la corte · fuego y agua.')+
+ `<div class="t5-cols" style="grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:8px">${['8','9','10'].map(n=>t5card({n,t:'Copas',sm:1})).join('')}${['Sota','Caballo','Reina','Rey'].map(n=>t5card({n:n[0],t:n,sm:1})).join('')}</div>`+
+ n3quote('Del fuego al agua: <mark>que tus emociones fluyan</mark>.')+`<small class="dk-sig" style="text-align:center;display:block">Casa Muladhara · Escuela de Formación Holística</small>`;
+const T5Q11=[
+ {q:'¿Qué elemento y qué tema tienen las Copas?',o:['Agua: emociones y vínculos','Fuego: acción y proyectos','Tierra: cuerpo y dinero'],a:0,e:'Como el agua, las emociones necesitan un recipiente y también fluir.'},
+ {q:'¿Cuál es la sombra de las Copas?',o:['Dependencia emocional, desborde, ilusiones','Impulsividad','Rigidez'],a:0,e:'Cuando fluyen: amor, empatía, sensibilidad y creatividad.'},
+ {q:'En el As de Copas, la copa desborda en…',o:['Cinco chorros de agua','Llamas','Flores'],a:0,e:'Una paloma desciende hacia ella: un corazón que se abre.'},
+ {q:'¿Cuál es la sombra del Dos de Copas?',o:['Perderse en el otro','Celebrar en exceso','Mirar el pasado'],a:0,e:'Su luz: un vínculo de igual a igual.'},
+ {q:'Las tres mujeres del Tres de Copas…',o:['Bailan en círculo y alzan sus copas','Lloran una pérdida','Discuten'],a:0,e:'La alegría que crece al compartirla.'},
+ {q:'¿Qué no ve el joven del Cuatro de Copas?',o:['La cuarta copa que una mano le ofrece','El árbol','El río'],a:0,e:'Su pregunta: ¿qué me ofrece la vida que no estoy viendo?'},
+ {q:'Detrás de la figura del Cinco de Copas…',o:['Hay dos copas de pie que todavía no ve','No hay nada','Hay un león'],a:0,e:'Honrar el duelo sin mirar solo lo que se perdió.'},
+ {q:'El Seis de Copas habla de…',o:['La ternura de la infancia y los recuerdos','Una pelea','Un viaje'],a:0,e:'Su sombra: quedarse viviendo en el pasado.'},
+ {q:'Invertido, el Siete de Copas puede hablar de…',o:['Claridad, elegir con los pies en la tierra','Confusión','Vivir en la fantasía'],a:0,e:'Al derecho, su sombra es la confusión y vivir en la fantasía.'},
+ {q:'En el recorrido del agua, el Cuatro de Copas…',o:['Se abre','Se cierra','Celebra'],a:1,e:'Se abre, se une, celebra, se cierra, pierde, recuerda y sueña.'}];
+RICH.t11e3=()=>n3quiz('t5c11',T5Q11,['Dominas lo esencial de la Clase 11. ¡Que tus emociones fluyan!','Vas muy bien. Repasa lo que falló y sigue practicando.','Vale la pena repasar la clase. Puedes volver cuando quieras.']);

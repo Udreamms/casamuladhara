@@ -1114,6 +1114,12 @@ const N5L10b=C2('Bastos · del 8 al 10',[['t10b1','Ocho de Bastos · el movimien
 const N5L10c=C2('La corte de Bastos',[['t10c1','Tres formas de leerlas'],['t10c2','Sota de Bastos · aprende'],['t10c3','Caballo de Bastos · actúa'],['t10c4','Reina de Bastos · siente'],['t10c5','Rey de Bastos · dirige']]);
 const N5L10d=C2('Práctica con tu mazo',[['t10d1','Los 14 Bastos, el fuego entero'],['t10d2','Mi figura de fuego','Ejercicio en grupos pequeños'],['t10d3','Tirada con los 14 Bastos']]);
 const N5L10e=C2('Tarea, cierre y repaso',[['t10e1','Las figuras del fuego a mi alrededor'],['t10e2','Próxima clase'],['t10e3','Repaso']]);
+const T11F=[F('pdf','Láminas de la Clase 11','16 láminas',N5P+'print/clase11_laminas.pdf')];
+const N5L11a=C2('Bienvenida y repaso',[['t11a1','Copas: el agua del corazón'],['t11a2','Repaso de la semana'],['t11a3','Del fuego al agua']],T11F);
+const N5L11b=C2('Copas · del As al 3',[['t11b1','El palo de Copas · elemento agua'],['t11b2','As de Copas · el inicio'],['t11b3','Dos de Copas · la elección'],['t11b4','Tres de Copas · el crecimiento']]);
+const N5L11c=C2('Copas · del 4 al 7',[['t11c1','Cuatro de Copas · la estabilidad'],['t11c2','Cinco de Copas · la crisis'],['t11c3','Seis de Copas · la armonía'],['t11c4','Siete de Copas · la prueba'],['t11c5','El recorrido del agua']]);
+const N5L11d=C2('Práctica con tu mazo',[['t11d1','¿Cómo está mi agua hoy?','Ejercicio en grupos pequeños'],['t11d2','Tirada de una carta']]);
+const N5L11e=C2('Tarea, cierre y repaso',[['t11e1','Diario de emociones'],['t11e2','Próxima clase'],['t11e3','Repaso']]);
 /* clases del Nivel 5 que todavía no se publican: una por módulo, para que cada clase conserve su lugar (y su avance) al llegar */
 const T5PEND=(n,t)=>({title:'Clase '+n+' · '+t,lessons:[L('Clase '+n+' · '+t,'',[])]});
 
@@ -1356,8 +1362,9 @@ const LEVELS=[
    {title:'Clase 8 · Plenitud y cierre del viaje',lessons:[N5L8a,N5L8b,N5L8c,N5L8d,N5L8e,N5L8f]},
    {title:'Clase 9 · Los Menores y el fuego de los Bastos',lessons:[N5L9a,N5L9b,N5L9c,N5L9d,N5L9e,N5L9f]},
    {title:'Clase 10 · Bastos: el fuego que madura',lessons:[N5L10a,N5L10b,N5L10c,N5L10d,N5L10e]},
-   T5PEND(11,'Copas: del As al 7'),
-   ...[12,13,14,15,16].map(n=>T5PEND(n,'Próximamente'))
+   {title:'Clase 11 · Copas: el agua del corazón',lessons:[N5L11a,N5L11b,N5L11c,N5L11d,N5L11e]},
+   T5PEND(12,'Copas: del 8 a la corte'),
+   ...[13,14,15,16].map(n=>T5PEND(n,'Próximamente'))
   ]}
 ];
 const allLessons=lv=>lv.modules.flatMap(m=>m.lessons);
@@ -1396,6 +1403,7 @@ const RES=[
  {t:'Clase 8 · Láminas de Tarot',type:'PDF',lvl:5,size:'21 láminas',k:'pdf',href:'assets/n5/print/clase8_laminas.pdf',new:1},
  {t:'Clase 9 · Láminas de Tarot',type:'PDF',lvl:5,size:'20 láminas',k:'pdf',href:'assets/n5/print/clase9_laminas.pdf',new:1},
  {t:'Clase 10 · Láminas de Tarot',type:'PDF',lvl:5,size:'16 láminas',k:'pdf',href:'assets/n5/print/clase10_laminas.pdf',new:1},
+ {t:'Clase 11 · Láminas de Tarot',type:'PDF',lvl:5,size:'16 láminas',k:'pdf',href:'assets/n5/print/clase11_laminas.pdf',new:1},
  {t:'Clase 2 · Láminas de Tarot',type:'PDF',lvl:5,size:'20 láminas',k:'pdf',href:'assets/n5/print/clase2_laminas.pdf',new:1},
  {t:'Clase 1 · Láminas de Tarot',type:'PDF',lvl:5,size:'19 láminas',k:'pdf',href:'assets/n5/print/clase1_laminas.pdf',new:1},
  {t:'Clase 8 · Láminas',type:'PDF',lvl:3,size:'32 láminas',k:'pdf',href:'assets/n3/print/clase8_laminas.pdf',new:1},
