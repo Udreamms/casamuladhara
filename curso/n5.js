@@ -381,6 +381,8 @@ const T5C4=N5P+'c4/';
 .t5-path .t5-fx{grid-column:1/-1;font:600 .62rem/1.2 var(--f-caps);letter-spacing:.18em;text-transform:uppercase;color:var(--nb-gold);padding-top:4px}
 .t5-two{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:12px;align-items:center;justify-items:center}
 .t5-two .ar{font:400 2rem/1 var(--f-display);color:var(--nb-gold)}
+.t5-nums small{overflow-wrap:anywhere}
+@media (max-width:560px){.t5-nums small{display:none}}
 .t5-vj{display:grid;grid-template-columns:minmax(90px,130px) minmax(0,1fr);gap:16px;align-items:center}
 @media (max-width:560px){.t5-vj{grid-template-columns:1fr}.t5-vj>.t5-path{width:110px;justify-self:center}}
 @media (max-width:560px){.t5-path{grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}.t5-path small{display:none}}
@@ -814,3 +816,110 @@ const T5Q8=[
  {q:'En el Viaje del Loco completo, ¿qué cartas forman el mundo interior?',o:['I a VII','VIII a XIV','XV a XXI'],a:1,e:'I a VII, mundo exterior; VIII a XIV, mundo interior; XV a XXI, mundo espiritual.'},
  {q:'Para la próxima clase separas…',o:['Los 22 Mayores','Los 56 Arcanos Menores','Solo los Bastos'],a:1,e:'Empezamos con los cuatro palos y los Bastos, del As al 7.'}];
 RICH.t8f3=()=>n3quiz('t5c8',T5Q8,['Dominas lo esencial de la Clase 8. ¡Completaste el Viaje del Loco!','Vas muy bien. Repasa lo que falló y sigue practicando.','Vale la pena repasar la clase. Puedes volver cuando quieras.']);
+
+/* ---------- Clase 9 · Los Menores y el fuego de los Bastos ---------- */
+const T5C9=N5P+'c9/';
+const T5PALO=[['bastos','Bastos','Fuego','Acción, pasión y proyectos.','#c0442f'],['copas','Copas','Agua','Emociones y vínculos.','#4573a8'],['espadas','Espadas','Aire','Mente, palabra y conflicto.','#7a8a96'],['oros','Oros','Tierra','Cuerpo, trabajo y dinero.','#9b6f27']];
+const T5NUM=[['Inicio','La semilla, el potencial puro.'],['Elección','La dualidad y la primera decisión.'],['Crecimiento','La expresión y los primeros frutos.'],['Estabilidad','La estructura que da una base.'],['Crisis','El conflicto que obliga a cambiar.'],['Armonía','El equilibrio que vuelve.'],['Evaluación','La prueba y la reflexión.'],['Movimiento','El avance y la maestría.'],['Culminación','Casi al final: el resultado.'],['Cierre','El ciclo completo, listo para volver a empezar.']];
+const T5CORTE=[['sota','Sota','Aprende','La curiosidad y el mensaje.'],['caballo','Caballo','Actúa','El movimiento y la búsqueda.'],['reina','Reina','Siente','El dominio interior del elemento.'],['rey','Rey','Dirige','El dominio exterior del elemento.']];
+const T5INVM=[['Bloqueada','La energía del palo aún no logra fluir.'],['Hacia adentro','El proceso es interno, todavía no se ve afuera.'],['Exceso o falta','El elemento está desequilibrado.'],['Aprendizaje','Una situación concreta que pide atención.']];
+// los Bastos usan la misma forma que los Mayores (n, t, img, kw, caras) para entrar en t5tirada
+const t5bas=(i,nm,alt,desc,kw,luz,som,inv,q,ph,verbo)=>({n:i===1?'As':String(i),t:nm,img:T5C9+'bastos_'+i+'.webp',alt,desc,kw,caras:[luz,som,inv].map(x=>[x.replace(/\.$/,'')]),q,ph,verbo,num:i});
+Object.assign(T5ARC,{
+ b1:t5bas(1,'As de Bastos','As de Bastos del mazo Rider-Waite: una mano sale de una nube y ofrece una vara con brotes verdes, sobre un paisaje con un castillo','Una mano sale de una nube y ofrece una vara que brota. Es la <b>chispa de una idea</b>, el impulso creativo que todavía es puro potencial.',['Inspiración','Impulso','Nuevo proyecto','Energía creativa'],'Una idea que nace con fuerza.','Empezar mucho y no terminar.','Falta de motivación, una idea que no despega.','¿Qué proyecto quiere nacer en mí?','Quiere nacer en mí…','Nace'),
+ b2:t5bas(2,'Dos de Bastos','Dos de Bastos del mazo Rider-Waite: un hombre en lo alto de su castillo sostiene un globo terráqueo y mira el horizonte, entre dos varas','Un hombre en lo alto de su castillo sostiene un globo terráqueo y mira el horizonte. Ya tiene una base y <b>planea hacia dónde llevar su fuego</b>.',['Planificación','Visión','Decisión','Explorar'],'Mirar más allá y planear el próximo paso.','Quedarse planeando sin salir.','Indecisión, miedo a lo desconocido.','¿Qué horizonte quiero explorar y qué me detiene?','Quiero explorar… y me detiene…','Elige'),
+ b3:t5bas(3,'Tres de Bastos','Tres de Bastos del mazo Rider-Waite: de espaldas, en lo alto de una colina, un hombre mira el mar entre tres varas','De espaldas, en lo alto de una colina, un hombre mira el mar entre sus tres varas. Lo que empezó <b>ya está en camino</b> y espera ver sus frutos.',['Expansión','Perspectiva','Avance','Confianza'],'Ver crecer lo iniciado y ampliar horizontes.','Impaciencia por los resultados.','Retrasos, planes que no salen como esperaba.','¿Qué estoy esperando y cómo lo cuido mientras llega?','Estoy esperando… y lo cuido…','Crece'),
+ b4:t5bas(4,'Cuatro de Bastos','Cuatro de Bastos del mazo Rider-Waite: cuatro varas sostienen una guirnalda de flores y frutos; detrás, dos figuras levantan ramos frente a un castillo','Cuatro varas sostienen una guirnalda de flores y frutos. Detrás, dos figuras levantan ramos frente al castillo: es tiempo de <b>celebrar lo construido</b>.',['Celebración','Hogar','Comunidad','Logro'],'Celebrar y sentirse en casa.','Aparentar una armonía que no se siente.','Tensión en el hogar, falta de pertenencia.','¿Dónde me siento en casa y qué quiero celebrar?','Me siento en casa en… y quiero celebrar…','Celebra'),
+ b5:t5bas(5,'Cinco de Bastos','Cinco de Bastos del mazo Rider-Waite: cinco jóvenes cruzan sus varas, cada uno hacia un lado','Cinco jóvenes cruzan sus varas, cada uno hacia un lado. Hay mucha energía y poca dirección común: <b>el fuego choca consigo mismo</b>.',['Conflicto','Competencia','Desacuerdo','Desafío'],'Un desacuerdo que hace crecer.','Pelear por pelear, querer imponerse.','Evitar el conflicto o salir de una disputa.','¿Qué conflicto en mi vida me pide ser escuchado?','El conflicto que me pide ser escuchado es…','Choca'),
+ b6:t5bas(6,'Seis de Bastos','Seis de Bastos del mazo Rider-Waite: un jinete coronado de laurel avanza en un caballo blanco entre la gente, con otra corona en su vara','Un jinete coronado de laurel avanza entre la gente, con otra corona en su vara. Superó el conflicto y <b>recibe el reconocimiento</b> de los demás.',['Victoria','Reconocimiento','Éxito','Liderazgo'],'Recibir el reconocimiento por lo logrado.','Depender del aplauso, el orgullo.','Sentirse no vista, inseguridad.','¿Me permito recibir el reconocimiento por lo que logro?','Cuando me reconocen, yo…','Triunfa'),
+ b7:t5bas(7,'Siete de Bastos','Siete de Bastos del mazo Rider-Waite: desde lo alto, un joven defiende su lugar con una vara frente a seis varas que suben','Desde lo alto, un joven defiende su lugar con una vara frente a seis que suben. Está en desventaja, pero tiene <b>la posición y la convicción</b>.',['Defensa','Coraje','Perseverancia','Convicción'],'Defender lo que creo y sostener mi lugar.','Vivir siempre a la defensiva.','Rendirse, sentirse sobrepasada.','¿Qué estoy defendiendo y vale la pena sostenerlo?','Estoy defendiendo… y vale la pena porque…','Defiende')});
+const T5B7=['b1','b2','b3','b4','b5','b6','b7'];
+const T5CAM=['Luz','Sombra','Invertida'];
+const t5Menor=id=>{const a=T5ARC[id],o=st('t5kw'+id,{}),k='t5ca'+id,s=n3clamp(st(k,0),0,2);
+ return dkH('Bastos · '+a.n+': '+T5NUM[a.num-1][0].toLowerCase(),a.t,a.desc)+
+ `<div class="dk-split" style="align-items:center">${t5card({...t5full(a),sm:1,rev:s===2})}
+ <div style="display:grid;gap:12px"><div class="dk-sub">Palabras clave · marca las que resuenan contigo hoy</div>
+ <div class="dk-chips" role="group">${a.kw.map((w,i)=>`<button class="chip" ${rxa('tog','t5kw'+id,i)} ${pressed(o[i])}>${w}</button>`).join('')}</div>
+ ${chipRow(k,T5CAM,s)}<div class="detail"><span class="eyebrow">${T5CAM[s]}</span><h3>${ic(T5CAR[s][1],24)} ${a.caras[s][0]}</h3>${t5nav(k,s,3)}</div></div></div>
+ <div class="detail"><span class="eyebrow">Pregunta</span><p class="t5-q">${a.q}</p></div>`+n3area('t5mq'+id,'Tu respuesta',a.ph)+n3priv};
+// fila de los siete Bastos como botones
+const t5bfila=(key,cur,lbl)=>`<div class="t5-path" role="group" style="grid-template-columns:repeat(7,minmax(0,1fr))">${T5B7.map((id,i)=>{const a=T5ARC[id];return `<button ${rxa('set',key,i)} ${pressed(i===cur)} aria-label="${a.t}"><img src="${a.img}" alt="" decoding="async"><small>${lbl?a.n+' · '+a.verbo:a.n}</small></button>`}).join('')}</div>`;
+
+/* ----- 1 · Bienvenida y repaso ----- */
+RICH.t9a1=()=>nbHero('Tarot Camino del Ser · Clase 9','<span style="font-size:.68em">Los Menores y el fuego</span>','de los Bastos','Clase 9 · Arcanos Menores. Los cuatro palos y los Bastos, del As al 7.',['Fuego','Acción','Pasión'],'Casa Muladhara · Escuela de Formación Holística',
+ `<div class="nb-pw t5-fan">${['b1','b4','b7'].map(id=>t5card({...t5full(T5ARC[id]),sm:1})).join('')}</div>`);
+RICH.t9a2=()=>dkH('Repaso de la semana','Cerramos el Viaje del Loco','Antes de empezar con los Menores, compartimos cómo fue la semana con los 22 Mayores.')+
+ `<div class="t5-cols" style="grid-template-columns:repeat(3,minmax(0,150px));justify-content:center">${['sol','juicio','mundo'].map(id=>t5card({...t5full(T5ARC[id]),sm:1})).join('')}</div>
+ <div class="dk-sub">¿Qué Mayor salió más en tu carta del día?</div>${chipRow('t9rc',T5TZ22.map(id=>t5arcOf(id).t),st('t9rc',-1))}`+
+ n3area('t9rh','¿Qué descubriste al revisar tus 22 fichas?','Al revisar mis fichas descubrí…')+
+ n3area('t9rr','¿Qué te quedó resonando de la clase 8?','Me quedó resonando…')+n3priv;
+RICH.t9a3=()=>dkH('Arcanos Menores','Del alma a la vida cotidiana','Los Mayores muestran las <b>grandes etapas del camino</b>. Los Menores muestran cómo esas etapas <b>se viven cada día</b>: en lo que hacemos, sentimos, pensamos y construimos.')+
+ `<div class="t5-two">${t5card({...t5full(T5ARC.mundo),sm:1})}<span class="ar" aria-hidden="true">→</span>${t5card({...t5full(T5ARC.b1),sm:1})}</div>
+ <div class="dk-grid c2"><div class="detail"><span class="eyebrow">22 Arcanos Mayores</span><h3>El alma</h3><p>Las grandes etapas del viaje del Loco.</p></div><div class="detail"><span class="eyebrow">56 Arcanos Menores</span><h3>La vida cotidiana</h3><p>Cómo esas etapas se viven en el día a día.</p></div></div>`;
+
+/* ----- 2 · Los Arcanos Menores ----- */
+RICH.t9b1=()=>{const s=n3clamp(st('t9pl',0),0,3),x=T5PALO[s];
+ return dkH('Los Arcanos Menores','56 cartas, cuatro palos, cuatro elementos','Cada palo tiene 14 cartas: del As al 10 y cuatro cartas de la corte.')+
+ `<div class="t5-big" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr))">${T5PALO.map((y,i)=>`<button ${rxa('set','t9pl',i)} ${pressed(i===s)} style="border-top:4px solid ${y[4]}"><b>${y[1]}</b><small>${y[2]}</small></button>`).join('')}</div>
+ <div class="dk-split" style="align-items:center">${t5card({full:1,img:T5C9+x[0]+'_1.webp',alt:'As de '+x[1]+' del mazo Rider-Waite',sm:1})}<div class="detail" style="border-left:6px solid ${x[4]}"><span class="eyebrow">Elemento ${x[2].toLowerCase()}</span><h3>${x[1]}</h3><p>${x[3]}</p>${t5nav('t9pl',s,4)}</div></div>`};
+RICH.t9b2=()=>{const s=n3clamp(st('t9nm',0),0,9),x=T5NUM[s],b=T5B7[s];
+ return dkH('El lenguaje de los números','Del As al 10, un ciclo completo','Cada número tiene un sentido que se repite en los cuatro palos. Toca cada número.')+
+ `<div class="t5-big t5-nums" style="grid-template-columns:repeat(5,minmax(0,1fr));gap:8px">${T5NUM.map((y,i)=>`<button ${rxa('set','t9nm',i)} ${pressed(i===s)} style="padding:12px 8px;justify-items:center;text-align:center"><span class="k" style="font-size:1.6rem">${i+1}</span><small>${y[0]}</small></button>`).join('')}</div>
+ <div class="dk-split" style="align-items:center">${b?t5card({...t5full(T5ARC[b]),sm:1}):t5card({n:String(s+1),t:'Bastos',sm:1})}<div class="detail"><span class="eyebrow">Número ${s+1}${b?' · '+T5ARC[b].t:' · la próxima clase'}</span><h3>${x[0]}</h3><p>${x[1]}</p>${t5nav('t9nm',s,10)}</div></div>`};
+RICH.t9b3=()=>{const s=n3clamp(st('t9co',0),0,3),x=T5CORTE[s];
+ return dkH('Las cartas de la corte','Cuatro formas de vivir cada elemento','Pueden mostrar a una persona, una actitud o una etapa de madurez frente al elemento.')+
+ `<div class="t5-big" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr))">${T5CORTE.map((y,i)=>`<button ${rxa('set','t9co',i)} ${pressed(i===s)}><b>${y[1]}</b><small>${y[2]}</small></button>`).join('')}</div>
+ <div class="dk-split" style="align-items:center">${t5card({full:1,img:T5C9+'bastos_'+x[0]+'.webp',alt:x[1]+' de Bastos del mazo Rider-Waite',sm:1})}<div class="detail"><span class="eyebrow">${x[1]} · ejemplo con Bastos</span><h3>${x[2]}</h3><p>${x[3]}</p>${t5nav('t9co',s,4)}</div></div>`};
+RICH.t9b4=()=>{const s=n3clamp(st('t9iv',0),0,3),x=T5INVM[s];
+ return dkH('Cartas invertidas en los Menores','La misma mirada, en lo cotidiano','Cuando un Menor sale invertido, puede leerse de cuatro formas.')+
+ `<div class="t5-big" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">${T5INVM.map((y,i)=>`<button ${rxa('set','t9iv',i)} ${pressed(i===s)}><b>${y[0]}</b></button>`).join('')}</div>
+ <div class="dk-split" style="align-items:center">${t5card({...t5full(T5ARC.b1),sm:1,rev:1})}<div class="detail"><span class="eyebrow">Forma ${s+1} de 4</span><h3>${ic('espiral',24)} ${x[0]}</h3><p>${x[1]}</p>${t5nav('t9iv',s,4)}</div></div>
+ <div class="dk-call">${ic('lupa',18)} En los Mayores la invertida habla de <b>un proceso del alma</b>; en los Menores, de <b>una situación del día a día</b>.</div>`};
+
+/* ----- 3 y 4 · El palo de Bastos ----- */
+RICH.t9c1=()=>dkH('El palo de Bastos · elemento fuego','La energía que nos mueve','Los Bastos hablan de la acción, la pasión, la creatividad y los proyectos. Sus varas tienen brotes verdes: <b>es vida que crece</b>.')+
+ `<div class="dk-split" style="align-items:center">${t5card({...t5full(T5ARC.b1),sm:1})}<div style="display:grid;gap:10px">
+ <div class="detail"><span class="eyebrow">Cuando fluye</span>${c4li(['Entusiasmo','Iniciativa','Valentía','Liderazgo'].map(t=>['sol',t]))}</div>
+ <div class="detail"><span class="eyebrow">En sombra</span>${c4li(['Impulsividad','Impaciencia','Agotamiento'].map(t=>['luna',t]))}</div></div></div>`;
+['b1','b2','b3'].forEach((id,i)=>{RICH['t9c'+(i+2)]=()=>t5Menor(id)});
+['b4','b5','b6','b7'].forEach((id,i)=>{RICH['t9d'+(i+1)]=()=>t5Menor(id)});
+RICH.t9d5=()=>{const s=n3clamp(st('t9rf',0),0,6),a=T5ARC[T5B7[s]];
+ return dkH('El recorrido del fuego','Del impulso a la defensa','Leídas en orden, las siete cartas cuentan una sola historia. Toca cada carta.')+t5bfila('t9rf',s,1)+
+ `<div class="dk-split" style="align-items:center">${t5card({...t5full(a),sm:1})}<div class="detail"><span class="eyebrow">${a.n} · ${T5NUM[a.num-1][0]}</span><h3>${a.verbo}</h3><p>${a.caras[0][0]}</p>${t5nav('t9rf',s,7)}</div></div>`+
+ n3quote('Una idea que <mark>nace, se planea, crece, se celebra, enfrenta un conflicto, triunfa y se defiende</mark>.')};
+
+/* ----- 5 · Práctica con tu mazo ----- */
+RICH.t9e1=()=>{const s=st('t9mf',-1),a=s>=0?T5ARC[T5B7[s]]:null;
+ return dkH('Ejercicio vivencial · en grupos pequeños','¿Cómo está mi fuego hoy?','Tres pasos para escuchar tu energía y compartirla en tu grupo.')+
+ `<div class="dk-sub">1 · Elige: entre los siete Bastos, la carta que muestra tu energía hoy</div>`+t5bfila('t9mf',s)+
+ (a?`<div class="dk-split" style="align-items:center">${t5card({...t5full(a),sm:1})}<div class="detail"><span class="eyebrow">Mi fuego hoy</span><h3>${a.t}</h3><p><b>Palabras clave:</b> ${a.kw.join(' · ')}.</p><p><b>Luz:</b> ${a.caras[0][0]} <b>Sombra:</b> ${a.caras[1][0]}</p></div></div>`:'')+
+ n3area('t9ms','2 · Siente: ¿dónde está ese fuego en tu cuerpo y cómo se siente?','Lo siento en…')+
+ n3area('t9mc','3 · Comparte: un paso concreto para cuidar o encender tu fuego','Para cuidar mi fuego voy a…')+n3priv};
+RICH.t9e2=()=>dkH('Práctica con tu mazo','Tirada de una carta','Con los 7 Bastos vistos. Practica con tu mazo y aquí mismo.')+
+ n3ck('t9tp',[['','Baraja los 7 Bastos vistos, derechos e invertidos.'],['','Pregunta: ¿cómo está mi energía para actuar esta semana?'],['','Saca una carta, muéstrala a la cámara y léela uniendo su número con el fuego.']])+
+ `<div class="t5-cols" style="grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:8px">${T5B7.map(id=>t5card({...t5full(T5ARC[id]),sm:1})).join('')}</div>
+ <div class="dk-call">${ic('lupa',18)} <b>¿Cómo está mi energía para actuar esta semana?</b></div>`+
+ t5tirada('t9tz','Sacar una carta',T5B7)+
+ (st('t9tz',-1)>=0?`<div class="dk-call">${ic('sol',18)} Su número: <b>${T5NUM[T5ARC[T5B7[st('t9tz',0)>>1]].num-1][0]}</b> (${T5NUM[T5ARC[T5B7[st('t9tz',0)>>1]].num-1][1].toLowerCase().replace(/\.$/,'')}) en el fuego de la acción.</div>`:'')+
+ n3area('t9tl','Lo que siento con mi carta','Mi carta me dice…')+n3priv;
+
+/* ----- 6 · Tarea, cierre y repaso ----- */
+RICH.t9f1=()=>dkH('Para esta semana','Observar mi fuego','Una práctica diaria con los 7 Bastos vistos.')+
+ n3ck('t9ta',[['libro','Completa las fichas del As al 7 de Bastos.'],['sol','Cada mañana saca una carta entre los 7 Bastos vistos, derecha o invertida.'],['luna','Anota cada noche una acción que hiciste guiada por tu fuego.']])+
+ `<div class="dk-sub">Tu carta de hoy</div>`+t5tirada('t9cd','Sacar mi carta del día',T5B7)+
+ n3area('t9ac','En la noche: una acción guiada por mi fuego','Hoy mi fuego me llevó a…')+n3priv;
+RICH.t9f2=()=>dkH('Que tu fuego te guíe','Próxima clase','8, 9 y 10 de Bastos · Sota, Caballo, Reina y Rey.')+
+ `<div class="t5-cols" style="grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:8px">${['8','9','10'].map(n=>t5card({n,t:'Bastos',sm:1})).join('')}${T5CORTE.map(c=>t5card({full:1,img:T5C9+'bastos_'+c[0]+'.webp',alt:c[1]+' de Bastos',sm:1})).join('')}</div>`+
+ n3quote('Del alma a la vida cotidiana: <mark>que tu fuego te guíe</mark>.')+`<small class="dk-sig" style="text-align:center;display:block">Casa Muladhara · Escuela de Formación Holística</small>`;
+const T5Q9=[
+ {q:'¿Cuántas cartas tienen los Arcanos Menores?',o:['22','56','78'],a:1,e:'Cuatro palos de 14 cartas: del As al 10 y cuatro de la corte.'},
+ {q:'¿Qué elemento corresponde a las Copas?',o:['Fuego','Agua','Tierra'],a:1,e:'Bastos, fuego; Copas, agua; Espadas, aire; Oros, tierra.'},
+ {q:'Los Oros hablan de…',o:['Emociones y vínculos','Cuerpo, trabajo y dinero','Mente y palabra'],a:1,e:'El elemento tierra.'},
+ {q:'En el lenguaje de los números, el 5 es…',o:['La armonía','La crisis: el conflicto que obliga a cambiar','El inicio'],a:1,e:'Y el 6 es la armonía, el equilibrio que vuelve.'},
+ {q:'¿Qué carta de la corte «siente»?',o:['La Sota','El Caballo','La Reina'],a:2,e:'Sota aprende, Caballo actúa, Reina siente y Rey dirige.'},
+ {q:'Una invertida en los Menores habla sobre todo de…',o:['Un proceso del alma','Una situación del día a día','Un castigo'],a:1,e:'Puede estar bloqueada, hacia adentro, en exceso o falta, o pedir aprendizaje.'},
+ {q:'Las varas de los Bastos tienen brotes verdes porque…',o:['Es vida que crece','Son viejas','Están en primavera'],a:0,e:'Los Bastos son la energía que nos mueve.'},
+ {q:'¿Cuál es la sombra del As de Bastos?',o:['Empezar mucho y no terminar','Celebrar lo construido','Defender lo que creo'],a:0,e:'Su luz: una idea que nace con fuerza.'},
+ {q:'En el Cinco de Bastos…',o:['Cinco jóvenes cruzan sus varas: el fuego choca consigo mismo','Un jinete recibe reconocimiento','Un hombre mira el mar'],a:0,e:'Mucha energía y poca dirección común.'},
+ {q:'En el recorrido del fuego, el Siete de Bastos…',o:['Nace','Celebra','Defiende'],a:2,e:'As nace, 2 elige, 3 crece, 4 celebra, 5 choca, 6 triunfa y 7 defiende.'}];
+RICH.t9f3=()=>n3quiz('t5c9',T5Q9,['Dominas lo esencial de la Clase 9. ¡Que tu fuego te guíe!','Vas muy bien. Repasa lo que falló y sigue practicando.','Vale la pena repasar la clase. Puedes volver cuando quieras.']);
