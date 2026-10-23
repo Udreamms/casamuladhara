@@ -554,3 +554,85 @@ const T5Q5=[
  {q:'El rostro de El Colgado está…',o:['Sereno: elige estar ahí','Sufriendo','Enojado'],a:0,e:'No sufre: la aureola es la comprensión que llega al soltar.'},
  {q:'En la tirada de esta clase, ¿con cuántas cartas trabajas?',o:['Con las 10 de la clase pasada','Con las 13 cartas vistas, del 0 al XII','Con los 22 Mayores'],a:1,e:'Derechas e invertidas.'}];
 RICH.t5f3=()=>n3quiz('t5c5',T5Q5,['Dominas lo esencial de la Clase 5. ¡Fluir, equilibrar y entregarse!','Vas muy bien. Repasa lo que falló y sigue practicando.','Vale la pena repasar la clase. Puedes volver cuando quieras.']);
+
+/* ---------- Clase 6 · Transformación, sanación y sombra ---------- */
+const T5C6=N5P+'c6/';
+Object.assign(T5ARC,{
+ muerte:{n:'XIII',t:'La Muerte',img:T5C6+'muerte.webp',alt:'La Muerte del mazo Rider-Waite: un esqueleto con armadura monta un caballo blanco y lleva una bandera negra con una rosa blanca; a sus pies, un rey caído, una niña y un obispo; al fondo, el sol entre dos torres',
+  lugar:'Después de la pausa del Colgado, el Loco <b>deja morir lo que ya cumplió su ciclo</b>. No es un final: es una transformación profunda.',
+  kw:['Transformación','Cierre de ciclo','Soltar','Renacer','Desapego'],
+  im:[['El jinete esqueleto','Lo esencial que queda cuando todo cae.',25,20],['El caballo blanco','Un cambio que avanza con pureza.',55,38],['La rosa blanca','En la bandera: la vida que renace.',62,14],['El rey caído','Ningún poder detiene el cambio.',20,82],['La niña y el obispo','Formas distintas de recibir el final.',82,62],['El sol en el horizonte','Después de la noche, amanece.',86,38]],
+  caras:[['Cerrar un ciclo','Dejar ir lo que ya no sirve','Abrir espacio a lo nuevo'],['Miedo a los finales','Aferrarse al pasado','Duelos que no se viven'],['Resistencia al cambio','Un final que se posterga','Quedarse en lo que ya terminó']],
+  mir:'La Muerte enseña que <b>para renacer hay que dejar morir algo</b>: una etapa, una creencia, una forma de ser que ya no nos representa.',
+  q:'¿Qué parte de mi vida necesita morir para que yo pueda renacer?',ph:'Necesita morir… para que yo pueda renacer como…'},
+ templanza:{n:'XIV',t:'La Templanza',img:T5C6+'templanza.webp',alt:'La Templanza del mazo Rider-Waite: un ángel de alas rojas y túnica blanca, con un triángulo dentro de un cuadrado en el pecho, pasa agua de una copa a otra con un pie en el agua y otro en la tierra; un camino sube entre montañas hacia el sol y crecen lirios junto al agua',
+  lugar:'Después de soltar, el Loco <b>se sana</b>: mezcla lo viejo y lo nuevo, la emoción y la razón, y encuentra su punto medio. Es la última carta del mundo interior.',
+  kw:['Sanación','Equilibrio','Paciencia','Integración','Armonía'],
+  im:[['El ángel','Lo sagrado que habita en nosotras.',50,16],['Las dos copas','El agua que pasa de una a otra: mezclar.',72,40],['Un pie en el agua','Y otro en la tierra: emoción y materia.',50,83],['El triángulo','Dentro del cuadrado: el espíritu en el cuerpo.',47,30],['El camino','Sube hacia la luz entre las montañas.',18,68],['Los lirios','Flores que crecen junto al agua: renovación.',80,55]],
+  caras:[['Sanar con paciencia','Encontrar el punto medio','Integrar lo vivido'],['Ir a los extremos','Querer sanar a la fuerza','Calmar a todos menos a mí'],['Desequilibrio','Impaciencia','Excesos']],
+  mir:'La Templanza nos recuerda que <b>sanar lleva tiempo</b>: se trata de unir nuestras partes con suavidad, sin forzar, hasta que vuelven a fluir juntas.',
+  q:'¿Qué necesito integrar en mí para sentirme en equilibrio?',ph:'Para sentirme en equilibrio necesito integrar…'},
+ diablo:{n:'XV',t:'El Diablo',img:T5C6+'diablo.webp',alt:'El Diablo del mazo Rider-Waite: una figura con cuernos y alas de murciélago, sentada sobre un pedestal ante un fondo negro, sostiene una antorcha hacia abajo; a sus pies, una pareja con cuernos y colas, atada con cadenas sueltas al cuello',
+  lugar:'Ya sanado, el Loco entra al mundo espiritual y <b>se encuentra con su sombra</b>: los apegos, miedos y deseos que lo atan.',
+  kw:['Sombra','Apego','Deseo','Dependencia','Liberación'],
+  im:[['Las cadenas sueltas','Podrían quitárselas: la atadura es elegida.',60,58],['La pareja','Los Enamorados, ahora atados al deseo.',22,62],['Cuernos y colas','El instinto que toma el control.',28,12],['La antorcha hacia abajo','Una energía que se usa para atarnos.',85,68],['El pedestal','Lo que ponemos por encima de nosotras.',45,67],['El fondo negro','Lo que no queremos ver de nosotras.',12,40]],
+  caras:[['Reconocer mi sombra','Usar el deseo como motor','Abrazar mi poder personal'],['Apegos y dependencias','Vínculos que atan','Patrones que se repiten'],['Romper una cadena','Darse cuenta de un apego','Comenzar a liberarse']],
+  mir:'El Diablo nos invita a <b>mirar nuestra sombra sin juicio</b>: lo que reconocemos podemos transformarlo, y lo que negamos nos sigue atando.',
+  q:'¿Qué me ata hoy y qué necesito para soltar esa cadena?',ph:'Hoy me ata… Para soltar esa cadena necesito…'}});
+const T5HOY6=[['muerte','Soltar','Lo que termina para que algo nazca.','#5b5b5b'],['templanza','Integrar','La sanación que mezcla y equilibra.','#4573a8'],['diablo','Liberarse','Mirar la sombra que nos ata.','#c0442f']];
+const T5TZ16=[...T5TZ13,'muerte','templanza','diablo'];
+
+/* ----- 1 · Bienvenida y repaso ----- */
+RICH.t6a1=()=>nbHero('Tarot Camino del Ser · Clase 6','<span style="font-size:.68em">Transformación, sanación</span>','y sombra','Clase 6 · Arcanos Mayores. La Muerte, La Templanza y El Diablo.',['Soltar','Integrar','Liberarse'],'Casa Muladhara · Escuela de Formación Holística',
+ `<div class="nb-pw t5-fan">${T5HOY6.map(y=>t5card({...t5full(T5ARC[y[0]]),sm:1})).join('')}</div>`);
+RICH.t6a2=()=>dkH('Repaso de la semana','Ciclos, equilibrio y entrega','Antes de seguir, compartimos cómo fue la semana con tu carta del día y tus ciclos.')+
+ `<div class="t5-cols" style="grid-template-columns:repeat(3,minmax(0,150px));justify-content:center">${['rueda','justicia','colgado'].map(id=>t5card({...t5full(T5ARC[id]),sm:1})).join('')}</div>
+ <div class="dk-sub">¿Qué carta salió más en tu carta del día?</div>${chipRow('t6rc',T5TZ13.map(id=>t5arcOf(id).t),st('t6rc',-1))}`+
+ n3area('t6rh','¿Qué ciclo observaste en tu semana?','Esta semana observé el ciclo de…')+
+ n3area('t6rr','¿Qué te quedó resonando de la clase 5?','Me quedó resonando…')+n3priv;
+RICH.t6a3=()=>{const s=n3clamp(st('t6hy',0),0,2),x=T5HOY6[s],a=T5ARC[x[0]];
+ return dkH('Las cartas de hoy','Tres pasos de transformación','Soltar, integrar y mirar la sombra: el Loco deja morir lo que ya cumplió su ciclo, encuentra su <b>equilibrio</b> y se atreve a mirar aquello que lo <b>ata</b>.')+
+ `<div class="t5-big" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr))">${T5HOY6.map((y,i)=>`<button ${rxa('set','t6hy',i)} ${pressed(i===s)} style="border-top:4px solid ${y[3]}"><span class="k" style="font-size:2rem">${T5ARC[y[0]].n}</span><b>${T5ARC[y[0]].t}</b><small>${y[1]}</small></button>`).join('')}</div>
+ <div class="dk-split" style="align-items:center">${t5card({...t5full(a),sm:1})}<div class="detail" style="border-left:6px solid ${x[3]}"><span class="eyebrow">${a.n} · ${a.t}</span><h3>${x[1]}</h3><p>${x[2]}</p>${t5nav('t6hy',s,3)}</div></div>
+ <div class="dk-call">${ic('espiral',18)} La Muerte <b>suelta</b>, La Templanza <b>sana</b> y El Diablo muestra lo que aún nos <b>ata</b>.</div>`};
+
+/* ----- 2, 3 y 4 · La Muerte, La Templanza y El Diablo ----- */
+[['b','muerte'],['c','templanza'],['d','diablo']].forEach(([l,id])=>{
+ RICH['t6'+l+'1']=()=>t5Lugar(id,'Clase 6');
+ RICH['t6'+l+'2']=()=>t5Lect(id);
+ RICH['t6'+l+'3']=()=>t5Caras(id);
+ RICH['t6'+l+'4']=()=>t5Mir(id)});
+
+/* ----- 5 · Práctica con tu mazo ----- */
+const T5SSL=[['muerte','Lo que suelto','Algo que ya cumplió su ciclo.','Suelto…'],['templanza','Lo que integro','Lo que quiero sanar en mí.','Quiero sanar en mí…'],['diablo','Lo que me ata','Una cadena que estoy lista para soltar.','Estoy lista para soltar la cadena de…']];
+RICH.t6e1=()=>{const s=n3clamp(st('t6ss',0),0,2),x=T5SSL[s],a=T5ARC[x[0]];
+ return dkH('Ejercicio vivencial · en grupos pequeños','Soltar, sanar y liberar','Con cada carta de hoy, anota lo tuyo y compártelo en tu grupo.')+
+ `<div class="t5-big" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr))">${T5SSL.map((y,i)=>`<button ${rxa('set','t6ss',i)} ${pressed(i===s)}><b>${y[1]}</b><small>Con ${T5ARC[y[0]].t}: ${y[2].charAt(0).toLowerCase()+y[2].slice(1)}</small>${st('t6sw'+i,'').trim()?`<small>${ic('check',14)} Anotado</small>`:''}</button>`).join('')}</div>
+ <div class="dk-split" style="align-items:center">${t5card({...t5full(a),sm:1})}<div style="display:grid;gap:10px"><div class="detail"><span class="eyebrow">${a.n} · ${a.t}</span><h3>${x[1]}</h3><p>${x[2]}</p>${t5nav('t6ss',s,3)}</div>${n3area('t6sw'+s,x[1],x[3])}</div></div>`+n3priv};
+RICH.t6e2=()=>dkH('Práctica con tu mazo','Tirada de una carta','Ahora con las 16 cartas vistas, del 0 al XV. Practica con tu mazo y aquí mismo.')+
+ n3ck('t6tp',[['','Baraja las 16 cartas vistas, del 0 al XV, derechas e invertidas.'],['','Pregunta: ¿qué estoy lista para transformar?'],['','Saca una carta, muéstrala a la cámara y léela con tu ficha y con lo que sientes.']])+
+ `<div class="t5-cols" style="grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:8px">${T5TZ16.map(id=>t5card({...t5full(t5arcOf(id)),sm:1})).join('')}</div>
+ <div class="dk-call">${ic('lupa',18)} <b>¿Qué estoy lista para transformar?</b></div>`+
+ t5tirada('t6tz','Sacar una carta',T5TZ16)+n3area('t6tl','Lo que siento con mi carta','Mi carta me dice…')+n3priv;
+
+/* ----- 6 · Tarea, cierre y repaso ----- */
+RICH.t6f1=()=>dkH('Para esta semana','Un pequeño ritual de cierre','Seguimos la carta del día, ahora con las 16 cartas, y nos despedimos de algo que elegimos soltar.')+
+ n3ck('t6ta',[['libro','Completa las fichas de La Muerte, La Templanza y El Diablo.'],['sol','Cada mañana saca una carta entre las 16 vistas, derecha o invertida.'],['hoja','Escribe una carta de despedida a algo que hoy eliges soltar.']])+
+ `<div class="dk-sub">Tu carta de hoy</div>`+t5tirada('t6cd','Sacar mi carta del día',T5TZ16)+
+ (st('t6sw0','').trim()?`<div class="dk-call">${ic('hoja',18)} En el ejercicio anotaste lo que sueltas: <b>${esc(st('t6sw0','').trim())}</b></div>`:'')+
+ n3area('t6cs','Mi carta de despedida','Querido/a… hoy elijo soltarte porque…')+n3priv;
+RICH.t6f2=()=>dkH('Lo que soltamos nos libera','Próxima clase','Seguimos el viaje por el mundo espiritual.')+
+ `<div class="t5-cols">${[16,17,18].map(i=>t5card({n:T5ROM[i],t:T5MAY[i],sm:1})).join('')}</div>`+
+ n3quote('Soltar, integrar y mirar la sombra: <mark>lo que soltamos nos libera</mark>.')+`<small class="dk-sig" style="text-align:center;display:block">Casa Muladhara · Escuela de Formación Holística</small>`;
+const T5Q6=[
+ {q:'¿Qué representa La Muerte en el viaje del Loco?',o:['Un final sin vuelta','Una transformación profunda: dejar morir lo que cumplió su ciclo','Un castigo'],a:1,e:'No es un final: es una transformación profunda.'},
+ {q:'La rosa blanca en la bandera de La Muerte habla de…',o:['La vida que renace','La guerra','El poder del rey'],a:0,e:'Y el sol en el horizonte: después de la noche, amanece.'},
+ {q:'¿Cuál es una sombra de La Muerte?',o:['Cerrar un ciclo','Aferrarse al pasado','Abrir espacio a lo nuevo'],a:1,e:'Su sombra: miedo a los finales, aferrarse al pasado y duelos que no se viven.'},
+ {q:'¿Qué lugar ocupa La Templanza en el viaje?',o:['La primera carta del mundo exterior','La última carta del mundo interior','El final del viaje'],a:1,e:'Después de soltar, el Loco se sana y encuentra su punto medio.'},
+ {q:'El ángel de La Templanza tiene un pie en el agua y otro en la tierra. Eso habla de…',o:['Emoción y materia','Duda','Huida'],a:0,e:'Y el agua que pasa de una copa a otra: mezclar.'},
+ {q:'¿Cuál es una sombra de La Templanza?',o:['Sanar con paciencia','Calmar a todos menos a mí','Integrar lo vivido'],a:1,e:'Su sombra: ir a los extremos, querer sanar a la fuerza y calmar a todos menos a mí.'},
+ {q:'En El Diablo, las cadenas están sueltas. ¿Qué nos dicen?',o:['Que no hay salida','Que podrían quitárselas: la atadura es elegida','Que el Diablo es más fuerte'],a:1,e:'Lo que reconocemos podemos transformarlo.'},
+ {q:'La pareja de El Diablo recuerda a…',o:['Los Enamorados, ahora atados al deseo','El Emperador y la Emperatriz','La niña y el obispo'],a:0,e:'La misma pareja, ahora con cuernos y colas.'},
+ {q:'Invertido, El Diablo puede hablar de…',o:['Apegos y dependencias','Romper una cadena','Vínculos que atan'],a:1,e:'Invertido: romper una cadena, darse cuenta de un apego y comenzar a liberarse.'},
+ {q:'En la tarea de esta semana escribes…',o:['Tu historia del Loco','Una carta de despedida a algo que eliges soltar','Las palabras clave de las 16 cartas'],a:1,e:'Un pequeño ritual de cierre.'}];
+RICH.t6f3=()=>n3quiz('t5c6',T5Q6,['Dominas lo esencial de la Clase 6. ¡Soltar, integrar y liberarse!','Vas muy bien. Repasa lo que falló y sigue practicando.','Vale la pena repasar la clase. Puedes volver cuando quieras.']);
