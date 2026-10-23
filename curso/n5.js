@@ -368,3 +368,107 @@ const T5Q3=[
  {q:'¿Cuál es una sombra de Los Enamorados?',o:['Elegir para complacer','Vínculos sanos','Elegir con el corazón'],a:0,e:'Su sombra: dependencia emocional, indecisión y elegir para complacer.'},
  {q:'En la tirada de esta clase, ¿con cuántas cartas trabajas?',o:['Con las 4 de la clase pasada','Con las 7 cartas vistas','Con los 22 Mayores'],a:1,e:'De El Loco a Los Enamorados, derechas e invertidas.'}];
 RICH.t3f3=()=>n3quiz('t5c3',T5Q3,['Dominas lo esencial de la Clase 3. ¡Ordenar, aprender y elegir!','Vas muy bien. Repasa lo que falló y sigue practicando.','Vale la pena repasar la clase. Puedes volver cuando quieras.']);
+
+/* ---------- Clase 4 · Avanzar, sostener y mirar adentro ---------- */
+const T5C4=N5P+'c4/';
+(function(){const c=document.getElementById('t5-css');if(c)c.textContent+=`
+.t5-path{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.t5-path button{all:unset;box-sizing:border-box;cursor:pointer;display:grid;gap:4px;justify-items:center;padding:6px;border-radius:12px;border:1px solid var(--nb-line);background:var(--nb-paper);color:var(--nb-ink);transition:transform .2s,border-color .2s}
+.t5-path button:hover{transform:translateY(-2px);border-color:var(--nb-gold)}.t5-path button:focus-visible{outline:2px solid var(--nb-gold)}
+.t5-path button[aria-pressed="true"]{background:#1f3f32;color:#ece7d3;border-color:#1f3f32}
+.t5-path img{width:100%;height:auto;border-radius:6px}
+.t5-path small{font:600 .6rem/1.2 var(--f-caps);letter-spacing:.12em;text-transform:uppercase;text-align:center}
+.t5-path .x{grid-column:1/-1;font:600 .62rem/1.2 var(--f-caps);letter-spacing:.18em;text-transform:uppercase;color:var(--nb-gold);padding-top:4px}
+.t5-two{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:12px;align-items:center;justify-items:center}
+.t5-two .ar{font:400 2rem/1 var(--f-display);color:var(--nb-gold)}
+@media (max-width:560px){.t5-path{grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}.t5-path small{display:none}}
+`})();
+Object.assign(T5ARC,{
+ carro:{n:'VII',t:'El Carro',img:T5C4+'carro.webp',alt:'El Carro del mazo Rider-Waite: un joven con corona y armadura de pie en un carro bajo un dosel de estrellas, con lunas en los hombros; lo tiran una esfinge negra y una blanca, sin riendas, y detrás queda una ciudad',
+  lugar:'El Loco ya tiene identidad y valores, y <b>sale al mundo a conquistar su camino</b>. Es la última carta del mundo exterior.',
+  kw:['Determinación','Avance','Dominio de sí','Victoria','Dirección'],
+  im:[['Dos esfinges','Una negra y una blanca: fuerzas opuestas.',20,76],['Sin riendas','Guía con la voluntad, no con la fuerza.',72,50],['La ciudad atrás','Deja lo conocido para avanzar.',88,40],['El dosel de estrellas','Una guía que viene de lo alto.',25,10],['La corona y el laurel','El triunfo y el logro.',50,13],['Las lunas en los hombros','Las emociones que lo acompañan.',30,29]],
+  caras:[['Avanzar con decisión','Tomar el control de tu rumbo','Enfocarte en tu meta'],['Querer controlarlo todo','Ganar a cualquier costo','Avanzar sin escuchar'],['Falta de dirección','Fuerzas internas en conflicto','Sentirse estancada']],
+  mir:'El Carro enseña a <b>integrar los opuestos</b> que llevamos dentro, como la razón y la emoción, para avanzar con un solo rumbo.',
+  q:'¿Hacia dónde quiero llevar mi vida y qué fuerzas internas necesito alinear?',ph:'Quiero llevar mi vida hacia… Necesito alinear…'},
+ fuerza:{n:'VIII',t:'La Fuerza',img:T5C4+'fuerza.webp',alt:'La Fuerza del mazo Rider-Waite: una mujer de vestido blanco, con el símbolo del infinito sobre la cabeza y una cadena de flores, cierra con suavidad la boca de un león rojo; al fondo, una montaña',
+  lugar:'Después de conquistar afuera, el Loco descubre la <b>fuerza interior</b>: acompañar su instinto con amor y paciencia. Abre el mundo interior.',
+  kw:['Fuerza interior','Compasión','Paciencia','Coraje','Dominio amoroso'],
+  im:[['El león','El instinto y las pasiones.',70,65],['Las manos suaves','Calma al león sin violencia.',38,54],['El infinito','El mismo del Mago: un poder sin límites.',18,20],['La cadena de flores','Un lazo de amor, no de fuerza.',58,38],['El vestido blanco','La pureza de la intención.',30,42],['La montaña al fondo','Una meta que se alcanza con calma.',9,68]],
+  caras:[['Valentía con ternura','Paciencia contigo','Calmar tus miedos con amor'],['Reprimir emociones','Exigirte demasiado','Aparentar fortaleza'],['Inseguridad','Instinto desbordado','Agotamiento']],
+  mir:'La Fuerza invita a <b>abrazar la propia sombra</b> en vez de pelear con ella. Lo que se acompaña con amor se calma; lo que se reprime vuelve con más fuerza.',
+  q:'¿Qué parte de mí necesita ser abrazada en vez de controlada?',ph:'La parte de mí que necesita ser abrazada es…'},
+ ermitano:{n:'IX',t:'El Ermitaño',img:T5C4+'ermitano.webp',alt:'El Ermitaño del mazo Rider-Waite: un anciano de manto gris y cabeza inclinada, en la cima nevada de una montaña, sostiene en alto una linterna con una estrella de seis puntas y se apoya en un bastón',
+  lugar:'El Loco se retira del ruido del mundo para <b>buscar su propia verdad</b>. Su luz ya no viene de afuera: la lleva en la mano.',
+  kw:['Introspección','Soledad elegida','Búsqueda','Sabiduría','Guía interior'],
+  im:[['La linterna','Ilumina solo el paso siguiente.',8,33],['La estrella de seis puntas','La sabiduría que une cielo y tierra.',15,20],['El bastón','El apoyo de la experiencia.',40,62],['La cima nevada','Un logro alcanzado en soledad.',82,86],['El manto gris','Discreción y humildad.',62,55],['La cabeza inclinada','Mira hacia adentro y hacia abajo.',45,17]],
+  caras:[['Retirarte para escucharte','Buscar tus propias respuestas','Guiar con el ejemplo'],['Aislamiento','Desconfianza','Encerrarse en sí misma'],['Soledad no elegida','Miedo a mirarse','No pedir ayuda']],
+  mir:'El Ermitaño muestra que el tiempo a solas puede ser medicina. Es el encuentro con el <b>maestro interior</b>: la voz que sabe lo que necesitas.',
+  q:'¿Qué respuesta estoy buscando afuera que ya sé por dentro?',ph:'Busco afuera… y por dentro ya sé que…'}});
+const T5HOY4=[['carro','Avanzar','La voluntad que guía hacia la meta.','#c0442f'],['fuerza','Sostener','El coraje que abraza el instinto.','#9b6f27'],['ermitano','Mirar adentro','La luz que se busca en el silencio.','#4573a8']];
+const T5TZ10=[...T5TZ7,'carro','fuerza','ermitano'];
+
+/* ----- 1 · Bienvenida y repaso ----- */
+RICH.t4a1=()=>nbHero('Tarot Camino del Ser · Clase 4','<span style="font-size:.68em">Avanzar, sostener</span>','y mirar adentro','Clase 4 · Arcanos Mayores. El Carro, La Fuerza y El Ermitaño.',['Avanzar','Sostener','Mirar adentro'],'Casa Muladhara · Escuela de Formación Holística',
+ `<div class="nb-pw t5-fan">${T5HOY4.map(y=>t5card({...t5full(T5ARC[y[0]]),sm:1})).join('')}</div>`);
+RICH.t4a2=()=>dkH('Repaso de la semana','Estructura, enseñanza y elección','Antes de seguir, compartimos cómo fue la semana con tu carta del día.')+
+ `<div class="t5-cols" style="grid-template-columns:repeat(3,minmax(0,150px));justify-content:center">${['emperador','hierofante','enamorados'].map(id=>t5card({...t5full(T5ARC[id]),sm:1})).join('')}</div>
+ <div class="dk-sub">¿Qué carta salió más en tu carta del día?</div>${chipRow('t4rc',T5TZ7.map(id=>t5arcOf(id).t),st('t4rc',-1))}`+
+ n3area('t4rs','¿Cómo se reflejó en tu semana?','Esta semana…')+
+ n3area('t4rr','¿Qué te quedó resonando de la clase 3?','Me quedó resonando…')+n3priv;
+RICH.t4a3=()=>{const s=n3clamp(st('t4hy',0),0,2),x=T5HOY4[s],a=T5ARC[x[0]];
+ return dkH('Las cartas de hoy','Tres pasos hacia adentro','Del mundo exterior al mundo interior: el Loco sale a conquistar su camino, descubre su <b>fuerza interior</b> y se retira a buscar su <b>propia luz</b>.')+
+ `<div class="t5-big" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr))">${T5HOY4.map((y,i)=>`<button ${rxa('set','t4hy',i)} ${pressed(i===s)} style="border-top:4px solid ${y[3]}"><span class="k" style="font-size:2rem">${T5ARC[y[0]].n}</span><b>${T5ARC[y[0]].t}</b><small>${y[1]}</small></button>`).join('')}</div>
+ <div class="dk-split" style="align-items:center">${t5card({...t5full(a),sm:1})}<div class="detail" style="border-left:6px solid ${x[3]}"><span class="eyebrow">${a.n} · ${a.t} · ${s?'Mundo interior':'Mundo exterior'}</span><h3>${x[1]}</h3><p>${x[2]}</p>${t5nav('t4hy',s,3)}</div></div>
+ <div class="dk-call">${ic('camino',18)} El Carro <b>cierra el mundo exterior</b>. La Fuerza y El Ermitaño <b>abren el mundo interior</b>.</div>`};
+
+/* ----- 2, 3 y 4 · El Carro, La Fuerza y El Ermitaño ----- */
+[['b','carro'],['c','fuerza'],['d','ermitano']].forEach(([l,id])=>{
+ RICH['t4'+l+'1']=()=>t5Lugar(id,'Clase 4');
+ RICH['t4'+l+'2']=()=>t5Lect(id);
+ RICH['t4'+l+'3']=()=>t5Caras(id);
+ RICH['t4'+l+'4']=()=>t5Mir(id)});
+
+/* ----- 5 · Cierre del primer mes ----- */
+// las 10 cartas como botones: el 0 al VII son el mundo exterior; VIII y IX abren el interior
+const t5path=(key,s)=>`<div class="t5-path" role="group">${T5TZ10.map((id,i)=>{const a=t5arcOf(id);return `<button ${rxa('set',key,i)} ${pressed(i===s)} aria-label="${a.n} · ${a.t}"><img src="${a.img}" alt="" decoding="async"><small>${a.n}</small></button>`}).join('')}</div>`;
+RICH.t4e1=()=>{const s=n3clamp(st('t4vj',0),0,9),a=t5arcOf(T5TZ10[s]);
+ return dkH('Cierre del primer mes','Las 10 primeras cartas del viaje','Del Loco que se lanza al Ermitaño que mira hacia adentro: así se construye una persona antes de enfrentar los grandes cambios de la vida. Toca cada carta.')+t5path('t4vj',s)+
+ `<div class="dk-split" style="align-items:center">${t5card({...t5full(a),sm:1})}<div class="detail"><span class="eyebrow">Carta ${s+1} de 10 · ${s<8?'Mundo exterior':'Mundo interior'}</span><h3>${a.n} · ${a.t}</h3><p><b>Palabras clave:</b> ${a.kw.join(' · ')}.</p><p><b>Mensaje luminoso:</b> ${a.caras[0].join(' · ')}.</p>${t5nav('t4vj',s,10)}</div></div>`};
+const T5LG=[['persona','Dónde estoy','Elige, entre las 10, la carta que muestra tu momento actual.'],['camino','Hacia dónde voy','Elige la carta que representa el paso que quieres dar.'],['grupo','Comparte','Cuenta qué necesitas para ir de una carta a la otra.']];
+RICH.t4e2=()=>{const s=n3clamp(st('t4lg',0),0,2),x=T5LG[s],de=st('t4de',-1),ha=st('t4ha',-1),nm=i=>t5arcOf(T5TZ10[i]);
+ return dkH('Ejercicio vivencial · en grupos pequeños','Mi lugar en el viaje','Tres pasos para ubicarte en el camino del Loco.')+
+ `<div class="tl" style="grid-template-columns:repeat(3,minmax(0,1fr))">${T5LG.map((y,i)=>`<button ${rxa('set','t4lg',i)} ${pressed(i===s)}><span class="n">${i+1}</span><span class="t">${y[1]}</span></button>`).join('')}</div>
+ <div class="detail"><span class="eyebrow">Paso ${s+1} de 3</span><h3>${ic(x[0],26)} ${x[1]}</h3><p>${x[2]}</p>${t5nav('t4lg',s,3,'Siguiente paso')}</div>
+ <div class="dk-sub">Dónde estoy</div>${chipRow('t4de',T5TZ10.map(id=>t5arcOf(id).t),de)}
+ <div class="dk-sub">Hacia dónde voy</div>${chipRow('t4ha',T5TZ10.map(id=>t5arcOf(id).t),ha)}`+
+ (de>=0&&ha>=0?(de===ha?`<div class="dk-call warn">Elegiste la misma carta en los dos. ¿Qué paso quieres dar desde aquí?</div>`:
+ `<div class="t5-two">${t5card({...t5full(nm(de)),sm:1})}<span class="ar" aria-hidden="true">→</span>${t5card({...t5full(nm(ha)),sm:1})}</div>
+ <div class="dk-call">${ic('camino',18)} De <b>${nm(de).t}</b> (${nm(de).kw[0].toLowerCase()}) hacia <b>${nm(ha).t}</b> (${nm(ha).kw[0].toLowerCase()}).</div>`):'')+
+ n3area('t4lq','Lo que necesito para ir de una carta a la otra','Para llegar ahí necesito…')+n3priv};
+RICH.t4e3=()=>dkH('Práctica con tu mazo','Tirada de una carta','Ahora con las 10 cartas vistas. Practica con tu mazo y aquí mismo.')+
+ n3ck('t4tp',[['','Baraja las 10 cartas vistas, derechas e invertidas.'],['','Pregunta: ¿qué me llevo de este primer mes?'],['','Saca una carta, muéstrala a la cámara y léela con tu ficha y con lo que sientes.']])+
+ `<div class="t5-cols" style="grid-template-columns:repeat(auto-fit,minmax(70px,1fr));gap:8px">${T5TZ10.map(id=>t5card({...t5full(t5arcOf(id)),sm:1})).join('')}</div>
+ <div class="dk-call">${ic('lupa',18)} <b>¿Qué me llevo de este primer mes?</b></div>`+
+ t5tirada('t4tz','Sacar una carta',T5TZ10)+n3area('t4tl','Lo que siento con mi carta','Mi carta me dice…')+n3priv;
+
+/* ----- 6 · Tarea, cierre y repaso ----- */
+RICH.t4f1=()=>dkH('Para esta semana','Tu propia historia del Loco','Seguimos la carta del día, ahora con las 10 cartas, y escribimos el viaje como propio.')+
+ n3ck('t4ta',[['libro','Completa las fichas de El Carro, La Fuerza y El Ermitaño.'],['sol','Cada mañana saca una carta entre las 10 vistas, derecha o invertida.'],['hoja','Escribe una página con el viaje del Loco del 0 al IX, contado como tu propia historia.']])+
+ `<div class="dk-sub">Tu carta de hoy</div>`+t5tirada('t4cd','Sacar mi carta del día',T5TZ10)+
+ n3area('t4hl','Mi historia del Loco, del 0 al IX','Un día salí al camino como el Loco…')+n3priv;
+RICH.t4f2=()=>dkH('Cerramos el primer mes','Próxima clase','Con estas 10 cartas cerramos el primer mes del viaje.')+
+ `<div class="t5-cols">${[10,11,12].map(i=>t5card({n:T5ROM[i],t:T5MAY[i],sm:1})).join('')}</div>`+
+ n3quote('El Loco avanza, se sostiene con amor y <mark>busca su propia luz</mark>.')+`<small class="dk-sig" style="text-align:center;display:block">Casa Muladhara · Escuela de Formación Holística</small>`;
+const T5Q4=[
+ {q:'¿Qué lugar ocupa El Carro en el viaje del Loco?',o:['La última carta del mundo exterior','La primera del mundo interior','El final del viaje'],a:0,e:'El Carro cierra el mundo exterior; La Fuerza y El Ermitaño abren el interior.'},
+ {q:'Las dos esfinges de El Carro, una negra y una blanca, representan…',o:['Fuerzas opuestas','El triunfo','Las emociones'],a:0,e:'Y las guía sin riendas: con la voluntad, no con la fuerza.'},
+ {q:'¿Cuál es una sombra de El Carro?',o:['Enfocarte en tu meta','Ganar a cualquier costo','Avanzar con decisión'],a:1,e:'Su sombra: querer controlarlo todo, ganar a cualquier costo y avanzar sin escuchar.'},
+ {q:'La mirada terapéutica de El Carro enseña a…',o:['Integrar los opuestos para avanzar con un solo rumbo','Retirarse del mundo','Reprimir las emociones'],a:0,e:'Como la razón y la emoción.'},
+ {q:'En La Fuerza, ¿cómo calma la mujer al león?',o:['Con una cadena de hierro','Con manos suaves, sin violencia','Con un bastón'],a:1,e:'La cadena es de flores: un lazo de amor, no de fuerza.'},
+ {q:'El símbolo del infinito sobre La Fuerza es el mismo de…',o:['El Mago','La Emperatriz','El Carro'],a:0,e:'Un poder sin límites.'},
+ {q:'Invertida, La Fuerza puede hablar de…',o:['Paciencia contigo','Instinto desbordado','Valentía con ternura'],a:1,e:'Invertida: inseguridad, instinto desbordado y agotamiento.'},
+ {q:'La linterna de El Ermitaño…',o:['Ilumina todo el camino','Ilumina solo el paso siguiente','Es un trofeo'],a:1,e:'Dentro brilla una estrella de seis puntas: la sabiduría que une cielo y tierra.'},
+ {q:'¿Cuál es la diferencia entre la luz y la sombra de El Ermitaño?',o:['Soledad elegida frente a aislamiento','Avanzar frente a detenerse','Hablar frente a callar'],a:0,e:'Su luz es retirarse para escucharse; su sombra, el aislamiento y encerrarse en sí misma.'},
+ {q:'En la tarea de esta semana escribes…',o:['Una carta a tu Ermitaño','El viaje del Loco del 0 al IX como tu propia historia','Las palabras clave de los 22 Mayores'],a:1,e:'Y sigues con tu carta del día entre las 10 vistas.'}];
+RICH.t4f3=()=>n3quiz('t5c4',T5Q4,['Dominas lo esencial de la Clase 4. ¡Cerraste el primer mes!','Vas muy bien. Repasa lo que falló y sigue practicando.','Vale la pena repasar la clase. Puedes volver cuando quieras.']);
