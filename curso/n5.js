@@ -378,9 +378,11 @@ const T5C4=N5P+'c4/';
 .t5-path button[aria-pressed="true"]{background:#1f3f32;color:#ece7d3;border-color:#1f3f32}
 .t5-path img{width:100%;height:auto;border-radius:6px}
 .t5-path small{font:600 .6rem/1.2 var(--f-caps);letter-spacing:.12em;text-transform:uppercase;text-align:center}
-.t5-path .x{grid-column:1/-1;font:600 .62rem/1.2 var(--f-caps);letter-spacing:.18em;text-transform:uppercase;color:var(--nb-gold);padding-top:4px}
+.t5-path .t5-fx{grid-column:1/-1;font:600 .62rem/1.2 var(--f-caps);letter-spacing:.18em;text-transform:uppercase;color:var(--nb-gold);padding-top:4px}
 .t5-two{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:12px;align-items:center;justify-items:center}
 .t5-two .ar{font:400 2rem/1 var(--f-display);color:var(--nb-gold)}
+.t5-vj{display:grid;grid-template-columns:minmax(90px,130px) minmax(0,1fr);gap:16px;align-items:center}
+@media (max-width:560px){.t5-vj{grid-template-columns:1fr}.t5-vj>.t5-path{width:110px;justify-self:center}}
 @media (max-width:560px){.t5-path{grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}.t5-path small{display:none}}
 `})();
 Object.assign(T5ARC,{
@@ -719,3 +721,96 @@ const T5Q7=[
  {q:'Invertida, La Luna puede hablar de…',o:['Miedos sin nombre','La niebla que empieza a disiparse','Confusión'],a:1,e:'Invertida: la niebla empieza a disiparse, un miedo sale a la luz y llega claridad de a poco.'},
  {q:'En la tarea «Diario de sueños», al despertar anotas…',o:['Tus sueños y la emoción con la que despertaste','Solo tu carta del día','Tus metas de la semana'],a:0,e:'Y cada mañana sacas una carta entre las 19 vistas.'}];
 RICH.t7f3=()=>n3quiz('t5c7',T5Q7,['Dominas lo esencial de la Clase 7. ¡Despertar, confiar y sentir!','Vas muy bien. Repasa lo que falló y sigue practicando.','Vale la pena repasar la clase. Puedes volver cuando quieras.']);
+
+/* ---------- Clase 8 · Plenitud y cierre del viaje ---------- */
+const T5C8=N5P+'c8/';
+Object.assign(T5ARC,{
+ sol:{n:'XIX',t:'El Sol',img:T5C8+'sol.webp',alt:'El Sol del mazo Rider-Waite: un gran sol con rostro brilla sobre un niño desnudo con corona de flores que monta un caballo blanco sin riendas y lleva un estandarte rojo; detrás, un muro con girasoles',
+  lugar:'Después de atravesar la noche de La Luna, <b>amanece</b>. El Loco recupera la claridad, la alegría y la inocencia de su niño interior.',
+  kw:['Alegría','Claridad','Vitalidad','Éxito','Niño interior'],
+  im:[['El gran sol','Una luz que ilumina todo, sin sombras.',50,18],['El niño desnudo','La inocencia: nada que esconder.',38,60],['El caballo blanco','Avanza sin riendas, con confianza.',60,80],['El estandarte rojo','La vitalidad que se muestra al mundo.',80,45],['Los girasoles','Crecen mirando hacia la luz.',12,45],['El muro','Queda atrás: el niño ya salió al mundo.',14,74]],
+  caras:[['Disfrutar la vida','Mostrarme sin miedo','Reconectar con mi niña interior'],['Necesitar brillar siempre','Negar el dolor','Optimismo forzado'],['Alegría apagada','Una luz que tarda en llegar','Dificultad para disfrutar']],
+  mir:'El Sol nos recuerda que <b>la alegría también sana</b>: cuando nos permitimos ser como somos, nuestra luz ilumina también a otros.',
+  q:'¿Qué me hace brillar y cuándo me permito disfrutarlo?',ph:'Me hace brillar… y me permito disfrutarlo cuando…'},
+ juicio:{n:'XX',t:'El Juicio',img:T5C8+'juicio.webp',alt:'El Juicio del mazo Rider-Waite: un ángel entre nubes toca una trompeta con una bandera de cruz roja; abajo, un hombre, una mujer y un niño se alzan de sus ataúdes con los brazos abiertos, ante montañas nevadas',
+  lugar:'Iluminado por El Sol, el Loco <b>escucha el llamado de su alma</b>. Mira su historia completa, la acepta y renace a una nueva conciencia.',
+  kw:['Llamado','Renacimiento','Despertar','Perdón','Propósito'],
+  im:[['El ángel y la trompeta','Un llamado que despierta.',45,13],['La bandera con la cruz','El encuentro del cielo y la tierra.',34,43],['Las figuras que se alzan','Renacen con los brazos abiertos.',58,67],['Hombre, mujer y niño','La familia: todo nuestro linaje.',86,64],['Los ataúdes','Lo que estaba dormido despierta.',50,86],['Las montañas nevadas','La claridad de una conciencia nueva.',16,55]],
+  caras:[['Escuchar mi llamado','Perdonar mi historia','Renacer a algo nuevo'],['Juzgarme por el pasado','Miedo a responder','Vivir según lo que esperan'],['No escuchar el llamado','Autocrítica','Dudar de mi propósito']],
+  mir:'El Juicio nos invita a <b>mirar nuestra historia sin condenarla</b>: cuando la aceptamos y la perdonamos, podemos responder al llamado de quienes realmente somos.',
+  q:'¿Qué llamado de mi alma estoy lista para responder?',ph:'Estoy lista para responder al llamado de…'},
+ mundo:{n:'XXI',t:'El Mundo',img:T5C8+'mundo.webp',alt:'El Mundo del mazo Rider-Waite: una bailarina envuelta en un manto violeta sostiene dos varas dentro de una corona de laurel atada con cintas rojas; en las esquinas, un ángel, un águila, un toro y un león',
+  lugar:'El Loco llega al final del viaje con todo lo aprendido integrado. Es <b>plenitud</b>, y también la puerta a un nuevo ciclo: el Loco vuelve a empezar.',
+  kw:['Plenitud','Integración','Logro','Cierre de ciclo','Totalidad'],
+  im:[['La bailarina','Se mueve con libertad y en armonía.',52,36],['La corona de laurel','El ciclo completo y el logro.',12,42],['Las dos varas','Los opuestos ya integrados.',74,44],['Las cintas rojas','Forman un infinito: todo vuelve a empezar.',50,82],['Los cuatro seres','Los de La Rueda, ahora sin libros.',12,10],['El manto violeta','La espiritualidad que envuelve.',64,58]],
+  caras:[['Celebrar lo logrado','Sentirme completa','Cerrar un ciclo con gratitud'],['Miedo a terminar','No valorar lo recorrido','Quedarme en la meta'],['Un ciclo sin cerrar','Falta un último paso','Sentir que algo queda pendiente']],
+  mir:'El Mundo nos enseña a <b>reconocer y celebrar lo que hemos integrado</b>: cada final es la base de un nuevo comienzo, y el camino del ser nunca termina.',
+  q:'¿Qué ciclo estoy completando y qué me llevo de él?',ph:'Estoy completando el ciclo de… y me llevo…'}});
+const T5HOY8=[['sol','Brillar','La alegría de ser quien soy.','#d19a2a'],['juicio','Despertar','El llamado del alma.','#c0442f'],['mundo','Integrar','El ciclo completo.','#4f7d4a']];
+const T5TZ22=[...T5TZ19,'sol','juicio','mundo'];
+// las tres filas del viaje: I a VII, VIII a XIV y XV a XXI
+const T5FIL=[['I a VII','Mundo exterior',1],['VIII a XIV','Mundo interior',8],['XV a XXI','Mundo espiritual',15]];
+const t5fila=(key,f,cur)=>`<div class="t5-path" role="group" style="grid-template-columns:repeat(7,minmax(0,1fr))"><span class="t5-fx">${T5FIL[f][0]} · ${T5FIL[f][1]}</span>${T5TZ22.slice(T5FIL[f][2],T5FIL[f][2]+7).map((id,j)=>{const i=T5FIL[f][2]+j,a=t5arcOf(id);return `<button ${rxa('set',key,i)} ${pressed(i===cur)} aria-label="${a.n} · ${a.t}"><img src="${a.img}" alt="" decoding="async"><small>${a.n}</small></button>`}).join('')}</div>`;
+
+/* ----- 1 · Bienvenida y repaso ----- */
+RICH.t8a1=()=>nbHero('Tarot Camino del Ser · Clase 8','<span style="font-size:.68em">Plenitud y cierre</span>','del viaje','Clase 8 · Arcanos Mayores. El Sol, El Juicio y El Mundo.',['Brillar','Despertar','Integrar'],'Casa Muladhara · Escuela de Formación Holística',
+ `<div class="nb-pw t5-fan">${T5HOY8.map(y=>t5card({...t5full(T5ARC[y[0]]),sm:1})).join('')}</div>`);
+RICH.t8a2=()=>dkH('Repaso de la semana','Ruptura, esperanza y mundo emocional','Antes de seguir, compartimos cómo fue la semana con tu carta del día y tu diario de sueños.')+
+ `<div class="t5-cols" style="grid-template-columns:repeat(3,minmax(0,150px));justify-content:center">${['torre','estrella','luna'].map(id=>t5card({...t5full(T5ARC[id]),sm:1})).join('')}</div>
+ <div class="dk-sub">¿Qué carta salió más en tu carta del día?</div>${chipRow('t8rc',T5TZ19.map(id=>t5arcOf(id).t),st('t8rc',-1))}`+
+ n3area('t8rh','¿Qué te mostraron tus sueños esta semana?','Mis sueños me mostraron…')+
+ n3area('t8rr','¿Qué te quedó resonando de la clase 7?','Me quedó resonando…')+n3priv;
+RICH.t8a3=()=>{const s=n3clamp(st('t8hy',0),0,2),x=T5HOY8[s],a=T5ARC[x[0]];
+ return dkH('Las cartas de hoy','Los tres últimos pasos del viaje','El viaje llega a su plenitud: después de la noche sale el <b>Sol</b>, el Loco escucha su <b>llamado interior</b> y llega al <b>Mundo</b>, un final que es también un nuevo comienzo.')+
+ `<div class="t5-big" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr))">${T5HOY8.map((y,i)=>`<button ${rxa('set','t8hy',i)} ${pressed(i===s)} style="border-top:4px solid ${y[3]}"><span class="k" style="font-size:2rem">${T5ARC[y[0]].n}</span><b>${T5ARC[y[0]].t}</b><small>${y[1]}</small></button>`).join('')}</div>
+ <div class="dk-split" style="align-items:center">${t5card({...t5full(a),sm:1})}<div class="detail" style="border-left:6px solid ${x[3]}"><span class="eyebrow">${a.n} · ${a.t}</span><h3>${x[1]}</h3><p>${x[2]}</p>${t5nav('t8hy',s,3)}</div></div>
+ <div class="dk-call">${ic('sol',18)} El Sol <b>ilumina</b>, El Juicio <b>despierta</b> y El Mundo <b>integra</b> todo el camino recorrido.</div>`};
+
+/* ----- 2, 3 y 4 · El Sol, El Juicio y El Mundo ----- */
+[['b','sol'],['c','juicio'],['d','mundo']].forEach(([l,id])=>{
+ RICH['t8'+l+'1']=()=>t5Lugar(id,'Clase 8');
+ RICH['t8'+l+'2']=()=>t5Lect(id);
+ RICH['t8'+l+'3']=()=>t5Caras(id);
+ RICH['t8'+l+'4']=()=>t5Mir(id)});
+
+/* ----- 5 · Cierre de los Arcanos Mayores ----- */
+RICH.t8e1=()=>{const s=n3clamp(st('t8vj',0),0,21),a=t5arcOf(T5TZ22[s]),zona=s?T5FIL[s<8?0:s<15?1:2][1]:'El viajero';
+ return dkH('Cierre de los Arcanos Mayores','El Viaje del Loco completo','El Loco, el viajero, recorre tres filas de siete cartas: el mundo exterior, el interior y el espiritual. Toca cada carta.')+
+ `<div class="t5-vj"><div class="t5-path" style="grid-template-columns:1fr"><button ${rxa('set','t8vj',0)} ${pressed(s===0)} aria-label="0 · El Loco"><img src="${T5FOOL.img}" alt="" decoding="async"><small>0 · El viajero</small></button></div>
+ <div style="display:grid;gap:10px">${[0,1,2].map(f=>t5fila('t8vj',f,s)).join('')}</div></div>
+ <div class="dk-split" style="align-items:center">${t5card({...t5full(a),sm:1})}<div class="detail"><span class="eyebrow">${a.n} · ${zona}</span><h3>${a.t}</h3><p><b>Palabras clave:</b> ${a.kw.join(' · ')}.</p><p><b>Mensaje luminoso:</b> ${a.caras[0].join(' · ')}.</p>${t5nav('t8vj',s,22)}</div></div>`};
+const T5MV=[['estrella','Elige','Una carta de cada fila que hable de tu vida.'],['chat','Cuenta','Tu historia con esas tres cartas, del Loco al Mundo.'],['ojo','Reconoce','¿En qué carta del viaje te encuentras hoy?']];
+RICH.t8e2=()=>{const s=n3clamp(st('t8mv',0),0,2),x=T5MV[s],el=[0,1,2].map(f=>st('t8f'+f,-1)),ok=el.every(i=>i>0),hoy=st('t8hoy',-1);
+ return dkH('Ejercicio vivencial · en grupos pequeños','Mi propio Viaje del Loco','Tres pasos para contar tu vida con las cartas del viaje.')+
+ `<div class="tl" style="grid-template-columns:repeat(3,minmax(0,1fr))">${T5MV.map((y,i)=>`<button ${rxa('set','t8mv',i)} ${pressed(i===s)}><span class="n">${i+1}</span><span class="t">${y[1]}</span></button>`).join('')}</div>
+ <div class="detail"><span class="eyebrow">Paso ${s+1} de 3</span><h3>${ic(x[0],26)} ${x[1]}</h3><p>${x[2]}</p>${t5nav('t8mv',s,3,'Siguiente paso')}</div>`+
+ (s===0?`<div style="display:grid;gap:10px">${[0,1,2].map(f=>t5fila('t8f'+f,f,el[f])).join('')}</div>`:'')+
+ (s===1?(ok?`<div class="t5-cols" style="grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;align-items:center">${['loco',...el.map(i=>T5TZ22[i]),'mundo'].map(id=>t5card({...t5full(t5arcOf(id)),sm:1})).join('')}</div>
+ <div class="dk-call">${ic('camino',18)} Del Loco al Mundo, pasando por <b>${el.map(i=>t5arcOf(T5TZ22[i]).t).join('</b>, <b>')}</b>.</div>`:`<div class="dk-call warn">Primero elige una carta de cada fila en el paso 1.</div>`)+n3area('t8hi','Mi historia del Loco al Mundo','Mi viaje empezó…'):'')+
+ (s===2?`${chipRow('t8hoy',T5TZ22.map(id=>t5arcOf(id).t),hoy)}`+(hoy>=0?`<div class="dk-split" style="align-items:center">${t5card({...t5full(t5arcOf(T5TZ22[hoy])),sm:1})}<div class="detail"><span class="eyebrow">Hoy estoy en</span><h3>${t5arcOf(T5TZ22[hoy]).n} · ${t5arcOf(T5TZ22[hoy]).t}</h3><p><b>Palabras clave:</b> ${t5arcOf(T5TZ22[hoy]).kw.join(' · ')}.</p></div></div>`:''):'')+n3priv};
+RICH.t8e3=()=>dkH('Práctica con tu mazo','Tirada con los 22 Mayores','Ahora con todos los Arcanos Mayores. Practica con tu mazo y aquí mismo.')+
+ n3ck('t8tp',[['','Baraja los 22 Arcanos Mayores, derechos e invertidos.'],['','Pregunta: ¿qué me llevo de este viaje?'],['','Saca una carta, muéstrala a la cámara y léela con tu ficha y con lo que sientes.']])+
+ `<div class="t5-cols" style="grid-template-columns:repeat(auto-fit,minmax(56px,1fr));gap:6px">${T5TZ22.map(id=>t5card({...t5full(t5arcOf(id)),sm:1})).join('')}</div>
+ <div class="dk-call">${ic('lupa',18)} <b>¿Qué me llevo de este viaje?</b></div>`+
+ t5tirada('t8tz','Sacar una carta',T5TZ22)+n3area('t8tl','Lo que siento con mi carta','Mi carta me dice…')+n3priv;
+
+/* ----- 6 · Tarea, cierre y repaso ----- */
+RICH.t8f1=()=>dkH('Para esta semana','Cerrar el viaje, preparar el siguiente','Revisamos los 22 Mayores y preparamos el mazo para los Arcanos Menores.')+
+ n3ck('t8ta',[['libro','Completa las fichas de El Sol, El Juicio y El Mundo, y revisa tus 22 fichas.'],['sol','Cada mañana saca una carta entre los 22 Mayores, derecha o invertida.'],['espiral','Separa los 56 Arcanos Menores de tu mazo: los usaremos desde la próxima clase.']])+
+ `<div class="dk-sub">Tu carta de hoy</div>`+t5tirada('t8cd','Sacar mi carta del día',T5TZ22)+
+ n3area('t8ll','Lo que me llevo de este viaje','De este viaje me llevo…')+n3priv;
+RICH.t8f2=()=>dkH('Cada final es un nuevo comienzo','Próxima clase · Arcanos Menores','Los cuatro palos · Bastos, del As al 7.')+
+ `<div class="t5-cols" style="grid-template-columns:repeat(auto-fit,minmax(110px,1fr))">${[['B','Bastos'],['C','Copas'],['E','Espadas'],['O','Oros']].map(p=>t5card({n:p[0],t:p[1],sm:1})).join('')}</div>`+
+ n3quote('El viaje llega a su plenitud: <mark>cada final es un nuevo comienzo</mark>.')+`<small class="dk-sig" style="text-align:center;display:block">Casa Muladhara · Escuela de Formación Holística</small>`;
+const T5Q8=[
+ {q:'¿Qué recupera el Loco con El Sol?',o:['La claridad, la alegría y la inocencia de su niño interior','El control','Su corona'],a:0,e:'Después de la noche de La Luna, amanece.'},
+ {q:'El niño de El Sol va desnudo porque…',o:['Tiene calor','Es la inocencia: nada que esconder','Perdió su ropa'],a:1,e:'Y el caballo blanco avanza sin riendas, con confianza.'},
+ {q:'¿Cuál es una sombra de El Sol?',o:['Disfrutar la vida','Optimismo forzado','Mostrarme sin miedo'],a:1,e:'Su sombra: necesitar brillar siempre, negar el dolor y optimismo forzado.'},
+ {q:'En El Juicio, el ángel y la trompeta representan…',o:['Un castigo','Un llamado que despierta','Una fiesta'],a:1,e:'El Loco escucha el llamado de su alma.'},
+ {q:'Hombre, mujer y niño en El Juicio hablan de…',o:['La familia: todo nuestro linaje','Tres desconocidos','Tres etapas del día'],a:0,e:'Se alzan de sus ataúdes con los brazos abiertos.'},
+ {q:'El Juicio nos invita a mirar nuestra historia…',o:['Sin condenarla','Para juzgarla','Para olvidarla'],a:0,e:'Cuando la aceptamos y la perdonamos, podemos responder al llamado.'},
+ {q:'Las cintas rojas de El Mundo forman…',o:['Una cruz','Un infinito: todo vuelve a empezar','Un círculo cerrado'],a:1,e:'Y la corona de laurel: el ciclo completo y el logro.'},
+ {q:'Los cuatro seres de El Mundo son los de La Rueda, pero ahora…',o:['Sin libros','Con espadas','Dormidos'],a:0,e:'Ya integraron lo aprendido.'},
+ {q:'En el Viaje del Loco completo, ¿qué cartas forman el mundo interior?',o:['I a VII','VIII a XIV','XV a XXI'],a:1,e:'I a VII, mundo exterior; VIII a XIV, mundo interior; XV a XXI, mundo espiritual.'},
+ {q:'Para la próxima clase separas…',o:['Los 22 Mayores','Los 56 Arcanos Menores','Solo los Bastos'],a:1,e:'Empezamos con los cuatro palos y los Bastos, del As al 7.'}];
+RICH.t8f3=()=>n3quiz('t5c8',T5Q8,['Dominas lo esencial de la Clase 8. ¡Completaste el Viaje del Loco!','Vas muy bien. Repasa lo que falló y sigue practicando.','Vale la pena repasar la clase. Puedes volver cuando quieras.']);
