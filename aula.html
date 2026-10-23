@@ -1138,6 +1138,12 @@ const N5L14b=C2('Espadas · del 8 al 10',[['t14b1','Ocho de Espadas · el movimi
 const N5L14c=C2('La corte de Espadas',[['t14c1','Cuatro maneras de pensar y comunicar'],['t14c2','Sota de Espadas · aprende'],['t14c3','Caballo de Espadas · actúa'],['t14c4','Reina de Espadas · discierne'],['t14c5','Rey de Espadas · dirige']]);
 const N5L14d=C2('Agua y aire',[['t14d1','Las 14 Espadas, el aire entero'],['t14d2','Agua y aire: sentir y pensar'],['t14d3','Mi corazón y mi mente','Ejercicio en grupos pequeños'],['t14d4','Tirada con 42 cartas']]);
 const N5L14e=C2('Tarea, cierre y repaso',[['t14e1','Soltar lo que me ata'],['t14e2','Próxima clase'],['t14e3','Repaso']]);
+const T15F=[F('pdf','Láminas de la Clase 15','16 láminas',N5P+'print/clase15_laminas.pdf')];
+const N5L15a=C2('Bienvenida y repaso',[['t15a1','Oros: la tierra que sostiene'],['t15a2','Repaso de la semana'],['t15a3','Del aire a la tierra']],T15F);
+const N5L15b=C2('Oros · del As al 3',[['t15b1','El palo de Oros · elemento tierra'],['t15b2','As de Oros · el inicio'],['t15b3','Dos de Oros · la elección'],['t15b4','Tres de Oros · el crecimiento']]);
+const N5L15c=C2('Oros · del 4 al 7',[['t15c1','Cuatro de Oros · la estabilidad'],['t15c2','Cinco de Oros · la crisis'],['t15c3','Seis de Oros · la armonía'],['t15c4','Siete de Oros · la prueba'],['t15c5','El recorrido de la tierra']]);
+const N5L15d=C2('Práctica con tu mazo',[['t15d1','Mi relación con la tierra','Ejercicio en grupos pequeños'],['t15d2','Tirada de una carta']]);
+const N5L15e=C2('Tarea, cierre y repaso',[['t15e1','Habitar la tierra'],['t15e2','Próxima clase'],['t15e3','Repaso']]);
 /* clases del Nivel 5 que todavía no se publican: una por módulo, para que cada clase conserve su lugar (y su avance) al llegar */
 const T5PEND=(n,t)=>({title:'Clase '+n+' · '+t,lessons:[L('Clase '+n+' · '+t,'',[])]});
 
@@ -1384,8 +1390,8 @@ const LEVELS=[
    {title:'Clase 12 · Copas: el corazón que madura',lessons:[N5L12a,N5L12b,N5L12c,N5L12d,N5L12e]},
    {title:'Clase 13 · Espadas: el aire de la mente',lessons:[N5L13a,N5L13b,N5L13c,N5L13d,N5L13e]},
    {title:'Clase 14 · Espadas: la mente que se libera',lessons:[N5L14a,N5L14b,N5L14c,N5L14d,N5L14e]},
-   T5PEND(15,'Oros: del As al 7'),
-   T5PEND(16,'Próximamente')
+   {title:'Clase 15 · Oros: la tierra que sostiene',lessons:[N5L15a,N5L15b,N5L15c,N5L15d,N5L15e]},
+   T5PEND(16,'Oros: del 8 al 10 y la corte · cierre del nivel')
   ]}
 ];
 const allLessons=lv=>lv.modules.flatMap(m=>m.lessons);
@@ -1428,6 +1434,7 @@ const RES=[
  {t:'Clase 12 · Láminas de Tarot',type:'PDF',lvl:5,size:'17 láminas',k:'pdf',href:'assets/n5/print/clase12_laminas.pdf',new:1},
  {t:'Clase 13 · Láminas de Tarot',type:'PDF',lvl:5,size:'16 láminas',k:'pdf',href:'assets/n5/print/clase13_laminas.pdf',new:1},
  {t:'Clase 14 · Láminas de Tarot',type:'PDF',lvl:5,size:'17 láminas',k:'pdf',href:'assets/n5/print/clase14_laminas.pdf',new:1},
+ {t:'Clase 15 · Láminas de Tarot',type:'PDF',lvl:5,size:'16 láminas',k:'pdf',href:'assets/n5/print/clase15_laminas.pdf',new:1},
  {t:'Clase 2 · Láminas de Tarot',type:'PDF',lvl:5,size:'20 láminas',k:'pdf',href:'assets/n5/print/clase2_laminas.pdf',new:1},
  {t:'Clase 1 · Láminas de Tarot',type:'PDF',lvl:5,size:'19 láminas',k:'pdf',href:'assets/n5/print/clase1_laminas.pdf',new:1},
  {t:'Clase 8 · Láminas',type:'PDF',lvl:3,size:'32 láminas',k:'pdf',href:'assets/n3/print/clase8_laminas.pdf',new:1},
