@@ -836,7 +836,7 @@ Object.assign(T5ARC,{
 const T5B7=['b1','b2','b3','b4','b5','b6','b7'];
 const T5CAM=['Luz','Sombra','Invertida'];
 const t5Menor=id=>{const a=T5ARC[id],o=st('t5kw'+id,{}),k='t5ca'+id,s=n3clamp(st(k,0),0,2);
- return dkH('Bastos · '+a.n+': '+T5NUM[a.num-1][0].toLowerCase(),a.t,a.desc)+
+ return dkH('Bastos · '+(a.lbl||a.n+': '+T5NUM[a.num-1][0].toLowerCase()),a.t,a.desc)+
  `<div class="dk-split" style="align-items:center">${t5card({...t5full(a),sm:1,rev:s===2})}
  <div style="display:grid;gap:12px"><div class="dk-sub">Palabras clave · marca las que resuenan contigo hoy</div>
  <div class="dk-chips" role="group">${a.kw.map((w,i)=>`<button class="chip" ${rxa('tog','t5kw'+id,i)} ${pressed(o[i])}>${w}</button>`).join('')}</div>
@@ -923,3 +923,80 @@ const T5Q9=[
  {q:'En el Cinco de Bastos…',o:['Cinco jóvenes cruzan sus varas: el fuego choca consigo mismo','Un jinete recibe reconocimiento','Un hombre mira el mar'],a:0,e:'Mucha energía y poca dirección común.'},
  {q:'En el recorrido del fuego, el Siete de Bastos…',o:['Nace','Celebra','Defiende'],a:2,e:'As nace, 2 elige, 3 crece, 4 celebra, 5 choca, 6 triunfa y 7 defiende.'}];
 RICH.t9f3=()=>n3quiz('t5c9',T5Q9,['Dominas lo esencial de la Clase 9. ¡Que tu fuego te guíe!','Vas muy bien. Repasa lo que falló y sigue practicando.','Vale la pena repasar la clase. Puedes volver cuando quieras.']);
+
+/* ---------- Clase 10 · Bastos: el fuego que madura ---------- */
+const T5C10=N5P+'c10/';
+// la corte no tiene número: n queda vacío y lbl dice qué hace la figura
+const t5cor=(k,nm,verbo,alt,desc,kw,luz,som,inv,q,ph)=>({...t5bas(0,nm,alt,desc,kw,luz,som,inv,q,ph,verbo),n:'',num:0,img:T5C9+'bastos_'+k+'.webp',lbl:nm.split(' ')[0]+' · '+verbo.toLowerCase(),corte:k});
+Object.assign(T5ARC,{
+ b8:{...t5bas(8,'Ocho de Bastos','Ocho de Bastos del mazo Rider-Waite: ocho varas vuelan en diagonal por el aire sobre un paisaje abierto con un río','Ocho varas vuelan por el aire sobre un paisaje abierto. No hay personas: es <b>pura energía en camino</b>, todo se acelera y llega a destino.',['Rapidez','Movimiento','Noticias','Avance'],'Las cosas fluyen y avanzan rápido.','Apurarse, actuar sin pausa.','Retrasos, energía dispersa.','¿Qué está avanzando en mi vida y cómo lo acompaño?','Está avanzando… y lo acompaño…','Avanza'),img:T5C10+'bastos_8.webp'},
+ b9:{...t5bas(9,'Nueve de Bastos','Nueve de Bastos del mazo Rider-Waite: un hombre con la cabeza vendada se apoya en su vara y mira hacia un lado; detrás, ocho varas forman una cerca','Un hombre con la cabeza vendada se apoya en su vara y mira hacia un lado. Detrás, ocho varas forman una cerca. Está herido y cansado, pero <b>sigue en pie</b>.',['Resiliencia','Persistencia','Cansancio','Límites'],'Seguir a pesar del cansancio, con lo aprendido.','Desconfiar, vivir en guardia.','Agotamiento, ganas de rendirse.','¿Qué herida me mantiene en guardia y qué necesito para descansar?','Me mantiene en guardia… y para descansar necesito…','Resiste'),img:T5C10+'bastos_9.webp'},
+ b10:{...t5bas(10,'Diez de Bastos','Diez de Bastos del mazo Rider-Waite: un hombre camina encorvado abrazando diez varas que le tapan la vista, hacia una casa cercana','Un hombre camina encorvado abrazando diez varas que le tapan la vista. La casa está cerca, pero <b>la carga es demasiado grande</b> para uno solo.',['Carga','Responsabilidad','Esfuerzo','Agotamiento'],'Llevar un proyecto hasta el final.','Cargar con todo sola, no delegar.','Soltar una carga que no era propia.','¿Qué estoy cargando que no me corresponde?','Estoy cargando… y no me corresponde porque…','Pesa'),img:T5C10+'bastos_10.webp'},
+ bS:t5cor('sota','Sota de Bastos','Aprende','Sota de Bastos del mazo Rider-Waite: un joven en el desierto mira su vara con asombro; su túnica tiene salamandras','Un joven en el desierto mira su vara con asombro, como quien <b>descubre algo nuevo</b>. En su túnica hay salamandras, el animal del fuego.',['Curiosidad','Entusiasmo','Mensaje','Exploración'],'Abrirse a algo nuevo con entusiasmo.','Un entusiasmo que dura poco.','Falta de dirección, noticias que se retrasan.','¿Qué me despierta curiosidad hoy?','Hoy me despierta curiosidad…'),
+ bC:t5cor('caballo','Caballo de Bastos','Actúa','Caballo de Bastos del mazo Rider-Waite: un caballero con armadura y plumas rojas en el casco monta un caballo que se encabrita','Un caballero con armadura monta un caballo que se encabrita. Las plumas de su casco parecen llamas: <b>todo en él quiere partir ya</b>.',['Acción','Aventura','Impulso','Pasión'],'Lanzarse con valentía.','Impulsividad, empezar y abandonar.','Impaciencia, frustración, retrasos.','¿Hacia dónde quiero lanzarme y con qué cuidado?','Quiero lanzarme hacia… y lo cuido…'),
+ bR:t5cor('reina','Reina de Bastos','Siente','Reina de Bastos del mazo Rider-Waite: una reina en un trono con leones sostiene su vara y un girasol; a sus pies, un gato negro','Una reina en un trono con leones sostiene su vara y un girasol. A sus pies, un gato negro. Su fuego es <b>cálido, seguro y magnético</b>.',['Confianza','Calidez','Magnetismo','Determinación'],'Brillar desde la seguridad en una misma.','Celos, necesitar ser el centro.','Inseguridad, fuego apagado.','¿Qué me ayuda a confiar en mi propia luz?','Me ayuda a confiar en mi luz…'),
+ bK:t5cor('rey','Rey de Bastos','Dirige','Rey de Bastos del mazo Rider-Waite: un rey en su trono con leones y salamandras sostiene su vara y mira hacia adelante; a sus pies, una salamandra','Un rey en su trono, con leones y salamandras, sostiene su vara y mira hacia adelante. A sus pies, una pequeña salamandra. Es <b>el fuego que lidera</b>.',['Liderazgo','Visión','Inspiración','Emprender'],'Liderar con visión e inspirar a otros.','Autoritarismo, impaciencia con los demás.','Liderazgo impulsivo, exigencias muy altas.','¿Cómo uso mi fuego para guiar sin imponer?','Para guiar sin imponer…')});
+const T5BC=['bS','bC','bR','bK'];
+const T5B14=[...T5B7,'b8','b9','b10',...T5BC];
+const T5LEER=[['persona','Una persona','Alguien de tu vida que tiene esa energía.'],['diana','Una actitud','Cómo estás usando tu fuego en este momento.'],['camino','Una etapa','Tu madurez frente al elemento: aprender, actuar, sentir, dirigir.']];
+const t5b14=(key,cur)=>`<div class="t5-path" role="group" style="grid-template-columns:repeat(7,minmax(0,1fr))">${T5B14.map((id,i)=>{const a=T5ARC[id];return `<button ${rxa('set',key,i)} ${pressed(i===cur)} aria-label="${a.t}"><img src="${a.img}" alt="" decoding="async"><small>${a.n||a.t.split(' ')[0]}</small></button>`}).join('')}</div>`;
+
+/* ----- 1 · Bienvenida y repaso ----- */
+RICH.t10a1=()=>nbHero('Tarot Camino del Ser · Clase 10','<span style="font-size:.68em">Bastos: el fuego</span>','que madura','Clase 10 · Arcanos Menores. El 8, 9 y 10 de Bastos y las cuatro figuras de la corte.',['Avanzar','Resistir','Madurar'],'Casa Muladhara · Escuela de Formación Holística',
+ `<div class="nb-pw t5-fan">${['b8','bR','bK'].map(id=>t5card({...t5full(T5ARC[id]),sm:1})).join('')}</div>`);
+RICH.t10a2=()=>dkH('Repaso de la semana','Del As al 7 de Bastos','Antes de seguir, compartimos cómo fue la semana con tu fuego.')+
+ `<div class="dk-sub">¿Qué Basto salió más en tu carta del día?</div>`+t5bfila('t10rc',st('t10rc',-1))+
+ n3area('t10rh','¿Qué acción hiciste guiada por tu fuego?','Guiada por mi fuego, yo…')+
+ n3area('t10rr','¿Qué te costó leer uniendo número y elemento?','Me costó…')+n3priv;
+RICH.t10a3=()=>dkH('Del impulso a la maestría','Hoy terminamos el recorrido del fuego','Cómo <b>avanza</b>, cómo <b>resiste</b>, cómo <b>pesa</b> cuando cargamos de más, y las <b>cuatro figuras</b> que lo encarnan.')+
+ `<div class="t5-cols" style="grid-template-columns:repeat(3,minmax(0,150px));justify-content:center">${['b8','b9','b10'].map(id=>t5card({...t5full(T5ARC[id]),sm:1})).join('')}</div>
+ <div class="t5-cols" style="grid-template-columns:repeat(4,minmax(0,120px));justify-content:center">${T5BC.map(id=>t5card({...t5full(T5ARC[id]),sm:1})).join('')}</div>`;
+
+/* ----- 2 y 3 · Del 8 al 10 y la corte ----- */
+['b8','b9','b10'].forEach((id,i)=>{RICH['t10b'+(i+1)]=()=>t5Menor(id)});
+RICH.t10c1=()=>{const s=n3clamp(st('t10lr',0),0,2),x=T5LEER[s];
+ return dkH('Las cartas de la corte','Tres formas de leerlas','Una figura de la corte puede hablar de tres cosas distintas.')+
+ `<div class="t5-big" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">${T5LEER.map((y,i)=>`<button ${rxa('set','t10lr',i)} ${pressed(i===s)}><b>${y[1]}</b></button>`).join('')}</div>
+ <div class="dk-split" style="align-items:center">${t5card({...t5full(T5ARC.bR),sm:1})}<div class="detail"><span class="eyebrow">Forma ${s+1} de 3</span><h3>${ic(x[0],24)} ${x[1]}</h3><p>${x[2]}</p>${t5nav('t10lr',s,3)}</div></div>`};
+T5BC.forEach((id,i)=>{RICH['t10c'+(i+2)]=()=>t5Menor(id)});
+
+/* ----- 4 · Práctica con tu mazo ----- */
+RICH.t10d1=()=>{const s=n3clamp(st('t10pc',0),0,13),a=T5ARC[T5B14[s]];
+ return dkH('El palo completo','Los 14 Bastos, el fuego entero','Del As que brota al 10 que pesa, y de la Sota que descubre al Rey que lidera: el fuego <b>nace, crece, se pone a prueba y madura</b>. Toca cada carta.')+t5b14('t10pc',s)+
+ `<div class="dk-split" style="align-items:center">${t5card({...t5full(a),sm:1})}<div class="detail"><span class="eyebrow">${a.corte?'Corte · '+a.verbo:a.n+' · '+T5NUM[a.num-1][0]}</span><h3>${a.t}</h3><p><b>Palabras clave:</b> ${a.kw.join(' · ')}.</p><p><b>Luz:</b> ${a.caras[0][0]}.</p>${t5nav('t10pc',s,14)}</div></div>`};
+const T5FIG=[['persona','Reconócete','¿Qué figura de la corte eres hoy con tu fuego?'],['hoja','Mira tu carga','Con el 10 de Bastos: ¿qué peso podrías soltar?'],['grupo','Comparte','¿Qué figura quieres llegar a ser y qué te falta?']];
+RICH.t10d2=()=>{const s=n3clamp(st('t10fg',0),0,2),x=T5FIG[s],nm=T5BC.map(id=>T5ARC[id].t),soy=st('t10soy',-1),ser=st('t10ser',-1);
+ return dkH('Ejercicio vivencial · en grupos pequeños','Mi figura de fuego','Tres pasos para mirar tu fuego con las figuras de la corte.')+
+ `<div class="tl" style="grid-template-columns:repeat(3,minmax(0,1fr))">${T5FIG.map((y,i)=>`<button ${rxa('set','t10fg',i)} ${pressed(i===s)}><span class="n">${i+1}</span><span class="t">${y[1]}</span></button>`).join('')}</div>
+ <div class="detail"><span class="eyebrow">Paso ${s+1} de 3</span><h3>${ic(x[0],26)} ${x[1]}</h3><p>${x[2]}</p>${t5nav('t10fg',s,3,'Siguiente paso')}</div>`+
+ (s===0?chipRow('t10soy',nm,soy)+(soy>=0?`<div class="dk-split" style="align-items:center">${t5card({...t5full(T5ARC[T5BC[soy]]),sm:1})}<div class="detail"><span class="eyebrow">Hoy soy</span><h3>${nm[soy]} · ${T5ARC[T5BC[soy]].verbo}</h3><p><b>Luz:</b> ${T5ARC[T5BC[soy]].caras[0][0]}. <b>Sombra:</b> ${T5ARC[T5BC[soy]].caras[1][0]}.</p></div></div>`:''):'')+
+ (s===1?`<div class="dk-split" style="align-items:center">${t5card({...t5full(T5ARC.b10),sm:1})}<div>${n3area('t10pe','El peso que podría soltar','Podría soltar…')}</div></div>`:'')+
+ (s===2?chipRow('t10ser',nm,ser)+(ser>=0?`<div class="dk-call">${ic('camino',18)} ${soy>=0&&soy!==ser?`De <b>${nm[soy]}</b> hacia <b>${nm[ser]}</b>.`:`Quiero llegar a ser <b>${nm[ser]}</b>.`}</div>`:'')+n3area('t10fa','Lo que me falta para llegar','Me falta…'):'')+n3priv};
+RICH.t10d3=()=>{const r=st('t10tz',-1),c=r>=0&&T5ARC[T5B14[r>>1]].corte;
+ return dkH('Práctica con tu mazo','Tirada con los 14 Bastos','Con el palo completo. Practica con tu mazo y aquí mismo.')+
+ n3ck('t10tp',[['','Baraja los 14 Bastos, derechos e invertidos.'],['','Pregunta: ¿cómo cuido mi fuego este mes?'],['','Saca una carta y muéstrala a la cámara.'],['','Si es de la corte, dila como persona, actitud o etapa.']])+
+ `<div class="dk-call">${ic('lupa',18)} <b>¿Cómo cuido mi fuego este mes?</b></div>`+
+ t5tirada('t10tz','Sacar una carta',T5B14)+
+ (c?`<div class="dk-call">${ic('persona',18)} Es una figura de la corte: léela como <b>una persona</b>, <b>una actitud</b> o <b>una etapa</b>.</div>`:'')+
+ n3area('t10tl','Lo que siento con mi carta','Mi carta me dice…')+n3priv};
+
+/* ----- 5 · Tarea, cierre y repaso ----- */
+RICH.t10e1=()=>dkH('Para esta semana','Las figuras del fuego a mi alrededor','Una práctica diaria con los 14 Bastos y una mirada a las personas de tu vida.')+
+ n3ck('t10ta',[['libro','Completa las fichas del 8, 9 y 10 de Bastos y de las cuatro figuras.'],['sol','Cada mañana saca una carta entre los 14 Bastos, derecha o invertida.'],['grupo','Reconoce en tu entorno a una Sota, un Caballo, una Reina y un Rey de Bastos.']])+
+ `<div class="dk-sub">Tu carta de hoy</div>`+t5tirada('t10cd','Sacar mi carta del día',T5B14)+
+ `<div class="dk-sub">Las figuras del fuego en mi entorno</div><div class="dk-grid c2">${T5BC.map(id=>n3area('t10en'+id,T5ARC[id].t+' · '+T5ARC[id].verbo.toLowerCase(),'Es…')).join('')}</div>`+n3priv;
+RICH.t10e2=()=>dkH('Del fuego pasamos al agua','Próxima clase','Copas, elemento agua · del As al 7.')+
+ `<div class="t5-cols" style="grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:8px">${t5card({full:1,img:T5C9+'copas_1.webp',alt:'As de Copas del mazo Rider-Waite',sm:1})}${['2','3','4','5','6','7'].map(n=>t5card({n,t:'Copas',sm:1})).join('')}</div>`+
+ n3quote('Del impulso a la maestría: <mark>del fuego pasamos al agua</mark>.')+`<small class="dk-sig" style="text-align:center;display:block">Casa Muladhara · Escuela de Formación Holística</small>`;
+const T5Q10=[
+ {q:'En el Ocho de Bastos no hay personas porque…',o:['Es pura energía en camino','Todos se fueron','Es una carta triste'],a:0,e:'Todo se acelera y llega a destino.'},
+ {q:'¿Cuál es la sombra del Ocho de Bastos?',o:['Apurarse, actuar sin pausa','Celebrar','Liderar'],a:0,e:'Invertido: retrasos, energía dispersa.'},
+ {q:'El hombre del Nueve de Bastos…',o:['Está herido y cansado, pero sigue en pie','Celebra una victoria','Huye'],a:0,e:'Su luz: seguir a pesar del cansancio, con lo aprendido.'},
+ {q:'¿Qué muestra el Diez de Bastos?',o:['Una carga demasiado grande para uno solo','Un nuevo comienzo','Un viaje rápido'],a:0,e:'Su pregunta: ¿qué estoy cargando que no me corresponde?'},
+ {q:'Invertido, el Diez de Bastos puede hablar de…',o:['Cargar con todo sola','Soltar una carga que no era propia','Llevar un proyecto al final'],a:1,e:'Al derecho, su sombra es cargar con todo sola y no delegar.'},
+ {q:'¿De qué tres formas se lee una carta de la corte?',o:['Persona, actitud o etapa','Pasado, presente y futuro','Luz, sombra e invertida'],a:0,e:'Alguien de tu vida, cómo usas tu fuego o tu madurez frente al elemento.'},
+ {q:'En la túnica de la Sota de Bastos hay…',o:['Leones','Salamandras, el animal del fuego','Girasoles'],a:1,e:'La Sota aprende: curiosidad y entusiasmo.'},
+ {q:'¿Cuál es la sombra del Caballo de Bastos?',o:['Impulsividad, empezar y abandonar','Inseguridad','Autoritarismo'],a:0,e:'Su luz: lanzarse con valentía.'},
+ {q:'A los pies de la Reina de Bastos hay…',o:['Una salamandra','Un gato negro','Un perro'],a:1,e:'Sostiene su vara y un girasol: su fuego es cálido, seguro y magnético.'},
+ {q:'El Rey de Bastos nos invita a…',o:['Guiar sin imponer','Cargar con todo','Esperar'],a:0,e:'Es el fuego que lidera con visión.'}];
+RICH.t10e3=()=>n3quiz('t5c10',T5Q10,['Dominas lo esencial de la Clase 10. ¡El fuego entero es tuyo!','Vas muy bien. Repasa lo que falló y sigue practicando.','Vale la pena repasar la clase. Puedes volver cuando quieras.']);
