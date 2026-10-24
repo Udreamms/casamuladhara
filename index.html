@@ -3,6 +3,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Josefin+Sans:wght@300;400;600&family=Mulish:wght@400;500;700&family=Fredoka:wght@500;600&display=swap">
+<link rel="stylesheet" href="assets/css/experiencia.css">
+<script>
+// Experiencia en movimiento: se activa salvo que la persona pida menos movimiento; si el módulo no carga, el sitio queda estático
+(function(){var d=document.documentElement;if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;d.classList.add('fx');setTimeout(function(){if(!window.__fxReady)d.classList.remove('fx')},3500)})();
+</script>
+<script type="importmap">{"imports":{"three":"./assets/vendor/three.module.min.js"}}</script>
 <style>
 /* Layout: a full-bleed green brand band on top, then alternating linen and green chapters (Terapias, Tienda, Escuela, Maestra Karen, Plataforma) on a 1160px column */
 :root{
@@ -394,6 +400,20 @@ form.auth .btn{justify-content:center;margin-top:6px}
 </svg>
 
 <div class="ribbon">Formaciones holísticas · Últimos cupos</div>
+<div class="scroll-bar" aria-hidden="true"><i></i></div>
+<div class="cosmos" id="cosmos" aria-hidden="true"><div class="cosmos-word" id="cosmos-word"></div><canvas id="cosmos-canvas"></canvas></div>
+<div class="cursor-dot" aria-hidden="true"></div><div class="cursor-ring" aria-hidden="true"></div>
+<nav class="dots" id="dots" aria-label="Secciones de la página">
+  <a href="#inicio"><span>Inicio</span></a>
+  <a href="#camino"><span>Recorrido</span></a>
+  <a href="#maestra"><span>Karen</span></a>
+  <a href="#escuela"><span>Escuela</span></a>
+  <a href="#sala"><span>Sala Abierta</span></a>
+  <a href="#plataforma"><span>Aula virtual</span></a>
+  <a href="#tienda"><span>Tienda</span></a>
+  <a href="#terapias"><span>Terapias</span></a>
+  <a href="#maestra-karen"><span>Niños</span></a>
+</nav>
 
 <header class="top">
   <div class="wrap">
@@ -438,6 +458,7 @@ form.auth .btn{justify-content:center;margin-top:6px}
       </div>
     </div>
     <div class="hero-mark" aria-hidden="true">
+      <div class="hero-orb" id="hero-orb"></div>
       <svg style="color:var(--on-brand)"><use href="#mark"/></svg>
       <div class="word">CASA MULADHARA</div>
       <div class="sub">SANACIÓN &amp; BIENESTAR</div>
@@ -451,12 +472,30 @@ form.auth .btn{justify-content:center;margin-top:6px}
       <a href="#maestra-karen"><b>Maestra Karen</b><span>Contenido para niños en YouTube</span></a>
     </div>
   </div>
+  <div class="scroll-cue" aria-hidden="true"><span>Desliza</span><i></i></div>
+</section>
+
+<section class="story" id="camino" aria-label="Recorre Casa Muladhara">
+  <div class="story-stage">
+    <div class="wrap story-grid">
+      <div class="story-text">
+        <span class="story-count" aria-hidden="true"><b id="story-num">01</b> / 05</span>
+        <article class="chapter" data-word="SANAR"><span class="eyebrow">Terapias holísticas</span><h2>Haz una pausa. Este momento es para ti.</h2><p>Reiki, Radiestesia, Péndulo Hebreo, Registros Akáshicos, Vidas Pasadas y más. Cada sesión se adapta a lo que estás viviendo.</p><a class="btn btn-cream" href="#terapias">Ver las terapias</a></article>
+        <article class="chapter" data-word="FORMARTE"><span class="eyebrow">Escuela de Formación</span><h2>Cinco pasos hacia tu certificación</h2><p>Cinco formaciones que se suben como una escalera, hasta certificarte como Terapeuta Holístico Integral con el Método Casa Muladhara.</p><a class="btn btn-cream" href="#escuela">Conocer la Escuela</a></article>
+        <article class="chapter" data-word="APRENDER"><span class="eyebrow">Aula virtual</span><h2>Tus clases y material en un solo lugar</h2><p>Clases en vivo y grabadas, material de estudio, tu avance y tus certificados, desde el computador o el celular.</p><a class="btn btn-cream" href="#plataforma">Ver el aula</a></article>
+        <article class="chapter" data-word="CUIDAR"><span class="eyebrow">Tienda</span><h2>Spray áurico y tintura de muérdago</h2><p>Preparados naturales elaborados en Casa Muladhara para acompañar la limpieza y armonización energética, en casa o en consulta.</p><a class="btn btn-cream" href="#tienda">Ir a la tienda</a></article>
+        <article class="chapter" data-word="JUGAR"><span class="eyebrow">Maestra Karen</span><h2>Contenido para niños en YouTube</h2><p>Historias animadas para que los más pequeños conozcan sus emociones, respiren con calma y crezcan conectados con la naturaleza.</p><a class="btn btn-cream" href="#maestra-karen">Ver los videos</a></article>
+      </div>
+      <div class="story-orb" id="story-orb"><svg class="story-mark" style="color:var(--on-brand)" aria-hidden="true"><use href="#mark"/></svg></div>
+    </div>
+    <ol class="story-steps" aria-hidden="true"><li><button type="button" data-ch="0" aria-label="Terapias holísticas"><i>01</i><span>Terapias holísticas</span></button></li><li><button type="button" data-ch="1" aria-label="Escuela de Formación"><i>02</i><span>Escuela de Formación</span></button></li><li><button type="button" data-ch="2" aria-label="Aula virtual"><i>03</i><span>Aula virtual</span></button></li><li><button type="button" data-ch="3" aria-label="Tienda"><i>04</i><span>Tienda</span></button></li><li><button type="button" data-ch="4" aria-label="Maestra Karen"><i>05</i><span>Maestra Karen</span></button></li></ol>
+  </div>
 </section>
 
 <section class="section" id="maestra">
   <div class="wrap">
     <div class="teacher">
-      <img class="karen-photo" src="assets/img/e2ec26d75a.webp" alt="Karen Oyarce Sáez sosteniendo un péndulo hebreo">
+      <div class="karen-orbit"><img class="karen-photo" src="assets/img/e2ec26d75a.webp" alt="Karen Oyarce Sáez sosteniendo un péndulo hebreo"></div>
       <div>
         <span class="eyebrow">Tu maestra holística</span>
         <h3>Karen Oyarce Sáez</h3>
@@ -474,15 +513,13 @@ form.auth .btn{justify-content:center;margin-top:6px}
   </div>
 </section>
 
+<div class="marquee" aria-hidden="true"><div class="marquee-track"><span>Reiki</span><span>Radiestesia</span><span>Péndulo Hebreo</span><span>Registros Akáshicos</span><span>Vidas Pasadas</span><span>Niño Interior</span><span>Terapia Transgeneracional</span><span>Tarot Terapéutico</span></div></div>
+
 <section class="section school" id="escuela">
-  <div class="wrap">
-    <div class="school-top">
-      <div class="section-head" style="margin-bottom:0">
-        <span class="eyebrow">Escuela de Formación Holística Casa Muladhara</span>
-        <h2>Una formación completa, paso a paso, en tu Camino del Ser</h2>
-        <p>Cinco formaciones que se suben como una escalera: cada una te prepara para la siguiente, hasta certificarte como Terapeuta Holístico Integral con el Método Casa Muladhara.</p>
-      </div>
-      <figure class="casona-fig"><svg class="casona" viewBox="0 0 520 400" role="img" aria-label="Ilustración de la casona de Casa Muladhara">
+  <div class="portal" id="portal">
+    <div class="portal-stage">
+      <div class="portal-title"><span class="eyebrow">Escuela de Formación Holística</span><p>Entra a tu Camino del Ser</p><small>Desliza para entrar</small></div>
+      <div class="portal-house"><figure class="casona-fig"><svg class="casona" viewBox="0 0 520 400" role="img" aria-label="Ilustración de la casona de Casa Muladhara">
   <defs>
     <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3d6b56"/><stop offset="1" stop-color="#2b5443"/></linearGradient>
     <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f1ebd8"/><stop offset="1" stop-color="#e2d9bf"/></linearGradient>
@@ -517,9 +554,10 @@ form.auth .btn{justify-content:center;margin-top:6px}
   <rect x="204" y="258" width="132" height="22" rx="3" fill="#1f3f32"/>
   <text x="270" y="273" text-anchor="middle" font-family="Josefin Sans, sans-serif" font-size="10" letter-spacing="2.4" fill="#ece7d3">CASA MULADHARA</text>
   <!-- door -->
-  <path d="M248 340 V302 a22 22 0 0 1 44 0 V340z" fill="#2b5443"/>
-  <line x1="270" y1="284" x2="270" y2="340" stroke="#1f3f32" stroke-width="2"/>
-  <circle cx="264" cy="318" r="2.2" fill="#c9a45c"/><circle cx="276" cy="318" r="2.2" fill="#c9a45c"/>
+  <path d="M248 340 V302 a22 22 0 0 1 44 0 V340z" fill="#f6dc9a"/>
+  <path class="door-glow" d="M248 340 V302 a22 22 0 0 1 44 0 V340z" fill="#fff4d6" opacity="0"/>
+  <g class="door-l"><path d="M248 340 V302 a22 22 0 0 1 22 -22 V340z" fill="#2b5443"/><line x1="269" y1="284" x2="269" y2="340" stroke="#1f3f32" stroke-width="2"/><circle cx="264" cy="318" r="2.2" fill="#c9a45c"/></g>
+  <g class="door-r"><path d="M270 280 a22 22 0 0 1 22 22 V340 H270z" fill="#2b5443"/><circle cx="276" cy="318" r="2.2" fill="#c9a45c"/></g>
   <!-- lower windows -->
   <g><rect x="150" y="286" width="44" height="38" rx="3" fill="#2f4a3e"/><rect x="150" y="286" width="44" height="38" rx="3" fill="none" stroke="#ece7d3" stroke-width="3"/><line x1="172" y1="286" x2="172" y2="324" stroke="#ece7d3" stroke-width="2"/>
   <rect x="346" y="286" width="44" height="38" rx="3" fill="#2f4a3e"/><rect x="346" y="286" width="44" height="38" rx="3" fill="none" stroke="#ece7d3" stroke-width="3"/><line x1="368" y1="286" x2="368" y2="324" stroke="#ece7d3" stroke-width="2"/>
@@ -539,7 +577,18 @@ form.auth .btn{justify-content:center;margin-top:6px}
   <!-- bushes -->
   <g fill="#5f8a66"><circle cx="448" cy="336" r="22"/><circle cx="476" cy="342" r="18"/><circle cx="108" cy="340" r="16"/></g>
 </svg>
-<figcaption>Escuela de Formación Holística</figcaption></figure>
+<figcaption>Escuela de Formación Holística</figcaption></figure></div>
+      <div class="portal-light"></div><div class="portal-fade"></div>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="school-top">
+      <div class="section-head" style="margin-bottom:0">
+        <span class="eyebrow">Escuela de Formación Holística Casa Muladhara</span>
+        <h2>Una formación completa, paso a paso, en tu Camino del Ser</h2>
+        <p>Cinco formaciones que se suben como una escalera: cada una te prepara para la siguiente, hasta certificarte como Terapeuta Holístico Integral con el Método Casa Muladhara.</p>
+      </div>
+
     </div>
     <ol class="stairs">
         <li class="stair" style="--k:1"><div class="step-card"><span class="stage">Paso 1 · Inicia</span><span class="mod pres">Presencial</span><h3>Péndulo Hebreo Nivel 1</h3><span class="dur">1 jornada intensiva · 8 horas</span><ul><li>Herramienta de limpieza, protección y equilibrio</li><li>Base para continuar en otras formaciones</li></ul><a class="step-link" href="pendulo.html">Ver esta formación →</a></div><div class="riser" aria-hidden="true"><span>1</span></div></li>
@@ -744,6 +793,7 @@ form.auth .btn{justify-content:center;margin-top:6px}
 </section>
 
 <section class="section kids" id="maestra-karen">
+  <div class="bubbles" aria-hidden="true"></div>
   <div class="wrap kids-grid">
     <div>
       <span class="eyebrow"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5" fill="currentColor"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></g></svg>Para niños y familias</span>
@@ -776,6 +826,7 @@ form.auth .btn{justify-content:center;margin-top:6px}
       <div><h4>Tu cuenta</h4><a href="aula.html">Ingresar al aula</a><a href="#plataforma" data-open-login data-tab="signup">Crear cuenta</a><a href="#tienda">Mis pedidos</a></div>
       <div><h4>Contacto</h4><a href="https://wa.link/by9gjr" target="_blank" rel="noopener">WhatsApp</a><a href="https://www.instagram.com/casa.muladhara/" target="_blank" rel="noopener">Instagram @casa.muladhara</a><a href="https://www.youtube.com/@casamaestrakaren" target="_blank" rel="noopener">YouTube Maestra Karen</a></div>
     </div>
+    <div class="foot-giant" aria-hidden="true">MULADHARA</div>
     <div class="legal"><span>© 2026 Casa Muladhara</span><span>casamuladhara.com</span></div>
   </div>
 </footer>
@@ -808,6 +859,7 @@ nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{nav.classLi
 document.querySelectorAll('[data-open-login]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();location.href=b.dataset.tab==='signup'?'login.html?register=true':'login.html?mode=login'}));
 $('#gift-form').addEventListener('submit',e=>{e.preventDefault();$('#gift-ok').hidden=false});
 </script>
-
+<script src="assets/vendor/lenis.min.js" defer></script>
+<script type="module" src="assets/js/experiencia.js"></script>
 
 </body></html>
