@@ -63,8 +63,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 .login-card .go{height:48px;margin-top:6px;border:0;border-radius:9999px;background:#fff;color:#000;font:600 .875rem/1 "Montserrat",system-ui,sans-serif;letter-spacing:.05em;box-shadow:0 10px 15px -3px rgba(0,0,0,.4);transition:all .3s}
 .login-card .go:hover{background:rgba(255,255,255,.9)}
 .login-card .go:active{transform:scale(.97)}
-.login-card .alt{height:44px;border-radius:9999px;background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;font:300 .72rem/1 "Montserrat",system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;transition:all .3s}
-.login-card .alt:hover{background:linear-gradient(to right,#2d1b4e,#9b4dca);border-color:#2d1b4e}
 .login-card button:disabled{opacity:.5;cursor:default}
 .login-card .forgot,.login-card .back{align-self:center;background:none;border:0;padding:2px 8px;color:rgba(255,255,255,.45);font-size:.6875rem;letter-spacing:.08em;text-decoration:none;transition:color .2s}
 .login-card .forgot:hover,.login-card .back:hover{color:#fff}

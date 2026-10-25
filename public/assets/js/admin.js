@@ -1,10 +1,10 @@
 // Portal de la Maestra (/admin): alumnas, acceso por alumna, pagos, mensajes, preguntas, ayuda y comunidad.
-// Entra con correo y contraseña. La primera vez la cuenta se activa al verificar el Gmail (ver api/admin.js).
+// Entra con correo y contraseña (la cuenta la crea scripts/admin.mjs create-admin). La primera vez se activa al verificar el Gmail (ver src/app/api/admin/route.js).
 // Lo que se ve aquí lo protegen las reglas de Firestore: solo una cuenta con el claim admin puede leerlo.
 import { auth, db } from './firebase.js';
 import { profileApi, mountProfileEditor, googlePhoto } from './profile.js';
 import {
-  signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail,
+  signInWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail,
   onAuthStateChanged, onIdTokenChanged, signOut,
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 import {
@@ -314,8 +314,6 @@ api = async (body) => {
 };
 const ERR = {
   'auth/invalid-credential': 'Correo o contraseña incorrectos.', 'auth/invalid-email': 'Escribe un correo válido.',
-  'auth/email-already-in-use': 'Ese correo ya tiene una cuenta. Usa «Entrar» o «Olvidé mi contraseña».',
-  'auth/weak-password': 'La contraseña debe tener al menos 6 caracteres.',
   'auth/too-many-requests': 'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.',
   'auth/network-request-failed': 'Sin conexión. Revisa tu internet e inténtalo de nuevo.',
 };
@@ -356,11 +354,11 @@ async function enter(u) {
 }
 $('#lg-form').onsubmit = async (e) => {
   e.preventDefault();
-  const email = $('#lg-email').value.trim(), pass = $('#lg-pass').value, create = e.submitter?.id === 'lg-create';
+  const email = $('#lg-email').value.trim(), pass = $('#lg-pass').value;
   if (!email || !pass) return say('Escribe tu correo y tu contraseña.');
   lock(true);
   try {
-    const cred = create ? await createUserWithEmailAndPassword(auth, email, pass) : await signInWithEmailAndPassword(auth, email, pass);
+    const cred = await signInWithEmailAndPassword(auth, email, pass);
     await enter(cred.user);
   } catch (err) { say(ERR[err.code] || 'No pudimos entrar. Inténtalo de nuevo.'); }
   lock(false);
