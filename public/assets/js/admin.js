@@ -246,6 +246,8 @@ V.ajustes = () => `<div class="view-head"><div><span class="eyebrow">Portal de l
     <form id="wv-form" style="display:flex;gap:8px;flex-wrap:wrap"><input type="url" id="wv-url" placeholder="https://" value="${esc(A.config.welcomeVideo || '')}" style="flex:1;min-width:220px"><button class="btn btn-primary btn-sm">Guardar</button></form></section>
   <section class="card panel"><h3>Clases en vivo</h3><p class="muted" style="margin:0;font-size:.88rem">Las clases en vivo y sus grabaciones se programan dentro de cada clase del aula, donde ves el contenido.</p><a class="btn btn-ghost btn-sm" style="justify-self:start" href="/aula">Ir al aula</a></section>`;
 
+// Un solo manejador para todos los [data-go]: el menú se vuelve a pintar solo (p. ej. al llegar una alumna nueva) y sus botones siguen funcionando
+document.addEventListener('click', (e) => { const b = e.target.closest('[data-go]'); if (b) go(b.dataset.go); });
 function paintNav() {
   $('#nav').innerHTML = NAV.map(([k, n, ic, c]) => { const cnt = c ? c() : 0; return `<button data-go="${k}" ${S.view === k || (S.view === 'ficha' && k === 'alumnas') || (S.view === 'clase' && k === 'formacion') ? 'aria-current="page"' : ''}><svg viewBox="0 0 24 24">${ic}</svg>${n}${cnt ? `<span class="count">${cnt}</span>` : ''}</button>`; }).join('');
 }
@@ -264,7 +266,6 @@ async function openStudent(uid) {
   try { await data.payments(uid); if (S.view === 'ficha' && S.open === uid) render(false); } catch (e) { fail(e); }
 }
 function bind() {
-  document.querySelectorAll('[data-go]').forEach((b) => (b.onclick = () => go(b.dataset.go)));
   document.querySelectorAll('[data-open]').forEach((b) => (b.onclick = () => openStudent(b.dataset.open)));
   document.querySelectorAll('[data-filter]').forEach((b) => (b.onclick = () => { S.filter = b.dataset.filter; render(false); }));
   document.querySelectorAll('[data-lvopen]').forEach((b) => (b.onclick = () => { S.lvOpen[b.dataset.lvopen] = !S.lvOpen[b.dataset.lvopen]; render(false); }));
