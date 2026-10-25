@@ -463,10 +463,17 @@ export async function startCasona(canvas, state, onProgress = () => {}) {
     const halo = new THREE.Mesh(new THREE.TorusGeometry(1.4, .025, 8, 96), M.lampGlow); halo.rotation.x = Math.PI / 2; halo.position.set(cx, 3.7, cz); world.add(halo);
     lamp(cx, 3.2, cz, 0xffd7a0, 22, 9);
     // fotos de las estudiantes en las dos paredes
-    const pics = [['231aa77989', 620, 465], ['f08f46f33a', 465, 620], ['292ddf3bf0', 620, 465], ['81f0a09164', 465, 620], ['41a246e938', 525, 620], ['37953e38df', 465, 620], ['6a5a5d85dd', 620, 465],
+    const pics = [['01f8e86fc0', 620, 493], ['231aa77989', 620, 465], ['f08f46f33a', 465, 620], ['292ddf3bf0', 620, 465], ['81f0a09164', 465, 620], ['41a246e938', 525, 620], ['37953e38df', 465, 620], ['6a5a5d85dd', 620, 465],
       ['df920f9476', 465, 620], ['851f49ec16', 465, 620], ['48b7a9fedc', 465, 620], ['37d3617307', 465, 620], ['554d470b85', 465, 620], ['eb751efb2e', 620, 465], ['85b1dea157', 465, 620]];
+    // cada pared reparte sus fotos según su ancho, centradas en el tramo de la sala
+    const hh = 1.12, half = Math.ceil(pics.length / 2), zs = [];
+    for (const wall of [pics.slice(0, half), pics.slice(half)]) {
+      const ws = wall.map(([, w, h]) => hh * w / h + .1), gap = .16;
+      let z = -20.74 + (ws.reduce((a, b) => a + b, 0) + gap * (ws.length - 1)) / 2;
+      ws.forEach(w => { zs.push(z - w / 2); z -= w + gap; });
+    }
     pics.forEach(([id, w, h], i) => {
-      const s = i < 7 ? -1 : 1, k = i % 7, z = -15.4 - k * 1.78, hh = 1.12, ww = hh * w / h;
+      const s = i < half ? -1 : 1, z = zs[i], ww = hh * w / h;
       const tex = photo(`assets/img/${id}.webp`);
       box(M.dark, .05, hh + .1, ww + .1, s * 8.47, 1.85 - hh / 2 - .05, z);
       plane(new THREE.MeshStandardMaterial({ map: tex, emissiveMap: tex, emissive: 0xffffff, emissiveIntensity: .4, roughness: .7 }), ww, hh, s * 8.43, 1.85, z, s < 0 ? Math.PI / 2 : -Math.PI / 2);
