@@ -3,7 +3,7 @@
 Sitio estático (Vercel, sin build) con aula virtual conectada a Firebase (proyecto `casamuladhara`).
 
 - `index.html`: sitio principal. "Mi cuenta" lleva al login real.
-- `assets/js/experiencia.js`, `assets/js/cosmos.js`, `assets/css/experiencia.css`: la portada en movimiento (péndulo 3D con Three.js, recorrido con scroll, portal de la Escuela, galería giratoria). Three.js y Lenis van copiados en `assets/vendor/`. Con "reducir movimiento" activado en el equipo, la portada se ve estática.
+- `assets/js/casona.js`, `assets/js/recorrido.js`, `assets/css/casona.css`: la portada es una casona moderna en 3D que se recorre al bajar (se abren las puertas, recibidor, sala del péndulo, pasillo de terapias, escalera de la Escuela, Sala Abierta, aula, tiendita y jardín de los niños). Three.js (con `assets/vendor/jsm/` para el brillo) y Lenis van copiados en `assets/vendor/`. Sin WebGL o con "reducir movimiento" activado en el equipo, la portada se ve como tarjetas estáticas.
 - `login.html`: ingreso / registro (correo y contraseña, Google).
 - `aula.html`: aula virtual. Sin sesión redirige a `login.html`.
 - `assets/js/firebase.js`, `assets/js/cloud.js`: configuración y capa de datos (Auth + Firestore).
