@@ -1,4 +1,4 @@
-// Portal de la Maestra (/admin): alumnas, acceso por alumna, pagos, mensajes, preguntas, ayuda y comunidad.
+// Portal de la Maestra (/admin): alumnas, acceso por alumna, la formación completa, pagos, mensajes, preguntas, ayuda y comunidad.
 // Entra con usuario y contraseña (sin correo): /api/staff los compara con STAFF_USER y STAFF_PASSWORD y entrega la sesión del Staff.
 // Lo que se ve aquí lo protegen las reglas de Firestore: solo una cuenta con el claim admin puede leerlo.
 import { auth, db } from './firebase.js';
@@ -97,14 +97,26 @@ const data = {
     await b.commit();
     A.tickets = A.tickets.filter((x) => x.id !== t.id);
   },
+  // El programa completo (niveles, módulos y clases) sale de los mismos datos del aula; se evalúa aparte para no mezclar sus nombres con los del portal
+  course: async () => {
+    if (!A.course) {
+      const src = await Promise.all(['datos', 'datos-niveles'].map((f) => fetch(`/assets/js/aula/${f}.js`).then((r) => {
+        if (!r.ok) throw new Error('No se pudo cargar el programa de la formación.');
+        return r.text();
+      })));
+      A.course = new Function(`${src.join('\n')}\n;return LEVELS;`)();
+    }
+    return A.course;
+  },
   deletePost: async (id) => { await deleteDoc(doc(db, 'posts', id)); A.posts = A.posts.filter((p) => p.id !== id); },
   saveConfig: async (d) => { await setDoc(doc(db, 'config', 'aula'), { ...d, updatedAt: serverTimestamp() }, { merge: true }); Object.assign(A.config, d); },
 };
 
 // ---------- Vista ----------
-const S = { view: 'alumnas', q: '', open: null, filter: 'todas' };
+const S = { view: 'alumnas', q: '', open: null, filter: 'todas', lvOpen: {}, fq: '', cls: null };
 const NAV = [
   ['alumnas', 'Alumnas', '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5a6.5 6.5 0 0 1 3.5 5.5"/>', () => A.students.filter(isNew).length],
+  ['formacion', 'Formación completa', '<path d="M3 8 12 4l9 4-9 4z"/><path d="M7 10v5c3 2 7 2 10 0v-5"/>'],
   ['pagos', 'Pagos', '<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h4"/>'],
   ['mensajes', 'Mensajes', '<path d="M4 5h16v11H9l-5 4z"/>'],
   ['preguntas', 'Preguntas de clase', '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5V14M12 17.5v.01"/>', () => A.questions.length],
@@ -161,6 +173,46 @@ V.ficha = () => {
     ${!pays ? '<tr><td colspan="4" class="muted">Cargando…</td></tr>' : pays.map((p) => `<tr><td>${fdate(p.paidAt) || fdate(p.createdAt)}</td><td>${esc(p.concept || 'Pago')}</td><td>${esc(p.amount ?? 0)} USD</td><td><span class="pill ${p.status === 'failed' ? 'bad' : 'done'}">${p.status === 'failed' ? 'Rechazado' : 'Pagado'}</span></td></tr>`).join('') || '<tr><td colspan="4" class="muted">Aún no tiene pagos registrados.</td></tr>'}
   </tbody></table></div></section>`;
 };
+// La formación tal como la ven las alumnas, toda abierta para la Maestra: niveles, módulos y clases
+const lessonsOf = (lv) => lv.modules.flatMap((m) => m.lessons);
+const filesOf = (lv) => lessonsOf(lv).reduce((a, l) => a + (l.files?.length || 0), 0);
+V.formacion = () => {
+  const head = `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>Formación completa</h1><p>Todo el programa que ven tus alumnas, con cada nivel abierto para ti aunque ellas lo tengan bloqueado. Abre cualquier clase para verla tal cual. Mirar aquí no le abre nada a ninguna alumna.</p></div></div>`;
+  if (!A.course) return `${head}<div class="card empty">Cargando el programa…</div>`;
+  const C = A.course, q = S.fq.trim().toLowerCase();
+  const has = (t) => String(t).toLowerCase().includes(q);
+  const levels = C.map((lv) => {
+    const mods = lv.modules.map((m, i) => ({ m, i, ls: m.lessons.map((l, j) => ({ l, j })).filter(({ l }) => !q || has(l.t) || has(m.title)) }))
+      .filter((x) => x.ls.length);
+    if (q && !mods.length) return '';
+    const n = A.students.filter((u) => openOf(u).includes(lv.n)).length;
+    const open = !!q || !!S.lvOpen[lv.id];
+    return `<article class="card panel fm-lv">
+      <div class="fm-top"><div style="display:grid;gap:8px;min-width:0">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="eyebrow">Nivel ${lv.n}</span><span class="pill ${n ? 'done' : 'lock'}">${n} ${n === 1 ? 'alumna lo tiene' : 'alumnas lo tienen'} abierto</span></div>
+        <h3 style="font-size:1.35rem">${esc(lv.title)}</h3>
+        <p class="muted" style="font-size:.9rem;max-width:60em">${esc(lv.desc)}</p>
+        <span class="muted" style="font-size:.8rem">${esc(lv.dur)} · ${lv.modules.length} módulos · ${lessonsOf(lv).length} clases${filesOf(lv) ? ` · ${filesOf(lv)} materiales` : ''}</span></div>
+        <div class="fm-acts"><button class="btn btn-primary btn-sm" data-cls="${lv.id},0,0">Abrir el nivel</button>${q ? '' : `<button class="btn btn-ghost btn-sm" data-lvopen="${lv.id}" aria-expanded="${open}">${open ? 'Ocultar módulos' : 'Ver módulos'}</button>`}</div></div>
+      ${open ? `<div class="fm-mods">${mods.map(({ m, i, ls }) => `<details class="fm-mod" ${q || i === 0 ? 'open' : ''}><summary><b>${esc(m.title)}</b><small>${m.lessons.length} ${m.lessons.length === 1 ? 'clase' : 'clases'}</small></summary>
+        <ol class="fm-les">${ls.map(({ l, j }) => `<li><button data-cls="${lv.id},${i},${j}"><span class="fm-t">${esc(l.t)}</span><small>${esc(l.len || '')}${l.files?.length ? ` · ${l.files.length} ${l.files.length === 1 ? 'material' : 'materiales'}` : ''}</small><span class="link">Ver clase</span></button></li>`).join('')}</ol></details>`).join('')}</div>` : ''}
+    </article>`;
+  }).join('');
+  return `${head}
+  <div class="kpis"><div><b>${C.length}</b><span>niveles</span></div><div><b>${C.reduce((a, lv) => a + lv.modules.length, 0)}</b><span>módulos</span></div><div><b>${C.reduce((a, lv) => a + lessonsOf(lv).length, 0)}</b><span>clases</span></div><div><b>${C.reduce((a, lv) => a + filesOf(lv), 0)}</b><span>materiales para descargar</span></div></div>
+  <div class="filters"><input type="text" id="fq" placeholder="Buscar una clase o un módulo" value="${esc(S.fq)}" style="flex:1;min-width:200px;border-radius:999px"></div>
+  <section style="display:grid;gap:14px">${levels || '<div class="card empty">No hay clases con ese nombre.</div>'}</section>`;
+};
+// Una clase abierta dentro del portal: es el aula misma (/aula?embed=1), sin su menú, con la sesión de la Maestra
+V.clase = () => {
+  const [id, i, j] = S.cls || [];
+  const lv = A.course?.find((l) => l.id === id), m = lv?.modules[i], l = m?.lessons[j];
+  if (!l) return '<button class="link" style="justify-self:start" data-go="formacion">← Volver a la formación</button><div class="card empty">No encontramos esa clase.</div>';
+  const src = `/aula?nivel=${encodeURIComponent(id)}&clase=${i}-${j}`;
+  return `<button class="link" style="justify-self:start" data-go="formacion">← Volver a la formación</button>
+  <div class="view-head"><div><span class="eyebrow">Nivel ${lv.n} · ${esc(lv.title)}</span><h1 style="font-size:clamp(1.4rem,2.6vw,1.9rem)">${esc(m.title)}</h1><p>Así la ven tus alumnas. Desde el temario del nivel puedes recorrer todas sus clases.</p></div><a class="btn btn-ghost btn-sm" href="${src}" target="_blank" rel="noopener">Abrir en otra pestaña</a></div>
+  <iframe class="aula-frame" src="${src}&embed=1" title="Clase: ${esc(l.t)}"></iframe>`;
+};
 V.pagos = () => {
   const cuotas = A.students.filter((u) => u.plan === 'mensual' && u.paymentStatus !== 'overdue');
   const rows = A.students.filter((u) => u.plan !== 'none' || Number(u.grantLevel)).sort((a, b) => (b.paymentStatus === 'overdue') - (a.paymentStatus === 'overdue'));
@@ -195,7 +247,7 @@ V.ajustes = () => `<div class="view-head"><div><span class="eyebrow">Portal de l
   <section class="card panel"><h3>Clases en vivo</h3><p class="muted" style="margin:0;font-size:.88rem">Las clases en vivo y sus grabaciones se programan dentro de cada clase del aula, donde ves el contenido.</p><a class="btn btn-ghost btn-sm" style="justify-self:start" href="/aula">Ir al aula</a></section>`;
 
 function paintNav() {
-  $('#nav').innerHTML = NAV.map(([k, n, ic, c]) => { const cnt = c ? c() : 0; return `<button data-go="${k}" ${S.view === k || (S.view === 'ficha' && k === 'alumnas') ? 'aria-current="page"' : ''}><svg viewBox="0 0 24 24">${ic}</svg>${n}${cnt ? `<span class="count">${cnt}</span>` : ''}</button>`; }).join('');
+  $('#nav').innerHTML = NAV.map(([k, n, ic, c]) => { const cnt = c ? c() : 0; return `<button data-go="${k}" ${S.view === k || (S.view === 'ficha' && k === 'alumnas') || (S.view === 'clase' && k === 'formacion') ? 'aria-current="page"' : ''}><svg viewBox="0 0 24 24">${ic}</svg>${n}${cnt ? `<span class="count">${cnt}</span>` : ''}</button>`; }).join('');
 }
 function render(top = true) {
   paintNav();
@@ -203,7 +255,10 @@ function render(top = true) {
   if (top) scrollTo(0, 0);
   bind();
 }
-function go(v) { S.view = v; $('#side').classList.remove('open'); $('#scrim').hidden = true; render(); }
+function go(v) {
+  S.view = v; $('#side').classList.remove('open'); $('#scrim').hidden = true; render();
+  if (v === 'formacion' && !A.course) data.course().then(() => S.view === 'formacion' && render(false)).catch(fail);
+}
 async function openStudent(uid) {
   S.open = uid; go('ficha');
   try { await data.payments(uid); if (S.view === 'ficha' && S.open === uid) render(false); } catch (e) { fail(e); }
@@ -212,6 +267,9 @@ function bind() {
   document.querySelectorAll('[data-go]').forEach((b) => (b.onclick = () => go(b.dataset.go)));
   document.querySelectorAll('[data-open]').forEach((b) => (b.onclick = () => openStudent(b.dataset.open)));
   document.querySelectorAll('[data-filter]').forEach((b) => (b.onclick = () => { S.filter = b.dataset.filter; render(false); }));
+  document.querySelectorAll('[data-lvopen]').forEach((b) => (b.onclick = () => { S.lvOpen[b.dataset.lvopen] = !S.lvOpen[b.dataset.lvopen]; render(false); }));
+  document.querySelectorAll('[data-cls]').forEach((b) => (b.onclick = () => { const [id, i, j] = b.dataset.cls.split(','); S.cls = [id, +i, +j]; go('clase'); }));
+  const fq = $('#fq'); if (fq) fq.oninput = () => { S.fq = fq.value; const p = fq.selectionStart; render(false); const f2 = $('#fq'); f2.focus(); f2.setSelectionRange(p, p); };
   const sq = $('#sq'); if (sq) sq.oninput = () => { S.q = sq.value; const p = sq.selectionStart; render(false); const s2 = $('#sq'); s2.focus(); s2.setSelectionRange(p, p); };
   document.querySelectorAll('[data-edit-student]').forEach((b) => (b.onclick = () => {
     const u = student(b.dataset.editStudent);

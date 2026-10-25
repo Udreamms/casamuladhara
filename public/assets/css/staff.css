@@ -172,3 +172,25 @@ table.tbl{width:100%;border-collapse:collapse;font-size:.88rem;min-width:520px}
 .btn:disabled{opacity:.55;cursor:default;transform:none}
 .tbl td .pill{margin:2px 0}
 .ribbon{background:var(--brass);color:#fff;text-align:center;font:600 .64rem/1 var(--f-caps);letter-spacing:.2em;text-transform:uppercase;padding:8px 16px}
+/* Formación completa: niveles, módulos y clases tal como las ven las alumnas */
+.fm-top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:start}
+.fm-acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.fm-mods{display:grid;gap:8px;border-top:1px solid var(--line);padding-top:14px}
+.fm-mod{border:1px solid var(--line);border-radius:14px;background:var(--bg)}
+.fm-mod summary{display:flex;gap:12px;align-items:baseline;justify-content:space-between;padding:12px 16px;cursor:pointer;list-style-position:inside}
+.fm-mod summary b{font-weight:600;font-size:.94rem;flex:1}
+.fm-mod summary small{color:var(--muted);font-size:.8rem;white-space:nowrap}
+.fm-les{margin:0;padding:0 8px 8px;list-style:none;counter-reset:fm}
+.fm-les li{counter-increment:fm}
+.fm-les button{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:grid;grid-template-columns:2.2em minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:9px 10px;border-radius:10px;font-size:.9rem}
+.fm-les button::before{content:counter(fm);color:var(--muted);font-size:.78rem;font-variant-numeric:tabular-nums;text-align:right}
+.fm-les button:hover{background:var(--surface-2)}
+.fm-les button:focus-visible{outline:2px solid var(--brass);outline-offset:1px}
+.fm-les small{color:var(--muted);font-size:.78rem;white-space:nowrap}
+.aula-frame{width:100%;height:calc(100dvh - 210px);min-height:560px;border:1px solid var(--line);border-radius:18px;background:var(--surface);box-shadow:var(--shadow)}
+@media (max-width:700px){
+  .fm-top{grid-template-columns:1fr}
+  .fm-acts{justify-content:flex-start}
+  .fm-les button{grid-template-columns:1.8em minmax(0,1fr) auto}
+  .fm-les small{display:none}
+}

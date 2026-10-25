@@ -2,6 +2,8 @@
 const lkey=()=>S.level+'_'+S.lesson.join('_');
 const person=(n)=>({who:n});
 const fail=e=>{console.error(e);toast(e&&e.code==='permission-denied'?'No tienes permiso para hacer eso.':'No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.')};
+// /aula?embed=1: el aula dentro del portal de la Maestra (sin menú ni barra superior, ver base.css)
+if(new URLSearchParams(location.search).has('embed'))document.documentElement.classList.add('embed');
 const fmtDay=d=>d.toLocaleDateString('es',{day:'numeric',month:'short',year:'numeric'});
 
 // primera clase pendiente del nivel más avanzado que ya tiene abierto
@@ -80,6 +82,10 @@ window.cmStart=async function(cm){
   renderNotifs();
   cm.onPosts=()=>{POSTS=cm.posts;const a=document.activeElement;const typing=a&&/INPUT|TEXTAREA/.test(a.tagName)&&a.value;if(!typing&&['comunidad','inicio'].includes(S.view))render(false)};
   POSTS=cm.posts;
+  // /aula?nivel=radiestesia&clase=2-3 abre esa clase (lo usa el portal de la Maestra)
+  const q=new URLSearchParams(location.search),dl=LEVELS.find(l=>l.id===q.get('nivel'));
+  if(dl){const [i,j]=(q.get('clase')||'').split('-').map(Number);const ok=dl.modules[i]&&dl.modules[i].lessons[j];
+    S.level=dl.id;S.lesson=ok?[i,j]:[0,0];S.openMods[dl.id+S.lesson[0]]=true;S.tab='temas';S.view='curso'}
   $('#login').hidden=true;
   render();
 };

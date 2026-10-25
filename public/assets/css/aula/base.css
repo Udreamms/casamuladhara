@@ -107,3 +107,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   .menu-btn{display:grid}
   .scrim-side{position:fixed;inset:0;background:rgba(10,20,16,.5);z-index:35}
 }
+/* /aula?embed=1: el aula dentro del portal de la Maestra, sin menú ni barra superior */
+.embed .side,.embed .topbar{display:none!important}
+.embed .app{grid-template-columns:minmax(0,1fr)}
