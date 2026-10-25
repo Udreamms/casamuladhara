@@ -38,7 +38,7 @@ scripts/                administración desde tu computador (alumnas, Maestra, r
 - Los enlaces antiguos con `.html` redirigen a la ruta nueva (`next.config.mjs`).
 - La portada es una casona moderna en 3D que se recorre al bajar (`public/assets/js/casona.js`, `recorrido.js`, `public/assets/css/casona.css`). Three.js y Lenis van copiados en `public/assets/vendor/`. Sin WebGL o con "reducir movimiento" activado, la portada se ve como tarjetas estáticas.
 - `/login`: ingreso / registro de alumnas (correo y contraseña, Google). `/aula` sin sesión redirige ahí.
-- `/staff`: portal de la Maestra, con su propio login (correo y contraseña).
+- `/staff`: portal de la Maestra. Se entra con usuario y contraseña (`STAFF_USER` y `STAFF_PASSWORD`, sin correo) por `src/app/api/staff`.
 - `public/assets/js/firebase.js`, `public/assets/js/cloud.js`: configuración y capa de datos del navegador (Auth + Firestore).
 - Imports del servidor con el alias `@/` → `src/` (`jsconfig.json`).
 
@@ -60,7 +60,7 @@ Para regalar la formación completa: `enroll correo --plan completo`.
 ### Puesta en marcha
 1. En Stripe: un producto con un precio recurrente mensual de 55 USD y otro único de 499 USD; activa el portal de clientes (cambiar tarjeta y cancelar).
 2. En Stripe → Webhooks: el endpoint `https://TU-DOMINIO/api/stripe-webhook` con `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid` e `invoice.payment_failed`.
-3. En Vercel → Settings → Environment Variables, las del archivo `.env.local` de tu computador (no se sube a GitHub): `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID`, `STRIPE_PRICE_FULL_ID`, `STRIPE_WEBHOOK_SECRET`, `FIREBASE_SERVICE_ACCOUNT`, `APP_URL` y `ADMIN_EMAILS`.
+3. En Vercel → Settings → Environment Variables, las del archivo `.env.local` de tu computador (no se sube a GitHub): `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID`, `STRIPE_PRICE_FULL_ID`, `STRIPE_WEBHOOK_SECRET`, `FIREBASE_SERVICE_ACCOUNT`, `APP_URL`, `ADMIN_EMAILS`, `STAFF_USER` y `STAFF_PASSWORD` (usuario y contraseña de `/staff`).
 4. Después de publicar: `node scripts/deploy-backend.mjs` (reglas), el `grant` de cada alumna actual y una vez `node scripts/admin.mjs sync-members`.
 
 ## Administración (en tu computador)

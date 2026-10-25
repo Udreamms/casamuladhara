@@ -1,10 +1,10 @@
 // Portal de la Maestra (/admin): alumnas, acceso por alumna, pagos, mensajes, preguntas, ayuda y comunidad.
-// Entra con correo y contraseña (la cuenta la crea scripts/admin.mjs create-admin). La primera vez se activa al verificar el Gmail (ver src/app/api/admin/route.js).
+// Entra con usuario y contraseña (sin correo): /api/staff los compara con STAFF_USER y STAFF_PASSWORD y entrega la sesión del Staff.
 // Lo que se ve aquí lo protegen las reglas de Firestore: solo una cuenta con el claim admin puede leerlo.
 import { auth, db } from './firebase.js';
 import { profileApi, mountProfileEditor, googlePhoto } from './profile.js';
 import {
-  signInWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail,
+  signInWithCustomToken,
   onAuthStateChanged, onIdTokenChanged, signOut,
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 import {
@@ -313,7 +313,6 @@ api = async (body) => {
   return out;
 };
 const ERR = {
-  'auth/invalid-credential': 'Correo o contraseña incorrectos.', 'auth/invalid-email': 'Escribe un correo válido.',
   'auth/too-many-requests': 'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.',
   'auth/network-request-failed': 'Sin conexión. Revisa tu internet e inténtalo de nuevo.',
 };
@@ -335,16 +334,15 @@ function watchStudents() {
     else paintNav();
   }, (e) => console.warn('alumnas', e.code));
 }
-async function enter(u) {
+// auto: la sesión que ya estaba abierta al cargar (si es de una alumna, solo se muestra el login sin cerrarla)
+async function enter(u, auto = false) {
   say('Abriendo tu portal…', true);
   try {
     const me = await api({ action: 'me' });
-    if (!me.admin && !me.verified) {
-      await sendEmailVerification(u).catch(() => {});
-      await signOut(auth);
-      return say(`Te enviamos un correo a ${u.email} para confirmar que es tuyo. Ábrelo, toca el enlace y vuelve a entrar aquí.`, true);
+    if (!me.admin) {
+      if (auto) return say('');
+      await signOut(auth); return say('Esta cuenta no es del Staff. Las alumnas entran por el aula.');
     }
-    if (!me.admin) { await signOut(auth); return say('Esta cuenta no es la de la Maestra. Las alumnas entran por el aula.'); }
     await u.getIdToken(true);
     await loadAll();
     watchStudents();
@@ -354,22 +352,19 @@ async function enter(u) {
 }
 $('#lg-form').onsubmit = async (e) => {
   e.preventDefault();
-  const email = $('#lg-email').value.trim(), pass = $('#lg-pass').value;
-  if (!email || !pass) return say('Escribe tu correo y tu contraseña.');
+  const usuario = $('#lg-user').value.trim(), clave = $('#lg-pass').value;
+  if (!usuario || !clave) return say('Escribe tu usuario y tu contraseña.');
   lock(true);
   try {
-    const cred = await signInWithEmailAndPassword(auth, email, pass);
+    const r = await fetch('/api/staff', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ usuario, clave }) });
+    const out = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(out.error || 'No pudimos entrar. Inténtalo de nuevo.');
+    const cred = await signInWithCustomToken(auth, out.token);
     await enter(cred.user);
-  } catch (err) { say(ERR[err.code] || 'No pudimos entrar. Inténtalo de nuevo.'); }
+  } catch (err) { say(ERR[err.code] || err.message || 'No pudimos entrar. Inténtalo de nuevo.'); }
   lock(false);
-};
-$('#lg-forgot').onclick = async () => {
-  const email = $('#lg-email').value.trim();
-  if (!email) return say('Escribe tu correo arriba y vuelve a tocar «Olvidé mi contraseña».');
-  try { await sendPasswordResetEmail(auth, email); } catch (err) { if (err.code !== 'auth/user-not-found') return say(ERR[err.code] || 'No se pudo enviar el correo.'); }
-  say('Si ese correo tiene una cuenta, te enviamos un enlace para crear una nueva contraseña.', true);
 };
 $('#logout').onclick = () => signOut(auth).then(() => { setSessionCookie(''); location.reload(); });
 
 const current = await new Promise((res) => { const off = onAuthStateChanged(auth, (u) => { off(); res(u); }); });
-if (current) enter(current); else say('');
+if (current) enter(current, true); else say('');
