@@ -176,6 +176,13 @@ V.soporte=()=>{
   </div>`;
 };
 
+V.tienda=()=>`<section class="shop-hero"><svg class="motif"><use href="#mark"/></svg><div style="position:relative"><span class="eyebrow">La tiendita</span><h2>Preparados y herramientas para tus prácticas</h2>
+    <p>Elaborados en Casa Muladhara para acompañar la limpieza y armonización energética, en casa o en consulta.</p></div></section>
+  <div class="shop">${SHOP.map(p=>`<article class="card shop-item"><div class="shop-img"><img loading="lazy" decoding="async" src="${p.img}" alt="${esc(p.alt)}">${p.isNew?'<span class="pill pres">Nuevo</span>':''}</div>
+    <div class="shop-body"><span class="eyebrow">${p.tag}</span><h3>${p.name}</h3><ul>${p.pts.map(x=>`<li>${x}</li>`).join('')}</ul>${p.warn?`<span class="shop-warn">${p.warn}</span>`:''}
+    <div class="shop-buy"><div class="shop-price">${p.price}<small>${p.unit}</small></div><button class="btn btn-primary btn-sm" data-shop="${p.id}">Pedir</button></div></div></article>`).join('')}</div>
+  <div class="shop-foot"><span>Despacho a domicilio o retiro en consulta</span><span>Coordinamos contigo el pago y la entrega</span><span>Consultas por Instagram @casa.muladhara</span></div>`;
+
 V.trabaja=()=>{
   const ck=on=>`<span class="chk ${on?'on':''}"></span>`;
   const services=['Péndulo Hebreo','Limpieza de casas y espacios','Radiestesia y Sanación del Alma','Vidas pasadas','Terapia transgeneracional','Niño interior','Limpieza uterina','Tarot Terapéutico'];

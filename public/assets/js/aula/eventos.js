@@ -69,6 +69,19 @@ document.addEventListener('click',e=>{
 });
 
 /* modal */
+// Tienda: el pedido le llega a la Maestra como mensaje (Mensajes de ayuda en su portal) y lo coordina con la alumna
+function openShop(id){const p=SHOP.find(x=>x.id===id);if(!p)return;
+  openModal(`<span class="eyebrow">Tienda</span><h3>${p.name}</h3><p class="muted" style="margin:0">${p.price} ${p.unit}. Envíanos tu pedido y te escribimos para coordinar el pago y la entrega.</p>
+  <form class="ticket" id="shop-form" style="margin-top:12px"><label for="sh-qty">Cantidad<select id="sh-qty">${[1,2,3,4,5].map(n=>`<option>${n}</option>`).join('')}</select></label>
+  <label for="sh-del">Entrega<select id="sh-del"><option>Despacho a domicilio</option><option>Retiro en consulta</option></select></label>
+  <label for="sh-note">Comentario (opcional)<textarea id="sh-note" style="min-height:80px" placeholder="Dirección, ciudad o lo que necesites contarnos"></textarea></label>
+  <button class="btn btn-primary">Enviar pedido</button></form>`);
+  $('#shop-form').onsubmit=e=>{e.preventDefault();const b=e.target.querySelector('button');b.disabled=true;
+    const note=$('#sh-note').value.trim();
+    const msg=`Pedido: ${$('#sh-qty').value} × ${p.name} (${p.price} ${p.unit} c/u).\nEntrega: ${$('#sh-del').value}.${note?'\nComentario: '+note:''}`;
+    CM.ticket('Pedido de la tienda',msg.slice(0,4000)).then(()=>{closeModal();toast('¡Recibimos tu pedido! Te escribiremos para coordinar el pago y la entrega.')}).catch(err=>{b.disabled=false;fail(err)})};
+}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-shop]');if(b)openShop(b.dataset.shop)});
 function openModal(html){$('#modal').innerHTML='<button class="x" aria-label="Cerrar" id="mx">×</button>'+html;$('#scrim').hidden=false;$('#mx').onclick=closeModal;$('#mx').focus()}
 function closeModal(){$('#scrim').hidden=true}
 $('#scrim').addEventListener('click',e=>{if(e.target.id==='scrim')closeModal()});

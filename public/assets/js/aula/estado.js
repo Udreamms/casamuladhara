@@ -10,6 +10,7 @@ const NAV=[
  ['comunidad','Comunidad','<path d="M4 5h16v11H9l-5 4z"/>'],
  ['calendario','Calendario','<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'],
  ['recursos','Recursos','<path d="M5 4h10l4 4v12H5z"/><path d="M14 4v5h5"/>'],
+ ['tienda','Tienda','<path d="M4 9h16l-1.5 11h-13z"/><path d="M8.5 9V7a3.5 3.5 0 0 1 7 0v2"/>'],
  ['trabaja','Trabaja con nosotras','<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/>'],
  ['pagos','Mis pagos','<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h4"/>'],
  ['soporte','Soporte','<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5V14M12 17.5v.01"/>'],
