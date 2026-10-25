@@ -245,6 +245,26 @@ CM.billing = async (kind) => {
   return out.url;
 };
 
+// ---- Respuestas que la alumna escribe dentro de las clases (las lee la Maestra en su portal; ver src/app/api/answers) ----
+const answersApi = async (body) => {
+  const r = await fetch('/api/answers', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${await user.getIdToken()}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+    keepalive: JSON.stringify(body).length < 60000, // para que lo último se guarde aunque cierre la pestaña
+  });
+  const out = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(out.error || 'No se pudieron guardar tus respuestas.');
+  return out;
+};
+CM.answers = {};
+if (!isAdmin) {
+  await answersApi({ action: 'mine' })
+    .then((o) => o.answers.forEach((a) => { CM.answers[a.key] = a.fields; }))
+    .catch((e) => console.warn('respuestas', e.message));
+}
+CM.saveAnswers = (key, fields) => answersApi({ action: 'save', key, fields });
+
 window.CM = CM;
 window.cmStart(CM);
 

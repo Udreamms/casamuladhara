@@ -67,6 +67,36 @@ $('#me-card').onclick=openProfile;
 $('#me-card').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openProfile()}};
 document.addEventListener('click',e=>{if(e.target.closest('#edit-profile'))openProfile()});
 
+/* ---------- respuestas escritas en las clases: se guardan solas y la Maestra las ve en su portal ---------- */
+// ANS[clase][campo] = {q: la consigna, v: lo que escribió, paso: el paso de la clase}
+const ANS={},ansTimers={};
+// vuelve a poner lo que ya había escrito (RS y la ficha del Nivel 2 viven en curso/n1.js y n2.js)
+function restoreAnswers(all){
+  Object.entries(all||{}).forEach(([key,fields])=>{ANS[key]={...fields};
+    if(typeof RS==='undefined')return;
+    Object.entries(fields).forEach(([k,f])=>{if(k.startsWith('n2:')){if(typeof FI==='function')FI()[k.slice(3)]=f.v}else if(RS[k]===undefined)RS[k]=f.v})});
+}
+// la consigna: el texto de su etiqueta (sin lo escrito), o su aria-label, o el placeholder
+function ansLabel(el){
+  const l=el.closest('label');
+  const t=l?[...l.childNodes].filter(n=>n.nodeType===3||(n.nodeType===1&&!/^(INPUT|TEXTAREA|SELECT)$/.test(n.tagName))).map(n=>n.textContent).join(' ').replace(/\s+/g,' ').trim():'';
+  return (t||el.getAttribute('aria-label')||el.placeholder||'').slice(0,300);
+}
+function ansSave(key){clearTimeout(ansTimers[key]);delete ansTimers[key];CM.saveAnswers(key,ANS[key]).catch(e=>console.warn('respuestas',e.message))}
+document.addEventListener('input',e=>{
+  const t=e.target,d=t.dataset||{};
+  if(!window.CM||CM.isAdmin||S.view!=='curso')return;
+  const k=d.rsin!==undefined?d.rsin:d.n2i!==undefined?'n2:'+d.n2i:null;
+  if(k===null||!(t.tagName==='TEXTAREA'||['text','number'].includes(t.type)))return;
+  const key=lkey(),lv=LEVELS.find(l=>l.id===S.level),les=lv&&lv.modules[S.lesson[0]].lessons[S.lesson[1]];
+  const paso=les&&les.topics&&les.topics[S.sl[key]||0]?les.topics[S.sl[key]||0].t:'';
+  (ANS[key]||(ANS[key]={}))[k]={q:ansLabel(t),v:String(t.value).slice(0,5000),paso};
+  clearTimeout(ansTimers[key]);ansTimers[key]=setTimeout(()=>ansSave(key),1500);
+});
+// al salir o cambiar de pestaña guarda lo pendiente
+addEventListener('pagehide',()=>Object.keys(ansTimers).forEach(ansSave));
+document.addEventListener('visibilitychange',()=>{if(document.hidden)Object.keys(ansTimers).forEach(ansSave)});
+
 window.cmStart=async function(cm){
   syncMe();
   // los datos de ejemplo del diseño original no se muestran: todo parte en blanco y se llena con su avance real
@@ -75,6 +105,7 @@ window.cmStart=async function(cm){
   // el código de cada nivel usa piezas de los anteriores: se carga hasta el más alto, pero solo se abren los suyos
   if(cm.lvl>0)S.lvl=await loadCourse(cm.lvl);
   S.lvls=new Set(cm.lvls.filter(n=>n<=S.lvl));
+  restoreAnswers(cm.answers);
   refreshDerived();
   if(S.lvl<cm.lvl)toast('No se pudo cargar el contenido de las clases. Recarga la página.');
   if(cm.paid==='ok')toast('¡Gracias! Estamos confirmando tu pago; tu aula se actualiza en unos segundos.');

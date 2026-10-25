@@ -43,7 +43,7 @@ const payState = (u) => (u.plan === 'completo' ? ['done', 'Pagó completo']
     : ownedOf(u).length ? ['done', `Compró el Nivel ${ownedOf(u).join(', ')}`] : ['lock', 'Sin pago']);
 
 // ---------- Datos ----------
-const A = { students: [], questions: [], tickets: [], posts: [], config: {}, payments: {}, me: null };
+const A = { students: [], questions: [], tickets: [], posts: [], config: {}, payments: {}, me: null, answers: null };
 let api = null; // llama a /api/admin con el token de la Maestra
 
 async function loadAll() {
@@ -108,17 +108,29 @@ const data = {
     }
     return A.course;
   },
+  // Lo que las alumnas escriben dentro de las clases (src/app/api/answers): las más recientes primero
+  answers: async () => {
+    const r = await fetch('/api/answers', {
+      method: 'POST', headers: { Authorization: `Bearer ${await auth.currentUser.getIdToken()}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'all' }),
+    });
+    const out = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(out.error || 'No se pudieron cargar las respuestas.');
+    A.answers = out.answers.sort((a, b) => b.updatedAt - a.updatedAt);
+    return A.answers;
+  },
   deletePost: async (id) => { await deleteDoc(doc(db, 'posts', id)); A.posts = A.posts.filter((p) => p.id !== id); },
   saveConfig: async (d) => { await setDoc(doc(db, 'config', 'aula'), { ...d, updatedAt: serverTimestamp() }, { merge: true }); Object.assign(A.config, d); },
 };
 
 // ---------- Vista ----------
-const S = { view: 'alumnas', q: '', open: null, filter: 'todas', lvOpen: {}, fq: '', cls: null };
+const S = { view: 'alumnas', q: '', open: null, filter: 'todas', lvOpen: {}, fq: '', cls: null, ansWho: '', ansLv: 0 };
 const NAV = [
   ['alumnas', 'Alumnas', '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5a6.5 6.5 0 0 1 3.5 5.5"/>', () => A.students.filter(isNew).length],
   ['formacion', 'Formación completa', '<path d="M3 8 12 4l9 4-9 4z"/><path d="M7 10v5c3 2 7 2 10 0v-5"/>'],
   ['pagos', 'Pagos', '<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h4"/>'],
   ['mensajes', 'Mensajes', '<path d="M4 5h16v11H9l-5 4z"/>'],
+  ['respuestas', 'Respuestas de clase', '<path d="M5 4h14v16H5z"/><path d="M8 9h8M8 13h8M8 17h5"/>', () => newAnswers().length],
   ['preguntas', 'Preguntas de clase', '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5V14M12 17.5v.01"/>', () => A.questions.length],
   ['ayuda', 'Mensajes de ayuda', '<path d="M12 21a9 9 0 1 0-9-9c0 1.6.4 3.1 1.2 4.4L3 21l4.6-1.2A9 9 0 0 0 12 21z"/>', () => A.tickets.length],
   ['comunidad', 'Comunidad', '<path d="M7 10h10M7 14h6"/><path d="M4 4h16v13H8l-4 3z"/>'],
@@ -171,7 +183,9 @@ V.ficha = () => {
   </div>
   <section class="card panel"><h3>Historial de pagos</h3><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Fecha</th><th>Detalle</th><th>Monto</th><th>Estado</th></tr></thead><tbody>
     ${!pays ? '<tr><td colspan="4" class="muted">Cargando…</td></tr>' : pays.map((p) => `<tr><td>${fdate(p.paidAt) || fdate(p.createdAt)}</td><td>${esc(p.concept || 'Pago')}</td><td>${esc(p.amount ?? 0)} USD</td><td><span class="pill ${p.status === 'failed' ? 'bad' : 'done'}">${p.status === 'failed' ? 'Rechazado' : 'Pagado'}</span></td></tr>`).join('') || '<tr><td colspan="4" class="muted">Aún no tiene pagos registrados.</td></tr>'}
-  </tbody></table></div></section>`;
+  </tbody></table></div></section>
+  <section class="card panel"><div class="panel-h"><h3>Respuestas en las clases</h3><button class="link" data-ans-who="${u.id}">Ver en Respuestas de clase</button></div>
+    ${answersHTML(A.answers && A.course ? A.answers.filter((a) => a.uid === u.id) : null, false)}</section>`;
 };
 // La formación tal como la ven las alumnas, toda abierta para la Maestra: niveles, módulos y clases
 const lessonsOf = (lv) => lv.modules.flatMap((m) => m.lessons);
@@ -203,6 +217,63 @@ V.formacion = () => {
   <div class="filters"><input type="text" id="fq" placeholder="Buscar una clase o un módulo" value="${esc(S.fq)}" style="flex:1;min-width:200px;border-radius:999px"></div>
   <section style="display:grid;gap:14px">${levels || '<div class="card empty">No hay clases con ese nombre.</div>'}</section>`;
 };
+// ---------- Respuestas de clase ----------
+// Cada clase se guarda como nivel_módulo_clase; con el programa del aula se ordena por nivel, módulo y clase
+const SEEN_KEY = 'cm-respuestas-vistas';
+const seenAt = () => { try { return Number(localStorage.getItem(SEEN_KEY)) || 0; } catch { return 0; } };
+const markSeen = () => { try { localStorage.setItem(SEEN_KEY, String(Date.now())); } catch { /* sin almacenamiento */ } };
+let seen = seenAt();
+const newAnswers = () => { const t = seenAt(); return (A.answers || []).filter((a) => a.updatedAt > t); };
+const placeOf = (key) => {
+  const m = String(key).match(/^(.+)_(\d+)_(\d+)$/);
+  const lv = m && A.course?.find((l) => l.id === m[1]), mod = lv?.modules[+m[2]], les = mod?.lessons[+m[3]];
+  return les ? { lv, mod, les, i: +m[2], j: +m[3] } : null;
+};
+const fdateMs = (ms) => (ms ? new Date(ms).toLocaleDateString('es', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '');
+const answerFields = (a) => Object.values(a.fields).filter((f) => String(f.v || '').trim());
+const answerBody = (a) => `<dl class="ans-list">${answerFields(a).map((f) => `<dt>${f.paso ? `<span class="muted">${esc(f.paso)} · </span>` : ''}${esc(f.q || 'Respuesta')}</dt><dd>${esc(f.v)}</dd>`).join('')}</dl>`;
+// list: respuestas ya filtradas; byStudent: agrupa también por alumna dentro de cada clase (vista general) o no (ficha)
+function answersHTML(list, byStudent = true) {
+  if (!list) return '<p class="muted" style="margin:0">Cargando respuestas…</p>';
+  if (!list.length) return '<p class="muted" style="margin:0">Todavía no hay respuestas escritas en las clases.</p>';
+  const groups = new Map();
+  list.forEach((a) => {
+    const p = placeOf(a.key);
+    const id = p ? `${p.lv.n}|${p.i}|${p.j}` : `9|${a.key}`;
+    if (!groups.has(id)) groups.set(id, { p, key: a.key, items: [] });
+    groups.get(id).items.push(a);
+  });
+  const order = (g) => (g.p ? [g.p.lv.n, g.p.i, g.p.j] : [99, 0, 0]);
+  const sorted = [...groups.values()].sort((x, y) => { const a = order(x), b = order(y); return a[0] - b[0] || a[1] - b[1] || a[2] - b[2]; });
+  let lastLv = null, lastMod = null;
+  return sorted.map((g) => {
+    let head = '';
+    if (g.p && g.p.lv !== lastLv) { head += `<h3 class="ans-lv"><span class="eyebrow">Nivel ${g.p.lv.n}</span> ${esc(g.p.lv.title)}</h3>`; lastLv = g.p.lv; lastMod = null; }
+    if (g.p && g.p.mod !== lastMod) { head += `<h4 class="ans-mod">${esc(g.p.mod.title)}</h4>`; lastMod = g.p.mod; }
+    const title = g.p ? esc(g.p.les.t) : `Clase ${esc(g.key)}`;
+    const items = g.items.map((a) => {
+      const u = student(a.uid), isNewA = a.updatedAt > seen;
+      return `<article class="ans-item">${byStudent ? `<div class="ans-who">${av(u)}<button class="link" style="font-size:.8rem;letter-spacing:.06em;text-transform:none;font-family:var(--f-body);color:var(--fg)" data-open="${esc(a.uid)}">${esc(nameOf(u))}</button>` : '<div class="ans-who">'}<span class="muted" style="font-size:.8rem">${fdateMs(a.updatedAt)}</span>${isNewA ? '<span class="pill pres">Nueva</span>' : ''}</div>${answerBody(a)}</article>`;
+    }).join('');
+    return `${head}<section class="ans-les"><div class="ans-les-h"><b>${title}</b>${g.p ? `<button class="link" data-cls="${g.p.lv.id},${g.p.i},${g.p.j}">Ver clase</button>` : ''}</div>${items}</section>`;
+  }).join('');
+}
+V.respuestas = () => {
+  const head = `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>Respuestas de clase</h1><p>Lo que tus alumnas escriben dentro de las clases: reflexiones, ejercicios y fichas. Se guarda solo mientras escriben y aquí queda ordenado por nivel, módulo y clase.</p></div><button class="btn btn-ghost btn-sm" data-ans-reload>Actualizar</button></div>`;
+  if (!A.answers || !A.course) return `${head}<div class="card empty">Cargando respuestas…</div>`;
+  const who = S.ansWho, lvN = S.ansLv;
+  const list = A.answers.filter((a) => (!who || a.uid === who) && (!lvN || placeOf(a.key)?.lv.n === lvN) && answerFields(a).length);
+  const writers = [...new Set(A.answers.map((a) => a.uid))].map(student).filter(Boolean).sort((a, b) => nameOf(a).localeCompare(nameOf(b)));
+  const chip = (n, t) => `<button class="chip" data-ans-lv="${n}" aria-pressed="${lvN === n}">${t}</button>`;
+  return `${head}
+  <div class="filters"><select id="ans-who" aria-label="Alumna" style="border-radius:999px;min-width:200px"><option value="">Todas las alumnas (${writers.length})</option>${writers.map((u) => `<option value="${esc(u.id)}" ${who === u.id ? 'selected' : ''}>${esc(nameOf(u))}</option>`).join('')}</select>
+    ${chip(0, 'Todos los niveles')}${A.course.map((l) => chip(l.n, `Nivel ${l.n}`)).join('')}</div>
+  <section class="card panel">${answersHTML(list)}</section>`;
+};
+// Carga programa y respuestas (para Respuestas de clase y la ficha de cada alumna)
+async function loadAnswers(force = false) {
+  await Promise.all([data.course(), force || !A.answers ? data.answers() : null]);
+}
 // Una clase abierta dentro del portal: es el aula misma (/aula?embed=1), sin su menú, con la sesión de la Maestra
 V.clase = () => {
   const [id, i, j] = S.cls || [];
@@ -258,16 +329,25 @@ function render(top = true) {
   bind();
 }
 function go(v) {
+  // Las marcadas como nuevas son las que llegaron desde la visita anterior a Respuestas de clase
+  if (v === 'respuestas' && S.view !== 'respuestas') { seen = seenAt(); markSeen(); }
   S.view = v; $('#side').classList.remove('open'); $('#scrim').hidden = true; render();
   if (v === 'formacion' && !A.course) data.course().then(() => S.view === 'formacion' && render(false)).catch(fail);
+  if (v === 'respuestas') {
+    loadAnswers(true).then(() => { if (S.view === 'respuestas') render(false); }).catch(fail);
+  }
 }
 async function openStudent(uid) {
   S.open = uid; go('ficha');
-  try { await data.payments(uid); if (S.view === 'ficha' && S.open === uid) render(false); } catch (e) { fail(e); }
+  try { await Promise.all([data.payments(uid), loadAnswers()]); if (S.view === 'ficha' && S.open === uid) render(false); } catch (e) { fail(e); }
 }
 function bind() {
   document.querySelectorAll('[data-open]').forEach((b) => (b.onclick = () => openStudent(b.dataset.open)));
   document.querySelectorAll('[data-filter]').forEach((b) => (b.onclick = () => { S.filter = b.dataset.filter; render(false); }));
+  document.querySelectorAll('[data-ans-lv]').forEach((b) => (b.onclick = () => { S.ansLv = Number(b.dataset.ansLv); render(false); }));
+  document.querySelectorAll('[data-ans-who]').forEach((b) => (b.onclick = () => { S.ansWho = b.dataset.ansWho; S.ansLv = 0; go('respuestas'); }));
+  document.querySelectorAll('[data-ans-reload]').forEach((b) => (b.onclick = () => { b.disabled = true; loadAnswers(true).then(() => render(false)).catch(fail); }));
+  const aw = $('#ans-who'); if (aw) aw.onchange = () => { S.ansWho = aw.value; render(false); };
   document.querySelectorAll('[data-lvopen]').forEach((b) => (b.onclick = () => { S.lvOpen[b.dataset.lvopen] = !S.lvOpen[b.dataset.lvopen]; render(false); }));
   document.querySelectorAll('[data-cls]').forEach((b) => (b.onclick = () => { const [id, i, j] = b.dataset.cls.split(','); S.cls = [id, +i, +j]; go('clase'); }));
   const fq = $('#fq'); if (fq) fq.oninput = () => { S.fq = fq.value; const p = fq.selectionStart; render(false); const f2 = $('#fq'); f2.focus(); f2.setSelectionRange(p, p); };
@@ -406,6 +486,7 @@ async function enter(u, auto = false) {
     await u.getIdToken(true);
     await loadAll();
     watchStudents();
+    loadAnswers().then(paintNav).catch((e) => console.warn('respuestas', e.message));
     const p = (await getDoc(doc(db, 'users', u.uid))).data() || {};
     start({ id: u.uid, ...p, displayName: p.displayName || 'Maestra Holística' });
   } catch (e) { console.error(e); say(e.message || 'No pudimos abrir el portal. Inténtalo de nuevo.'); }
