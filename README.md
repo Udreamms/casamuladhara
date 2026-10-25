@@ -1,23 +1,32 @@
 # Casa Muladhara · Sitio y Aula
 
-Sitio estático (Vercel, sin build) con aula virtual conectada a Firebase (proyecto `casamuladhara`).
+Sitio en **Next.js** (Vercel) con aula virtual conectada a Firebase (proyecto `casamuladhara`).
 
-- `index.html`: sitio principal. "Mi cuenta" lleva al login real.
-- `assets/js/casona.js`, `assets/js/recorrido.js`, `assets/css/casona.css`: la portada es una casona moderna en 3D que se recorre al bajar (se abren las puertas, recibidor, sala del péndulo, pasillo de terapias, escalera de la Escuela, Sala Abierta, aula, tiendita y jardín de los niños). Three.js (con `assets/vendor/jsm/` para el brillo) y Lenis van copiados en `assets/vendor/`. Sin WebGL o con "reducir movimiento" activado en el equipo, la portada se ve como tarjetas estáticas.
-- `login.html`: ingreso / registro (correo y contraseña, Google).
-- `aula.html`: aula virtual. Sin sesión redirige a `login.html`.
-- `assets/js/firebase.js`, `assets/js/cloud.js`: configuración y capa de datos (Auth + Firestore).
-- `curso/n1.js`, `curso/n2.js`, `curso/n3.js`: contenido de las clases de cada nivel. Solo se sirven a quien tiene ese nivel abierto.
-- `api/billing.js`, `api/stripe-webhook.js`: pagos con Stripe (funciones de Vercel).
-- `api/_lib/access.js`: la regla única de quién abre qué nivel.
-- `middleware.js`: bloquea en el servidor `curso/nN.js` y `assets/nN/` según el nivel de cada alumna.
+```bash
+npm install
+npm run dev     # http://localhost:3000 (lee .env.local)
+npm run build   # build de producción, el mismo que hace Vercel
+```
+
+- `app/`: rutas de Next.js. Cada carpeta es una dirección: `/`, `/login`, `/aula`, `/staff` (y `/admin`), `/terapias`, `/pendulo`, `/meditacion`, `/sala`. Los enlaces antiguos con `.html` redirigen a la ruta nueva.
+- `paginas/*.html`: el contenido de cada página (HTML, estilos y scripts). `lib/pagina.js` lo entrega tal cual en su ruta, así el diseño y el 3D no cambian.
+- `paginas/index.html`: sitio principal. "Mi cuenta" lleva al login real.
+- `public/assets/js/casona.js`, `public/assets/js/recorrido.js`, `public/assets/css/casona.css`: la portada es una casona moderna en 3D que se recorre al bajar (se abren las puertas, recibidor, sala del péndulo, pasillo de terapias, escalera de la Escuela, Sala Abierta, aula, tiendita y jardín de los niños). Three.js (con `public/assets/vendor/jsm/` para el brillo) y Lenis van copiados en `public/assets/vendor/`. Sin WebGL o con "reducir movimiento" activado en el equipo, la portada se ve como tarjetas estáticas.
+- `paginas/login.html` (`/login`): ingreso / registro de alumnas (correo y contraseña, Google).
+- `paginas/admin.html` (`/staff`): portal de la Maestra, con su propio login (correo y contraseña).
+- `paginas/aula.html` (`/aula`): aula virtual. Sin sesión redirige a `/login`.
+- `public/assets/js/firebase.js`, `public/assets/js/cloud.js`: configuración y capa de datos (Auth + Firestore).
+- `public/curso/n1.js` … `n5.js`: contenido de las clases de cada nivel. Solo se sirven a quien tiene ese nivel abierto.
+- `app/api/billing`, `app/api/stripe-webhook`, `app/api/admin`: pagos con Stripe y acciones de la Maestra (rutas de API de Next).
+- `app/api/_lib/access.js`: la regla única de quién abre qué nivel.
+- `proxy.js`: bloquea en el servidor `curso/nN.js` y `assets/nN/` según el nivel de cada alumna.
 - `firestore.rules`, `storage.rules`, `firestore.indexes.json`: seguridad e índices.
 
 ## Formación y pagos (Stripe)
 Una sola inscripción para la formación completa de cinco niveles: **9 cuotas de 55 USD** (Stripe deja de cobrar sola después de la novena) o **499 USD al contado**. Quien paga en cuotas puede pagar lo que le falta al contado cuando quiera.
 
 - **Roles** (`users/{uid}.role`): `admin` (la Maestra), `student_free` (toda cuenta nueva: ve el programa y la comunidad, todo bloqueado), `student_subscribed` (paga en cuotas al día o ya pagó todo) y `student_permanent` (alumnas que pagaron niveles antes de la plataforma). Nadie elige su rol: lo ponen el webhook de Stripe o la Maestra, y las reglas de Firestore impiden cambiarlo desde el navegador.
-- **Niveles abiertos** (claims `lvls` y `lvl` en el token): cada alumna tiene los suyos, no necesariamente en orden. Se suman los niveles que compró aparte (`ownedLevels`, alumnas antiguas, permanentes) y, si el programa está pagado o al día, los que la Maestra le desbloqueó (`unlockedLevels`). `blocked: true` la bloquea. Se cambian desde el portal de la Maestra (`admin.html`). `middleware.js` y las reglas los exigen antes de servir el contenido de cada nivel.
+- **Niveles abiertos** (claims `lvls` y `lvl` en el token): cada alumna tiene los suyos, no necesariamente en orden. Se suman los niveles que compró aparte (`ownedLevels`, alumnas antiguas, permanentes) y, si el programa está pagado o al día, los que la Maestra le desbloqueó (`unlockedLevels`). `blocked: true` la bloquea. Se cambian desde el portal de la Maestra (`/staff`). `proxy.js` y las reglas los exigen antes de servir el contenido de cada nivel.
 - **Cuota atrasada**: se pausa lo que no tenía; conserva su acceso permanente y su avance. Cada pago queda en `users/{uid}/payments`.
 
 ### Tus alumnas actuales

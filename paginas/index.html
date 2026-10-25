@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Casa Muladhara · Sanación &amp; Bienestar</title>
+<meta name="description" content="Entra a la casona de Casa Muladhara: Escuela de Formación Holística, terapias, Sala Abierta, aula virtual y tienda, con Karen Oyarce, maestra holística.">
+<meta name="theme-color" content="#1f3f32">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Josefin+Sans:wght@300;400;600&family=Mulish:wght@400;500;700&family=Fredoka:wght@500;600&display=swap">
+<link rel="stylesheet" href="assets/css/casona.css">
+<script>
+// Recorrido 3D: se activa si el equipo tiene WebGL y la persona no pidió reducir el movimiento.
+// Si el módulo no arranca, la página queda como texto sobre fondo verde (todo el contenido sigue ahí).
+(function(){var d=document.documentElement;if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+try{var c=document.createElement('canvas');if(!(c.getContext('webgl2')||c.getContext('webgl')))return}catch(e){return}
+d.classList.add('fx');setTimeout(function(){if(!window.__casonaReady)d.classList.remove('fx')},6000)})();
+</script>
+<script type="importmap">{"imports":{"three":"./assets/vendor/three.module.min.js"}}</script>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="mark" viewBox="-50 -50 100 100">
+      <g fill="currentColor">
+        <g id="petals"></g>
+        <circle cx="0" cy="-27" r="5.2"/>
+        <path d="M-2.6 -20 C-9 -24 -14 -31 -17 -39 C-12 -33 -7 -27 -3.4 -24 Z M2.6 -20 C9 -24 14 -31 17 -39 C12 -33 7 -27 3.4 -24 Z M-3.6 -20.5 L3.6 -20.5 L2.2 6 L1.2 30 L-1.2 30 L-2.2 6 Z"/>
+      </g>
+    </symbol>
+    <symbol id="tree" viewBox="0 0 100 100">
+      <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+        <circle cx="50" cy="50" r="46" stroke-width="1.2"/>
+        <path d="M50 78 V44 M50 58 C40 50 32 48 24 40 M50 54 C60 46 68 44 76 36 M50 48 C44 38 40 30 36 22 M50 48 C56 38 60 30 64 22 M50 44 V18"/>
+        <path d="M50 78 C44 82 36 84 28 84 M50 78 C56 82 64 84 72 84 M50 78 V86" stroke-width="1.6"/>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+
+<canvas id="casona" aria-hidden="true"></canvas>
+<div class="veil" id="veil" aria-hidden="true">
+  <svg style="color:var(--sun)"><use href="#mark"/></svg>
+  <p>La maestra holística te espera en su casona</p>
+  <div class="veil-bar"><i id="veil-bar"></i></div>
+</div>
+
+<div class="ribbon">Formaciones holísticas · Últimos cupos</div>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#inicio" aria-label="Casa Muladhara, inicio">
+      <svg style="color:var(--on-brand)"><use href="#mark"/></svg>
+      <span class="brand-name"><b>CASA MULADHARA</b><small>SANACIÓN &amp; BIENESTAR</small></span>
+    </a>
+    <nav class="main" id="nav">
+      <a href="#maestra">Karen</a>
+      <a href="#escuela">Escuela</a>
+      <a href="/aula">Aula virtual</a>
+      <a href="#tienda">Tienda</a>
+      <a href="#terapias">Terapias</a>
+      <a href="#maestra-karen">Niños</a>
+      <a class="staff" href="/staff">Staff</a>
+    </nav>
+    <div class="tools">
+      <button class="icon-btn round" type="button" aria-label="Activar sonido ambiente" aria-pressed="false" id="sound-btn" title="Sonido ambiente">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 10v4h4l5 4V6L8 10z"/><path class="wave" d="M16 9c1.5 1.7 1.5 4.3 0 6M18.5 6.5c3 3.2 3 7.8 0 11"/></svg>
+      </button>
+      <a class="icon-btn acct" href="/aula" id="acct-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
+        <span class="acct-label">Mi cuenta</span>
+      </a>
+      <button class="icon-btn round" type="button" aria-label="Carrito" id="cart-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+        <span class="badge" id="cart-count">0</span>
+      </button>
+      <button class="icon-btn round menu-btn" type="button" aria-label="Abrir menú" aria-expanded="false" id="menu-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<nav class="plano" id="plano" aria-label="Plano de la casona">
+  <a href="#inicio"><span>Entrada</span></a>
+  <a href="#maestra"><span>Recibidor</span></a>
+  <a href="#pendulo"><span>Sala de Péndulo</span></a>
+  <a href="#terapias"><span>Terapias</span></a>
+  <a href="#escuela"><span>Escalera de la Escuela</span></a>
+  <a href="#sala"><span>Sala Abierta</span></a>
+  <a href="#plataforma"><span>Aula virtual</span></a>
+  <a href="#tienda"><span>Tiendita</span></a>
+  <a href="#maestra-karen"><span>Jardín de niños</span></a>
+</nav>
+
+<main id="recorrido">
+
+<!-- 0 · Llegada: frente a la casona, de noche -->
+<section class="stop stop-hero" id="inicio" data-stop="0">
+  <div class="card card-hero">
+    <span class="eyebrow">Karen Oyarce · Maestra Holística</span>
+    <h1>Un espacio seguro para que tu energía vuelva a fluir</h1>
+    <p class="lede">Fórmate como terapeuta en la Escuela de Formación Holística Casa Muladhara, un camino completo de cinco pasos, presencial y online en vivo.</p>
+    <div class="ctas">
+      <a class="btn btn-cream" href="#escuela">Conocer la Escuela</a>
+      <a class="btn btn-ghost" href="#sala">Clase gratis en vivo</a>
+    </div>
+    <p class="invite">Karen te invita a su casona. <b>Desliza para entrar</b></p>
+  </div>
+  <div class="pillars">
+    <a href="#escuela"><b>Escuela de Formación</b><span>Cinco pasos hacia tu certificación</span></a>
+    <a href="/aula"><b>Aula virtual</b><span>Tus clases y material en un solo lugar</span></a>
+    <a href="#tienda"><b>Tienda</b><span>Spray áurico y tintura de muérdago</span></a>
+    <a href="#maestra-karen"><b>Maestra Karen</b><span>Contenido para niños en YouTube</span></a>
+  </div>
+  <div class="scroll-cue" aria-hidden="true"><span>Desliza</span><i></i></div>
+</section>
+
+<!-- 1 · Se abren las puertas -->
+<section class="stop stop-doors" data-stop="1">
+  <div class="doors-word" aria-hidden="true"><span>Bienvenida</span><small>a Casa Muladhara</small></div>
+  <p class="sr-only">Se abren las puertas de la casona.</p>
+</section>
+
+<!-- 2 · Recibidor: la maestra holística -->
+<section class="stop" id="maestra" data-stop="2">
+  <div class="card side-left">
+    <span class="eyebrow">El recibidor · Tu maestra holística</span>
+    <h2>Karen Oyarce Sáez</h2>
+    <span class="role">Maestra Holística · Creadora del Método Casa Muladhara</span>
+    <img class="karen-photo" src="assets/img/e2ec26d75a.webp" alt="Karen Oyarce Sáez sosteniendo un péndulo hebreo" loading="lazy" decoding="async">
+    <p>Karen tiene más de 5 años de experiencia acompañando procesos de sanación y formando terapeutas. Ha guiado a personas de distintas edades y caminos de vida a descubrir sus propias herramientas energéticas, y de esa experiencia nació El Camino del Ser, la metodología con la que enseña en la Escuela.</p>
+    <div class="stats">
+      <div><b>+5</b><span>años de experiencia terapéutica</span></div>
+      <div><b>5</b><span>formaciones con metodología propia</span></div>
+      <div><b>2</b><span>modalidades: online y presencial</span></div>
+    </div>
+    <div class="chips"><span>Reiki</span><span>Radiestesia</span><span>Péndulo Hebreo</span><span>Registros Akáshicos</span><span>Terapia Transgeneracional</span><span>Tarot Terapéutico</span></div>
+  </div>
+</section>
+
+<!-- 3 · Sala de Péndulo Hebreo -->
+<section class="stop" id="pendulo" data-stop="3">
+  <div class="card side-right">
+    <span class="eyebrow">Sala de Péndulo Hebreo · Paso 1 · Inicia</span>
+    <h2>Péndulo Hebreo Nivel 1</h2>
+    <p><span class="mod pres">Presencial</span> <span class="dur">1 jornada intensiva · 8 horas</span></p>
+    <ul class="ticks"><li>Herramienta de limpieza, protección y equilibrio</li><li>Base para continuar en otras formaciones</li></ul>
+    <a class="btn btn-cream" href="/pendulo">Ver esta formación</a>
+  </div>
+  <div class="card side-left gallery-card">
+    <span class="eyebrow">Nuestras estudiantes</span>
+    <h3>Ellas ya comenzaron su Camino del Ser</h3>
+    <p>Graduaciones y clases prácticas de Péndulo Hebreo en Santiago, 2026.</p>
+    <div class="gallery">
+      <figure><img loading="lazy" decoding="async" src="assets/img/01f8e86fc0.webp" width="620" height="493" alt="Estudiante de Casa Muladhara con su péndulo hebreo y la lámina de los 7 cuerpos energéticos"><figcaption>Clase práctica · Péndulo Hebreo</figcaption></figure>
+      <figure><img loading="lazy" decoding="async" src="assets/img/231aa77989.webp" width="620" height="465" alt="Estudiantes de Casa Muladhara, graduación · péndulo hebreo nivel 1"><figcaption>Graduación · Péndulo Hebreo Nivel 1</figcaption></figure>
+      <figure><img loading="lazy" decoding="async" src="assets/img/f08f46f33a.webp" width="465" height="620" alt="Estudiantes de Casa Muladhara, graduación · péndulo hebreo nivel 1"><figcaption>Graduación · Péndulo Hebreo Nivel 1</figcaption></figure>
+      <figure><img loading="lazy" decoding="async" src="assets/img/292ddf3bf0.webp" width="620" height="465" alt="Estudiantes de Casa Muladhara, certificación · péndulo hebreo nivel i y ii"><figcaption>Certificación · Péndulo Hebreo Nivel I y II</figcaption></figure>
+      <figure><img loading="lazy" decoding="async" src="assets/img/81f0a09164.webp" width="465" height="620" alt="Estudiantes de Casa Muladhara, graduación · péndulo hebreo nivel 1"><figcaption>Graduación · Péndulo Hebreo Nivel 1</figcaption></figure>
+      <figure><img loading="lazy" decoding="async" src="assets/img/41a246e938.webp" width="525" height="620" alt="Estudiantes de Casa Muladhara, clase práctica · péndulo hebreo"><figcaption>Clase práctica · Péndulo Hebreo</figcaption></figure>
+      <figure><img loading="lazy" decoding="async" src="assets/img/37953e38df.webp" width="465" height="620" alt="Estudiantes de Casa Muladhara, graduación · péndulo hebreo nivel 1"><figcaption>Graduación · Péndulo Hebreo Nivel 1</figcaption></figure>
+      <figure><img loading="lazy" decoding="async" src="assets/img/6a5a5d85dd.webp" width="620" height="465" alt="Estudiantes de Casa Muladhara, clase práctica · péndulo hebreo"><figcaption>Clase práctica · Péndulo Hebreo</figcaption></figure>
+      <figure><img loading="lazy" decoding="async" src="assets/img/df920f9476.webp" width="465" height="620" alt="Estudiantes de Casa Muladhara, graduación · péndulo hebreo nivel 1"><figcaption>Graduación · Péndulo Hebreo Nivel 1</figcaption></figure>
+      <figure><img loading="lazy" decoding="async" src="assets/img/851f49ec16.webp" width="465" height="620" alt="Estudiantes de Casa Muladhara, clase práctica · péndulo hebreo"><figcaption>Clase práctica · Péndulo Hebreo</figcaption></figure>
+      <figure><img loading="lazy" decoding="async" src="assets/img/48b7a9fedc.webp" width="465" height="620" alt="Estudiantes de Casa Muladhara, graduación · péndulo hebreo nivel 1"><figcaption>Graduación · Péndulo Hebreo Nivel 1</figcaption></figure>
+      <figure><img loading="lazy" decoding="async" src="assets/img/37d3617307.webp" width="465" height="620" alt="Estudiantes de Casa Muladhara, certificación · péndulo hebreo nivel i y ii"><figcaption>Certificación · Péndulo Hebreo Nivel I y II</figcaption></figure>
+      <figure><img loading="lazy" decoding="async" src="assets/img/554d470b85.webp" width="465" height="620" alt="Estudiantes de Casa Muladhara, graduación · péndulo hebreo nivel 1"><figcaption>Graduación · Péndulo Hebreo Nivel 1</figcaption></figure>
+      <figure><img loading="lazy" decoding="async" src="assets/img/eb751efb2e.webp" width="620" height="465" alt="Estudiantes de Casa Muladhara, clase práctica · péndulo hebreo"><figcaption>Clase práctica · Péndulo Hebreo</figcaption></figure>
+      <figure><img loading="lazy" decoding="async" src="assets/img/85b1dea157.webp" width="465" height="620" alt="Estudiantes de Casa Muladhara, graduación · péndulo hebreo nivel 1"><figcaption>Graduación · Péndulo Hebreo Nivel 1</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<!-- 4 · Pasillo de las terapias -->
+<section class="stop" id="terapias" data-stop="4">
+  <div class="card side-left card-wide">
+    <span class="eyebrow">Pasillo de las terapias holísticas</span>
+    <h2>Haz una pausa. Este momento es para ti.</h2>
+    <p>Cada sesión se adapta a lo que estás viviendo. Elige una terapia o escríbenos y te orientamos.</p>
+    <ol class="doors-list">
+      <li><b>Reiki</b><p>Técnica de canalización de energía universal para sanar y equilibrar cuerpo, mente y espíritu.</p><span class="chip">Presencial · Online</span><a href="https://wa.link/by9gjr" target="_blank" rel="noopener">Agendar</a></li>
+      <li><b>Radiestesia y Sanación del Alma</b><p>Técnica para detectar energías y restablecer el equilibrio energético a nivel físico, emocional y espiritual.</p><span class="chip">Presencial · Online</span><a href="https://wa.link/by9gjr" target="_blank" rel="noopener">Agendar</a></li>
+      <li><b>Péndulo Hebreo</b><p>Herramienta de sanación basada en geometría sagrada para equilibrar y armonizar energías.</p><span class="chip">Presencial · Online</span><a href="https://wa.link/by9gjr" target="_blank" rel="noopener">Agendar</a></li>
+      <li><b>Registros Akáshicos</b><p>Lectura de los registros del alma para comprender patrones que se repiten y decidir con más claridad.</p><span class="chip">Presencial · Online</span><a href="https://wa.link/by9gjr" target="_blank" rel="noopener">Agendar</a></li>
+      <li><b>Vidas Pasadas</b><p>Exploración de memorias de otras vidas que influyen en bloqueos y miedos del presente.</p><span class="chip">Presencial · Online</span><a href="https://wa.link/by9gjr" target="_blank" rel="noopener">Agendar</a></li>
+      <li><b>Sanando Niño Interior</b><p>Acompañamiento para reconocer y sanar heridas de la infancia que siguen presentes en tu vida adulta.</p><span class="chip">Presencial · Online</span><a href="https://wa.link/by9gjr" target="_blank" rel="noopener">Agendar</a></li>
+      <li><b>Terapia Transgeneracional</b><p>Sana patrones y cargas heredadas de tu linaje familiar para vivir con más libertad.</p><span class="chip">Presencial · Online</span><a href="https://wa.link/by9gjr" target="_blank" rel="noopener">Agendar</a></li>
+      <li><b>Tarot Terapéutico y Evolutivo</b><p>El tarot como espejo para el autoconocimiento y para tomar decisiones conscientes.</p><span class="chip">Presencial · Online</span><a href="https://wa.link/by9gjr" target="_blank" rel="noopener">Agendar</a></li>
+      <li><b>Limpieza energética de espacios</b><p>Armoniza, protege y eleva la energía de tu hogar o lugar de trabajo con péndulo hebreo.</p><span class="chip">Presencial</span><a href="https://wa.link/by9gjr" target="_blank" rel="noopener">Agendar</a></li>
+    </ol>
+    <div class="note"><p>¿No sabes qué terapia elegir? Te orientamos en una primera conversación.</p><a class="btn btn-cream" href="/terapias">Agendar mi sesión</a></div>
+    <div class="note"><p>Sacerdotisa de bodas: ceremonias simbólicas diseñadas para cada pareja.</p><a class="btn btn-ghost" href="https://wa.link/by9gjr" target="_blank" rel="noopener">Consultar fecha</a></div>
+  </div>
+</section>
+
+<!-- 5 · Escalera de la Escuela: cinco pasos -->
+<section class="stop" id="escuela" data-stop="5">
+  <div class="card side-right card-wide">
+    <span class="eyebrow">Escuela de Formación Holística Casa Muladhara</span>
+    <h2>Una formación completa, paso a paso, en tu Camino del Ser</h2>
+    <p>Cinco formaciones que se suben como una escalera: cada una te prepara para la siguiente, hasta certificarte como Terapeuta Holístico Integral con el Método Casa Muladhara.</p>
+    <ol class="steps">
+      <li><span class="stage">Paso 1 · Inicia</span><span class="mod pres">Presencial</span><h3>Péndulo Hebreo Nivel 1</h3><span class="dur">1 jornada intensiva · 8 horas</span><ul><li>Herramienta de limpieza, protección y equilibrio</li><li>Base para continuar en otras formaciones</li></ul><a class="step-link" href="/pendulo">Ver esta formación →</a></li>
+      <li><span class="stage">Paso 2 · Equilibra</span><span class="mod live">Online en vivo</span><h3>Limpieza Energética de Casas y Espacios</h3><span class="dur">1 jornada · teórica y práctica</span><ul><li>Armoniza, protege y eleva la energía de los espacios</li><li>Requisito: Péndulo Hebreo Nivel 1</li></ul></li>
+      <li><span class="stage">Paso 3 · Transforma</span><span class="mod live">Online en vivo</span><h3>Radiestesia y Sanación del Alma</h3><span class="dur">8 clases · 2 meses</span><ul><li>Formación base de la Metodología Casa Muladhara</li><li>Diagnóstico, armonización y sanación</li></ul></li>
+      <li><span class="stage">Paso 4 · Especialízate</span><span class="mod live">Online en vivo</span><h3>Especializaciones en Radiestesia</h3><span class="dur">4 clases · 1 mes cada una</span><div class="specs"><span>Vidas Pasadas</span><span>Terapia Transgeneracional</span><span>Niño Interior</span><span>Limpieza Uterina</span></div></li>
+      <li><span class="stage">Paso 5 · Integra</span><span class="mod live">Online en vivo</span><h3>Tarot Terapéutico: El Camino del Ser</h3><span class="dur">16 clases · 4 meses</span><ul><li>Autoconocimiento y desarrollo personal</li><li>Tarot como herramienta de transformación</li></ul></li>
+    </ol>
+  </div>
+</section>
+
+<!-- 6 · La cima: el árbol de la vida y la formación completa -->
+<section class="stop" id="formacion-completa" data-stop="6">
+  <div class="card side-left card-wide offer">
+    <div class="summit"><svg style="color:var(--sun)"><use href="#tree"/></svg><div><b>Terapeuta Holístico Integral</b><span>Certificación final</span></div></div>
+    <span class="eyebrow">Formación completa · Método Casa Muladhara</span>
+    <h2>Conviértete en Terapeuta Holístico Integral</h2>
+    <p>Recorre los cinco pasos del Camino del Ser con una sola inscripción, acompañada por Karen de principio a fin.</p>
+    <div class="cols">
+      <div>
+        <h4>Incluye</h4>
+        <ul class="ticks">
+          <li>Las 5 formaciones: Péndulo Hebreo, Limpieza de Espacios, Radiestesia, 4 especializaciones y Tarot Terapéutico</li>
+          <li>Clases online en vivo y sus grabaciones en tu aula virtual</li>
+          <li>Prácticas guiadas y supervisadas</li>
+          <li>Material de estudio exclusivo de cada módulo</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Bonos al inscribirte completa</h4>
+        <ul class="ticks bonus">
+          <li><b>Kit de práctica:</b> péndulo hebreo, Tintura Madre de Muérdago y Spray Áurico</li>
+          <li><b>Meditaciones guiadas</b> para acompañar tu proceso personal</li>
+          <li><b>Comunidad de estudiantes</b> y acompañamiento directo de Karen</li>
+        </ul>
+      </div>
+    </div>
+    <div class="offer-buy">
+      <span class="seats">Cupos limitados por generación</span>
+      <div class="start">Próxima generación <b>2027</b></div>
+      <div class="price">$499<small>o 9 cuotas de $55 mensuales</small></div>
+      <button class="btn btn-cream" type="button" data-open-login data-tab="signup">Reservar mi cupo</button>
+      <a class="alt" href="/pendulo">Prefiero empezar por Péndulo Hebreo Nivel 1 →</a>
+    </div>
+    <div class="why"><b>Por qué estudiar aquí</b><span>Metodología propia</span><span>Formación progresiva</span><span>Material exclusivo</span><span>Prácticas supervisadas</span><span>Acompañamiento</span><span>Formación continua</span><span>Comunidad consciente</span></div>
+    <div class="strip"><span>Participa desde cualquier parte del mundo</span><span>Modalidad online y presencial</span><span>Comunidad de aprendizaje consciente</span><span>Certificación y formación profesional</span></div>
+  </div>
+</section>
+
+<!-- 7 · Sala Abierta: el círculo de cojines -->
+<section class="stop" id="sala" data-stop="7">
+  <div class="card side-right card-wide">
+    <span class="eyebrow live-dot">Gratis · En vivo · 30 minutos</span>
+    <h2>Sala Abierta con Karen</h2>
+    <p>Cada martes y sábado Karen abre una sala en vivo y gratuita donde comparte pequeñas formaciones de las que se hacen en la Escuela. En 30 minutos responde tus preguntas y conversa contigo. Es la mejor forma de conocerla antes de formarte.</p>
+    <ul class="sala-list">
+      <li><b>Martes · 19:00</b><span>30 minutos en vivo con Karen</span></li>
+      <li><b>Sábado · 11:00</b><span>30 minutos en vivo con Karen</span></li>
+    </ul>
+    <small class="note-small">Horario de Chile. Al registrarte te enviamos el tema y el enlace de cada clase.</small>
+    <form class="gift-form" id="gift-form">
+      <label>Nombre<input id="g-name" type="text" autocomplete="name" placeholder="Tu nombre" required></label>
+      <label>Correo electrónico<input id="g-email" type="email" autocomplete="email" placeholder="tu@correo.com" required></label>
+      <label>WhatsApp<input id="g-wa" type="tel" autocomplete="tel" placeholder="+56 9 1234 5678"></label>
+      <label>¿A qué clase quieres ir?<select id="g-when"><option>Martes · 19:00</option><option>Sábado · 11:00</option><option>Avísenme de todas las clases</option></select></label>
+      <button class="btn btn-cream" type="submit">Reservar mi lugar gratis</button>
+      <p class="gift-ok" id="gift-ok" hidden>¡Listo! Te enviamos el enlace de la sala por correo y WhatsApp, y un recordatorio 1 hora antes.</p>
+      <small>Sin costo. Puedes darte de baja cuando quieras.</small>
+    </form>
+    <a class="btn btn-ghost" href="/sala">Ver la Sala Abierta</a>
+  </div>
+</section>
+
+<!-- 8 · Aula virtual: la pantalla del estudio -->
+<section class="stop" id="plataforma" data-stop="8">
+  <div class="card side-right card-wide">
+    <span class="eyebrow">Aula virtual</span>
+    <h2>Tu espacio de estudiante</h2>
+    <p>Al inscribirte en una formación recibes tu usuario y entras a tu aula desde el computador o el celular. Esto es lo que verás dentro.</p>
+    <div class="dash" aria-label="Vista previa del aula virtual con datos de ejemplo">
+      <div class="dash-bar"><svg style="color:var(--on-brand)"><use href="#mark"/></svg><b>AULA CASA MULADHARA</b><span class="ex">Ejemplo</span></div>
+      <div class="dash-body">
+        <h3>Hola, Valentina</h3>
+        <div class="course"><div class="course-top"><b>Péndulo Hebreo Nivel 1</b><span>Completado</span></div><div class="bar"><i style="width:100%"></i></div></div>
+        <div class="course"><div class="course-top"><b>Radiestesia y Sanación del Alma</b><span>3 de 8 clases</span></div><div class="bar"><i style="width:37.5%"></i></div></div>
+        <div class="course"><div class="course-top"><b>Limpieza Energética de Espacios</b><span>Por iniciar</span></div><div class="bar"><i style="width:0"></i></div></div>
+        <div class="next"><p><b>Regístrate para tener acceso a tu aula virtual.</b> Con tu cuenta entras a tus clases, material y certificados.</p><button class="btn btn-green" type="button" data-open-login data-tab="signup">Crear mi cuenta</button></div>
+      </div>
+    </div>
+    <div class="feats">
+      <div><b>Clases en vivo y grabadas</b><p>Entra a las clases online en vivo y vuelve a verlas cuando quieras.</p></div>
+      <div><b>Material de estudio</b><p>Manuales, láminas y guías de cada módulo para descargar.</p></div>
+      <div><b>Tu avance</b><p>Ve qué clases completaste y cuánto te falta en el Camino del Ser.</p></div>
+      <div><b>Calendario de clases</b><p>Fechas de las próximas clases en vivo, jornadas presenciales y prácticas.</p></div>
+      <div><b>Tus certificados</b><p>Descarga los certificados de cada formación que completes.</p></div>
+      <div><b>Comunidad y acompañamiento</b><p>Comparte dudas con tus compañeras y recibe guía de Karen durante tu formación.</p></div>
+    </div>
+    <a class="btn btn-cream" href="/aula">Ingresar al aula</a>
+  </div>
+</section>
+
+<!-- 9 · La tiendita -->
+<section class="stop" id="tienda" data-stop="9">
+  <div class="card side-left card-wide">
+    <span class="eyebrow">La tiendita</span>
+    <h2>Preparados naturales para tus prácticas</h2>
+    <p>Elaborados en Casa Muladhara para acompañar la limpieza y armonización energética, en casa o en consulta.</p>
+    <div class="products">
+      <article class="product">
+        <img loading="lazy" decoding="async" src="assets/img/c6ce786100.webp" alt="Spray Áurico de 30 ml con la nueva etiqueta verde y crema de Casa Muladhara">
+        <div class="body">
+          <span class="tag">Spray · 30 ml</span>
+          <h3>Spray Áurico de salvia, romero y lavanda</h3>
+          <ul>
+            <li><b>Salvia:</b> limpia y renueva tu energía.</li>
+            <li><b>Romero:</b> aporta protección, vitalidad y fuerza.</li>
+            <li><b>Lavanda:</b> favorece la calma, la relajación y la armonía.</li>
+            <li>Rocía alrededor de tu cuerpo a 20 cm, con los ojos cerrados, o en tus espacios y objetos sagrados.</li>
+          </ul>
+          <div class="buy"><div class="price">$6.99<small>USD · 30 ml</small></div><button class="btn btn-cream" type="button" data-add="Spray Áurico">Agregar al carrito</button></div>
+        </div>
+      </article>
+      <article class="product">
+        <img loading="lazy" decoding="async" src="assets/img/cdf5f76943.webp" alt="Tintura Madre de Muérdago de 30 ml con la nueva etiqueta verde y crema de Casa Muladhara">
+        <div class="body">
+          <span class="tag">Tintura madre · 30 ml</span>
+          <h3>Tintura Madre de Muérdago</h3>
+          <ul>
+            <li>Viscum album, extracto puro, sin químicos añadidos.</li>
+            <li>Pensada para acompañar el trabajo con <b>Péndulo Hebreo</b>.</li>
+            <li>Limpieza, descarga y armonización, junto a las etiquetas hebreas y el trabajo vibracional del péndulo.</li>
+          </ul>
+          <span class="warn">Uso externo · No ingerir</span>
+          <div class="buy"><div class="price">$9.99<small>USD · 30 ml</small></div><button class="btn btn-cream" type="button" data-add="Tintura de Muérdago">Agregar al carrito</button></div>
+        </div>
+      </article>
+    </div>
+    <div class="shop-foot"><span>Pago seguro en línea</span><span>Despacho a domicilio o retiro en consulta</span><span>Consultas por Instagram @casa.muladhara</span></div>
+  </div>
+</section>
+
+<!-- 10 · Jardín de Maestra Karen (niños) -->
+<section class="stop kids" id="maestra-karen" data-stop="10">
+  <div class="card side-right card-wide card-kids">
+    <span class="eyebrow">Jardín de los niños · Para niños y familias</span>
+    <h2>Maestra Karen</h2>
+    <p>Historias animadas para que los más pequeños conozcan sus emociones, respiren con calma, cuiden a los animales y crezcan conectados con la naturaleza. Nuevos videos en el canal de YouTube de Maestra Karen.</p>
+    <a class="btn yt" href="https://www.youtube.com/@casamaestrakaren" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>Ver el canal en YouTube</a>
+    <div class="videos">
+      <a class="video" href="https://www.instagram.com/reel/Ddl3EKKxVCl/" target="_blank" rel="noopener"><img loading="lazy" decoding="async" src="assets/img/55eaee5a9f.webp" alt="Escena del video El frasquito de las alegrías"><b>El frasquito de las alegrías</b><span>Emociones · ver en Instagram</span></a>
+      <a class="video" href="https://www.instagram.com/reel/DdouFflxdXl/" target="_blank" rel="noopener"><img loading="lazy" decoding="async" src="assets/img/7d63999fc3.webp" alt="Escena del video Cuidamos a nuestros animalitos"><b>Cuidamos a nuestros animalitos</b><span>Amor y cuidado · ver en Instagram</span></a>
+      <a class="video" href="https://www.instagram.com/reel/DdmKllFR9ro/" target="_blank" rel="noopener"><img loading="lazy" decoding="async" src="assets/img/6765ba3ad3.webp" alt="Escena del video Una plantita que crece"><b>Una plantita que crece</b><span>Naturaleza · ver en Instagram</span></a>
+      <a class="video" href="https://www.instagram.com/reel/DdrhVkFKkV7/" target="_blank" rel="noopener"><img loading="lazy" decoding="async" src="assets/img/5d7729f660.webp" alt="Escena del video Respiramos con Maestra Karen"><b>Respiramos con Maestra Karen</b><span>Respiración · ver en Instagram</span></a>
+    </div>
+    <div class="note"><p><b>Para mamás y papás.</b> Karen acompaña a las familias con terapias como Sanando Niño Interior y Terapia Transgeneracional, para sanar lo que se repite de generación en generación.</p><a class="btn btn-cream" href="/terapias">Agendar para mi familia</a></div>
+  </div>
+</section>
+
+<!-- 11 · Despedida bajo las estrellas -->
+<section class="stop stop-end" data-stop="11">
+  <div class="card card-end">
+    <svg style="color:var(--sun)"><use href="#mark"/></svg>
+    <h2>Tu Camino del Ser empieza hoy</h2>
+    <p>Gracias por recorrer la casona. Cuando quieras, la puerta está abierta.</p>
+    <div class="ctas">
+      <button class="btn btn-cream" type="button" data-open-login data-tab="signup">Reservar mi cupo</button>
+      <a class="btn btn-ghost" href="#sala">Clase gratis en vivo</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div>
+        <a class="brand" href="#inicio"><svg style="color:var(--on-brand)"><use href="#mark"/></svg><span class="brand-name"><b>CASA MULADHARA</b><small>SANACIÓN &amp; BIENESTAR</small></span></a>
+        <p>Terapias holísticas, productos naturales y formación de terapeutas. Presencial y online.</p>
+      </div>
+      <div><h4>Explora</h4><a href="#escuela">Escuela</a><a href="#plataforma">Aula virtual</a><a href="#tienda">Tienda</a><a href="#terapias">Terapias</a><a href="#maestra-karen">Maestra Karen</a></div>
+      <div><h4>Landing pages</h4><a href="/sala">Sala Abierta con Karen</a><a href="/pendulo">Péndulo Hebreo Nivel 1</a><a href="/terapias">Agendar terapia</a></div>
+      <div><h4>Tu cuenta</h4><a href="/aula">Ingresar al aula</a><a href="#plataforma" data-open-login data-tab="signup">Crear cuenta</a><a href="#tienda">Mis pedidos</a></div>
+      <div><h4>Contacto</h4><a href="https://wa.link/by9gjr" target="_blank" rel="noopener">WhatsApp</a><a href="https://www.instagram.com/casa.muladhara/" target="_blank" rel="noopener">Instagram @casa.muladhara</a><a href="https://www.youtube.com/@casamaestrakaren" target="_blank" rel="noopener">YouTube Maestra Karen</a></div>
+    </div>
+    <div class="legal"><span>© 2026 Casa Muladhara</span><span>casamuladhara.com</span></div>
+  </div>
+</footer>
+
+<div class="toast" id="toast" hidden></div>
+
+<script>
+// Pétalos del logo, dibujados una vez en el símbolo compartido
+(function(){
+  const g=document.getElementById('petals');const ns='http://www.w3.org/2000/svg';
+  const outer='M0,-19 C7,-26 9,-38 0,-47 C-9,-38 -7,-26 0,-19Z';
+  const add=(d,r)=>{const p=document.createElementNS(ns,'path');p.setAttribute('d',d);p.setAttribute('transform','rotate('+r+')');g.appendChild(p)};
+  for(let i=0;i<14;i++){const r=i*360/14+360/28;if(r<22||r>338)continue;add(outer,r)}
+  for(let i=0;i<10;i++){const r=i*36+18;if(r<30||r>330)continue;add('M0,-12 C4,-16 5,-23 0,-28 C-5,-23 -4,-16 0,-12Z',r)}
+})();
+
+const $=s=>document.querySelector(s);
+const toast=$('#toast');let tt;
+function say(t){toast.textContent=t;toast.hidden=false;clearTimeout(tt);tt=setTimeout(()=>toast.hidden=true,2600)}
+
+let cart=0;
+document.querySelectorAll('[data-add]').forEach(b=>b.addEventListener('click',()=>{cart++;$('#cart-count').textContent=cart;say(b.dataset.add+' agregado al carrito')}));
+$('#cart-btn').addEventListener('click',()=>say(cart?('Tienes '+cart+' producto'+(cart>1?'s':'')+' en el carrito'):'Tu carrito está vacío'));
+
+const menuBtn=$('#menu-btn'),nav=$('#nav');
+menuBtn.addEventListener('click',()=>{const o=nav.classList.toggle('open');menuBtn.setAttribute('aria-expanded',o)});
+nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{nav.classList.remove('open');menuBtn.setAttribute('aria-expanded','false')}));
+
+// "Mi cuenta" y "Crear cuenta" llevan al login real (Firebase Auth)
+document.querySelectorAll('[data-open-login]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();location.href=b.dataset.tab==='signup'?'/login?register=true':'/login?mode=login'}));
+$('#gift-form').addEventListener('submit',e=>{e.preventDefault();$('#gift-ok').hidden=false});
+</script>
+<script src="assets/vendor/lenis.min.js" defer></script>
+<script type="module" src="assets/js/recorrido.js"></script>
+</body>
+</html>
