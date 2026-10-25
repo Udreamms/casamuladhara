@@ -18,7 +18,7 @@
 import admin from 'firebase-admin';
 import { readFileSync } from 'node:fs';
 import { keyFile, DATABASE } from './_auth.mjs';
-import { accessFor, cleanLevels, ownedOf, unlockedOf } from '../app/api/_lib/access.js';
+import { accessFor, cleanLevels, ownedOf, unlockedOf } from '../src/lib/server/access.js';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 
 admin.initializeApp({ credential: admin.credential.cert(JSON.parse(readFileSync(keyFile, 'utf8'))) });

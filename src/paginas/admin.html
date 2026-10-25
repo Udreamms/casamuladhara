@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Portal de la Maestra · Casa Muladhara</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Marcellus&family=Josefin+Sans:wght@300;400;600&family=Mulish:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="/assets/css/staff.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="mark" viewBox="-50 -50 100 100">
+      <g fill="currentColor">
+        <g id="petals"></g>
+        <circle cx="0" cy="-27" r="5.2"/>
+        <path d="M-2.6 -20 C-9 -24 -14 -31 -17 -39 C-12 -33 -7 -27 -3.4 -24 Z M2.6 -20 C9 -24 14 -31 17 -39 C12 -33 7 -27 3.4 -24 Z M-3.6 -20.5 L3.6 -20.5 L2.2 6 L1.2 30 L-1.2 30 L-2.2 6 Z"/>
+      </g>
+    </symbol></defs></svg>
+<div class="app" id="app" hidden>
+  <aside class="side" id="side">
+    <a class="brand" href="/" style="text-decoration:none" aria-label="Volver al sitio de Casa Muladhara"><svg><use href="#mark"/></svg><div><b>CASA MULADHARA</b><small>MAESTRA</small></div></a>
+    <nav class="nav" id="nav" aria-label="Secciones"></nav>
+    <div class="side-foot edit" id="me-card" role="button" tabindex="0" title="Editar mi perfil y mi foto">
+      <span class="av karen" id="me-av">MH</span>
+      <div class="who"><b id="me-name"></b><small>Maestra Holística</small><span class="edit-hint">Editar mi perfil</span></div>
+    </div>
+    <a class="logout" href="/aula" style="text-decoration:none"><svg viewBox="0 0 24 24"><path d="M4 6h7v13H4zM13 6h7v13h-7"/></svg>Ver el aula</a>
+    <button class="logout" id="logout"><svg viewBox="0 0 24 24"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/></svg>Cerrar sesión</button>
+  </aside>
+  <div class="scrim-side" id="scrim" hidden></div>
+  <div class="main">
+    <header class="topbar">
+      <button class="ibtn menu-btn" id="menu-btn" aria-label="Abrir menú"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <span class="eyebrow">Portal de la Maestra</span>
+    </header>
+    <main class="view" id="view"></main>
+  </div>
+</div>
+
+<div class="login" id="login">
+  <canvas id="particles" aria-hidden="true"></canvas>
+  <form class="login-card" id="lg-form" novalidate>
+    <span class="tag">Staff</span>
+    <h2>Portal de la Maestra</h2>
+    <p class="sub">Acceso del equipo de Casa Muladhara</p>
+    <input class="in" type="email" id="lg-email" autocomplete="username" placeholder="Correo electrónico" required>
+    <input class="in" type="password" id="lg-pass" autocomplete="current-password" placeholder="Contraseña" minlength="6" required>
+    <button class="go" id="lg-enter" type="submit">Entrar</button>
+    <button class="alt" id="lg-create" type="submit">Primera vez: crear mi contraseña</button>
+    <button class="forgot" id="lg-forgot" type="button">¿Olvidaste tu contraseña?</button>
+    <p id="lg-msg" hidden></p>
+    <a class="back" href="/login">¿Eres alumna? Entra por el aula</a>
+    <a class="back" href="/">Volver a la página principal</a>
+  </form>
+  <div class="foot">Casa Muladhara · Staff</div>
+</div>
+<dialog id="dlg"><button class="x" id="dlg-x" aria-label="Cerrar">×</button><div id="dlg-body"></div></dialog>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script src="/assets/js/staff/particulas.js"></script>
+<script>
+// Pétalos del logo (mismo dibujo que el sitio)
+(function(){
+  const g=document.getElementById('petals');const ns='http://www.w3.org/2000/svg';
+  const add=(d,r)=>{const p=document.createElementNS(ns,'path');p.setAttribute('d',d);p.setAttribute('transform','rotate('+r+')');g.appendChild(p)};
+  for(let i=0;i<14;i++){const r=i*360/14+360/28;if(r<22||r>338)continue;add('M0,-19 C7,-26 9,-38 0,-47 C-9,-38 -7,-26 0,-19Z',r)}
+  for(let i=0;i<10;i++){const r=i*36+18;if(r<30||r>330)continue;add('M0,-12 C4,-16 5,-23 0,-28 C-5,-23 -4,-16 0,-12Z',r)}
+})();
+</script>
+<script type="module" src="assets/js/admin.js"></script>
+</body>
+</html>

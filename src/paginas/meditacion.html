@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Meditación gratis · Casa Muladhara</title><link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Josefin+Sans:wght@300;400;600&family=Mulish:wght@400;500;700&family=Fredoka:wght@500;600&display=swap">
+<link rel="stylesheet" href="/assets/css/landing.css">
+<style>html,body{margin:0}body{font-size:16px}img{max-width:100%}[hidden]{display:none!important}</style></head><body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="mark" viewBox="-50 -50 100 100">
+      <g fill="currentColor">
+        <!-- 14 outward petals with a gap at the top for the figure -->
+        <g id="petals"></g>
+        <circle cx="0" cy="-27" r="5.2"/>
+        <path d="M-2.6 -20 C-9 -24 -14 -31 -17 -39 C-12 -33 -7 -27 -3.4 -24 Z M2.6 -20 C9 -24 14 -31 17 -39 C12 -33 7 -27 3.4 -24 Z M-3.6 -20.5 L3.6 -20.5 L2.2 6 L1.2 30 L-1.2 30 L-2.2 6 Z"/>
+      </g>
+    </symbol>
+    <symbol id="tree" viewBox="0 0 100 100">
+      <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+        <circle cx="50" cy="50" r="46" stroke-width="1.2"/>
+        <path d="M50 78 V44 M50 58 C40 50 32 48 24 40 M50 54 C60 46 68 44 76 36 M50 48 C44 38 40 30 36 22 M50 48 C56 38 60 30 64 22 M50 44 V18"/>
+        <path d="M50 78 C44 82 36 84 28 84 M50 78 C56 82 64 84 72 84 M50 78 V86" stroke-width="1.6"/>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+<div class="ribbon">Vista previa · landing para publicidad · sin menú, un solo objetivo</div>
+<header class="lp-top"><div class="wrap"><span class="brand"><svg style="color:var(--on-brand)"><use href="#mark"/></svg><span class="brand-name"><b>CASA MULADHARA</b><small>SANACIÓN &amp; BIENESTAR</small></span></span><a class="lp-back" href="/">← Volver al sitio</a></div></header>
+
+<section class="lp-hero"><svg class="hero-motif" style="color:var(--on-brand)" aria-hidden="true"><use href="#mark"/></svg><div class="wrap">
+  <div>
+    <span class="eyebrow">Regalo gratuito</span>
+    <h1>Una meditación guiada para volver a tu centro</h1>
+    <p class="lede">Karen, Maestra Holística, grabó esta meditación para que sueltes tensiones y limpies tu energía en cualquier momento del día. Déjanos tus datos y te la enviamos ahora.</p>
+    <div class="facts"><span class="hl">Gratis</span><span>Audio grabado</span><span>Para escuchar desde el celular</span></div>
+  </div>
+  <form class="lp-form" data-lp>
+    <h3>¿Dónde te la enviamos?</h3>
+    <label>Nombre<input id="m-name" type="text" autocomplete="name" placeholder="Tu nombre" required></label>
+    <label>Correo electrónico<input id="m-email" type="email" autocomplete="email" placeholder="tu@correo.com" required></label>
+    <label>WhatsApp<input id="m-wa" type="tel" autocomplete="tel" placeholder="+56 9 1234 5678"></label>
+    <button class="btn" type="submit">Enviarme la meditación</button>
+    <p class="lp-ok" hidden>Vista previa: aquí se mostraría la página de gracias con el audio y la invitación a Péndulo Hebreo Nivel 1.</p>
+    <small>Sin spam. Puedes darte de baja cuando quieras.</small>
+  </form>
+</div></section>
+<section class="section"><div class="wrap">
+  <div class="section-head"><span class="eyebrow">Qué vas a sentir</span><h2>Una pausa de verdad, guiada paso a paso</h2></div>
+  <div class="cols3">
+    <div><b>Soltar</b><p>Respiración consciente para liberar la tensión acumulada en el cuerpo.</p></div>
+    <div><b>Limpiar</b><p>Visualización para limpiar y proteger tu campo energético.</p></div>
+    <div><b>Volver a ti</b><p>Un cierre para conectar con tu centro y seguir el día con calma.</p></div>
+  </div>
+  <div class="next-step"><b>Después de la meditación:</b> te contaremos cómo dar el primer paso en la Escuela con Péndulo Hebreo Nivel 1, una jornada presencial intensiva.</div>
+</div></section>
+<section class="section" style="padding-top:0"><div class="wrap kit">
+  <img class="lp-photo" src="assets/img/e2ec26d75a.webp" alt="Karen Oyarce Sáez, Maestra Holística">
+  <div><span class="eyebrow">Quién te guía</span><h2 style="font-size:clamp(1.8rem,3.6vw,2.6rem);margin-block:12px">Karen Oyarce Sáez, Maestra Holística</h2><p style="color:var(--muted)">Más de 5 años acompañando procesos de sanación y formando terapeutas con el Método Casa Muladhara.</p></div>
+</div></section>
+<footer style="padding-block:28px"><div class="wrap legal" style="margin:0;border:0;padding:0"><span>© 2026 Casa Muladhara</span><span>Instagram @casa.muladhara</span></div></footer>
+<script src="/assets/js/landing/petalos.js"></script>
+<script>document.querySelectorAll('form[data-lp]').forEach(f=>f.addEventListener('submit',e=>{e.preventDefault();f.querySelector('.lp-ok').hidden=false}));</script>
+</body></html>

@@ -1,0 +1,41 @@
+/* ===== Nivel 2 · limpieza de casas y espacios ===== */
+.n2-w{width:100%;max-width:560px;margin-inline:auto}.n2-w.sq{max-width:460px}.n2-w.wide{max-width:860px}
+.n2-svg{display:block;width:100%;height:auto}
+.n2-svg text{font-family:var(--f-body);pointer-events:none;user-select:none}
+.n2-svg g[data-rx]{cursor:pointer;outline:none}
+.n2-svg g[data-rx]:hover path,.n2-svg g[data-rx]:hover rect{filter:brightness(1.07)}
+.n2-svg g[data-rx]:focus-visible path,.n2-svg g[data-rx]:focus-visible rect{stroke:var(--brass);stroke-width:4.5}
+.n2-ends{display:flex;justify-content:space-between;gap:10px;max-width:560px;width:100%;margin:-4px auto 0}
+.n2-ends span{font:600 .6rem/1.25 var(--f-caps);letter-spacing:.1em;text-transform:uppercase;color:#fff;padding:8px 12px;border-radius:10px}
+.n2-ends .lo{background:#b53a22}.n2-ends .hi{background:#2f7a38}
+input[type=range].n2-range{width:100%;accent-color:var(--forest);padding:0;background:none;border:0}
+.n2-lv{display:inline-flex;gap:8px;align-items:center}
+.n2-sw{width:14px;height:14px;border-radius:50%;flex-shrink:0;border:1px solid rgba(0,0,0,.18)}
+.dk-body .tbl td,.dk-body .tbl th{padding:10px}
+.qopt span{min-width:0}
+.n2-k{width:26px;height:26px;border-radius:50%;background:var(--forest);color:#f2c66d;display:grid;place-items:center;font:400 .95rem/1 var(--f-display);flex-shrink:0}
+.n2-house{position:relative;display:grid;place-items:center;aspect-ratio:1;width:min(100%,250px);margin:auto;border-radius:50%;background:var(--surface-2);color:var(--muted);transition:background .5s,color .5s,box-shadow .5s}
+.n2-house svg{width:44%;height:auto;stroke:currentColor}
+.n2-halo{position:absolute;inset:7%;border-radius:50%;border:2px dashed var(--line);transition:.5s}
+.n2-house.on{background:color-mix(in srgb,var(--sun) 26%,var(--surface));color:var(--forest);box-shadow:0 0 0 10px color-mix(in srgb,var(--sun) 16%,transparent),0 0 60px color-mix(in srgb,var(--sun) 40%,transparent)}
+.n2-house.on .n2-halo{border-color:var(--brass);border-style:solid}
+.sel.n2-sm{padding:8px 10px;gap:8px;font-size:.84rem}
+.n2-n{font:700 .7rem/1 var(--f-caps);color:var(--muted);min-width:1.3em}
+.n2-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.n2-f{display:grid;gap:8px;align-content:start}
+.n2-f>span{font:600 .62rem/1.2 var(--f-caps);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.n2-bov{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.n2-bov input{max-width:200px}
+.n2-zones{display:grid;gap:10px}
+.n2-zr{display:grid;grid-template-columns:minmax(110px,.9fr) 110px minmax(0,2fr) auto;gap:8px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+@media (max-width:720px){.n2-zr{grid-template-columns:1fr 1fr}.n2-zr b{grid-column:1/-1}.n2-zr input[type=text]{grid-column:1/-1}}
+.n2-sheet{--fg:#22302a;--muted:#5d6b63;--line:#d9d5c3;--surface:#fffdf6;--surface-2:#f0ede1;background:#fffdf6;color:#22302a;border:1px solid #d9d5c3;border-radius:16px;padding:clamp(16px,3vw,28px);display:grid;gap:14px}
+.n2-sheet header{display:flex;gap:12px;align-items:center;border-bottom:1px solid #d9d5c3;padding-bottom:12px}
+.n2-sheet header .mo{width:44px;height:44px;color:#2b5443;flex-shrink:0}
+.n2-sheet header b{font:400 1.3rem/1.2 var(--f-display)}.n2-sheet header small{display:block;color:#5d6b63;font-size:.74rem}
+.n2-dl{display:grid;grid-template-columns:minmax(120px,.35fr) 1fr;gap:0 16px;margin:0}
+.n2-dl dt{font:600 .62rem/1.5 var(--f-caps);letter-spacing:.12em;text-transform:uppercase;color:#8a6430;padding-top:12px;border-top:1px solid #e6e1cf}
+.n2-dl dd{margin:0;padding:10px 0 4px;border-top:1px solid #e6e1cf;display:grid;gap:6px;align-content:start;overflow-wrap:anywhere}
+@media (max-width:620px){.n2-dl{grid-template-columns:1fr}.n2-dl dd{border-top:0;padding-top:0}}
+.n2-f input[type=number],.n2-f input[type=date],.n2-zr input[type=number]{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px;width:100%}
+.n2-zr input{min-width:0;padding:10px 12px}
+.n2-empty{color:#9a9a8f;font-style:normal}

@@ -31,7 +31,7 @@ let tt;
 function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(tt); tt = setTimeout(() => (t.hidden = true), 4200); }
 const fail = (e) => { console.error(e); toast(e?.message && !e.code ? e.message : 'No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.'); };
 
-// ---------- Regla de acceso (la misma que app/api/_lib/access.js) ----------
+// ---------- Regla de acceso (la misma que src/lib/server/access.js) ----------
 const paying = (u) => u.plan === 'completo' || (u.plan === 'mensual' && u.paymentStatus === 'ok');
 const upTo = (n) => Array.from({ length: Math.max(0, Math.min(5, Number(n) || 0)) }, (_, i) => i + 1);
 const list = (v) => (Array.isArray(v) ? v.map(Number) : null);

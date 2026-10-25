@@ -1,5 +1,5 @@
 // Casa Muladhara · contenido del Nivel 2 (solo con acceso a este nivel; lo exige middleware.js).
-// Script clásico: sus constantes quedan en el ámbito global que usa paginas/aula.html. Se carga después de los niveles anteriores.
+// Script clásico: sus constantes quedan en el ámbito global que usa src/paginas/aula.html. Se carga después de los niveles anteriores.
 /* ---------- Nivel 2 · Limpieza energética de casas y espacios ---------- */
 const n2f=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g,'.');
 /* ----- dibujo SVG nativo: sectores, anillos, semicírculos ----- */

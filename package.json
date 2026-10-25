@@ -2,7 +2,7 @@
   "name": "casamuladhara",
   "private": true,
   "type": "module",
-  "description": "Sitio de Casa Muladhara en Next.js: páginas en paginas/, funciones en app/api (Stripe y Firebase).",
+  "description": "Sitio de Casa Muladhara en Next.js: código en src/ (rutas en src/app, páginas en src/paginas) (Stripe y Firebase).",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

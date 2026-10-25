@@ -1,5 +1,5 @@
 // Casa Muladhara · contenido del Nivel 1 (solo con acceso a este nivel; lo exige middleware.js).
-// Script clásico: sus constantes quedan en el ámbito global que usa paginas/aula.html. Se carga después de los niveles anteriores.
+// Script clásico: sus constantes quedan en el ámbito global que usa src/paginas/aula.html. Se carga después de los niveles anteriores.
 /* ---------- Nivel 1 · clases interactivas (marca nueva, poco texto, todo tocable) ---------- */
 const RS={};
 const st=(k,d)=>(RS[k]===undefined?(RS[k]=d):RS[k]);

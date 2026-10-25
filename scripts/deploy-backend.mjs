@@ -23,16 +23,16 @@ async function publishRules(source, releaseName, label) {
   console.log(`✔ ${label} publicadas (${rulesetName.split('/').pop()})`);
 }
 
-if (want('rules')) await publishRules(read('firestore.rules'), `cloud.firestore/${DATABASE}`, 'firestore.rules');
+if (want('rules')) await publishRules(read('firebase/firestore.rules'), `cloud.firestore/${DATABASE}`, 'firestore.rules');
 
 if (want('storage')) {
   // El bucket por defecto de Firebase Storage
   const bucket = 'casamuladhara.firebasestorage.app';
-  await publishRules(read('storage.rules'), `firebase.storage/${bucket}`, 'storage.rules');
+  await publishRules(read('firebase/storage.rules'), `firebase.storage/${bucket}`, 'storage.rules');
 }
 
 if (want('indexes')) {
-  const { indexes } = JSON.parse(read('firestore.indexes.json'));
+  const { indexes } = JSON.parse(read('firebase/firestore.indexes.json'));
   const base = `https://firestore.googleapis.com/v1/projects/${PROJECT}/databases/${DATABASE}/collectionGroups`;
   for (const ix of indexes) {
     try {

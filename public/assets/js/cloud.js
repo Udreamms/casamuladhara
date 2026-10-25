@@ -1,5 +1,5 @@
 // Capa de datos del aula: sesión + Firestore.
-// Todo lo personal vive en users/{uid}/…; las reglas (firestore.rules) impiden leer lo de otra alumna.
+// Todo lo personal vive en users/{uid}/…; las reglas (firebase/firestore.rules) impiden leer lo de otra alumna.
 import { auth, db } from './firebase.js';
 import { PREVIEW, startPreview } from './preview.js';
 import { profileApi, googlePhoto } from './profile.js';
@@ -42,7 +42,7 @@ if (!user) {
 // Si cierra sesión en otra pestaña, sale también de esta
 onAuthStateChanged(auth, (u) => { if (!u) location.replace('/login?mode=login'); });
 
-// El servidor (proxy.js) lee esta cookie para servir el contenido de las clases y sus materiales.
+// El servidor (src/proxy.js) lee esta cookie para servir el contenido de las clases y sus materiales.
 // Es el mismo token de sesión de Firebase (dura 1 hora y se renueva solo).
 const setSessionCookie = (t) => {
   document.cookie = t

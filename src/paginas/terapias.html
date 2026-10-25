@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Agenda tu terapia · Casa Muladhara</title><link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Josefin+Sans:wght@300;400;600&family=Mulish:wght@400;500;700&family=Fredoka:wght@500;600&display=swap">
+<link rel="stylesheet" href="/assets/css/landing.css">
+<style>html,body{margin:0}body{font-size:16px}img{max-width:100%}[hidden]{display:none!important}</style></head><body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="mark" viewBox="-50 -50 100 100">
+      <g fill="currentColor">
+        <!-- 14 outward petals with a gap at the top for the figure -->
+        <g id="petals"></g>
+        <circle cx="0" cy="-27" r="5.2"/>
+        <path d="M-2.6 -20 C-9 -24 -14 -31 -17 -39 C-12 -33 -7 -27 -3.4 -24 Z M2.6 -20 C9 -24 14 -31 17 -39 C12 -33 7 -27 3.4 -24 Z M-3.6 -20.5 L3.6 -20.5 L2.2 6 L1.2 30 L-1.2 30 L-2.2 6 Z"/>
+      </g>
+    </symbol>
+    <symbol id="tree" viewBox="0 0 100 100">
+      <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+        <circle cx="50" cy="50" r="46" stroke-width="1.2"/>
+        <path d="M50 78 V44 M50 58 C40 50 32 48 24 40 M50 54 C60 46 68 44 76 36 M50 48 C44 38 40 30 36 22 M50 48 C56 38 60 30 64 22 M50 44 V18"/>
+        <path d="M50 78 C44 82 36 84 28 84 M50 78 C56 82 64 84 72 84 M50 78 V86" stroke-width="1.6"/>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+<div class="ribbon">Vista previa · landing para publicidad · sin menú, un solo objetivo</div>
+<header class="lp-top"><div class="wrap"><span class="brand"><svg style="color:var(--on-brand)"><use href="#mark"/></svg><span class="brand-name"><b>CASA MULADHARA</b><small>SANACIÓN &amp; BIENESTAR</small></span></span><a class="lp-back" href="/">← Volver al sitio</a></div></header>
+
+<section class="lp-hero"><svg class="hero-motif" style="color:var(--on-brand)" aria-hidden="true"><use href="#mark"/></svg><div class="wrap">
+  <div>
+    <span class="eyebrow">Terapias holísticas con Karen, Maestra Holística</span>
+    <h1>Haz una pausa. Este momento es para ti.</h1>
+    <p class="lede">Sesiones presenciales en Casa Muladhara u online por videollamada. Cuéntanos qué estás viviendo y te orientamos hacia la terapia que más te ayuda.</p>
+    <div class="facts"><span class="hl">Presencial u online</span><span>Primera orientación sin costo</span></div>
+  </div>
+  <form class="lp-form" data-lp>
+    <h3>Solicita tu hora</h3>
+    <label>Nombre<input id="t-name" type="text" autocomplete="name" placeholder="Tu nombre" required></label>
+    <label>WhatsApp<input id="t-wa" type="tel" autocomplete="tel" placeholder="+56 9 1234 5678" required></label>
+    <label>Terapia<select id="t-type"><option>No sé, quiero orientación</option><option>Reiki</option><option>Radiestesia y Sanación del Alma</option><option>Péndulo Hebreo</option><option>Registros Akáshicos</option><option>Vidas Pasadas</option><option>Sanando Niño Interior</option><option>Terapia Transgeneracional</option><option>Tarot Terapéutico y Evolutivo</option><option>Limpieza energética de espacios</option></select></label>
+    <label>Modalidad<select id="t-mode"><option>Presencial</option><option>Online por videollamada</option></select></label>
+    <button class="btn" type="submit">Solicitar mi hora</button>
+    <p class="lp-ok" hidden>Vista previa: aquí la solicitud llegaría a Karen y la persona recibiría la confirmación por WhatsApp.</p>
+  </form>
+</div></section>
+<section class="section"><div class="wrap">
+  <div class="section-head"><span class="eyebrow">Lo que dicen quienes vinieron</span><h2>Experiencias reales</h2></div>
+  <div class="quotes">
+    <blockquote><p>«La sesión de Reiki me ayudó a soltar bloqueos de energía que llevaba mucho tiempo cargando.»</p><cite>María C. · Reiki</cite></blockquote>
+    <blockquote><p>«Los Registros Akáshicos me ayudaron a entender patrones que se repetían en mi vida.»</p><cite>Sebastián L. · Registros Akáshicos</cite></blockquote>
+  </div>
+  <div class="next-step" style="margin-top:36px"><b>¿Te gustaría aprender a hacerlo tú?</b> Muchas de nuestras estudiantes llegaron primero como consultantes. Conoce la <a href="/#escuela" style="color:#2b5443">Escuela de Formación Holística</a>.</div>
+</div></section>
+<footer style="padding-block:28px"><div class="wrap legal" style="margin:0;border:0;padding:0"><span>© 2026 Casa Muladhara</span><span>Instagram @casa.muladhara</span></div></footer>
+<script src="/assets/js/landing/petalos.js"></script>
+<script>document.querySelectorAll('form[data-lp]').forEach(f=>f.addEventListener('submit',e=>{e.preventDefault();f.querySelector('.lp-ok').hidden=false}));</script>
+</body></html>

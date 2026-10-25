@@ -1,0 +1,18 @@
+/* modal + toast */
+.scrim{position:fixed;inset:0;z-index:50;background:rgba(10,20,16,.6);display:grid;place-items:center;padding:16px}
+.modal{width:min(560px,100%);max-height:calc(100vh - 32px);overflow:auto;background:var(--surface);border-radius:22px;box-shadow:0 30px 80px rgba(0,0,0,.4)}
+.modal-b{padding:28px;display:grid;gap:14px;justify-items:center;text-align:center}
+.modal-b svg.big{width:140px;height:140px}
+.modal-b h3{font-size:1.6rem}
+.modal-b p{color:var(--muted);font-size:.92rem}
+.modal-b .acts{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.x{position:sticky;top:0;float:right;margin:12px 12px 0 0;background:var(--surface-2);border:0;width:36px;height:36px;border-radius:50%;font-size:1.3rem;line-height:1}
+.certificate{width:100%;aspect-ratio:1.414;max-width:100%;background:#fbf8ee;color:#22302a;border:10px double #a77a3b;border-radius:6px;padding:6% 7%;display:grid;align-content:center;justify-items:center;text-align:center;gap:6px;position:relative;overflow:hidden}
+.certificate .wm{position:absolute;width:70%;opacity:.06;color:#2b5443}
+.certificate .k{font:600 .5rem/1 "Josefin Sans",system-ui,sans-serif;letter-spacing:.3em;text-transform:uppercase;color:#a77a3b}
+.certificate h4{font:400 clamp(1rem,3.4vw,1.5rem)/1.2 "Marcellus",Georgia,serif;color:#2b5443}
+.certificate .name{font:400 clamp(1.2rem,4.5vw,2rem)/1.1 "Marcellus",Georgia,serif;border-bottom:1px solid #a77a3b;padding:4px 18px}
+.certificate p{font-size:clamp(.56rem,1.6vw,.74rem);color:#4d5b53;max-width:34em}
+.certificate .sig{display:flex;justify-content:space-between;width:100%;margin-top:6px;font-size:clamp(.5rem,1.4vw,.66rem);color:#4d5b53}
+.certificate .sig div{border-top:1px solid #a77a3b;padding-top:4px;min-width:30%}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:80;background:var(--fg);color:var(--bg);padding:12px 20px;border-radius:999px;font-size:.88rem;box-shadow:var(--shadow);max-width:calc(100% - 32px);text-align:center}

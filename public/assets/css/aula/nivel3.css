@@ -1,0 +1,19 @@
+/* ===== Nivel 3 ===== */
+.dk-video{display:block;width:100%;aspect-ratio:16/9;border-radius:14px;background:#000}
+.dk-img{display:block;width:100%;height:auto;border-radius:14px;border:1px solid var(--line);background:#fff}
+.dk-fig{margin:0}
+.n3-mantra{font:400 clamp(2.6rem,7vw,4.2rem)/1 var(--f-display);letter-spacing:.04em}
+.n3-turn{width:46px;height:46px;color:#2b5443;flex-shrink:0}
+.n3-turn.ccw{transform:scaleX(-1)}
+.n3-spin{transform-origin:12px 12px;animation:n3spin 7s linear infinite}
+@keyframes n3spin{to{transform:rotate(360deg)}}
+.n3-lab{display:grid;gap:6px;font-weight:600;font-size:.9rem}
+.n3-lab textarea,.n3-lab input{font:inherit;font-weight:400;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface,#fff);color:inherit;min-height:44px}
+.n3-lab textarea{min-height:96px;resize:vertical}
+.n3-photo{width:220px;height:220px;max-width:100%;object-fit:cover;object-position:50% 25%;border-radius:50%;border:3px solid var(--brass);justify-self:center}
+.dk-foot .sl-dots{flex:1;min-width:0;gap:4px}
+.dk-foot .sl-dots button{flex:0 1 9px;min-width:4px;height:9px}
+.dk-foot .sl-dots button[aria-current="true"]{flex:0 0 18px}
+.n3-q{font-family:var(--f-display);font-style:italic}
+.n3-yn{display:flex;gap:6px}
+.n3-nf{font-weight:700;color:var(--brass)}
