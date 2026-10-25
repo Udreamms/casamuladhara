@@ -264,10 +264,10 @@ const BADGES=[
 
 /* tienda del aula: los productos de Casa Muladhara (los mismos de la página web y el mazo de tarot) */
 const SHOP=[
- {id:'spray',name:'Spray Áurico de salvia, romero y lavanda',tag:'Spray · 30 ml',price:'$6.99',unit:'USD · 30 ml',img:'assets/img/c6ce786100.webp',
+ {id:'spray',name:'Spray Áurico de salvia, romero y lavanda',tag:'Spray · 30 ml',price:'$6.990',unit:'CLP · 30 ml',img:'assets/img/c6ce786100.webp',
   alt:'Spray Áurico de 30 ml con la etiqueta verde y crema de Casa Muladhara',
   pts:['<b>Salvia:</b> limpia y renueva tu energía.','<b>Romero:</b> aporta protección, vitalidad y fuerza.','<b>Lavanda:</b> favorece la calma, la relajación y la armonía.','Rocía alrededor de tu cuerpo a 20 cm, con los ojos cerrados, o en tus espacios y objetos sagrados.']},
- {id:'tintura',name:'Tintura Madre de Muérdago',tag:'Tintura madre · 30 ml',price:'$9.99',unit:'USD · 30 ml',img:'assets/img/cdf5f76943.webp',
+ {id:'tintura',name:'Tintura Madre de Muérdago',tag:'Tintura madre · 30 ml',price:'$9.990',unit:'CLP · 30 ml',img:'assets/img/cdf5f76943.webp',
   alt:'Tintura Madre de Muérdago de 30 ml con la etiqueta verde y crema de Casa Muladhara',
   pts:['Viscum album, extracto puro, sin químicos añadidos.','Pensada para acompañar el trabajo con <b>Péndulo Hebreo</b>.','Limpieza, descarga y armonización, junto a las etiquetas hebreas y el trabajo vibracional del péndulo.'],warn:'Uso externo · No ingerir'},
  {id:'tarot',name:'Mazo de Tarot Terapéutico',tag:'Mazo · Arcanos Mayores y Menores',price:'$14.990',unit:'CLP',img:'assets/img/mazo-tarot.svg',
