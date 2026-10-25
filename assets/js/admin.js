@@ -5,7 +5,7 @@ import { auth, db } from './firebase.js';
 import { profileApi, mountProfileEditor, googlePhoto } from './profile.js';
 import {
   signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail,
-  onAuthStateChanged, onIdTokenChanged, signOut,
+  onAuthStateChanged, onIdTokenChanged, signOut, signInWithPopup, GoogleAuthProvider,
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 import {
   doc, getDoc, setDoc, updateDoc, deleteDoc, collection, collectionGroup, getDocs, query, orderBy, where, limit,
@@ -363,6 +363,16 @@ $('#lg-form').onsubmit = async (e) => {
     const cred = create ? await createUserWithEmailAndPassword(auth, email, pass) : await signInWithEmailAndPassword(auth, email, pass);
     await enter(cred.user);
   } catch (err) { say(ERR[err.code] || 'No pudimos entrar. Inténtalo de nuevo.'); }
+  lock(false);
+};
+$('#lg-google').onclick = async () => {
+  lock(true);
+  try {
+    const google = new GoogleAuthProvider(); google.setCustomParameters({ prompt: 'select_account' });
+    await enter((await signInWithPopup(auth, google)).user);
+  } catch (err) {
+    say(err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request' ? 'Cerraste la ventana de Google antes de terminar.' : ERR[err.code] || 'No pudimos entrar con Google. Inténtalo de nuevo.');
+  }
   lock(false);
 };
 $('#lg-forgot').onclick = async () => {
