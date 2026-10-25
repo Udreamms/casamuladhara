@@ -1,389 +1,30 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Casa Muladhara · Sitio y Aula</title>
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Casa Muladhara · Sanación &amp; Bienestar</title>
+<meta name="description" content="Entra a la casona de Casa Muladhara: Escuela de Formación Holística, terapias, Sala Abierta, aula virtual y tienda, con Karen Oyarce, maestra holística.">
+<meta name="theme-color" content="#1f3f32">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Josefin+Sans:wght@300;400;600&family=Mulish:wght@400;500;700&family=Fredoka:wght@500;600&display=swap">
-<link rel="stylesheet" href="assets/css/experiencia.css">
+<link rel="stylesheet" href="assets/css/casona.css">
 <script>
-// Experiencia en movimiento: se activa salvo que la persona pida menos movimiento; si el módulo no carga, el sitio queda estático
-(function(){var d=document.documentElement;if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;d.classList.add('fx');setTimeout(function(){if(!window.__fxReady)d.classList.remove('fx')},3500)})();
+// Recorrido 3D: se activa si el equipo tiene WebGL y la persona no pidió reducir el movimiento.
+// Si el módulo no arranca, la página queda como texto sobre fondo verde (todo el contenido sigue ahí).
+(function(){var d=document.documentElement;if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+try{var c=document.createElement('canvas');if(!(c.getContext('webgl2')||c.getContext('webgl')))return}catch(e){return}
+d.classList.add('fx');setTimeout(function(){if(!window.__casonaReady)d.classList.remove('fx')},6000)})();
 </script>
 <script type="importmap">{"imports":{"three":"./assets/vendor/three.module.min.js"}}</script>
-<style>
-/* Layout: a full-bleed green brand band on top, then alternating linen and green chapters (Terapias, Tienda, Escuela, Maestra Karen, Plataforma) on a 1160px column */
-:root{
-  --forest:#2b5443;      /* brand green from the reference logo */
-  --forest-deep:#1f3f32;
-  --linen:#e9e4d0;       /* brand cream */
-  --bg:#f6f4ec;
-  --surface:#fffdf6;
-  --fg:#22302a;
-  --muted:#5d6b63;
-  --line:#d9d5c3;
-  --brass:#a77a3b;       /* small warm accent, borrowed from the flyer's copper */
-  --sun:#f2c66d;
-  --kids-bg:#eef3e4;
-  --on-brand:#ece7d3;
-  --on-brand-muted:#b9c4b5;
-  --shadow:0 1px 2px rgba(31,63,50,.06),0 10px 30px -12px rgba(31,63,50,.25);
-  --f-display:"Marcellus","Cormorant Garamond",Georgia,serif;
-  --f-caps:"Josefin Sans","Futura","Century Gothic",system-ui,sans-serif;
-  --f-body:"Mulish","Segoe UI",system-ui,sans-serif;
-  --f-kids:"Fredoka","Baloo 2","Trebuchet MS",system-ui,sans-serif;
-}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#141c18;--surface:#1b2520;--fg:#e8e4d4;--muted:#a3ada2;--line:#2e3a33;
-  --forest:#2b5443;--forest-deep:#18302a;--linen:#e9e4d0;--brass:#d2a565;--sun:#e8bd63;--kids-bg:#1d2a22;
-  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.6);color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#141c18;--surface:#1b2520;--fg:#e8e4d4;--muted:#a3ada2;--line:#2e3a33;
-  --forest:#2b5443;--forest-deep:#18302a;--linen:#e9e4d0;--brass:#d2a565;--sun:#e8bd63;--kids-bg:#1d2a22;
-  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.6);color-scheme:dark}
-
-*{box-sizing:border-box}
-[hidden]{display:none!important}
-html{scroll-behavior:smooth}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
-body{background:var(--bg);color:var(--fg);font:16px/1.65 var(--f-body)}
-a{color:inherit}
-h1,h2,h3{font-family:var(--f-display);font-weight:400;line-height:1.15;margin:0;text-wrap:balance}
-p{margin:0}
-.wrap{max-width:1160px;margin:0 auto;padding-inline:20px}
-.eyebrow{font:600 .74rem/1 var(--f-caps);letter-spacing:.24em;text-transform:uppercase;color:var(--brass)}
-.btn{display:inline-flex;align-items:center;gap:.5em;font:600 .8rem/1 var(--f-caps);letter-spacing:.14em;text-transform:uppercase;padding:1em 1.5em;border-radius:999px;border:1px solid transparent;text-decoration:none;cursor:pointer;transition:transform .2s,background .2s}
-.btn:hover{transform:translateY(-1px)}
-.btn:focus-visible,button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--brass);outline-offset:3px}
-.btn-cream{background:var(--linen);color:var(--forest-deep)}
-.btn-ghost{border-color:currentColor;background:transparent;color:inherit}
-.btn-green{background:var(--forest);color:var(--on-brand)}
-.section{padding-block:clamp(64px,9vw,112px)}
-.section-head{display:grid;gap:14px;max-width:640px;margin-bottom:44px}
-.section-head h2{font-size:clamp(2rem,4.4vw,3rem)}
-.section-head p{color:var(--muted);font-size:1.05rem}
-
-/* preview ribbon */
-.ribbon{background:var(--brass);color:#fff;text-align:center;font:600 .7rem/1 var(--f-caps);letter-spacing:.2em;text-transform:uppercase;padding:9px 16px}
-
-/* header */
-header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--forest-deep);color:var(--on-brand);border-bottom:1px solid rgba(236,231,211,.12)}
-.top .wrap{display:flex;align-items:center;gap:24px;height:74px}
-.brand{display:flex;align-items:center;gap:12px;text-decoration:none;flex-shrink:0}
-.brand svg{width:42px;height:42px}
-.brand-name{display:grid;line-height:1}
-.brand-name b{font:400 1.02rem/1 var(--f-caps);letter-spacing:.2em}
-.brand-name small{font:300 .58rem/1 var(--f-caps);letter-spacing:.42em;margin-top:6px;color:var(--on-brand-muted)}
-nav.main{display:flex;gap:26px;margin-left:auto}
-nav.main a{font:400 .78rem/1 var(--f-caps);letter-spacing:.16em;text-transform:uppercase;text-decoration:none;opacity:.85;padding-block:6px;border-bottom:1px solid transparent}
-nav.main a:hover{opacity:1;border-color:var(--sun)}
-.tools{display:flex;align-items:center;gap:10px}
-.icon-btn{position:relative;display:inline-flex;align-items:center;gap:8px;background:transparent;border:1px solid rgba(236,231,211,.3);color:inherit;border-radius:999px;height:40px;padding:0 14px;font:600 .72rem/1 var(--f-caps);letter-spacing:.14em;text-transform:uppercase;cursor:pointer}
-.icon-btn svg{width:18px;height:18px;flex-shrink:0}
-.icon-btn.round{width:40px;padding:0;justify-content:center}
-.badge{position:absolute;top:-5px;right:-5px;min-width:19px;height:19px;border-radius:999px;background:var(--sun);color:var(--forest-deep);font:700 .68rem/19px var(--f-body);text-align:center;padding:0 5px}
-.menu-btn{display:none}
-@media (max-width:980px){
-  nav.main{display:none;position:absolute;left:0;right:0;top:74px;background:var(--forest-deep);flex-direction:column;gap:0;padding:8px 20px 20px;border-bottom:1px solid rgba(236,231,211,.12)}
-  nav.main.open{display:flex}
-  nav.main a{padding:14px 0;border-bottom:1px solid rgba(236,231,211,.1)}
-  .menu-btn{display:inline-flex}
-  .tools{margin-left:auto}
-}
-@media (max-width:520px){.top .wrap{gap:10px}.brand{gap:8px;min-width:0}.brand svg{width:34px;height:34px}.brand-name b{font-size:.8rem;letter-spacing:.12em}.tools{gap:6px}.acct-label{display:none}.icon-btn.acct{width:40px;padding:0;justify-content:center}.brand-name small{display:none}}
-
-/* hero */
-.hero{position:relative;overflow:hidden;background:radial-gradient(120% 90% at 85% 10%,#386650 0%,var(--forest) 45%,var(--forest-deep) 100%);color:var(--on-brand)}
-.hero-motif{position:absolute;left:-14%;top:50%;width:min(780px,95vw);aspect-ratio:1;transform:translateY(-50%);opacity:.09;pointer-events:none}
-.hero .wrap{position:relative;display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center;padding-block:clamp(56px,9vw,120px)}
-.hero h1{font-size:clamp(2.4rem,5.6vw,4.3rem);margin-block:18px 22px}
-.hero .lede{font-size:1.12rem;color:var(--on-brand-muted);max-width:34em}
-.hero .eyebrow{color:var(--sun)}
-.hero-ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:34px}
-.hero-mark{display:grid;justify-items:center;gap:22px;text-align:center}
-.hero-mark svg{width:min(260px,60vw);height:auto}
-.hero-mark .word{font:300 clamp(1.4rem,3vw,2rem)/1 var(--f-caps);letter-spacing:.24em}
-.hero-mark .sub{font:300 .8rem/1 var(--f-caps);letter-spacing:.5em;color:var(--on-brand-muted);margin-top:-8px}
-.pillars{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid rgba(236,231,211,.15);position:relative}
-.pillars a{padding:22px 20px;text-decoration:none;display:grid;gap:6px;border-right:1px solid rgba(236,231,211,.15);transition:background .2s}
-.pillars a:last-child{border-right:0}
-.pillars a:hover{background:rgba(236,231,211,.06)}
-.pillars b{font:400 1.2rem/1.2 var(--f-display)}
-.pillars span{font-size:.86rem;color:var(--on-brand-muted)}
-@media (max-width:860px){.hero .wrap{grid-template-columns:1fr}.hero-mark{order:-1}.hero-mark svg{width:150px}.pillars{grid-template-columns:1fr 1fr}.pillars a:nth-child(2){border-right:0}.pillars a:nth-child(-n+2){border-bottom:1px solid rgba(236,231,211,.15)}}
-
-/* therapies */
-.therapy-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:18px;overflow:hidden}
-.therapy{background:var(--surface);padding:28px 26px 26px;display:flex;flex-direction:column;gap:12px;min-width:0}
-.therapy h3{font-size:1.38rem}
-.therapy p{color:var(--muted);font-size:.95rem;flex:1}
-.therapy .meta{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding-top:14px;border-top:1px dashed var(--line)}
-.chip{font:600 .66rem/1 var(--f-caps);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
-.therapy a{font:600 .7rem/1 var(--f-caps);letter-spacing:.14em;text-transform:uppercase;color:var(--brass);text-decoration:none}
-.therapy.feature{background:var(--forest);color:var(--on-brand)}
-.therapy.feature p,.therapy.feature .chip{color:var(--on-brand-muted)}
-.therapy.feature a{color:var(--sun)}
-.therapy.feature .meta{border-color:rgba(236,231,211,.25)}
-.modal-note{margin-top:28px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;padding:22px 26px;border-radius:18px;background:var(--linen);color:#22302a}
-.modal-note p{font-family:var(--f-display);font-size:1.25rem}
-
-@media (max-width:900px){.therapy-grid{grid-template-columns:1fr 1fr}.therapy.feature{grid-column:span 2}}
-@media (max-width:600px){.therapy-grid{grid-template-columns:1fr}.therapy.feature{grid-column:auto}}
-.hero .wrap.pillars-wrap{display:block;padding-block:0}
-/* shop */
-.shop{background:var(--surface);border-block:1px solid var(--line)}
-.products{display:grid;grid-template-columns:1fr 1fr;gap:28px}
-.product{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);border:1px solid var(--line);border-radius:20px;overflow:hidden;background:var(--bg)}
-.product img{width:100%;height:100%;object-fit:cover;aspect-ratio:4/5;display:block}
-.product .body{padding:26px;display:flex;flex-direction:column;gap:14px;min-width:0}
-.product h3{font-size:1.6rem}
-.product .tag{font:600 .66rem/1 var(--f-caps);letter-spacing:.16em;text-transform:uppercase;color:var(--brass)}
-.product ul{margin:0;padding:0;list-style:none;display:grid;gap:8px;font-size:.92rem;color:var(--muted)}
-.product li{padding-left:18px;position:relative}
-.product li::before{content:"";position:absolute;left:0;top:.62em;width:7px;height:7px;border-radius:50%;background:var(--forest);opacity:.6}
-.product li b{color:var(--fg);font-weight:700}
-.warn{display:inline-block;align-self:flex-start;font:700 .68rem/1 var(--f-caps);letter-spacing:.14em;text-transform:uppercase;padding:7px 10px;border-radius:6px;border:1px solid var(--brass);color:var(--brass)}
-.buy{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-top:16px;border-top:1px solid var(--line)}
-.price{font:400 1.5rem/1 var(--f-display);font-variant-numeric:tabular-nums}
-.price small{display:block;font:500 .72rem/1.4 var(--f-body);color:var(--muted);margin-top:4px}
-@media (max-width:1020px){.products{grid-template-columns:1fr}}
-@media (max-width:560px){.product{grid-template-columns:1fr}.product img{aspect-ratio:1}}
-.shop-foot{margin-top:24px;color:var(--muted);font-size:.9rem;display:flex;flex-wrap:wrap;gap:8px 28px}
-
-/* school */
-.school{background:var(--forest-deep);color:var(--on-brand);position:relative;overflow:hidden}
-.school .section-head p{color:var(--on-brand-muted)}
-.school .eyebrow{color:var(--sun)}
-.school-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:40px;align-items:start}
-.path{list-style:none;margin:0;padding:0;display:grid;gap:0;position:relative}
-.path::before{content:"";position:absolute;left:27px;top:20px;bottom:20px;width:1px;background:linear-gradient(var(--sun),rgba(236,231,211,.15))}
-.step{display:grid;grid-template-columns:56px minmax(0,1fr);gap:22px;padding-block:18px}
-.num{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font:400 1.5rem/1 var(--f-display);background:var(--forest-deep);border:1px solid var(--sun);color:var(--sun);position:relative}
-.step-card{border:1px solid rgba(236,231,211,.16);border-radius:18px;padding:22px 24px;background:rgba(236,231,211,.04);display:grid;gap:10px}
-.stage{font:600 .66rem/1 var(--f-caps);letter-spacing:.3em;text-transform:uppercase;color:var(--sun)}
-.step-card h3{font-size:1.45rem}
-.dur{font:600 .72rem/1 var(--f-caps);letter-spacing:.14em;text-transform:uppercase;color:var(--on-brand-muted)}
-.step-card ul{margin:4px 0 0;padding-left:18px;color:var(--on-brand-muted);font-size:.93rem;display:grid;gap:3px}
-.specs{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
-.specs span{font-size:.82rem;padding:6px 12px;border-radius:999px;border:1px solid rgba(236,231,211,.28)}
-.aside{display:grid;gap:20px;position:sticky;top:100px}
-.why{border-radius:18px;background:var(--linen);color:#22302a;padding:24px}
-.why h3{font-size:1.25rem;margin-bottom:12px}
-.why ul{list-style:none;margin:0;padding:0;display:grid}
-.why li{padding:9px 0;border-top:1px solid rgba(43,84,67,.18);font-size:.92rem}
-.cert{border-radius:18px;border:1px solid var(--sun);padding:26px 24px;text-align:center;display:grid;gap:10px;justify-items:center}
-.cert svg{width:84px;height:84px}
-.cert .t{font:400 1.4rem/1.2 var(--f-display)}
-.cert p{font-size:.88rem;color:var(--on-brand-muted)}
-.strip{margin-top:48px;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid rgba(236,231,211,.18);border-bottom:1px solid rgba(236,231,211,.18)}
-.strip div{padding:20px 18px;font:400 .76rem/1.5 var(--f-caps);letter-spacing:.14em;text-transform:uppercase;border-right:1px solid rgba(236,231,211,.18)}
-.strip div:last-child{border-right:0}
-@media (max-width:920px){.school-grid{grid-template-columns:1fr}.aside{position:static;grid-template-columns:1fr 1fr}.strip{grid-template-columns:1fr 1fr}.strip div:nth-child(2){border-right:0}.strip div:nth-child(-n+2){border-bottom:1px solid rgba(236,231,211,.18)}}
-@media (max-width:600px){.aside{grid-template-columns:1fr}.step{grid-template-columns:40px minmax(0,1fr);gap:14px}.num{width:40px;height:40px;font-size:1.15rem}.path::before{left:19px}}
-
-
-/* teacher + student gallery */
-.teacher{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:48px;align-items:center}
-.photo-slot{aspect-ratio:4/5;width:100%;max-width:340px;justify-self:center;border-radius:200px 200px 22px 22px;border:1.5px dashed var(--brass);background:var(--surface);display:grid;place-items:center;text-align:center;color:var(--muted);font:600 .72rem/1.6 var(--f-caps);letter-spacing:.18em;text-transform:uppercase;padding:24px}
-.photo-slot svg{width:64px;height:64px;opacity:.5;margin:0 auto 12px;display:block}
-.teacher h3{font-size:clamp(1.9rem,3.6vw,2.6rem);margin-block:12px 6px}
-.teacher .role{font:400 .8rem/1.5 var(--f-caps);letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
-.teacher .bio{color:var(--muted);font-size:1.04rem;margin-top:18px;max-width:36em}
-.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-top:26px}
-.stats div{background:var(--surface);padding:18px 16px;display:grid;gap:6px}
-.stats b{font:400 2rem/1 var(--f-display);color:var(--brass);font-variant-numeric:tabular-nums}
-.stats span{font-size:.82rem;color:var(--muted);line-height:1.4}
-.creds{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
-.creds span{font-size:.8rem;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface)}
-.gallery-head{margin-top:96px;padding-top:72px;border-top:1px solid rgba(236,231,211,.18);display:flex;justify-content:space-between;align-items:end;gap:20px;flex-wrap:wrap}
-.gallery-head h3{font-size:clamp(1.8rem,3.4vw,2.4rem);margin-top:12px}
-.gallery-head p{color:var(--on-brand-muted);max-width:30em}
-.gallery{margin-top:28px;columns:4 220px;column-gap:14px}
-.gallery figure{margin:0 0 14px;break-inside:avoid;position:relative;border-radius:14px;overflow:hidden;background:rgba(236,231,211,.06)}
-.gallery img{display:block;width:100%;height:auto}
-.gallery figcaption{position:absolute;left:0;right:0;bottom:0;padding:28px 12px 10px;background:linear-gradient(transparent,rgba(15,30,24,.82));color:#ece7d3;font:600 .62rem/1.4 var(--f-caps);letter-spacing:.14em;text-transform:uppercase}
-@media (max-width:860px){.teacher{grid-template-columns:1fr}.photo-slot{max-width:320px}}
-@media (max-width:520px){.gallery{columns:2;column-gap:10px}.gallery figure{margin-bottom:10px}.stats{grid-template-columns:1fr}}
-
-
-.aula-feats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-top:56px}
-.aula-feats div{background:var(--surface);padding:24px 22px;display:grid;gap:8px;align-content:start}
-.aula-feats svg{width:28px;height:28px;fill:none;stroke:var(--forest);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .aula-feats svg{stroke:var(--sun)}}
-:root[data-theme="dark"] .aula-feats svg{stroke:var(--sun)}
-.aula-feats b{font:400 1.2rem/1.25 var(--f-display)}
-.aula-feats p{font-size:.92rem;color:var(--muted)}
-@media (max-width:900px){.aula-feats{grid-template-columns:1fr 1fr}}
-@media (max-width:560px){.aula-feats{grid-template-columns:1fr}}
-.product .art{display:block;width:100%;height:100%;min-height:360px;object-fit:cover}
-@media (max-width:560px){.product .art{height:auto;min-height:0;aspect-ratio:1}}
-
-.karen-photo{width:100%;max-width:360px;justify-self:center;aspect-ratio:4/5;object-fit:cover;border-radius:200px 200px 22px 22px;box-shadow:var(--shadow)}
-
-/* v8: school staircase, offer, gift, kids bridge */
-.school-top{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:48px;align-items:center;margin-bottom:56px}
-.casona-fig{margin:0;display:grid;gap:10px}
-.casona{width:100%;height:auto;display:block;border-radius:22px;box-shadow:0 20px 50px -20px rgba(0,0,0,.5)}
-.casona-fig figcaption{font:600 .62rem/1 var(--f-caps);letter-spacing:.18em;text-transform:uppercase;color:var(--on-brand-muted);text-align:right}
-.stairs{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr)) minmax(0,.8fr);gap:10px;align-items:end}
-.stair{display:flex;flex-direction:column;min-width:0}
-.stair .step-card{padding:16px 16px 18px;gap:8px;border-radius:16px 16px 0 0;border-bottom:0;background:rgba(236,231,211,.06)}
-.stair .step-card h3{font-size:1.12rem}
-.stair .step-card ul{font-size:.82rem;padding-left:16px}
-.stair .stage{font-size:.58rem;letter-spacing:.2em}
-.stair .dur{font-size:.64rem;line-height:1.4}
-.stair .specs{gap:5px}.stair .specs span{font-size:.72rem;padding:4px 9px}
-.mod{justify-self:start;align-self:flex-start;font:700 .58rem/1 var(--f-caps);letter-spacing:.14em;text-transform:uppercase;padding:6px 9px;border-radius:999px}
-.mod.pres{background:var(--sun);color:var(--forest-deep)}
-.mod.live{border:1px solid rgba(236,231,211,.45);color:var(--on-brand)}
-.mod.live::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:#e8735f;margin-right:6px;vertical-align:1px}
-.step-link{font:600 .64rem/1.3 var(--f-caps);letter-spacing:.12em;text-transform:uppercase;color:var(--sun);text-decoration:none;margin-top:4px}
-.riser{height:calc(var(--k) * 46px);background:linear-gradient(rgba(242,198,109,.26),rgba(242,198,109,.04));border-top:2px solid var(--sun);display:flex;justify-content:center;padding-top:8px}
-.riser span{font:400 1.7rem/1 var(--f-display);color:var(--sun)}
-.summit-card{display:grid;justify-items:center;text-align:center;gap:6px;padding:12px 6px 16px}
-.summit-card svg{width:64px;height:64px}
-.summit-card b{font:400 1.05rem/1.2 var(--f-display)}
-.summit-card span{font:600 .58rem/1 var(--f-caps);letter-spacing:.18em;text-transform:uppercase;color:var(--sun)}
-.why-row{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;margin-top:28px}
-.why-row b{font:600 .66rem/1 var(--f-caps);letter-spacing:.18em;text-transform:uppercase;color:var(--sun);margin-right:6px}
-.why-row span{font-size:.82rem;padding:6px 12px;border-radius:999px;background:rgba(236,231,211,.08)}
-@media (max-width:1000px){.school-top{grid-template-columns:1fr}.stairs{grid-template-columns:1fr;gap:12px}.riser{display:none}.stair .step-card{border-radius:16px;border-bottom:1px solid rgba(236,231,211,.16)}.summit-card{border:1px solid var(--sun);border-radius:16px}}
-.offer{margin-top:48px;display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);border-radius:24px;overflow:hidden;background:var(--linen);color:#22302a}
-.offer-main{padding:34px 34px 36px;display:grid;gap:12px;align-content:start}
-.offer-main .eyebrow{color:#8a6430}
-.offer-main h3{font-size:clamp(1.7rem,3.2vw,2.4rem)}
-.offer-main>p{color:#4d5b53;max-width:36em}
-.offer-cols{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:10px}
-.offer h4{margin:0 0 10px;font:700 .66rem/1 var(--f-caps);letter-spacing:.18em;text-transform:uppercase;color:#2b5443}
-.ticks{list-style:none;margin:0;padding:0;display:grid;gap:9px;font-size:.92rem;color:#3c4a42}
-.ticks li{padding-left:24px;position:relative}
-.ticks li::before{content:"";position:absolute;left:2px;top:.35em;width:12px;height:7px;border-left:2px solid #2b5443;border-bottom:2px solid #2b5443;transform:rotate(-45deg)}
-.ticks.bonus li::before{border-color:#a77a3b}
-.offer-side{background:#f6f2e3;border-left:1px solid rgba(43,84,67,.15);padding:30px 26px;display:grid;gap:14px;justify-items:center;text-align:center;align-content:center}
-.offer-side svg{width:76px;height:76px}
-.seats{font:700 .62rem/1 var(--f-caps);letter-spacing:.16em;text-transform:uppercase;background:#2b5443;color:#ece7d3;padding:7px 11px;border-radius:999px}
-.start{font-size:.8rem;color:#5d6b63;display:grid;gap:2px}.start b{font:400 1.2rem/1.2 var(--f-display);color:#22302a}
-.offer-price{font:400 1.8rem/1 var(--f-display)}.offer-price small{display:block;font:500 .74rem/1.5 var(--f-body);color:#5d6b63;margin-top:6px}
-.offer-side .btn{width:100%;justify-content:center;background:#2b5443;color:#ece7d3}
-.offer-alt{font-size:.85rem;color:#2b5443;text-underline-offset:3px}
-@media (max-width:860px){.offer{grid-template-columns:1fr}.offer-side{border-left:0;border-top:1px solid rgba(43,84,67,.15)}.offer-cols{grid-template-columns:1fr}.offer-main{padding:26px 22px}}
-.gift{background:var(--linen);color:#22302a}
-.gift-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px;align-items:center}
-.gift .eyebrow{color:#8a6430}
-.gift h2{font-size:clamp(2rem,4.2vw,2.9rem);margin-block:14px}
-.gift p{color:#4d5b53;font-size:1.05rem;max-width:32em}
-.gift ul{margin:18px 0 0;padding-left:18px;color:#3c4a42;display:grid;gap:6px}
-.gift-form{background:#fffdf6;border-radius:22px;padding:26px;display:grid;gap:14px;box-shadow:0 20px 40px -24px rgba(31,63,50,.45)}
-.gift-form label{display:grid;gap:6px;font-size:.82rem;font-weight:700;color:#22302a}
-.gift-form input{font:inherit;font-weight:400;padding:12px 14px;border-radius:12px;border:1px solid #d9d5c3;background:#f6f4ec;color:#22302a}
-.gift-form .btn{justify-content:center;background:#2b5443;color:#ece7d3}
-.gift-form small{color:#5d6b63;font-size:.78rem}
-.gift-form select{font:inherit;font-weight:400;padding:12px 14px;border-radius:12px;border:1px solid #d9d5c3;background:#f6f4ec;color:#22302a}
-.sala-list{list-style:none;padding:0!important;gap:0!important}
-.sala-list li{display:grid;grid-template-columns:150px 1fr;gap:12px;padding:12px 0;border-top:1px solid rgba(43,84,67,.18)}
-.sala-list b{font:600 .72rem/1.6 var(--f-caps);letter-spacing:.12em;text-transform:uppercase;color:#2b5443}
-.sala-note{display:block;margin-top:12px;color:#5d6b63;font-size:.82rem}
-@media (max-width:480px){.sala-list li{grid-template-columns:1fr;gap:2px}}
-.gift-ok{font-size:.9rem;padding:12px 14px;border-radius:12px;background:#e3ecdf;color:#1f3f32}
-@media (max-width:860px){.gift-grid{grid-template-columns:1fr}}
-.family{grid-column:1/-1;margin-top:8px;display:flex;flex-wrap:wrap;gap:16px 24px;align-items:center;justify-content:space-between;padding:22px 26px;border-radius:20px;background:var(--surface);border:1px solid var(--line)}
-.family p{max-width:44em;color:var(--muted)}.family b{color:var(--fg);font-family:var(--f-display);font-size:1.2rem;font-weight:400;display:block;margin-bottom:4px}
-
-/* kids */
-.kids{background:var(--kids-bg)}
-.kids-grid{display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);gap:48px;align-items:center}
-.kids h2{font-family:var(--f-kids);font-weight:600;font-size:clamp(2.4rem,5vw,3.6rem);color:var(--forest)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .kids h2{color:var(--sun)}}
-:root[data-theme="dark"] .kids h2{color:var(--sun)}
-.kids .lede{font-size:1.08rem;color:var(--muted);margin-block:16px 26px;max-width:32em}
-.kids .eyebrow{display:inline-flex;align-items:center;gap:8px}
-.yt{background:#c4302b;color:#fff}
-.videos{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.video{text-decoration:none;display:grid;gap:10px}
-.thumb{aspect-ratio:4/5;background:var(--line);border-radius:20px;position:relative;overflow:hidden;display:grid;place-items:center}
-.thumb.a{background:linear-gradient(140deg,#f6d27c,#e9a85a)}
-.thumb.b{background:linear-gradient(140deg,#9fcfb4,#5d9c7f)}
-.thumb.c{background:linear-gradient(140deg,#b9c9ef,#7d93d1)}
-.thumb.d{background:linear-gradient(140deg,#f0b7a4,#d98a7a)}
-.thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.thumb{place-items:end start;padding:12px}
-.thumb .play{position:relative;width:44px!important;height:44px!important;width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.9);display:grid;place-items:center;box-shadow:0 6px 18px rgba(0,0,0,.18)}
-.thumb .play svg{width:20px;height:20px;margin-left:3px;fill:#2b5443}
-.thumb .blob{position:absolute;border-radius:50%;background:rgba(255,255,255,.25)}
-.video b{font:600 1rem/1.3 var(--f-kids);color:var(--fg)}
-.video span{font-size:.82rem;color:var(--muted)}
-@media (max-width:860px){.kids-grid{grid-template-columns:1fr}}
-@media (max-width:440px){.videos{grid-template-columns:1fr}}
-
-/* platform preview */
-.platform-grid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:48px;align-items:center}
-.platform ul.feat{list-style:none;padding:0;margin:24px 0 30px;display:grid;gap:12px}
-.platform ul.feat li{display:grid;grid-template-columns:22px 1fr;gap:12px;color:var(--muted)}
-.platform ul.feat li svg{width:22px;height:22px;stroke:var(--forest);fill:none;stroke-width:1.6}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .platform ul.feat li svg{stroke:var(--sun)}}
-:root[data-theme="dark"] .platform ul.feat li svg{stroke:var(--sun)}
-.platform ul.feat b{color:var(--fg)}
-.dash{border-radius:20px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);overflow:hidden}
-.dash-bar{display:flex;align-items:center;gap:10px;padding:14px 18px;background:var(--forest);color:var(--on-brand)}
-.dash-bar svg{width:26px;height:26px}
-.dash-bar b{font:400 .78rem/1 var(--f-caps);letter-spacing:.18em}
-.dash-bar .ex{margin-left:auto;font:600 .62rem/1 var(--f-caps);letter-spacing:.16em;text-transform:uppercase;background:var(--sun);color:var(--forest-deep);padding:5px 8px;border-radius:4px}
-.dash-body{padding:22px;display:grid;gap:18px}
-.dash-body h3{font-size:1.35rem}
-.course{display:grid;gap:8px;padding:14px 16px;border:1px solid var(--line);border-radius:14px}
-.course-top{display:flex;justify-content:space-between;gap:10px;font-size:.92rem}
-.course-top b{font-weight:700}
-.course-top span{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
-.bar{height:6px;border-radius:999px;background:var(--line);overflow:hidden}
-.bar i{display:block;height:100%;background:var(--forest);border-radius:inherit}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .bar i{background:var(--sun)}}
-:root[data-theme="dark"] .bar i{background:var(--sun)}
-.next{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:14px;background:var(--linen);color:#22302a}
-.next .date{text-align:center;line-height:1.1;font-variant-numeric:tabular-nums}
-.next .date b{display:block;font:400 1.5rem/1 var(--f-display)}
-.next .date small{font:600 .62rem/1 var(--f-caps);letter-spacing:.14em;text-transform:uppercase}
-.next p{font-size:.9rem}
-@media (max-width:860px){.platform-grid{grid-template-columns:1fr}}
-
-/* testimonials */
-.quotes{display:grid;grid-template-columns:1fr 1fr;gap:28px}
-blockquote{margin:0;padding:30px 0 0;border-top:1px solid var(--line);display:grid;gap:16px}
-blockquote p{font:400 clamp(1.25rem,2.2vw,1.6rem)/1.4 var(--f-display)}
-blockquote cite{font:600 .72rem/1 var(--f-caps);letter-spacing:.18em;text-transform:uppercase;font-style:normal;color:var(--muted)}
-@media (max-width:760px){.quotes{grid-template-columns:1fr}}
-
-/* footer */
-footer{background:var(--forest-deep);color:var(--on-brand);padding-block:56px 36px}
-.foot{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr 1fr;gap:32px}
-.foot h4{margin:0 0 14px;font:600 .7rem/1 var(--f-caps);letter-spacing:.2em;text-transform:uppercase;color:var(--sun)}
-.foot a{display:block;text-decoration:none;color:var(--on-brand-muted);padding-block:4px;font-size:.92rem}
-.foot a:hover{color:var(--on-brand)}
-.foot p{color:var(--on-brand-muted);font-size:.92rem;max-width:28em;margin-top:14px}
-.legal{margin-top:44px;padding-top:20px;border-top:1px solid rgba(236,231,211,.15);font-size:.8rem;color:var(--on-brand-muted);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
-@media (max-width:820px){.foot{grid-template-columns:1fr 1fr}}
-
-/* modal + toast */
-.scrim{position:fixed;inset:0;z-index:50;background:rgba(15,28,22,.6);display:grid;place-items:center;padding:20px}
-.modal{width:min(440px,100%);background:var(--surface);color:var(--fg);border-radius:22px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.35)}
-.modal-top{background:var(--forest);color:var(--on-brand);padding:22px 24px;display:flex;align-items:center;gap:14px}
-.modal-top svg{width:40px;height:40px}
-.modal-top b{font:400 1.25rem/1.2 var(--f-display);display:block}
-.modal-top small{color:var(--on-brand-muted);font-size:.82rem}
-.close{margin-left:auto;background:transparent;border:0;color:inherit;font-size:1.6rem;line-height:1;cursor:pointer;padding:4px 8px}
-.tabs{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--line)}
-.tabs button{background:transparent;border:0;padding:14px;font:600 .74rem/1 var(--f-caps);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent}
-.tabs button[aria-selected="true"]{color:var(--fg);border-color:var(--brass)}
-form.auth{padding:22px 24px 26px;display:grid;gap:14px}
-form.auth label{display:grid;gap:6px;font-size:.82rem;font-weight:700}
-form.auth input{font:inherit;font-weight:400;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--fg)}
-form.auth .btn{justify-content:center;margin-top:6px}
-.form-msg{font-size:.86rem;padding:12px 14px;border-radius:12px;background:var(--linen);color:#22302a}
-.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;background:var(--fg);color:var(--bg);padding:12px 20px;border-radius:999px;font-size:.9rem;box-shadow:var(--shadow);max-width:calc(100% - 32px)}
-</style>
+</head>
+<body>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
     <symbol id="mark" viewBox="-50 -50 100 100">
       <g fill="currentColor">
-        <!-- 14 outward petals with a gap at the top for the figure -->
         <g id="petals"></g>
         <circle cx="0" cy="-27" r="5.2"/>
         <path d="M-2.6 -20 C-9 -24 -14 -31 -17 -39 C-12 -33 -7 -27 -3.4 -24 Z M2.6 -20 C9 -24 14 -31 17 -39 C12 -33 7 -27 3.4 -24 Z M-3.6 -20.5 L3.6 -20.5 L2.2 6 L1.2 30 L-1.2 30 L-2.2 6 Z"/>
@@ -399,21 +40,14 @@ form.auth .btn{justify-content:center;margin-top:6px}
   </defs>
 </svg>
 
+<canvas id="casona" aria-hidden="true"></canvas>
+<div class="veil" id="veil" aria-hidden="true">
+  <svg style="color:var(--sun)"><use href="#mark"/></svg>
+  <p>La maestra holística te espera en su casona</p>
+  <div class="veil-bar"><i id="veil-bar"></i></div>
+</div>
+
 <div class="ribbon">Formaciones holísticas · Últimos cupos</div>
-<div class="scroll-bar" aria-hidden="true"><i></i></div>
-<div class="cosmos" id="cosmos" aria-hidden="true"><div class="cosmos-word" id="cosmos-word"></div><canvas id="cosmos-canvas"></canvas></div>
-<div class="cursor-dot" aria-hidden="true"></div><div class="cursor-ring" aria-hidden="true"></div>
-<nav class="dots" id="dots" aria-label="Secciones de la página">
-  <a href="#inicio"><span>Inicio</span></a>
-  <a href="#camino"><span>Recorrido</span></a>
-  <a href="#maestra"><span>Karen</span></a>
-  <a href="#escuela"><span>Escuela</span></a>
-  <a href="#sala"><span>Sala Abierta</span></a>
-  <a href="#plataforma"><span>Aula virtual</span></a>
-  <a href="#tienda"><span>Tienda</span></a>
-  <a href="#terapias"><span>Terapias</span></a>
-  <a href="#maestra-karen"><span>Niños</span></a>
-</nav>
 
 <header class="top">
   <div class="wrap">
@@ -430,7 +64,10 @@ form.auth .btn{justify-content:center;margin-top:6px}
       <a href="#maestra-karen">Niños</a>
     </nav>
     <div class="tools">
-      <a class="icon-btn acct" href="aula.html" id="acct-btn" style="text-decoration:none">
+      <button class="icon-btn round" type="button" aria-label="Activar sonido ambiente" aria-pressed="false" id="sound-btn" title="Sonido ambiente">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 10v4h4l5 4V6L8 10z"/><path class="wave" d="M16 9c1.5 1.7 1.5 4.3 0 6M18.5 6.5c3 3.2 3 7.8 0 11"/></svg>
+      </button>
+      <a class="icon-btn acct" href="aula.html" id="acct-btn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
         <span class="acct-label">Mi cuenta</span>
       </a>
@@ -445,206 +82,79 @@ form.auth .btn{justify-content:center;margin-top:6px}
   </div>
 </header>
 
-<section class="hero" id="inicio">
-  <svg class="hero-motif" style="color:var(--on-brand)" aria-hidden="true"><use href="#mark"/></svg>
-  <div class="wrap">
-    <div>
-      <span class="eyebrow">Karen Oyarce · Maestra Holística</span>
-      <h1>Un espacio seguro para que tu energía vuelva a fluir</h1>
-      <p class="lede">Fórmate como terapeuta en la Escuela de Formación Holística Casa Muladhara, un camino completo de cinco pasos, presencial y online en vivo.</p>
-      <div class="hero-ctas">
-        <a class="btn btn-cream" href="#escuela">Conocer la Escuela</a>
-        <a class="btn btn-ghost" href="#sala">Clase gratis en vivo</a>
-      </div>
+<nav class="plano" id="plano" aria-label="Plano de la casona">
+  <a href="#inicio"><span>Entrada</span></a>
+  <a href="#maestra"><span>Recibidor</span></a>
+  <a href="#pendulo"><span>Sala de Péndulo</span></a>
+  <a href="#terapias"><span>Terapias</span></a>
+  <a href="#escuela"><span>Escalera de la Escuela</span></a>
+  <a href="#sala"><span>Sala Abierta</span></a>
+  <a href="#plataforma"><span>Aula virtual</span></a>
+  <a href="#tienda"><span>Tiendita</span></a>
+  <a href="#maestra-karen"><span>Jardín de niños</span></a>
+</nav>
+
+<main id="recorrido">
+
+<!-- 0 · Llegada: frente a la casona, de noche -->
+<section class="stop stop-hero" id="inicio" data-stop="0">
+  <div class="card card-hero">
+    <span class="eyebrow">Karen Oyarce · Maestra Holística</span>
+    <h1>Un espacio seguro para que tu energía vuelva a fluir</h1>
+    <p class="lede">Fórmate como terapeuta en la Escuela de Formación Holística Casa Muladhara, un camino completo de cinco pasos, presencial y online en vivo.</p>
+    <div class="ctas">
+      <a class="btn btn-cream" href="#escuela">Conocer la Escuela</a>
+      <a class="btn btn-ghost" href="#sala">Clase gratis en vivo</a>
     </div>
-    <div class="hero-mark" aria-hidden="true">
-      <div class="hero-orb" id="hero-orb"></div>
-      <svg style="color:var(--on-brand)"><use href="#mark"/></svg>
-      <div class="word">CASA MULADHARA</div>
-      <div class="sub">SANACIÓN &amp; BIENESTAR</div>
-    </div>
+    <p class="invite">Karen te invita a su casona. <b>Desliza para entrar</b></p>
   </div>
-  <div class="wrap pillars-wrap">
-    <div class="pillars">
-      <a href="#escuela"><b>Escuela de Formación</b><span>Cinco pasos hacia tu certificación</span></a>
-      <a href="aula.html"><b>Aula virtual</b><span>Tus clases y material en un solo lugar</span></a>
-      <a href="#tienda"><b>Tienda</b><span>Spray áurico y tintura de muérdago</span></a>
-      <a href="#maestra-karen"><b>Maestra Karen</b><span>Contenido para niños en YouTube</span></a>
-    </div>
+  <div class="pillars">
+    <a href="#escuela"><b>Escuela de Formación</b><span>Cinco pasos hacia tu certificación</span></a>
+    <a href="aula.html"><b>Aula virtual</b><span>Tus clases y material en un solo lugar</span></a>
+    <a href="#tienda"><b>Tienda</b><span>Spray áurico y tintura de muérdago</span></a>
+    <a href="#maestra-karen"><b>Maestra Karen</b><span>Contenido para niños en YouTube</span></a>
   </div>
   <div class="scroll-cue" aria-hidden="true"><span>Desliza</span><i></i></div>
 </section>
 
-<section class="story" id="camino" aria-label="Recorre Casa Muladhara">
-  <div class="story-stage">
-    <div class="wrap story-grid">
-      <div class="story-text">
-        <span class="story-count" aria-hidden="true"><b id="story-num">01</b> / 05</span>
-        <article class="chapter" data-word="SANAR"><span class="eyebrow">Terapias holísticas</span><h2>Haz una pausa. Este momento es para ti.</h2><p>Reiki, Radiestesia, Péndulo Hebreo, Registros Akáshicos, Vidas Pasadas y más. Cada sesión se adapta a lo que estás viviendo.</p><a class="btn btn-cream" href="#terapias">Ver las terapias</a></article>
-        <article class="chapter" data-word="FORMARTE"><span class="eyebrow">Escuela de Formación</span><h2>Cinco pasos hacia tu certificación</h2><p>Cinco formaciones que se suben como una escalera, hasta certificarte como Terapeuta Holístico Integral con el Método Casa Muladhara.</p><a class="btn btn-cream" href="#escuela">Conocer la Escuela</a></article>
-        <article class="chapter" data-word="APRENDER"><span class="eyebrow">Aula virtual</span><h2>Tus clases y material en un solo lugar</h2><p>Clases en vivo y grabadas, material de estudio, tu avance y tus certificados, desde el computador o el celular.</p><a class="btn btn-cream" href="#plataforma">Ver el aula</a></article>
-        <article class="chapter" data-word="CUIDAR"><span class="eyebrow">Tienda</span><h2>Spray áurico y tintura de muérdago</h2><p>Preparados naturales elaborados en Casa Muladhara para acompañar la limpieza y armonización energética, en casa o en consulta.</p><a class="btn btn-cream" href="#tienda">Ir a la tienda</a></article>
-        <article class="chapter" data-word="JUGAR"><span class="eyebrow">Maestra Karen</span><h2>Contenido para niños en YouTube</h2><p>Historias animadas para que los más pequeños conozcan sus emociones, respiren con calma y crezcan conectados con la naturaleza.</p><a class="btn btn-cream" href="#maestra-karen">Ver los videos</a></article>
-      </div>
-      <div class="story-orb" id="story-orb"><svg class="story-mark" style="color:var(--on-brand)" aria-hidden="true"><use href="#mark"/></svg></div>
+<!-- 1 · Se abren las puertas -->
+<section class="stop stop-doors" data-stop="1">
+  <div class="doors-word" aria-hidden="true"><span>Bienvenida</span><small>a Casa Muladhara</small></div>
+  <p class="sr-only">Se abren las puertas de la casona.</p>
+</section>
+
+<!-- 2 · Recibidor: la maestra holística -->
+<section class="stop" id="maestra" data-stop="2">
+  <div class="card side-left">
+    <span class="eyebrow">El recibidor · Tu maestra holística</span>
+    <h2>Karen Oyarce Sáez</h2>
+    <span class="role">Maestra Holística · Creadora del Método Casa Muladhara</span>
+    <img class="karen-photo" src="assets/img/e2ec26d75a.webp" alt="Karen Oyarce Sáez sosteniendo un péndulo hebreo" loading="lazy" decoding="async">
+    <p>Karen tiene más de 5 años de experiencia acompañando procesos de sanación y formando terapeutas. Ha guiado a personas de distintas edades y caminos de vida a descubrir sus propias herramientas energéticas, y de esa experiencia nació El Camino del Ser, la metodología con la que enseña en la Escuela.</p>
+    <div class="stats">
+      <div><b>+5</b><span>años de experiencia terapéutica</span></div>
+      <div><b>5</b><span>formaciones con metodología propia</span></div>
+      <div><b>2</b><span>modalidades: online y presencial</span></div>
     </div>
-    <ol class="story-steps" aria-hidden="true"><li><button type="button" data-ch="0" aria-label="Terapias holísticas"><i>01</i><span>Terapias holísticas</span></button></li><li><button type="button" data-ch="1" aria-label="Escuela de Formación"><i>02</i><span>Escuela de Formación</span></button></li><li><button type="button" data-ch="2" aria-label="Aula virtual"><i>03</i><span>Aula virtual</span></button></li><li><button type="button" data-ch="3" aria-label="Tienda"><i>04</i><span>Tienda</span></button></li><li><button type="button" data-ch="4" aria-label="Maestra Karen"><i>05</i><span>Maestra Karen</span></button></li></ol>
+    <div class="chips"><span>Reiki</span><span>Radiestesia</span><span>Péndulo Hebreo</span><span>Registros Akáshicos</span><span>Terapia Transgeneracional</span><span>Tarot Terapéutico</span></div>
   </div>
 </section>
 
-<section class="section" id="maestra">
-  <div class="wrap">
-    <div class="teacher">
-      <div class="karen-orbit"><img class="karen-photo" src="assets/img/e2ec26d75a.webp" alt="Karen Oyarce Sáez sosteniendo un péndulo hebreo"></div>
-      <div>
-        <span class="eyebrow">Tu maestra holística</span>
-        <h3>Karen Oyarce Sáez</h3>
-        <span class="role">Maestra Holística · Creadora del Método Casa Muladhara</span>
-        <p class="bio">Karen tiene más de 5 años de experiencia acompañando procesos de sanación y formando terapeutas. Ha guiado a personas de distintas edades y caminos de vida a descubrir sus propias herramientas energéticas, y de esa experiencia nació El Camino del Ser, la metodología con la que enseña en la Escuela.</p>
-        <div class="stats">
-          <div><b>+5</b><span>años de experiencia terapéutica</span></div>
-          <div><b>5</b><span>formaciones con metodología propia</span></div>
-          <div><b>2</b><span>modalidades: online y presencial</span></div>
-        </div>
-        <div class="creds"><span>Reiki</span><span>Radiestesia</span><span>Péndulo Hebreo</span><span>Registros Akáshicos</span><span>Terapia Transgeneracional</span><span>Tarot Terapéutico</span></div>
-      </div>
-    </div>
-
+<!-- 3 · Sala de Péndulo Hebreo -->
+<section class="stop" id="pendulo" data-stop="3">
+  <div class="card side-right">
+    <span class="eyebrow">Sala de Péndulo Hebreo · Paso 1 · Inicia</span>
+    <h2>Péndulo Hebreo Nivel 1</h2>
+    <p><span class="mod pres">Presencial</span> <span class="dur">1 jornada intensiva · 8 horas</span></p>
+    <ul class="ticks"><li>Herramienta de limpieza, protección y equilibrio</li><li>Base para continuar en otras formaciones</li></ul>
+    <a class="btn btn-cream" href="pendulo.html">Ver esta formación</a>
   </div>
-</section>
-
-<div class="marquee" aria-hidden="true"><div class="marquee-track"><span>Reiki</span><span>Radiestesia</span><span>Péndulo Hebreo</span><span>Registros Akáshicos</span><span>Vidas Pasadas</span><span>Niño Interior</span><span>Terapia Transgeneracional</span><span>Tarot Terapéutico</span></div></div>
-
-<section class="section school" id="escuela">
-  <div class="portal" id="portal">
-    <div class="portal-stage">
-      <div class="portal-title"><span class="eyebrow">Escuela de Formación Holística</span><p>Entra a tu Camino del Ser</p><small>Desliza para entrar</small></div>
-      <div class="portal-house"><figure class="casona-fig"><svg class="casona" viewBox="0 0 520 400" role="img" aria-label="Ilustración de la casona de Casa Muladhara">
-  <defs>
-    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3d6b56"/><stop offset="1" stop-color="#2b5443"/></linearGradient>
-    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f1ebd8"/><stop offset="1" stop-color="#e2d9bf"/></linearGradient>
-  </defs>
-  <rect width="520" height="400" rx="22" fill="url(#sky)"/>
-  <circle cx="420" cy="78" r="34" fill="#f2c66d" opacity=".85"/>
-  <circle cx="420" cy="78" r="52" fill="#f2c66d" opacity=".12"/>
-  <!-- tree -->
-  <rect x="58" y="210" width="12" height="130" fill="#5a3d24"/>
-  <g fill="#7fa585"><circle cx="64" cy="190" r="44"/><circle cx="34" cy="226" r="30"/><circle cx="98" cy="222" r="32"/></g>
-  <g fill="#9cbf9e" opacity=".7"><circle cx="52" cy="176" r="18"/><circle cx="86" cy="204" r="14"/></g>
-  <!-- house body -->
-  <rect x="120" y="170" width="300" height="170" fill="url(#wall)"/>
-  <rect x="120" y="248" width="300" height="5" fill="#d4c9a8"/>
-  <!-- roof -->
-  <polygon points="102,174 270,92 438,174" fill="#8a5a3a"/>
-  <polygon points="102,174 270,92 438,174 438,182 102,182" fill="#6e4329" opacity=".55"/>
-  <rect x="352" y="104" width="22" height="42" fill="#7a4d31"/>
-  <!-- round window in gable -->
-  <circle cx="270" cy="142" r="16" fill="#2b5443" stroke="#ece7d3" stroke-width="3"/>
-  <g transform="translate(270 142) scale(.26)" style="color:#ece7d3"><use href="#mark" x="-50" y="-50" width="100" height="100"/></g>
-  <!-- upper windows -->
-  <g>
-    <rect x="146" y="192" width="40" height="46" rx="20" fill="#2f4a3e"/><rect x="138" y="192" width="8" height="46" fill="#2b5443"/><rect x="186" y="192" width="8" height="46" fill="#2b5443"/>
-    <rect x="250" y="192" width="40" height="46" rx="20" fill="#2f4a3e"/><rect x="242" y="192" width="8" height="46" fill="#2b5443"/><rect x="290" y="192" width="8" height="46" fill="#2b5443"/>
-    <rect x="354" y="192" width="40" height="46" rx="20" fill="#2f4a3e"/><rect x="346" y="192" width="8" height="46" fill="#2b5443"/><rect x="394" y="192" width="8" height="46" fill="#2b5443"/>
-    <g fill="#f2c66d" opacity=".55"><rect x="152" y="212" width="28" height="22" rx="3"/><rect x="360" y="212" width="28" height="22" rx="3"/></g>
-  </g>
-  <!-- balcony rail -->
-  <g stroke="#2b5443" stroke-width="2"><line x1="238" y1="240" x2="302" y2="240"/><line x1="246" y1="240" x2="246" y2="250"/><line x1="258" y1="240" x2="258" y2="250"/><line x1="270" y1="240" x2="270" y2="250"/><line x1="282" y1="240" x2="282" y2="250"/><line x1="294" y1="240" x2="294" y2="250"/></g>
-  <!-- sign -->
-  <rect x="204" y="258" width="132" height="22" rx="3" fill="#1f3f32"/>
-  <text x="270" y="273" text-anchor="middle" font-family="Josefin Sans, sans-serif" font-size="10" letter-spacing="2.4" fill="#ece7d3">CASA MULADHARA</text>
-  <!-- door -->
-  <path d="M248 340 V302 a22 22 0 0 1 44 0 V340z" fill="#f6dc9a"/>
-  <path class="door-glow" d="M248 340 V302 a22 22 0 0 1 44 0 V340z" fill="#fff4d6" opacity="0"/>
-  <g class="door-l"><path d="M248 340 V302 a22 22 0 0 1 22 -22 V340z" fill="#2b5443"/><line x1="269" y1="284" x2="269" y2="340" stroke="#1f3f32" stroke-width="2"/><circle cx="264" cy="318" r="2.2" fill="#c9a45c"/></g>
-  <g class="door-r"><path d="M270 280 a22 22 0 0 1 22 22 V340 H270z" fill="#2b5443"/><circle cx="276" cy="318" r="2.2" fill="#c9a45c"/></g>
-  <!-- lower windows -->
-  <g><rect x="150" y="286" width="44" height="38" rx="3" fill="#2f4a3e"/><rect x="150" y="286" width="44" height="38" rx="3" fill="none" stroke="#ece7d3" stroke-width="3"/><line x1="172" y1="286" x2="172" y2="324" stroke="#ece7d3" stroke-width="2"/>
-  <rect x="346" y="286" width="44" height="38" rx="3" fill="#2f4a3e"/><rect x="346" y="286" width="44" height="38" rx="3" fill="none" stroke="#ece7d3" stroke-width="3"/><line x1="368" y1="286" x2="368" y2="324" stroke="#ece7d3" stroke-width="2"/>
-  <g fill="#f2c66d" opacity=".5"><rect x="154" y="290" width="15" height="30"/><rect x="371" y="290" width="15" height="30"/></g></g>
-  <!-- flower boxes -->
-  <g fill="#7fa585"><ellipse cx="172" cy="328" rx="26" ry="6"/><ellipse cx="368" cy="328" rx="26" ry="6"/></g>
-  <g fill="#c9a8e0"><circle cx="156" cy="325" r="3"/><circle cx="168" cy="323" r="3"/><circle cx="182" cy="325" r="3"/><circle cx="356" cy="325" r="3"/><circle cx="372" cy="323" r="3"/><circle cx="384" cy="325" r="3"/></g>
-  <!-- vine -->
-  <path d="M122 340 C 130 300 118 270 128 236 C 136 210 126 196 132 176" stroke="#5f8a66" stroke-width="3" fill="none"/>
-  <g fill="#7fa585"><ellipse cx="126" cy="300" rx="6" ry="3.5"/><ellipse cx="131" cy="262" rx="6" ry="3.5"/><ellipse cx="128" cy="222" rx="6" ry="3.5"/><ellipse cx="133" cy="190" rx="6" ry="3.5"/></g>
-  <!-- ground -->
-  <rect x="0" y="338" width="520" height="62" fill="#1f3f32"/>
-  <path d="M246 340 L222 400 H318 L294 340z" fill="#d4c9a8" opacity=".35"/>
-  <!-- pots -->
-  <g><path d="M214 340 l4 -18 h18 l4 18z" fill="#a77a3b"/><g fill="#7fa585"><ellipse cx="220" cy="316" rx="5" ry="12" transform="rotate(-20 220 316)"/><ellipse cx="234" cy="314" rx="5" ry="12" transform="rotate(20 234 314)"/><ellipse cx="227" cy="310" rx="4" ry="12"/></g></g>
-  <g><path d="M302 340 l4 -18 h18 l4 18z" fill="#a77a3b"/><g fill="#7fa585"><ellipse cx="308" cy="316" rx="5" ry="12" transform="rotate(-20 308 316)"/><ellipse cx="322" cy="314" rx="5" ry="12" transform="rotate(20 322 314)"/><ellipse cx="315" cy="310" rx="4" ry="12"/></g></g>
-  <!-- bushes -->
-  <g fill="#5f8a66"><circle cx="448" cy="336" r="22"/><circle cx="476" cy="342" r="18"/><circle cx="108" cy="340" r="16"/></g>
-</svg>
-<figcaption>Escuela de Formación Holística</figcaption></figure></div>
-      <div class="portal-light"></div><div class="portal-fade"></div>
-    </div>
-  </div>
-  <div class="wrap">
-    <div class="school-top">
-      <div class="section-head" style="margin-bottom:0">
-        <span class="eyebrow">Escuela de Formación Holística Casa Muladhara</span>
-        <h2>Una formación completa, paso a paso, en tu Camino del Ser</h2>
-        <p>Cinco formaciones que se suben como una escalera: cada una te prepara para la siguiente, hasta certificarte como Terapeuta Holístico Integral con el Método Casa Muladhara.</p>
-      </div>
-
-    </div>
-    <ol class="stairs">
-        <li class="stair" style="--k:1"><div class="step-card"><span class="stage">Paso 1 · Inicia</span><span class="mod pres">Presencial</span><h3>Péndulo Hebreo Nivel 1</h3><span class="dur">1 jornada intensiva · 8 horas</span><ul><li>Herramienta de limpieza, protección y equilibrio</li><li>Base para continuar en otras formaciones</li></ul><a class="step-link" href="pendulo.html">Ver esta formación →</a></div><div class="riser" aria-hidden="true"><span>1</span></div></li>
-        <li class="stair" style="--k:2"><div class="step-card"><span class="stage">Paso 2 · Equilibra</span><span class="mod live">Online en vivo</span><h3>Limpieza Energética de Casas y Espacios</h3><span class="dur">1 jornada · teórica y práctica</span><ul><li>Armoniza, protege y eleva la energía de los espacios</li><li>Requisito: Péndulo Hebreo Nivel 1</li></ul></div><div class="riser" aria-hidden="true"><span>2</span></div></li>
-        <li class="stair" style="--k:3"><div class="step-card"><span class="stage">Paso 3 · Transforma</span><span class="mod live">Online en vivo</span><h3>Radiestesia y Sanación del Alma</h3><span class="dur">8 clases · 2 meses</span><ul><li>Formación base de la Metodología Casa Muladhara</li><li>Diagnóstico, armonización y sanación</li></ul></div><div class="riser" aria-hidden="true"><span>3</span></div></li>
-        <li class="stair" style="--k:4"><div class="step-card"><span class="stage">Paso 4 · Especialízate</span><span class="mod live">Online en vivo</span><h3>Especializaciones en Radiestesia</h3><span class="dur">4 clases · 1 mes cada una</span><div class="specs"><span>Vidas Pasadas</span><span>Terapia Transgeneracional</span><span>Niño Interior</span><span>Limpieza Uterina</span></div></div><div class="riser" aria-hidden="true"><span>4</span></div></li>
-        <li class="stair" style="--k:5"><div class="step-card"><span class="stage">Paso 5 · Integra</span><span class="mod live">Online en vivo</span><h3>Tarot Terapéutico: El Camino del Ser</h3><span class="dur">16 clases · 4 meses</span><ul><li>Autoconocimiento y desarrollo personal</li><li>Tarot como herramienta de transformación</li></ul></div><div class="riser" aria-hidden="true"><span>5</span></div></li>
-      <li class="stair summit" style="--k:6"><div class="summit-card"><svg style="color:var(--sun)"><use href="#tree"/></svg><b>Terapeuta Holístico Integral</b><span>Certificación final</span></div><div class="riser" aria-hidden="true"></div></li>
-    </ol>
-    <div class="why-row"><b>Por qué estudiar aquí</b><span>Metodología propia</span><span>Formación progresiva</span><span>Material exclusivo</span><span>Prácticas supervisadas</span><span>Acompañamiento</span><span>Formación continua</span><span>Comunidad consciente</span></div>
-
-    <div class="offer" id="formacion-completa">
-      <div class="offer-main">
-        <span class="eyebrow">Formación completa · Método Casa Muladhara</span>
-        <h3>Conviértete en Terapeuta Holístico Integral</h3>
-        <p>Recorre los cinco pasos del Camino del Ser con una sola inscripción, acompañada por Karen de principio a fin.</p>
-        <div class="offer-cols">
-          <div>
-            <h4>Incluye</h4>
-            <ul class="ticks">
-              <li>Las 5 formaciones: Péndulo Hebreo, Limpieza de Espacios, Radiestesia, 4 especializaciones y Tarot Terapéutico</li>
-              <li>Clases online en vivo y sus grabaciones en tu aula virtual</li>
-              <li>Prácticas guiadas y supervisadas</li>
-              <li>Material de estudio exclusivo de cada módulo</li>
-            </ul>
-          </div>
-          <div>
-            <h4>Bonos al inscribirte completa</h4>
-            <ul class="ticks bonus">
-              <li><b>Kit de práctica:</b> péndulo hebreo, Tintura Madre de Muérdago y Spray Áurico</li>
-              <li><b>Meditaciones guiadas</b> para acompañar tu proceso personal</li>
-              <li><b>Comunidad de estudiantes</b> y acompañamiento directo de Karen</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-      <aside class="offer-side">
-        <svg style="color:var(--forest)"><use href="#tree"/></svg>
-        <span class="seats">Cupos limitados por generación</span>
-        <div class="start">Próxima generación<b>2027</b></div>
-        <div class="offer-price">$499<small>o 9 cuotas de $55 mensuales</small></div>
-        <button class="btn btn-green" type="button" data-open-login data-tab="signup">Reservar mi cupo</button>
-        <a class="offer-alt" href="pendulo.html">Prefiero empezar por Péndulo Hebreo Nivel 1 →</a>
-      </aside>
-    </div>
-    <div class="strip">
-      <div>Participa desde cualquier parte del mundo</div>
-      <div>Modalidad online y presencial</div>
-      <div>Comunidad de aprendizaje consciente</div>
-      <div>Certificación y formación profesional</div>
-    </div>
-    <div class="gallery-head">
-      <div><span class="eyebrow" style="color:var(--sun)">Nuestras estudiantes</span><h3>Ellas ya comenzaron su Camino del Ser</h3></div>
-      <p>Graduaciones y clases prácticas de Péndulo Hebreo en Santiago, 2026.</p>
-    </div>
+  <div class="card side-left gallery-card">
+    <span class="eyebrow">Nuestras estudiantes</span>
+    <h3>Ellas ya comenzaron su Camino del Ser</h3>
+    <p>Graduaciones y clases prácticas de Péndulo Hebreo en Santiago, 2026.</p>
     <div class="gallery">
+      <figure><img loading="lazy" decoding="async" src="assets/img/01f8e86fc0.webp" width="620" height="493" alt="Estudiante de Casa Muladhara con su péndulo hebreo y la lámina de los 7 cuerpos energéticos"><figcaption>Clase práctica · Péndulo Hebreo</figcaption></figure>
       <figure><img loading="lazy" decoding="async" src="assets/img/231aa77989.webp" width="620" height="465" alt="Estudiantes de Casa Muladhara, graduación · péndulo hebreo nivel 1"><figcaption>Graduación · Péndulo Hebreo Nivel 1</figcaption></figure>
       <figure><img loading="lazy" decoding="async" src="assets/img/f08f46f33a.webp" width="465" height="620" alt="Estudiantes de Casa Muladhara, graduación · péndulo hebreo nivel 1"><figcaption>Graduación · Péndulo Hebreo Nivel 1</figcaption></figure>
       <figure><img loading="lazy" decoding="async" src="assets/img/292ddf3bf0.webp" width="620" height="465" alt="Estudiantes de Casa Muladhara, certificación · péndulo hebreo nivel i y ii"><figcaption>Certificación · Péndulo Hebreo Nivel I y II</figcaption></figure>
@@ -663,40 +173,112 @@ form.auth .btn{justify-content:center;margin-top:6px}
   </div>
 </section>
 
-<section class="section gift" id="sala">
-  <div class="wrap gift-grid">
-    <div>
-      <span class="eyebrow">Gratis · En vivo · 30 minutos</span>
-      <h2>Sala Abierta con Karen</h2>
-      <p>Cada martes y sábado Karen abre una sala en vivo y gratuita donde comparte pequeñas formaciones de las que se hacen en la Escuela. En 30 minutos responde tus preguntas y conversa contigo. Es la mejor forma de conocerla antes de formarte.</p>
-      <ul class="sala-list">
-        <li><b>Martes · 19:00</b><span>30 minutos en vivo con Karen</span></li>
-        <li><b>Sábado · 11:00</b><span>30 minutos en vivo con Karen</span></li>
-      </ul>
-      <small class="sala-note">Horario de Chile. Al registrarte te enviamos el tema y el enlace de cada clase.</small>
-      <a class="btn btn-green" href="sala.html" style="margin-top:20px">Ver la Sala Abierta</a>
+<!-- 4 · Pasillo de las terapias -->
+<section class="stop" id="terapias" data-stop="4">
+  <div class="card side-left card-wide">
+    <span class="eyebrow">Pasillo de las terapias holísticas</span>
+    <h2>Haz una pausa. Este momento es para ti.</h2>
+    <p>Cada sesión se adapta a lo que estás viviendo. Elige una terapia o escríbenos y te orientamos.</p>
+    <ol class="doors-list">
+      <li><b>Reiki</b><p>Técnica de canalización de energía universal para sanar y equilibrar cuerpo, mente y espíritu.</p><span class="chip">Presencial · Online</span><a href="https://wa.link/by9gjr" target="_blank" rel="noopener">Agendar</a></li>
+      <li><b>Radiestesia y Sanación del Alma</b><p>Técnica para detectar energías y restablecer el equilibrio energético a nivel físico, emocional y espiritual.</p><span class="chip">Presencial · Online</span><a href="https://wa.link/by9gjr" target="_blank" rel="noopener">Agendar</a></li>
+      <li><b>Péndulo Hebreo</b><p>Herramienta de sanación basada en geometría sagrada para equilibrar y armonizar energías.</p><span class="chip">Presencial · Online</span><a href="https://wa.link/by9gjr" target="_blank" rel="noopener">Agendar</a></li>
+      <li><b>Registros Akáshicos</b><p>Lectura de los registros del alma para comprender patrones que se repiten y decidir con más claridad.</p><span class="chip">Presencial · Online</span><a href="https://wa.link/by9gjr" target="_blank" rel="noopener">Agendar</a></li>
+      <li><b>Vidas Pasadas</b><p>Exploración de memorias de otras vidas que influyen en bloqueos y miedos del presente.</p><span class="chip">Presencial · Online</span><a href="https://wa.link/by9gjr" target="_blank" rel="noopener">Agendar</a></li>
+      <li><b>Sanando Niño Interior</b><p>Acompañamiento para reconocer y sanar heridas de la infancia que siguen presentes en tu vida adulta.</p><span class="chip">Presencial · Online</span><a href="https://wa.link/by9gjr" target="_blank" rel="noopener">Agendar</a></li>
+      <li><b>Terapia Transgeneracional</b><p>Sana patrones y cargas heredadas de tu linaje familiar para vivir con más libertad.</p><span class="chip">Presencial · Online</span><a href="https://wa.link/by9gjr" target="_blank" rel="noopener">Agendar</a></li>
+      <li><b>Tarot Terapéutico y Evolutivo</b><p>El tarot como espejo para el autoconocimiento y para tomar decisiones conscientes.</p><span class="chip">Presencial · Online</span><a href="https://wa.link/by9gjr" target="_blank" rel="noopener">Agendar</a></li>
+      <li><b>Limpieza energética de espacios</b><p>Armoniza, protege y eleva la energía de tu hogar o lugar de trabajo con péndulo hebreo.</p><span class="chip">Presencial</span><a href="https://wa.link/by9gjr" target="_blank" rel="noopener">Agendar</a></li>
+    </ol>
+    <div class="note"><p>¿No sabes qué terapia elegir? Te orientamos en una primera conversación.</p><a class="btn btn-cream" href="terapias.html">Agendar mi sesión</a></div>
+    <div class="note"><p>Sacerdotisa de bodas: ceremonias simbólicas diseñadas para cada pareja.</p><a class="btn btn-ghost" href="https://wa.link/by9gjr" target="_blank" rel="noopener">Consultar fecha</a></div>
+  </div>
+</section>
+
+<!-- 5 · Escalera de la Escuela: cinco pasos -->
+<section class="stop" id="escuela" data-stop="5">
+  <div class="card side-right card-wide">
+    <span class="eyebrow">Escuela de Formación Holística Casa Muladhara</span>
+    <h2>Una formación completa, paso a paso, en tu Camino del Ser</h2>
+    <p>Cinco formaciones que se suben como una escalera: cada una te prepara para la siguiente, hasta certificarte como Terapeuta Holístico Integral con el Método Casa Muladhara.</p>
+    <ol class="steps">
+      <li><span class="stage">Paso 1 · Inicia</span><span class="mod pres">Presencial</span><h3>Péndulo Hebreo Nivel 1</h3><span class="dur">1 jornada intensiva · 8 horas</span><ul><li>Herramienta de limpieza, protección y equilibrio</li><li>Base para continuar en otras formaciones</li></ul><a class="step-link" href="pendulo.html">Ver esta formación →</a></li>
+      <li><span class="stage">Paso 2 · Equilibra</span><span class="mod live">Online en vivo</span><h3>Limpieza Energética de Casas y Espacios</h3><span class="dur">1 jornada · teórica y práctica</span><ul><li>Armoniza, protege y eleva la energía de los espacios</li><li>Requisito: Péndulo Hebreo Nivel 1</li></ul></li>
+      <li><span class="stage">Paso 3 · Transforma</span><span class="mod live">Online en vivo</span><h3>Radiestesia y Sanación del Alma</h3><span class="dur">8 clases · 2 meses</span><ul><li>Formación base de la Metodología Casa Muladhara</li><li>Diagnóstico, armonización y sanación</li></ul></li>
+      <li><span class="stage">Paso 4 · Especialízate</span><span class="mod live">Online en vivo</span><h3>Especializaciones en Radiestesia</h3><span class="dur">4 clases · 1 mes cada una</span><div class="specs"><span>Vidas Pasadas</span><span>Terapia Transgeneracional</span><span>Niño Interior</span><span>Limpieza Uterina</span></div></li>
+      <li><span class="stage">Paso 5 · Integra</span><span class="mod live">Online en vivo</span><h3>Tarot Terapéutico: El Camino del Ser</h3><span class="dur">16 clases · 4 meses</span><ul><li>Autoconocimiento y desarrollo personal</li><li>Tarot como herramienta de transformación</li></ul></li>
+    </ol>
+  </div>
+</section>
+
+<!-- 6 · La cima: el árbol de la vida y la formación completa -->
+<section class="stop" id="formacion-completa" data-stop="6">
+  <div class="card side-left card-wide offer">
+    <div class="summit"><svg style="color:var(--sun)"><use href="#tree"/></svg><div><b>Terapeuta Holístico Integral</b><span>Certificación final</span></div></div>
+    <span class="eyebrow">Formación completa · Método Casa Muladhara</span>
+    <h2>Conviértete en Terapeuta Holístico Integral</h2>
+    <p>Recorre los cinco pasos del Camino del Ser con una sola inscripción, acompañada por Karen de principio a fin.</p>
+    <div class="cols">
+      <div>
+        <h4>Incluye</h4>
+        <ul class="ticks">
+          <li>Las 5 formaciones: Péndulo Hebreo, Limpieza de Espacios, Radiestesia, 4 especializaciones y Tarot Terapéutico</li>
+          <li>Clases online en vivo y sus grabaciones en tu aula virtual</li>
+          <li>Prácticas guiadas y supervisadas</li>
+          <li>Material de estudio exclusivo de cada módulo</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Bonos al inscribirte completa</h4>
+        <ul class="ticks bonus">
+          <li><b>Kit de práctica:</b> péndulo hebreo, Tintura Madre de Muérdago y Spray Áurico</li>
+          <li><b>Meditaciones guiadas</b> para acompañar tu proceso personal</li>
+          <li><b>Comunidad de estudiantes</b> y acompañamiento directo de Karen</li>
+        </ul>
+      </div>
     </div>
+    <div class="offer-buy">
+      <span class="seats">Cupos limitados por generación</span>
+      <div class="start">Próxima generación <b>2027</b></div>
+      <div class="price">$499<small>o 9 cuotas de $55 mensuales</small></div>
+      <button class="btn btn-cream" type="button" data-open-login data-tab="signup">Reservar mi cupo</button>
+      <a class="alt" href="pendulo.html">Prefiero empezar por Péndulo Hebreo Nivel 1 →</a>
+    </div>
+    <div class="why"><b>Por qué estudiar aquí</b><span>Metodología propia</span><span>Formación progresiva</span><span>Material exclusivo</span><span>Prácticas supervisadas</span><span>Acompañamiento</span><span>Formación continua</span><span>Comunidad consciente</span></div>
+    <div class="strip"><span>Participa desde cualquier parte del mundo</span><span>Modalidad online y presencial</span><span>Comunidad de aprendizaje consciente</span><span>Certificación y formación profesional</span></div>
+  </div>
+</section>
+
+<!-- 7 · Sala Abierta: el círculo de cojines -->
+<section class="stop" id="sala" data-stop="7">
+  <div class="card side-right card-wide">
+    <span class="eyebrow live-dot">Gratis · En vivo · 30 minutos</span>
+    <h2>Sala Abierta con Karen</h2>
+    <p>Cada martes y sábado Karen abre una sala en vivo y gratuita donde comparte pequeñas formaciones de las que se hacen en la Escuela. En 30 minutos responde tus preguntas y conversa contigo. Es la mejor forma de conocerla antes de formarte.</p>
+    <ul class="sala-list">
+      <li><b>Martes · 19:00</b><span>30 minutos en vivo con Karen</span></li>
+      <li><b>Sábado · 11:00</b><span>30 minutos en vivo con Karen</span></li>
+    </ul>
+    <small class="note-small">Horario de Chile. Al registrarte te enviamos el tema y el enlace de cada clase.</small>
     <form class="gift-form" id="gift-form">
       <label>Nombre<input id="g-name" type="text" autocomplete="name" placeholder="Tu nombre" required></label>
       <label>Correo electrónico<input id="g-email" type="email" autocomplete="email" placeholder="tu@correo.com" required></label>
       <label>WhatsApp<input id="g-wa" type="tel" autocomplete="tel" placeholder="+56 9 1234 5678"></label>
       <label>¿A qué clase quieres ir?<select id="g-when"><option>Martes · 19:00</option><option>Sábado · 11:00</option><option>Avísenme de todas las clases</option></select></label>
-      <button class="btn" type="submit">Reservar mi lugar gratis</button>
+      <button class="btn btn-cream" type="submit">Reservar mi lugar gratis</button>
       <p class="gift-ok" id="gift-ok" hidden>¡Listo! Te enviamos el enlace de la sala por correo y WhatsApp, y un recordatorio 1 hora antes.</p>
       <small>Sin costo. Puedes darte de baja cuando quieras.</small>
     </form>
+    <a class="btn btn-ghost" href="sala.html">Ver la Sala Abierta</a>
   </div>
 </section>
 
-<section class="section platform" id="plataforma">
-  <div class="wrap">
-  <div class="platform-grid">
-    <div>
-      <span class="eyebrow">Aula virtual</span>
-      <h2 style="font-size:clamp(2rem,4.4vw,3rem);margin-top:14px">Tu espacio de estudiante</h2>
-      <p style="color:var(--muted);font-size:1.05rem;margin-top:14px;max-width:32em">Al inscribirte en una formación recibes tu usuario y entras a tu aula desde el computador o el celular. Esto es lo que verás dentro.</p>
-      <div style="margin-top:26px"><a class="btn btn-green" href="aula.html">Ingresar al aula</a></div>
-    </div>
+<!-- 8 · Aula virtual: la pantalla del estudio -->
+<section class="stop" id="plataforma" data-stop="8">
+  <div class="card side-right card-wide">
+    <span class="eyebrow">Aula virtual</span>
+    <h2>Tu espacio de estudiante</h2>
+    <p>Al inscribirte en una formación recibes tu usuario y entras a tu aula desde el computador o el celular. Esto es lo que verás dentro.</p>
     <div class="dash" aria-label="Vista previa del aula virtual con datos de ejemplo">
       <div class="dash-bar"><svg style="color:var(--on-brand)"><use href="#mark"/></svg><b>AULA CASA MULADHARA</b><span class="ex">Ejemplo</span></div>
       <div class="dash-body">
@@ -704,32 +286,31 @@ form.auth .btn{justify-content:center;margin-top:6px}
         <div class="course"><div class="course-top"><b>Péndulo Hebreo Nivel 1</b><span>Completado</span></div><div class="bar"><i style="width:100%"></i></div></div>
         <div class="course"><div class="course-top"><b>Radiestesia y Sanación del Alma</b><span>3 de 8 clases</span></div><div class="bar"><i style="width:37.5%"></i></div></div>
         <div class="course"><div class="course-top"><b>Limpieza Energética de Espacios</b><span>Por iniciar</span></div><div class="bar"><i style="width:0"></i></div></div>
-        <div class="next" style="justify-content:space-between;flex-wrap:wrap"><p><b>Regístrate para tener acceso a tu aula virtual.</b> Con tu cuenta entras a tus clases, material y certificados.</p><button class="btn btn-green" type="button" data-open-login data-tab="signup">Crear mi cuenta</button></div>
+        <div class="next"><p><b>Regístrate para tener acceso a tu aula virtual.</b> Con tu cuenta entras a tus clases, material y certificados.</p><button class="btn btn-green" type="button" data-open-login data-tab="signup">Crear mi cuenta</button></div>
       </div>
     </div>
-  </div>
-    <div class="aula-feats">
-      <div><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M10 9l4 2-4 2z"/><path d="M8 21h8"/></svg><b>Clases en vivo y grabadas</b><p>Entra a las clases online en vivo y vuelve a verlas cuando quieras.</p></div>
-      <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg><b>Material de estudio</b><p>Manuales, láminas y guías de cada módulo para descargar.</p></div>
-      <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18l5-6 4 3 7-9"/><path d="M15 6h5v5"/></svg><b>Tu avance</b><p>Ve qué clases completaste y cuánto te falta en el Camino del Ser.</p></div>
-      <div><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><b>Calendario de clases</b><p>Fechas de las próximas clases en vivo, jornadas presenciales y prácticas.</p></div>
-      <div><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="5"/><path d="M9 13.5L8 21l4-2 4 2-1-7.5"/></svg><b>Tus certificados</b><p>Descarga los certificados de cada formación que completes.</p></div>
-      <div><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="9" r="3"/><circle cx="16" cy="9" r="3"/><path d="M3 19c.8-3 2.8-4.5 5-4.5s4.2 1.5 5 4.5M11 19c.8-3 2.8-4.5 5-4.5s4.2 1.5 5 4.5"/></svg><b>Comunidad y acompañamiento</b><p>Comparte dudas con tus compañeras y recibe guía de Karen durante tu formación.</p></div>
+    <div class="feats">
+      <div><b>Clases en vivo y grabadas</b><p>Entra a las clases online en vivo y vuelve a verlas cuando quieras.</p></div>
+      <div><b>Material de estudio</b><p>Manuales, láminas y guías de cada módulo para descargar.</p></div>
+      <div><b>Tu avance</b><p>Ve qué clases completaste y cuánto te falta en el Camino del Ser.</p></div>
+      <div><b>Calendario de clases</b><p>Fechas de las próximas clases en vivo, jornadas presenciales y prácticas.</p></div>
+      <div><b>Tus certificados</b><p>Descarga los certificados de cada formación que completes.</p></div>
+      <div><b>Comunidad y acompañamiento</b><p>Comparte dudas con tus compañeras y recibe guía de Karen durante tu formación.</p></div>
     </div>
+    <a class="btn btn-cream" href="aula.html">Ingresar al aula</a>
   </div>
 </section>
 
-<section class="section shop" id="tienda">
-  <div class="wrap">
-    <div class="section-head">
-      <span class="eyebrow">Tienda</span>
-      <h2>Preparados naturales para tus prácticas</h2>
-      <p>Elaborados en Casa Muladhara para acompañar la limpieza y armonización energética, en casa o en consulta.</p>
-    </div>
+<!-- 9 · La tiendita -->
+<section class="stop" id="tienda" data-stop="9">
+  <div class="card side-left card-wide">
+    <span class="eyebrow">La tiendita</span>
+    <h2>Preparados naturales para tus prácticas</h2>
+    <p>Elaborados en Casa Muladhara para acompañar la limpieza y armonización energética, en casa o en consulta.</p>
     <div class="products">
       <article class="product">
-        <img loading="lazy" decoding="async" class="art" src="assets/img/c6ce786100.webp" alt="Spray Áurico de 30 ml con la nueva etiqueta verde y crema de Casa Muladhara">
-                <div class="body">
+        <img loading="lazy" decoding="async" src="assets/img/c6ce786100.webp" alt="Spray Áurico de 30 ml con la nueva etiqueta verde y crema de Casa Muladhara">
+        <div class="body">
           <span class="tag">Spray · 30 ml</span>
           <h3>Spray Áurico de salvia, romero y lavanda</h3>
           <ul>
@@ -738,15 +319,12 @@ form.auth .btn{justify-content:center;margin-top:6px}
             <li><b>Lavanda:</b> favorece la calma, la relajación y la armonía.</li>
             <li>Rocía alrededor de tu cuerpo a 20 cm, con los ojos cerrados, o en tus espacios y objetos sagrados.</li>
           </ul>
-          <div class="buy">
-            <div class="price">$6.99<small>USD · 30 ml</small></div>
-            <button class="btn btn-green" type="button" data-add="Spray Áurico">Agregar al carrito</button>
-          </div>
+          <div class="buy"><div class="price">$6.99<small>USD · 30 ml</small></div><button class="btn btn-cream" type="button" data-add="Spray Áurico">Agregar al carrito</button></div>
         </div>
       </article>
       <article class="product">
-        <img loading="lazy" decoding="async" class="art" src="assets/img/cdf5f76943.webp" alt="Tintura Madre de Muérdago de 30 ml con la nueva etiqueta verde y crema de Casa Muladhara">
-                <div class="body">
+        <img loading="lazy" decoding="async" src="assets/img/cdf5f76943.webp" alt="Tintura Madre de Muérdago de 30 ml con la nueva etiqueta verde y crema de Casa Muladhara">
+        <div class="body">
           <span class="tag">Tintura madre · 30 ml</span>
           <h3>Tintura Madre de Muérdago</h3>
           <ul>
@@ -755,10 +333,7 @@ form.auth .btn{justify-content:center;margin-top:6px}
             <li>Limpieza, descarga y armonización, junto a las etiquetas hebreas y el trabajo vibracional del péndulo.</li>
           </ul>
           <span class="warn">Uso externo · No ingerir</span>
-          <div class="buy">
-            <div class="price">$9.99<small>USD · 30 ml</small></div>
-            <button class="btn btn-green" type="button" data-add="Tintura de Muérdago">Agregar al carrito</button>
-          </div>
+          <div class="buy"><div class="price">$9.99<small>USD · 30 ml</small></div><button class="btn btn-cream" type="button" data-add="Tintura de Muérdago">Agregar al carrito</button></div>
         </div>
       </article>
     </div>
@@ -766,59 +341,43 @@ form.auth .btn{justify-content:center;margin-top:6px}
   </div>
 </section>
 
-<section class="section" id="terapias">
-  <div class="wrap">
-    <div class="section-head">
-      <span class="eyebrow">Terapias holísticas</span>
-      <h2>Haz una pausa. Este momento es para ti.</h2>
-      <p>Cada sesión se adapta a lo que estás viviendo. Elige una terapia o escríbenos y te orientamos.</p>
+<!-- 10 · Jardín de Maestra Karen (niños) -->
+<section class="stop kids" id="maestra-karen" data-stop="10">
+  <div class="card side-right card-wide card-kids">
+    <span class="eyebrow">Jardín de los niños · Para niños y familias</span>
+    <h2>Maestra Karen</h2>
+    <p>Historias animadas para que los más pequeños conozcan sus emociones, respiren con calma, cuiden a los animales y crezcan conectados con la naturaleza. Nuevos videos en el canal de YouTube de Maestra Karen.</p>
+    <a class="btn yt" href="https://www.youtube.com/@casamaestrakaren" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>Ver el canal en YouTube</a>
+    <div class="videos">
+      <a class="video" href="https://www.instagram.com/reel/Ddl3EKKxVCl/" target="_blank" rel="noopener"><img loading="lazy" decoding="async" src="assets/img/55eaee5a9f.webp" alt="Escena del video El frasquito de las alegrías"><b>El frasquito de las alegrías</b><span>Emociones · ver en Instagram</span></a>
+      <a class="video" href="https://www.instagram.com/reel/DdouFflxdXl/" target="_blank" rel="noopener"><img loading="lazy" decoding="async" src="assets/img/7d63999fc3.webp" alt="Escena del video Cuidamos a nuestros animalitos"><b>Cuidamos a nuestros animalitos</b><span>Amor y cuidado · ver en Instagram</span></a>
+      <a class="video" href="https://www.instagram.com/reel/DdmKllFR9ro/" target="_blank" rel="noopener"><img loading="lazy" decoding="async" src="assets/img/6765ba3ad3.webp" alt="Escena del video Una plantita que crece"><b>Una plantita que crece</b><span>Naturaleza · ver en Instagram</span></a>
+      <a class="video" href="https://www.instagram.com/reel/DdrhVkFKkV7/" target="_blank" rel="noopener"><img loading="lazy" decoding="async" src="assets/img/5d7729f660.webp" alt="Escena del video Respiramos con Maestra Karen"><b>Respiramos con Maestra Karen</b><span>Respiración · ver en Instagram</span></a>
     </div>
-    <div class="therapy-grid">
-      <article class="therapy feature"><h3>Reiki</h3><p>Técnica de canalización de energía universal para sanar y equilibrar cuerpo, mente y espíritu.</p><div class="meta"><span class="chip">Presencial · Online</span><a href="https://wa.link/by9gjr" target="_blank" rel="noopener">Agendar</a></div></article>
-      <article class="therapy"><h3>Radiestesia y Sanación del Alma</h3><p>Técnica para detectar energías y restablecer el equilibrio energético a nivel físico, emocional y espiritual.</p><div class="meta"><span class="chip">Presencial · Online</span><a href="https://wa.link/by9gjr" target="_blank" rel="noopener">Agendar</a></div></article>
-      <article class="therapy"><h3>Péndulo Hebreo</h3><p>Herramienta de sanación basada en geometría sagrada para equilibrar y armonizar energías.</p><div class="meta"><span class="chip">Presencial · Online</span><a href="https://wa.link/by9gjr" target="_blank" rel="noopener">Agendar</a></div></article>
-      <article class="therapy"><h3>Registros Akáshicos</h3><p>Lectura de los registros del alma para comprender patrones que se repiten y decidir con más claridad.</p><div class="meta"><span class="chip">Presencial · Online</span><a href="https://wa.link/by9gjr" target="_blank" rel="noopener">Agendar</a></div></article>
-      <article class="therapy"><h3>Vidas Pasadas</h3><p>Exploración de memorias de otras vidas que influyen en bloqueos y miedos del presente.</p><div class="meta"><span class="chip">Presencial · Online</span><a href="https://wa.link/by9gjr" target="_blank" rel="noopener">Agendar</a></div></article>
-      <article class="therapy"><h3>Sanando Niño Interior</h3><p>Acompañamiento para reconocer y sanar heridas de la infancia que siguen presentes en tu vida adulta.</p><div class="meta"><span class="chip">Presencial · Online</span><a href="https://wa.link/by9gjr" target="_blank" rel="noopener">Agendar</a></div></article>
-      <article class="therapy"><h3>Terapia Transgeneracional</h3><p>Sana patrones y cargas heredadas de tu linaje familiar para vivir con más libertad.</p><div class="meta"><span class="chip">Presencial · Online</span><a href="https://wa.link/by9gjr" target="_blank" rel="noopener">Agendar</a></div></article>
-      <article class="therapy"><h3>Tarot Terapéutico y Evolutivo</h3><p>El tarot como espejo para el autoconocimiento y para tomar decisiones conscientes.</p><div class="meta"><span class="chip">Presencial · Online</span><a href="https://wa.link/by9gjr" target="_blank" rel="noopener">Agendar</a></div></article>
-      <article class="therapy"><h3>Limpieza energética de espacios</h3><p>Armoniza, protege y eleva la energía de tu hogar o lugar de trabajo con péndulo hebreo.</p><div class="meta"><span class="chip">Presencial</span><a href="https://wa.link/by9gjr" target="_blank" rel="noopener">Agendar</a></div></article>
-    </div>
-    <div class="modal-note" style="margin-top:16px;background:var(--forest);color:var(--on-brand)"><p>¿No sabes qué terapia elegir? Te orientamos en una primera conversación.</p><a class="btn btn-cream" href="terapias.html">Agendar mi sesión</a></div>
-    <div class="modal-note">
-      <p>Sacerdotisa de bodas: ceremonias simbólicas diseñadas para cada pareja.</p>
-      <a class="btn btn-green" href="https://wa.link/by9gjr" target="_blank" rel="noopener">Consultar fecha</a>
+    <div class="note"><p><b>Para mamás y papás.</b> Karen acompaña a las familias con terapias como Sanando Niño Interior y Terapia Transgeneracional, para sanar lo que se repite de generación en generación.</p><a class="btn btn-cream" href="terapias.html">Agendar para mi familia</a></div>
+  </div>
+</section>
+
+<!-- 11 · Despedida bajo las estrellas -->
+<section class="stop stop-end" data-stop="11">
+  <div class="card card-end">
+    <svg style="color:var(--sun)"><use href="#mark"/></svg>
+    <h2>Tu Camino del Ser empieza hoy</h2>
+    <p>Gracias por recorrer la casona. Cuando quieras, la puerta está abierta.</p>
+    <div class="ctas">
+      <button class="btn btn-cream" type="button" data-open-login data-tab="signup">Reservar mi cupo</button>
+      <a class="btn btn-ghost" href="#sala">Clase gratis en vivo</a>
     </div>
   </div>
 </section>
 
-<section class="section kids" id="maestra-karen">
-  <div class="bubbles" aria-hidden="true"></div>
-  <div class="wrap kids-grid">
-    <div>
-      <span class="eyebrow"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5" fill="currentColor"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></g></svg>Para niños y familias</span>
-      <h2>Maestra Karen</h2>
-      <p class="lede">Historias animadas para que los más pequeños conozcan sus emociones, respiren con calma, cuiden a los animales y crezcan conectados con la naturaleza. Nuevos videos en el canal de YouTube de Maestra Karen.</p>
-      <a class="btn yt" href="https://www.youtube.com/@casamaestrakaren" target="_blank" rel="noopener">
-        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
-        Ver el canal en YouTube
-      </a>
-    </div>
-    <div class="videos">
-      <a class="video" href="https://www.instagram.com/reel/Ddl3EKKxVCl/" target="_blank" rel="noopener"><div class="thumb"><img loading="lazy" decoding="async" src="assets/img/55eaee5a9f.webp" alt="Escena del video El frasquito de las alegrías"><span class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></div><b>El frasquito de las alegrías</b><span>Emociones · ver en Instagram</span></a>
-      <a class="video" href="https://www.instagram.com/reel/DdouFflxdXl/" target="_blank" rel="noopener"><div class="thumb"><img loading="lazy" decoding="async" src="assets/img/7d63999fc3.webp" alt="Escena del video Cuidamos a nuestros animalitos"><span class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></div><b>Cuidamos a nuestros animalitos</b><span>Amor y cuidado · ver en Instagram</span></a>
-      <a class="video" href="https://www.instagram.com/reel/DdmKllFR9ro/" target="_blank" rel="noopener"><div class="thumb"><img loading="lazy" decoding="async" src="assets/img/6765ba3ad3.webp" alt="Escena del video Una plantita que crece"><span class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></div><b>Una plantita que crece</b><span>Naturaleza · ver en Instagram</span></a>
-      <a class="video" href="https://www.instagram.com/reel/DdrhVkFKkV7/" target="_blank" rel="noopener"><div class="thumb"><img loading="lazy" decoding="async" src="assets/img/5d7729f660.webp" alt="Escena del video Respiramos con Maestra Karen"><span class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></div><b>Respiramos con Maestra Karen</b><span>Respiración · ver en Instagram</span></a>
-    </div>
-    <div class="family"><div><b>Para mamás y papás</b><p>Karen acompaña a las familias con terapias como Sanando Niño Interior y Terapia Transgeneracional, para sanar lo que se repite de generación en generación.</p></div><a class="btn btn-green" href="terapias.html">Agendar para mi familia</a></div>
-  </div></section>
-
+</main>
 
 <footer>
   <div class="wrap">
     <div class="foot">
       <div>
-        <a class="brand" href="#inicio" style="padding:0"><svg style="color:var(--on-brand)"><use href="#mark"/></svg><span class="brand-name"><b style="color:var(--on-brand)">CASA MULADHARA</b><small>SANACIÓN &amp; BIENESTAR</small></span></a>
+        <a class="brand" href="#inicio"><svg style="color:var(--on-brand)"><use href="#mark"/></svg><span class="brand-name"><b>CASA MULADHARA</b><small>SANACIÓN &amp; BIENESTAR</small></span></a>
         <p>Terapias holísticas, productos naturales y formación de terapeutas. Presencial y online.</p>
       </div>
       <div><h4>Explora</h4><a href="#escuela">Escuela</a><a href="#plataforma">Aula virtual</a><a href="#tienda">Tienda</a><a href="#terapias">Terapias</a><a href="#maestra-karen">Maestra Karen</a></div>
@@ -826,7 +385,6 @@ form.auth .btn{justify-content:center;margin-top:6px}
       <div><h4>Tu cuenta</h4><a href="aula.html">Ingresar al aula</a><a href="#plataforma" data-open-login data-tab="signup">Crear cuenta</a><a href="#tienda">Mis pedidos</a></div>
       <div><h4>Contacto</h4><a href="https://wa.link/by9gjr" target="_blank" rel="noopener">WhatsApp</a><a href="https://www.instagram.com/casa.muladhara/" target="_blank" rel="noopener">Instagram @casa.muladhara</a><a href="https://www.youtube.com/@casamaestrakaren" target="_blank" rel="noopener">YouTube Maestra Karen</a></div>
     </div>
-    <div class="foot-giant" aria-hidden="true">MULADHARA</div>
     <div class="legal"><span>© 2026 Casa Muladhara</span><span>casamuladhara.com</span></div>
   </div>
 </footer>
@@ -834,7 +392,7 @@ form.auth .btn{justify-content:center;margin-top:6px}
 <div class="toast" id="toast" hidden></div>
 
 <script>
-// Petals of the placeholder mark, drawn once into the shared symbol
+// Pétalos del logo, dibujados una vez en el símbolo compartido
 (function(){
   const g=document.getElementById('petals');const ns='http://www.w3.org/2000/svg';
   const outer='M0,-19 C7,-26 9,-38 0,-47 C-9,-38 -7,-26 0,-19Z';
@@ -860,6 +418,6 @@ document.querySelectorAll('[data-open-login]').forEach(b=>b.addEventListener('cl
 $('#gift-form').addEventListener('submit',e=>{e.preventDefault();$('#gift-ok').hidden=false});
 </script>
 <script src="assets/vendor/lenis.min.js" defer></script>
-<script type="module" src="assets/js/experiencia.js"></script>
-
-</body></html>
+<script type="module" src="assets/js/recorrido.js"></script>
+</body>
+</html>
