@@ -84,7 +84,7 @@ const name = p.displayName || pretty((p.email || '').split('@')[0]);
 const CM = {
   uid, isAdmin, lvl: isAdmin ? 5 : Number(token.claims.lvl) || 0, paid,
   // tokens antiguos sin lvls: todos los niveles hasta lvl
-  lvls: isAdmin ? [1, 2, 3, 4, 5] : Array.isArray(token.claims.lvls) ? token.claims.lvls : Array.from({ length: Number(token.claims.lvl) || 0 }, (_, i) => i + 1),
+  lvls: isAdmin ? [1, 2, 3, 41, 42, 43, 44, 5] : Array.isArray(token.claims.lvls) ? token.claims.lvls : Array.from({ length: Number(token.claims.lvl) || 0 }, (_, i) => i + 1),
   blocked: p.blocked === true,
   editor: { api: profileApi(uid), hasGoogle: !!googlePhoto() },
   profile: { ...p, name, ini: initials(name), c: colorFor(uid), accessLevel: Number(p.accessLevel) || 1, plan: p.plan || 'none', paymentStatus: p.paymentStatus || 'none' },

@@ -3,6 +3,7 @@
 // (lo ponen el webhook de Stripe, el portal de la Maestra o scripts/admin.mjs) dice qué niveles tiene abiertos,
 // p. ej. [3]; lvl es el más alto. La Maestra (admin) abre todo.
 //   /assets/n2/...  (materiales)  -> requiere el Nivel 2 abierto
+//   /assets/n4/nino/... (materiales de un curso del Nivel 4) -> requiere ese curso: nino 4.1, vidas 4.2, trans 4.3, utero 4.4
 //   /curso/n2.js    (código)      -> requiere lvl >= 2: el código de cada nivel usa piezas de los anteriores,
 //                                    así que se descargan juntos; el aula solo muestra los niveles abiertos
 import { NextResponse } from 'next/server';
@@ -21,7 +22,10 @@ const deny = (status, text) => new Response(text, {
 });
 
 // Nivel que pide la ruta; lo que no se reconoce queda reservado para la Maestra
-const levelOf = (path) => Number(path.match(/^\/(?:curso\/n|assets\/n)(\d+)(?:\.js$|\/)/)?.[1]) || 99;
+// (los cursos del Nivel 4 tienen su propio número: 41 a 44)
+const N4 = { nino: 41, vidas: 42, trans: 43, utero: 44 };
+const levelOf = (path) => N4[path.match(/^\/assets\/n4\/([a-z]+)\//)?.[1]]
+  || Number(path.match(/^\/(?:curso\/n|assets\/n)(\d+)(?:\.js$|\/)/)?.[1]) || 99;
 
 export async function proxy(request) {
   const token = (request.headers.get('cookie') || '').match(/(?:^|;\s*)cm_session=([^;]+)/)?.[1];

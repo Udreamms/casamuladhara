@@ -39,12 +39,15 @@ V.formacion=()=>`
   ${pathHTML()}
   <section style="display:grid;gap:14px">${LEVELS.map(lv=>`<article class="card panel" style="grid-template-columns:minmax(0,1fr) auto;align-items:center">
     <div style="display:grid;gap:8px;min-width:0"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="eyebrow">Nivel ${lv.n}</span>${modePill(lv)}${statusPill(lv)}</div>
-    <h3 style="font-size:1.35rem">${lv.title}</h3>${detailOpen(lv)?`<p class="muted" style="font-size:.9rem;max-width:60em">${lv.desc}</p><span class="muted" style="font-size:.8rem">${lv.dur} · ${allLessons(lv).length} clases</span>`:`<span class="muted" style="font-size:.8rem">${lv.dur}</span>`}</div>
+    <h3 style="font-size:1.35rem">${lv.title}</h3>${lv.n===4?`<div style="display:flex;gap:6px;flex-wrap:wrap">${lv.modules.map((m,i)=>`<span class="pill ${modOpen(lv,i)?'done':'lock'}">${esc(m.title)}</span>`).join('')}</div>`:''}${detailOpen(lv)?`<p class="muted" style="font-size:.9rem;max-width:60em">${lv.desc}</p><span class="muted" style="font-size:.8rem">${lv.dur} · ${allLessons(lv).length} clases</span>`:`<span class="muted" style="font-size:.8rem">${lv.dur}</span>`}</div>
     ${detailOpen(lv)?`<button class="btn ${lv.status==='locked'?'btn-ghost':'btn-primary'}" data-open-level="${lv.id}">${lv.status==='done'?'Repasar':lv.status==='progress'?'Continuar':'Ver programa'}</button>`:`<button class="btn btn-ghost" data-go="pagos">Inscríbete para ver el programa</button>`}</article>`).join('')}</section>`;
 
 V.curso=()=>{
   const lv=LEVELS.find(l=>l.id===S.level);const [mi,li]=S.lesson;const les=lv.modules[mi].lessons[li];
-  const locked=lv.status==='locked';
+  // en el Nivel 4 cada módulo es un curso que se abre por separado (4.1 a 4.4)
+  const locked=lv.status==='locked'||!modOpen(lv,mi);
+  const lvTag=lv.n===4?'Nivel 4.'+(mi+1):'Nivel '+lv.n,lockTitle=lv.n===4?esc(lv.modules[mi].title):lv.title;
+  const nextTxt=lv.n===4?'Este curso se abre cuando la Maestra te lo habilite':'Se desbloquea al completar el Nivel '+(lv.n-1);
   const flat=allLessons(lv);const doneN=flat.filter(l=>l.done).length;
   const upcoming=!locked&&!les.done&&/En vivo/.test(les.len);
   const isSl=!!les.slides;
@@ -69,7 +72,7 @@ V.curso=()=>{
   <div class="crumbs"><button data-go="formacion">Mi formación</button><span>/</span><span>Nivel ${lv.n} · ${lv.title}</span></div>
   <div class="course">
     <div style="display:grid;gap:20px;min-width:0">
-      ${locked?`<div class="player"><svg class="motif"><use href="#mark"/></svg><div style="position:relative;display:grid;gap:12px;justify-items:center;text-align:center;padding:20px"><span class="pill pres">Nivel ${lv.n}</span><b style="font:400 clamp(1.2rem,3vw,1.8rem)/1.2 var(--f-display)">${lv.title}</b>${S.paying?`<span style="color:#b9c4b5;font-size:.9rem">Se desbloquea al completar el Nivel ${lv.n-1}</span><button class="btn btn-primary btn-sm" style="background:#e9e4d0;color:#1f3f32" data-go="pagos">Ver mi plan</button>`:`<span style="color:#b9c4b5;font-size:.9rem;max-width:30em">Esta clase es parte de la formación completa. Inscríbete para abrir las clases, videos y materiales nivel a nivel.</span><button class="btn btn-primary btn-sm" style="background:#e9e4d0;color:#1f3f32" data-go="pagos">Ver cómo inscribirme</button>`}</div></div>`:
+      ${locked?`<div class="player"><svg class="motif"><use href="#mark"/></svg><div style="position:relative;display:grid;gap:12px;justify-items:center;text-align:center;padding:20px"><span class="pill pres">${lvTag}</span><b style="font:400 clamp(1.2rem,3vw,1.8rem)/1.2 var(--f-display)">${lockTitle}</b>${S.paying?`<span style="color:#b9c4b5;font-size:.9rem">${nextTxt}</span><button class="btn btn-primary btn-sm" style="background:#e9e4d0;color:#1f3f32" data-go="pagos">Ver mi plan</button>`:`<span style="color:#b9c4b5;font-size:.9rem;max-width:30em">Esta clase es parte de la formación completa. Inscríbete para abrir las clases, videos y materiales nivel a nivel.</span><button class="btn btn-primary btn-sm" style="background:#e9e4d0;color:#1f3f32" data-go="pagos">Ver cómo inscribirme</button>`}</div></div>`:
       live&&!isSl?live:upcoming?`<div class="player"><svg class="motif"><use href="#mark"/></svg><div class="cap"><div><small>Nivel ${lv.n} · Próxima clase en vivo</small><b>${esc(les.t)}</b></div></div><div style="position:relative;display:grid;gap:12px;justify-items:center;text-align:center"><span class="pill live" style="color:#ece7d3;border-color:rgba(236,231,211,.4)">${les.len.replace('En vivo','En vivo el')}</span><span style="color:#b9c4b5;font-size:.88rem">La Maestra publicará aquí la fecha y el enlace de la sala.</span><span style="color:#b9c4b5;font-size:.82rem">La grabación queda aquí al terminar</span></div></div>`:
       isSl?(live||'')+deckHTML(les,si):`<div class="player" id="player"><svg class="motif"><use href="#mark"/></svg>
         <div class="cap"><div><small>Nivel ${lv.n} · ${esc(lv.modules[mi].title)}</small><b>${esc(les.t)}</b></div></div>
@@ -79,14 +82,15 @@ V.curso=()=>{
         <span id="tnow">${fmt(S.t)}</span><div class="track" id="track"><i id="tfill" style="width:${S.t/dur*100}%"></i>${les.topics.slice(1).map(c=>`<span style="left:${toSec(c.ts)/dur*100}%"></span>`).join('')}</div><span>${les.len}</span></div></div>`}
       <div class="lesson-head"><div><div style="display:flex;gap:8px;flex-wrap:wrap">${modePill(lv)}${les.done?'<span class="pill done">Vista</span>':''}</div><h2>${esc(les.t)}</h2></div>
         ${!locked&&!upcoming?`<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ${les.done?'btn-ghost':'btn-primary'} btn-sm" id="mark-done">${les.done?'Marcar como no vista':'Marcar como vista'}</button><button class="btn btn-ghost btn-sm" id="next-les">Siguiente clase</button></div>`:''}</div>
-      ${locked?`<div class="lock-note">${icLock}<span>${S.paying?`Puedes revisar el programa completo. Las clases, videos y materiales se abren cuando completes el Nivel ${lv.n-1}.`:`Puedes revisar el programa completo. Las clases, videos y materiales se abren al inscribirte en la formación: 9 cuotas de 55 USD o un solo pago.`}</span></div>`:
+      ${locked?`<div class="lock-note">${icLock}<span>${S.paying?`Puedes revisar el programa completo. ${lv.n===4?'Las clases, videos y materiales de este curso se abren cuando la Maestra te lo habilite.':`Las clases, videos y materiales se abren cuando completes el Nivel ${lv.n-1}.`}`:`Puedes revisar el programa completo. Las clases, videos y materiales se abren al inscribirte en la formación: 9 cuotas de 55 USD o un solo pago.`}</span></div>`:
       `<div class="tabs" role="tablist">${tabs.map(([k,n])=>`<button role="tab" aria-selected="${S.tab===k}" data-tab="${k}">${n}${k==='preguntas'&&qa.length?` (${qa.length})`:''}</button>`).join('')}</div><div>${body[S.tab]}</div>`}
     </div>
     <aside class="card syllabus">
       <div class="syl-top"><span class="eyebrow">Nivel ${lv.n}</span><h3>${lv.title}</h3>${statusPill(lv)}<div class="bar"><i style="width:${pct(lv)}%"></i></div><div class="row"><span>${doneN} de ${flat.length} clases</span><span>${pct(lv)}%</span></div></div>
       ${lv.modules.map((m,i)=>{const open=S.openMods[lv.id+i]!==undefined?S.openMods[lv.id+i]:i===mi;const md=m.lessons.filter(l=>l.done).length;
-        return `<div class="mod"><button class="mod-h" aria-expanded="${open}" data-mod="${i}"><b>${esc(m.title)}</b><small>${md}/${m.lessons.length}</small><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
-        <div ${open?'':'hidden'}>${m.lessons.map((l,j)=>`<button class="les ${i===mi&&j===li?'cur':''} ${locked?'locked':''}" data-les="${i},${j}" ${locked?'aria-disabled="true"':''}><span class="chk ${l.done?'on':''} ${locked?'lk':''}">${locked?icLock:''}</span><span>${esc(l.t)}</span><small>${esc(l.len)}</small></button>`).join('')}</div></div>`}).join('')}
+        const ml=lv.status==='locked'||!modOpen(lv,i);
+        return `<div class="mod"><button class="mod-h" aria-expanded="${open}" data-mod="${i}"><b>${lv.n===4&&ml&&!CM.isAdmin?icLock+' ':''}${esc(m.title)}</b><small>${md}/${m.lessons.length}</small><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
+        <div ${open?'':'hidden'}>${m.lessons.map((l,j)=>`<button class="les ${i===mi&&j===li?'cur':''} ${ml?'locked':''}" data-les="${i},${j}" ${ml?'aria-disabled="true"':''}><span class="chk ${l.done?'on':''} ${ml?'lk':''}">${ml?icLock:''}</span><span>${esc(l.t)}</span><small>${esc(l.len)}</small></button>`).join('')}</div></div>`}).join('')}
       ${!S.paying&&!CM.isAdmin?`<div style="padding:18px;display:grid;gap:10px;border-top:1px solid var(--line)"><p class="muted" style="margin:0;font-size:.88rem">Las clases, videos y materiales se abren al inscribirte en la formación completa.</p><button class="btn btn-primary btn-sm" data-go="pagos">${CTA_TXT}</button></div>`:''}
     </aside>
   </div>${CM.isAdmin&&!locked?liveEditor(lv,mi,li):''}`;
@@ -94,7 +98,7 @@ V.curso=()=>{
 // Solo la Maestra: programa la clase en vivo de esta lección y agrega la grabación
 function liveEditor(lv,mi,li){const key=lv.id+'_'+mi+'_'+li,a=liveOf(key),L=CM.liveLinks[key]||{};
   return `<details class="card panel" style="margin-top:20px" ${a?'open':''}><summary style="cursor:pointer"><b>Clase en vivo de esta lección</b> <span class="muted" style="font-size:.84rem">· solo la Maestra</span></summary>
-  <form id="live-form" data-key="${key}" data-level="${lv.n}" style="display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-top:12px">
+  <form id="live-form" data-key="${key}" data-level="${lv.n===4?41+mi:lv.n}" style="display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-top:12px">
     <label class="n2-f"><span>Fecha y hora</span><input type="datetime-local" id="lv-start" value="${a?toLocalInput(a.start.toDate()):''}" required></label>
     <label class="n2-f"><span>Duración (minutos)</span><input type="number" id="lv-dur" min="15" max="600" step="5" value="${a?a.durationMin:90}"></label>
     <label class="n2-f"><span>Enlace de la sala (Zoom o Meet)</span><input type="url" id="lv-url" placeholder="https://" value="${esc(L.url||'')}"></label>

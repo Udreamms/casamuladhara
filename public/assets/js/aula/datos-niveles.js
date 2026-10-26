@@ -220,12 +220,12 @@ const LEVELS=[
    {title:'Clase 8 · Integración y profundización',lessons:[N3L8a,N3L8b,N3L8c,N3L8d,N3L8e,N3L8f,N3L8g,N3L8h]}
   ]},
  {n:4,id:'especializaciones',title:'Especializaciones en Radiestesia',mode:'live',dur:'4 especializaciones · 4 clases y 1 mes cada una',status:'locked',
-  desc:'Cuatro especializaciones para trabajar temas profundos con la radiestesia. Cada una tiene su propia insignia.',
+  desc:'Cuatro especializaciones para trabajar temas profundos con la radiestesia: 4.1 Niño interior, 4.2 Vidas pasadas, 4.3 Terapia transgeneracional y 4.4 Limpieza uterina. Cada una es un curso aparte, con su propia insignia, y se abre cuando la Maestra te lo habilita.',
   modules:[
-   {title:'Niño interior',lessons:[N4N1a,N4N1b,N4N1c,N4N1d,N4N1e,N4N1f,N4N1g,N4N1h,N4N1i,N4N1j,N4N2a,N4N2b,N4N2c,N4N2d,N4N2e,N4N2f,N4N2g,N4N2h,N4N2i,N4N2j,N4N3a,N4N3b,N4N3c,N4N3d,N4N3e,N4N3f,N4N3g,N4N3h,N4N3i,N4N4a,N4N4b,N4N4c,N4N4d,N4N4e,N4N4f,N4N4g,N4N4h,N4N4i]},
-   {title:'Vidas pasadas',lessons:[N4V1a,N4V1b,N4V1c,N4V1d,N4V1e,N4V1f,N4V1g,N4V1h,N4V1i,N4V2a,N4V2b,N4V2c,N4V2d,N4V2e,N4V2f,N4V2g,N4V2h,N4V2i,N4V3a,N4V3b,N4V3c,N4V3d,N4V3e,N4V3f,N4V3g,N4V3h,N4V3i,N4V4a,N4V4b,N4V4c,N4V4d,N4V4e,N4V4f,N4V4g,N4V4h,N4V4i,N4V4j]},
-   {title:'Terapia transgeneracional',lessons:[N4T1a,N4T1b,N4T1c,N4T1d,N4T1e,N4T1f,N4T1g,N4T1h,N4T1i,N4T2a,N4T2b,N4T2c,N4T2d,N4T2e,N4T2f,N4T2g,N4T2h,N4T2i,N4T3a,N4T3b,N4T3c,N4T3d,N4T3e,N4T3f,N4T3g,N4T3h,N4T3i,N4T4a,N4T4b,N4T4c,N4T4d,N4T4e,N4T4f,N4T4g,N4T4h,N4T4i,N4T4j]},
-   {title:'Limpieza uterina',lessons:[N4U1a,N4U1b,N4U1c,N4U1d,N4U1e,N4U1f,N4U1g,N4U1h,N4U1i,N4U2a,N4U2b,N4U2c,N4U2d,N4U2e,N4U2f,N4U2g,N4U2h,N4U2i,N4U3a,N4U3b,N4U3c,N4U3d,N4U3e,N4U3f,N4U3g,N4U3h,N4U3i,N4U4a,N4U4b,N4U4c,N4U4d,N4U4e,N4U4f,N4U4g,N4U4h,N4U4i,N4U4j]}
+   {title:'4.1 · Niño interior',lessons:[N4N1a,N4N1b,N4N1c,N4N1d,N4N1e,N4N1f,N4N1g,N4N1h,N4N1i,N4N1j,N4N2a,N4N2b,N4N2c,N4N2d,N4N2e,N4N2f,N4N2g,N4N2h,N4N2i,N4N2j,N4N3a,N4N3b,N4N3c,N4N3d,N4N3e,N4N3f,N4N3g,N4N3h,N4N3i,N4N4a,N4N4b,N4N4c,N4N4d,N4N4e,N4N4f,N4N4g,N4N4h,N4N4i]},
+   {title:'4.2 · Vidas pasadas',lessons:[N4V1a,N4V1b,N4V1c,N4V1d,N4V1e,N4V1f,N4V1g,N4V1h,N4V1i,N4V2a,N4V2b,N4V2c,N4V2d,N4V2e,N4V2f,N4V2g,N4V2h,N4V2i,N4V3a,N4V3b,N4V3c,N4V3d,N4V3e,N4V3f,N4V3g,N4V3h,N4V3i,N4V4a,N4V4b,N4V4c,N4V4d,N4V4e,N4V4f,N4V4g,N4V4h,N4V4i,N4V4j]},
+   {title:'4.3 · Terapia transgeneracional',lessons:[N4T1a,N4T1b,N4T1c,N4T1d,N4T1e,N4T1f,N4T1g,N4T1h,N4T1i,N4T2a,N4T2b,N4T2c,N4T2d,N4T2e,N4T2f,N4T2g,N4T2h,N4T2i,N4T3a,N4T3b,N4T3c,N4T3d,N4T3e,N4T3f,N4T3g,N4T3h,N4T3i,N4T4a,N4T4b,N4T4c,N4T4d,N4T4e,N4T4f,N4T4g,N4T4h,N4T4i,N4T4j]},
+   {title:'4.4 · Limpieza uterina',lessons:[N4U1a,N4U1b,N4U1c,N4U1d,N4U1e,N4U1f,N4U1g,N4U1h,N4U1i,N4U2a,N4U2b,N4U2c,N4U2d,N4U2e,N4U2f,N4U2g,N4U2h,N4U2i,N4U3a,N4U3b,N4U3c,N4U3d,N4U3e,N4U3f,N4U3g,N4U3h,N4U3i,N4U4a,N4U4b,N4U4c,N4U4d,N4U4e,N4U4f,N4U4g,N4U4h,N4U4i,N4U4j]}
   ]},
  {n:5,id:'tarot',title:'Tarot Terapéutico: El Camino del Ser',mode:'live',dur:'16 clases · 4 meses · online en vivo',status:'locked',
   desc:'El tarot como herramienta terapéutica de autoconocimiento. Cierra tu formación como Terapeuta Holístico Integral.',

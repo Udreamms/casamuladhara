@@ -15,7 +15,8 @@ function render(scrollTop=true){
 }
 function go(v){if(v==='maestra'){location.href='/staff';return}if(isLockedView(v)){toast('Los recursos estarán disponibles muy pronto.');closeSide();return}S.view=v;stopPlay();closeSide();render()}
 function openLevel(id){const lv=LEVELS.find(l=>l.id===id);S.level=id;let pos=[0,0];
-  outer:for(let i=0;i<lv.modules.length;i++)for(let j=0;j<lv.modules[i].lessons.length;j++){if(!lv.modules[i].lessons[j].done){pos=[i,j];break outer}}
+  const first=lv.modules.findIndex((m,i)=>modOpen(lv,i));if(first>0)pos=[first,0];
+  outer:for(let i=0;i<lv.modules.length;i++)if(modOpen(lv,i))for(let j=0;j<lv.modules[i].lessons.length;j++){if(!lv.modules[i].lessons[j].done){pos=[i,j];break outer}}
   S.lesson=pos;S.tab='temas';S.t=0;stopPlay();S.view='curso';closeSide();render()}
 function stopPlay(){S.playing=false;clearInterval(timer)}
 function bindView(){

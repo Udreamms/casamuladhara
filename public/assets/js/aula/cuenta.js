@@ -11,7 +11,7 @@ function resumePoint(){
   const open=LEVELS.filter(l=>l.status!=='locked');
   let started=false;
   for(const lv of open){
-    for(let i=0;i<lv.modules.length;i++)for(let j=0;j<lv.modules[i].lessons.length;j++){
+    for(let i=0;i<lv.modules.length;i++)if(modOpen(lv,i))for(let j=0;j<lv.modules[i].lessons.length;j++){
       if(lv.modules[i].lessons[j].done)started=true;
       else return {lv,i,j,les:lv.modules[i].lessons[j],started};
     }
@@ -104,7 +104,7 @@ window.cmStart=async function(cm){
   // el contenido de las clases solo se descarga con acceso (middleware.js lo exige en el servidor)
   // el código de cada nivel usa piezas de los anteriores: se carga hasta el más alto, pero solo se abren los suyos
   if(cm.lvl>0)S.lvl=await loadCourse(cm.lvl);
-  S.lvls=new Set(cm.lvls.filter(n=>n<=S.lvl));
+  S.lvls=new Set(cm.lvls.filter(n=>(n>10?Math.floor(n/10):n)<=S.lvl));
   restoreAnswers(cm.answers);
   refreshDerived();
   if(S.lvl<cm.lvl)toast('No se pudo cargar el contenido de las clases. Recarga la página.');

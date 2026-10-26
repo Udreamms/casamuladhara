@@ -25,6 +25,16 @@ const LEVELS = [
   { n: 5, id: 'tarot', t: 'Tarot Terapéutico' },
 ];
 const levelOfKey = (key) => LEVELS.find((l) => String(key).startsWith(l.id + '_'));
+// Lo que se abre por separado (igual que src/lib/server/access.js): los niveles 1, 2, 3 y 5,
+// y los cuatro cursos del Nivel 4, cada uno con su número: 41 = 4.1, 42 = 4.2, 43 = 4.3, 44 = 4.4
+const UNITS = [
+  { n: 1, t: 'Péndulo Hebreo' }, { n: 2, t: 'Limpieza de casas y espacios' }, { n: 3, t: 'Radiestesia y Sanación del Alma' },
+  { n: 41, t: 'Niño interior' }, { n: 42, t: 'Vidas pasadas' }, { n: 43, t: 'Terapia transgeneracional' }, { n: 44, t: 'Limpieza uterina' },
+  { n: 5, t: 'Tarot Terapéutico' },
+];
+const lvName = (n) => (n > 10 ? `${Math.floor(n / 10)}.${n % 10}` : String(n));
+// "Nivel 4.2" para una clase del Nivel 4 (cada módulo es un curso), "Nivel 3" para las demás
+const keyLevelName = (key) => { const lv = levelOfKey(key); if (!lv) return ''; const i = Number(String(key).split('_')[1]); return lv.n === 4 && i >= 0 && i < 4 ? `4.${i + 1}` : String(lv.n); };
 const CHANNELS = { general: 'General', presentaciones: 'Preséntate', n1: 'Nivel 1', n2: 'Nivel 2', n3: 'Nivel 3', n4: 'Nivel 4', n5: 'Nivel 5', testimonios: 'Testimonios' };
 
 let tt;
@@ -33,14 +43,16 @@ const fail = (e) => { console.error(e); toast(e?.message && !e.code ? e.message 
 
 // ---------- Regla de acceso (la misma que src/lib/server/access.js) ----------
 const paying = (u) => u.plan === 'completo' || (u.plan === 'mensual' && u.paymentStatus === 'ok');
-const upTo = (n) => Array.from({ length: Math.max(0, Math.min(5, Number(n) || 0)) }, (_, i) => i + 1);
-const list = (v) => (Array.isArray(v) ? v.map(Number) : null);
+// datos antiguos: niveles 1..n, sin los cursos del Nivel 4 (esos se abren uno por uno)
+const upTo = (n) => [1, 2, 3, 5].filter((x) => x <= (Number(n) || 0));
+const inOrder = (ns) => UNITS.map((l) => l.n).filter((n) => ns.includes(n));
+const list = (v) => (Array.isArray(v) ? inOrder(v.map(Number)) : null);
 const ownedOf = (u) => list(u.ownedLevels) ?? upTo(u.grantLevel);
 const unlockedOf = (u) => list(u.unlockedLevels) ?? upTo(Math.max(Number(u.accessLevel) || 1, (Number(u.grantLevel) || 0) + 1));
-const openOf = (u) => (u.blocked ? [] : [...new Set([...ownedOf(u), ...(paying(u) ? unlockedOf(u) : [])])].sort());
+const openOf = (u) => (u.blocked ? [] : inOrder([...ownedOf(u), ...(paying(u) ? unlockedOf(u) : [])]));
 const payState = (u) => (u.plan === 'completo' ? ['done', 'Pagó completo']
   : u.plan === 'mensual' ? (u.paymentStatus === 'overdue' ? ['bad', 'Cuota pendiente'] : ['pres', 'En cuotas al día'])
-    : ownedOf(u).length ? ['done', `Compró el Nivel ${ownedOf(u).join(', ')}`] : ['lock', 'Sin pago']);
+    : ownedOf(u).length ? ['done', `Compró el Nivel ${ownedOf(u).map(lvName).join(', ')}`] : ['lock', 'Sin pago']);
 
 // ---------- Datos ----------
 const A = { students: [], questions: [], tickets: [], posts: [], config: {}, payments: {}, me: null, answers: null };
@@ -84,7 +96,7 @@ const data = {
     const b = writeBatch(db);
     b.update(doc(db, 'users', q.uid, 'questions', q.id), { reply, answered: true, repliedAt: serverTimestamp() });
     b.set(doc(collection(db, 'users', q.uid, 'notifications')), {
-      text: `La Maestra respondió tu pregunta${lv ? ` del Nivel ${lv.n}` : ''}. Ábrela en la pestaña Preguntas de esa clase.`,
+      text: `La Maestra respondió tu pregunta${lv ? ` del Nivel ${keyLevelName(q.lessonKey)}` : ''}. Ábrela en la pestaña Preguntas de esa clase.`,
       read: false, createdAt: serverTimestamp(),
     });
     await b.commit();
@@ -141,9 +153,9 @@ const photoCss = (u) => (typeof u === 'string' && /^https:\/\/[^\s"'()\\]+$/.tes
 const av = (u) => { const ph = photoCss(u?.photoURL); return `<span class="av sm${ph ? ' ph' : ''}" style="--c:${colorFor(u?.id || nameOf(u))};${ph}">${ph ? '' : esc(initials(nameOf(u)))}</span>`; };
 const student = (uid) => A.students.find((s) => s.id === uid);
 const levelPills = (u) => (u.blocked ? '<span class="pill bad">Bloqueada</span>'
-  : openOf(u).map((n) => `<span class="pill done">Nivel ${n}</span>`).join(' ') || '<span class="pill lock">Ninguno</span>');
+  : openOf(u).map((n) => `<span class="pill done">Nivel ${lvName(n)}</span>`).join(' ') || '<span class="pill lock">Ninguno</span>');
 // Fila de niveles para marcar o desmarcar (field: ownedLevels o unlockedLevels)
-const levelBoxes = (u, field, cur) => `<div class="lvbox" role="group">${LEVELS.map((l) => `<label title="${esc(l.t)}"><input type="checkbox" data-lv="${field}" data-uid="${u.id}" value="${l.n}" ${cur.includes(l.n) ? 'checked' : ''}><span>Nivel ${l.n}</span></label>`).join('')}</div>`;
+const levelBoxes = (u, field, cur) => `<div class="lvbox" role="group">${UNITS.map((l) => `<label title="${esc(l.t)}"><input type="checkbox" data-lv="${field}" data-uid="${u.id}" value="${l.n}" ${cur.includes(l.n) ? 'checked' : ''}><span>Nivel ${lvName(l.n)}${l.n > 10 ? ` · ${esc(l.t)}` : ''}</span></label>`).join('')}</div>`;
 const blockBtn = (u) => `<button class="btn ${u.blocked ? 'btn-primary' : 'btn-ghost'} btn-sm" data-block="${u.id}">${u.blocked ? 'Desbloquear' : 'Bloquear'}</button>`;
 
 const V = {};
@@ -171,7 +183,7 @@ V.ficha = () => {
   <div class="cols">
     <section class="card panel"><div class="panel-h"><h3>Niveles</h3>${blockBtn(u)}</div>
       <dl class="kv"><dt>Abiertos ahora</dt><dd>${levelPills(u)}</dd><dt>Pago</dt><dd><span class="pill ${k}">${t}</span></dd>${u.plan === 'mensual' ? `<dt>Cuotas</dt><dd>${Number(u.paidInstallments) || 0} de ${total}</dd>` : ''}${u.currentPeriodEnd?.toDate ? `<dt>Próximo cobro</dt><dd>${fdate(u.currentPeriodEnd)}</dd>` : ''}</dl>
-      <div style="display:grid;gap:6px"><b style="font-size:.88rem">Desbloqueados en el programa completo</b>${levelBoxes(u, 'unlockedLevels', unlockedOf(u))}<small class="muted">Se abren mientras su programa esté pagado o con las cuotas al día.</small>${paying(u) ? '' : `<div class="alert" style="padding:12px 14px;font-size:.86rem"><span><b>${esc(nameOf(u).split(' ')[0])} no tiene el programa pagado</b>, así que lo que marques aquí no se le abre todavía. Para abrirle un nivel ahora, márcalo abajo en «Abiertos siempre».</span></div>`}</div>
+      <div style="display:grid;gap:6px"><b style="font-size:.88rem">Desbloqueados en el programa completo</b>${levelBoxes(u, 'unlockedLevels', unlockedOf(u))}<small class="muted">Se abren mientras su programa esté pagado o con las cuotas al día.</small>${paying(u) ? '' : `<div class="alert" style="padding:12px 14px;font-size:.86rem"><span><b style="display:inline;font:inherit;font-weight:700">${esc(nameOf(u).split(' ')[0])} no tiene el programa pagado</b>, así que lo que marques aquí no se le abre todavía. Para abrirle un nivel ahora, márcalo abajo en «Abiertos siempre».</span></div>`}</div>
       <div style="display:grid;gap:6px"><b style="font-size:.88rem">Abiertos siempre (comprados aparte o regalados)</b>${levelBoxes(u, 'ownedLevels', ownedOf(u))}<small class="muted">Quedan abiertos siempre, pague o no el programa.</small></div>
     </section>
     <section class="card panel"><div class="panel-h"><h3>Datos de la alumna</h3><button class="btn btn-ghost btn-sm" data-edit-student="${u.id}">Editar</button></div>
@@ -199,7 +211,7 @@ V.formacion = () => {
     const mods = lv.modules.map((m, i) => ({ m, i, ls: m.lessons.map((l, j) => ({ l, j })).filter(({ l }) => !q || has(l.t) || has(m.title)) }))
       .filter((x) => x.ls.length);
     if (q && !mods.length) return '';
-    const n = A.students.filter((u) => openOf(u).includes(lv.n)).length;
+    const n = A.students.filter((u) => openOf(u).some((x) => x === lv.n || Math.floor(x / 10) === lv.n)).length;
     const open = !!q || !!S.lvOpen[lv.id];
     return `<article class="card panel fm-lv">
       <div class="fm-top"><div style="display:grid;gap:8px;min-width:0">
@@ -208,7 +220,7 @@ V.formacion = () => {
         <p class="muted" style="font-size:.9rem;max-width:60em">${esc(lv.desc)}</p>
         <span class="muted" style="font-size:.8rem">${esc(lv.dur)} · ${lv.modules.length} módulos · ${lessonsOf(lv).length} clases${filesOf(lv) ? ` · ${filesOf(lv)} materiales` : ''}</span></div>
         <div class="fm-acts"><button class="btn btn-primary btn-sm" data-cls="${lv.id},0,0">Abrir el nivel</button>${q ? '' : `<button class="btn btn-ghost btn-sm" data-lvopen="${lv.id}" aria-expanded="${open}">${open ? 'Ocultar módulos' : 'Ver módulos'}</button>`}</div></div>
-      ${open ? `<div class="fm-mods">${mods.map(({ m, i, ls }) => `<details class="fm-mod" ${q || i === 0 ? 'open' : ''}><summary><b>${esc(m.title)}</b><small>${m.lessons.length} ${m.lessons.length === 1 ? 'clase' : 'clases'}</small></summary>
+      ${open ? `<div class="fm-mods">${mods.map(({ m, i, ls }) => `<details class="fm-mod" ${q || i === 0 ? 'open' : ''}><summary><b>${esc(m.title)}</b><small>${lv.n === 4 ? `${((c) => `${c} ${c === 1 ? 'alumna lo tiene' : 'alumnas lo tienen'} abierto · `)(A.students.filter((u) => openOf(u).includes(41 + i)).length)}` : ''}${m.lessons.length} ${m.lessons.length === 1 ? 'clase' : 'clases'}</small></summary>
         <ol class="fm-les">${ls.map(({ l, j }) => `<li><button data-cls="${lv.id},${i},${j}"><span class="fm-t">${esc(l.t)}</span><small>${esc(l.len || '')}${l.files?.length ? ` · ${l.files.length} ${l.files.length === 1 ? 'material' : 'materiales'}` : ''}</small><span class="link">Ver clase</span></button></li>`).join('')}</ol></details>`).join('')}</div>` : ''}
     </article>`;
   }).join('');
@@ -295,12 +307,12 @@ V.pagos = () => {
 };
 V.mensajes = () => `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>Mensajes</h1><p>Escribe un aviso a una alumna o a todas. Les llega a la campana del aula. Para conversar en grupo está la comunidad.</p></div></div>
   <section class="card panel"><form id="msg-form" style="display:grid;gap:12px">
-    <label style="display:grid;gap:6px;font-size:.84rem"><b>Para</b><select id="msg-to"><option value="all">Todas las alumnas (${A.students.length})</option><option value="access">Solo alumnas con niveles abiertos (${A.students.filter((u) => openOf(u).length > 0).length})</option>${LEVELS.map((l) => `<option value="lvl${l.n}">Alumnas con el Nivel ${l.n} abierto</option>`).join('')}${A.students.map((u) => `<option value="${u.id}">${esc(nameOf(u))} · ${esc(u.email)}</option>`).join('')}</select></label>
+    <label style="display:grid;gap:6px;font-size:.84rem"><b>Para</b><select id="msg-to"><option value="all">Todas las alumnas (${A.students.length})</option><option value="access">Solo alumnas con niveles abiertos (${A.students.filter((u) => openOf(u).length > 0).length})</option>${UNITS.map((l) => `<option value="lvl${l.n}">Alumnas con el Nivel ${lvName(l.n)} abierto${l.n > 10 ? ` (${esc(l.t)})` : ''}</option>`).join('')}${A.students.map((u) => `<option value="${u.id}">${esc(nameOf(u))} · ${esc(u.email)}</option>`).join('')}</select></label>
     <label style="display:grid;gap:6px;font-size:.84rem"><b>Mensaje</b><textarea id="msg-text" maxlength="1900" placeholder="Escribe tu mensaje"></textarea></label>
     <button class="btn btn-primary btn-sm" style="justify-self:start">Enviar</button></form></section>`;
 V.preguntas = () => `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>Preguntas de clase</h1><p>Lo que tus alumnas preguntan debajo de cada clase. Al responder, la respuesta aparece en la clase y le llega un aviso.</p></div></div>
   <section class="card panel">${A.questions.length ? A.questions.map((q, ix) => { const u = student(q.uid), lv = levelOfKey(q.lessonKey); return `<article style="display:grid;gap:8px;padding:14px 0;border-top:1px solid var(--line)">
-    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">${av(u)}<b>${esc(nameOf(u))}</b><span class="muted" style="font-size:.84rem">${lv ? 'Nivel ' + lv.n + ' · ' : ''}${fdate(q.createdAt)}</span></div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">${av(u)}<b>${esc(nameOf(u))}</b><span class="muted" style="font-size:.84rem">${lv ? 'Nivel ' + keyLevelName(q.lessonKey) + ' · ' : ''}${fdate(q.createdAt)}</span></div>
     <p style="margin:0">${esc(q.text)}</p>
     <form data-answer="${ix}" style="display:grid;gap:8px"><textarea placeholder="Tu respuesta" aria-label="Respuesta"></textarea><button class="btn btn-primary btn-sm" style="justify-self:start">Responder</button></form></article>`; }).join('') : '<p class="muted" style="margin:0">No tienes preguntas pendientes.</p>'}</section>`;
 V.ayuda = () => `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>Mensajes de ayuda</h1><p>Lo que te escriben desde la sección Ayuda del aula. Tu respuesta les llega como aviso.</p></div></div>
@@ -372,7 +384,7 @@ function bind() {
     const levels = [...document.querySelectorAll(`input[data-lv="${field}"][data-uid="${uid}"]`)].filter((x) => x.checked).map((x) => Number(x.value));
     document.querySelectorAll('input[data-lv]').forEach((x) => (x.disabled = true));
     try { await data.setAccess(uid, { [field]: levels }); render(false); const u = student(uid);
-      toast(field === 'unlockedLevels' && cb.checked && !paying(u) ? `Nivel ${cb.value} guardado, pero no se le abre hasta que pague. Para abrírselo ya, márcalo en «Abiertos siempre».` : `${cb.checked ? 'Desbloqueado' : 'Cerrado'} el Nivel ${cb.value}`); } catch (e) { fail(e); render(false); }
+      toast(field === 'unlockedLevels' && cb.checked && !paying(u) ? `Nivel ${lvName(+cb.value)} guardado, pero no se le abre hasta que pague. Para abrírselo ya, márcalo en «Abiertos siempre».` : `${cb.checked ? 'Desbloqueado' : 'Cerrado'} el Nivel ${lvName(+cb.value)}`); } catch (e) { fail(e); render(false); }
   }));
   document.querySelectorAll('form[data-msg-one]').forEach((f) => (f.onsubmit = async (e) => {
     e.preventDefault(); const v = f.querySelector('textarea').value.trim(); if (!v) return;

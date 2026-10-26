@@ -28,7 +28,9 @@ function pathHTML(){
 /* ---------- vista gratis, clases en vivo y videos ---------- */
 // Sin inscripción se ven los títulos del Nivel 1; de los demás niveles, solo nombre y duración
 // cada alumna tiene sus propios niveles abiertos (p. ej. solo el Nivel 3)
-const hasLv=n=>CM.isAdmin||S.lvls.has(n);
+// el Nivel 4 son cuatro cursos con su propio número (41 = 4.1 … 44 = 4.4): tiene el Nivel 4 si tiene alguno
+const hasLv=n=>CM.isAdmin||S.lvls.has(n)||(n===4&&[41,42,43,44].some(x=>S.lvls.has(x)));
+const modOpen=(lv,i)=>lv.n===4?hasLv(41+i):hasLv(lv.n);
 const detailOpen=lv=>CM.isAdmin||S.paying||lv.n===1||hasLv(lv.n);
 const CTA_TXT='Comienza tu formación: 9 cuotas de 55 USD';
 const LIVE_OPEN_MIN=15;
