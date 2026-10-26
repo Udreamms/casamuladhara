@@ -9,6 +9,8 @@ function render(scrollTop=true){
   $('#nav').innerHTML=NAV.filter(x=>x[0]!=='maestra'||CM.isAdmin).map(([k,n,ic,c])=>`${k==='maestra'?'<span class="nav-label">Solo para la Maestra</span>':''}<button data-go="${k}" ${isLockedView(k)?'class="locked" aria-disabled="true" title="Próximamente"':''} ${(S.view===k||(S.view==='curso'&&k==='formacion'))?'aria-current="page"':''}><svg viewBox="0 0 24 24">${ic}</svg>${n}${isLockedView(k)?LOCK_SVG:''}${c?`<span class="count">${c}</span>`:''}</button>`).join('');
   $('#view').innerHTML=(CM.blocked?`<div class="alert"><div><b>Tu acceso está pausado</b><p>La Maestra pausó tu acceso a las clases. Escríbenos desde Ayuda si tienes dudas.</p></div></div>`:'')+(S.overdue&&S.view!=='maestra'?`<div class="alert"><div><b>Tu cuota está pendiente</b><p>Tu acceso a clases, grabaciones y materiales está pausado. Se reactiva apenas se registre el pago.</p></div><button class="btn btn-sm" data-checkout="portal">Actualizar mi pago</button></div>`:'')+V[S.view]();
   if(scrollTop)window.scrollTo(0,0);
+  // Ampliar dura hasta que la alumna lo cierre; si la vista ya no tiene pasos (otra sección o una clase sin pasos), se suelta
+  if(S.full&&!document.querySelector('.deck.full')){S.full=0;document.body.style.overflow=''}
   bindView();if(typeof pndMount==='function')pndMount();
 }
 function go(v){if(v==='maestra'){location.href='/staff';return}if(isLockedView(v)){toast('Los recursos estarán disponibles muy pronto.');closeSide();return}S.view=v;stopPlay();closeSide();render()}

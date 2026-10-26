@@ -103,7 +103,7 @@ function liveEditor(lv,mi,li){const key=lv.id+'_'+mi+'_'+li,a=liveOf(key),L=CM.l
   </form><p class="muted" style="margin:0;font-size:.82rem">Las alumnas con este nivel ven la fecha y el botón para entrar ${LIVE_OPEN_MIN} minutos antes. Al terminar, si agregas la grabación, la ven en esta misma clase.</p></details>`}
 function curLesson(){const lv=LEVELS.find(l=>l.id===S.level);return lv.modules[S.lesson[0]].lessons[S.lesson[1]]}
 function goSlide(v){const lv=LEVELS.find(l=>l.id===S.level),les=curLesson();if(!les.slides)return;
-  if(v==='nextles'){S.full=0;document.body.style.overflow='';const nx=$('#next-les');nx&&nx.click();return}
+  if(v==='nextles'){const nx=$('#next-les');nx&&nx.click();return} // el modo Ampliar sigue en la clase siguiente; solo se quita con Cerrar o Esc
   if(v==='zoom'){S.full=!S.full;document.body.style.overflow=S.full?'hidden':'';render(false);return}
   const key=lv.id+'_'+S.lesson[0]+'_'+S.lesson[1];const n=les.slides.length;let i=S.sl[key]||0;
   i=v==='next'?Math.min(n-1,i+1):v==='prev'?Math.max(0,i-1):Math.max(0,Math.min(n-1,+v));S.sl[key]=i;S.anim=1;render(false);
