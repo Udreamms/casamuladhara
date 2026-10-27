@@ -2,7 +2,7 @@
 // Lo usa el portal de la Maestra (/admin).
 //   action 'me'     -> activa la cuenta de la Maestra la primera vez (correo en ADMIN_EMAILS y ya verificado)
 //                      y devuelve { admin, verified }.
-//   action 'access' -> { uid, ownedLevels?: [..], unlockedLevels?: [..], blocked?: bool } cambia los niveles
+//   action 'access' -> { uid, ownedLevels?: [..], unlockedLevels?: [..], completedLevels?: [..], blocked?: bool } cambia los niveles
 //                      de una alumna (ver src/lib/server/access.js) y los aplica al instante (rol en Firestore y claims).
 import { FieldValue } from 'firebase-admin/firestore';
 import { cleanLevels } from '@/lib/server/access.js';
@@ -60,7 +60,8 @@ export async function POST(request) {
       if (!profile) return json({ error: 'No encontramos a esa alumna.' }, 404);
       if (profile.role === 'admin') return json({ error: 'No se puede cambiar el acceso de la Maestra.' }, 400);
       const data = {};
-      for (const k of ['ownedLevels', 'unlockedLevels']) {
+      // completedLevels: niveles que la alumna ya terminó (p. ej. antes de la plataforma): en el aula salen completados y con su insignia
+      for (const k of ['ownedLevels', 'unlockedLevels', 'completedLevels']) {
         if (!(k in body)) continue;
         const v = cleanLevels(body[k]);
         if (!v) return json({ error: 'Niveles no válidos.' }, 400);

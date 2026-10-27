@@ -24,7 +24,8 @@ function resumePoint(){
 function refreshDerived(){
   S.paying=CM.isAdmin||CM.profile.plan==='completo'||(CM.profile.plan==='mensual'&&CM.profile.paymentStatus==='ok');
   LEVELS.forEach(lv=>{lv.status=!hasLv(lv.n)?'locked':(pct(lv)===100?'done':'progress')});
-  const lastDone=lv=>{let t=0;lv.modules.forEach((m,i)=>m.lessons.forEach((l,j)=>{const d=CM.doneAt[lv.id+'_'+i+'_'+j];if(d&&d.toMillis)t=Math.max(t,d.toMillis())}));return t?fmtDay(new Date(t)):'hoy'};
+  const marked=CM.profile.accessUpdatedAt&&CM.profile.accessUpdatedAt.toDate?fmtDay(CM.profile.accessUpdatedAt.toDate()):'hoy';
+  const lastDone=lv=>{let t=0;lv.modules.forEach((m,i)=>m.lessons.forEach((l,j)=>{const d=CM.doneAt[lv.id+'_'+i+'_'+j];if(d&&d.toMillis)t=Math.max(t,d.toMillis())}));return t?fmtDay(new Date(t)):marked};
   BADGES.forEach(b=>{
     const lv=LEVELS.find(l=>l.n===b.lvl);
     let ok;
@@ -100,7 +101,9 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)Object.keys
 window.cmStart=async function(cm){
   syncMe();
   // los datos de ejemplo del diseño original no se muestran: todo parte en blanco y se llena con su avance real
-  LEVELS.forEach(lv=>lv.modules.forEach((m,i)=>m.lessons.forEach((l,j)=>{l.done=!!cm.progress[lv.id+'_'+i+'_'+j]})));
+  // los niveles que la Maestra marcó como completados (alumnas que los hicieron antes de la plataforma) salen terminados
+  const completed=new Set(Array.isArray(cm.profile.completedLevels)?cm.profile.completedLevels.map(Number):[]);
+  LEVELS.forEach(lv=>lv.modules.forEach((m,i)=>{const full=completed.has(lv.n===4?41+i:lv.n);m.lessons.forEach((l,j)=>{l.done=full||!!cm.progress[lv.id+'_'+i+'_'+j]})}));
   // el contenido de las clases solo se descarga con acceso (middleware.js lo exige en el servidor)
   // el código de cada nivel usa piezas de los anteriores: se carga hasta el más alto, pero solo se abren los suyos
   if(cm.lvl>0)S.lvl=await loadCourse(cm.lvl);
