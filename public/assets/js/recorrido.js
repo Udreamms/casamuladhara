@@ -11,7 +11,7 @@ const FX = root.classList.contains('fx');
 const stops = $$('.stop');
 const state = { u: 0, pointer: { nx: 0, ny: 0 } };
 
-// ---------- sonido ambiente (cuencos), siempre opcional ----------
+// ---------- sonido ambiente (cuencos de cuarzo), siempre opcional ----------
 const soundBtn = $('#sound-btn');
 let audio = null;
 soundBtn?.addEventListener('click', () => {
@@ -21,36 +21,45 @@ soundBtn?.addEventListener('click', () => {
   soundBtn.setAttribute('aria-label', on ? 'Silenciar sonido ambiente' : 'Activar sonido ambiente');
   audio.set(on);
 });
+// Cuencos afinados en Do pentatónico (Do Re Mi Sol La), así todas las notas combinan entre sí,
+// sobre un zumbido grave y quieto de Do y Sol. Se genera en el navegador: sin archivos de audio.
 function makeAmbient() {
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
-  const master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
+  const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -18; comp.ratio.value = 3; comp.connect(ctx.destination);
+  const master = ctx.createGain(); master.gain.value = 0; master.connect(comp);
   const verb = ctx.createConvolver();
-  const len = ctx.sampleRate * 3, buf = ctx.createBuffer(2, len, ctx.sampleRate);
-  for (let c = 0; c < 2; c++) { const d = buf.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.5); }
-  verb.buffer = buf; verb.connect(master);
-  // zumbido grave (OM, 136.1 Hz) que respira
-  for (const [f, g] of [[136.1, .05], [204.15, .025]]) {
-    const o = ctx.createOscillator(), gn = ctx.createGain(), lfo = ctx.createOscillator(), lg = ctx.createGain();
-    o.frequency.value = f; gn.gain.value = g; lfo.frequency.value = .07; lg.gain.value = g * .6;
-    lfo.connect(lg); lg.connect(gn.gain); o.connect(gn); gn.connect(master); gn.connect(verb); o.start(); lfo.start();
+  const len = ctx.sampleRate * 5, buf = ctx.createBuffer(2, len, ctx.sampleRate);
+  for (let c = 0; c < 2; c++) { const d = buf.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3); }
+  verb.buffer = buf;
+  const wet = ctx.createGain(); wet.gain.value = .55; verb.connect(wet); wet.connect(master);
+  const hz = (midi) => 440 * Math.pow(2, (midi - 69) / 12);
+  // zumbido de Do y Sol graves, apenas desafinados para que respire
+  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 400;
+  const drone = ctx.createGain(); drone.gain.value = .07; lp.connect(drone); drone.connect(master); drone.connect(verb);
+  for (const m of [36, 43]) for (const cents of [-4, 4]) {
+    const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.value = hz(m); o.detune.value = cents; o.connect(lp); o.start();
   }
-  // un cuenco que suena cada tanto
+  // un cuenco cada 6,5 segundos, con un leve vibrato
+  const NOTES = [60, 62, 64, 67, 69, 72, 55, 57];
   let timer = null;
   const bowl = () => {
-    const base = [220, 261.6, 196][Math.floor(Math.random() * 3)], t = ctx.currentTime;
-    for (const [m, a] of [[1, .12], [2.71, .05], [5.15, .025]]) {
+    const midi = NOTES[Math.floor(Math.random() * NOTES.length)], t = ctx.currentTime;
+    [[1, 1], [2, .18], [3.01, .06]].forEach(([m, a], k) => {
       const o = ctx.createOscillator(), g = ctx.createGain();
-      o.frequency.value = base * m; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(a, t + .02); g.gain.exponentialRampToValueAtTime(.0001, t + 7);
-      o.connect(g); g.connect(master); g.connect(verb); o.start(t); o.stop(t + 7.2);
-    }
+      o.frequency.value = hz(midi) * m;
+      if (k === 0) { const l = ctx.createOscillator(), lg = ctx.createGain(); l.frequency.value = 1.1; lg.gain.value = 1.5; l.connect(lg); lg.connect(o.frequency); l.start(t); l.stop(t + 11); }
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.09 * a, t + .015); g.gain.exponentialRampToValueAtTime(.0001, t + 11 / (1 + k * .6));
+      o.connect(g); g.connect(master); g.connect(verb); o.start(t); o.stop(t + 11.1);
+    });
   };
   return {
     set(on) {
       ctx.resume();
       master.gain.cancelScheduledValues(ctx.currentTime);
-      master.gain.linearRampToValueAtTime(on ? .5 : 0, ctx.currentTime + 1.5);
+      master.gain.setValueAtTime(master.gain.value, ctx.currentTime);
+      master.gain.linearRampToValueAtTime(on ? .8 : 0, ctx.currentTime + 2);
       clearInterval(timer);
-      if (on) { bowl(); timer = setInterval(bowl, 9000); }
+      if (on) { bowl(); timer = setInterval(bowl, 6500); }
     }
   };
 }
