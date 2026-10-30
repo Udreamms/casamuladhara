@@ -6,9 +6,29 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Josefin+Sans:wght@300;400;600&family=Mulish:wght@400;500;700&family=Fredoka:wght@500;600&display=swap">
 <link rel="stylesheet" href="/assets/css/landing.css">
 <style>html,body{margin:0}body{font-size:16px}img{max-width:100%}[hidden]{display:none!important}
-.next-class{display:inline-flex;align-items:center;gap:10px;margin-top:22px;padding:12px 16px;border-radius:14px;background:rgba(242,198,109,.14);border:1px solid rgba(242,198,109,.45);font-weight:700}
-.next-class::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--sun);flex:none}
-.wa-alt{font-size:.85rem;text-align:center;color:#5d6b63}.wa-alt a{color:#2b5443;font-weight:700}</style></head><body>
+/* Bloques que alternan claro y oscuro con colores fijos (no cambian con el modo oscuro del equipo) */
+.tone-light{--bg:#f6f4ec;--surface:#fffdf6;--fg:#22302a;--muted:#5d6b63;--line:#d9d5c3;background:var(--bg);color:var(--fg)}
+.tone-dark{--surface:#24483a;--fg:#ece7d3;--muted:#c3cdbf;--line:rgba(236,231,211,.16);background:#1f3f32;color:var(--fg)}
+.tone-dark .eyebrow{color:#f2c66d}
+.tone-light .eyebrow{color:#8a6430}
+/* Primer bloque en blanco: el título en verde y el formulario en verde para que resalte */
+.lp-hero.hero-light{background:#fffdf6;color:#2b5443}
+.hero-light .hero-motif{color:#2b5443!important;opacity:.06}
+.hero-light h1{color:#2b5443}
+.hero-light .lede{color:#4a5a51}
+.hero-light .eyebrow{color:#8a6430}
+.hero-light .facts span{border-color:rgba(43,84,67,.35);color:#2b5443}
+.hero-light .facts span.hl{background:#f2c66d;border-color:#f2c66d;color:#1f3f32}
+.next-class{display:inline-flex;align-items:center;gap:10px;margin-top:22px;padding:12px 16px;border-radius:14px;background:#fbf0d4;border:1px solid #f2c66d;color:#1f3f32;font-weight:700}
+.next-class::before{content:"";width:9px;height:9px;border-radius:50%;background:#2b5443;flex:none}
+.hero-light .lp-form{background:#2b5443;color:#ece7d3;box-shadow:0 30px 60px -25px rgba(31,63,50,.55)}
+.hero-light .lp-form h3{color:#ece7d3}.hero-light .lp-form h3 em{font-style:normal;color:#f2c66d}
+.hero-light .lp-form input,.hero-light .lp-form select{background:#fffdf6;border-color:#fffdf6;color:#1f3f32}
+.hero-light .lp-form .btn{background:#f2c66d;color:#1f3f32}
+.hero-light .lp-form small{color:#c3cdbf}
+.hero-light .lp-ok{background:#fffdf6;color:#1f3f32}
+.hero-light .lp-err{color:#ffd9cc!important}
+.wa-alt{font-size:.85rem;text-align:center;color:#c3cdbf}.wa-alt a{color:#f2c66d;font-weight:700}</style></head><body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
     <symbol id="mark" viewBox="-50 -50 100 100">
@@ -23,7 +43,7 @@
 </svg>
 <header class="lp-top"><div class="wrap"><span class="brand"><svg style="color:var(--on-brand)"><use href="#mark"/></svg><span class="brand-name"><b>CASA MULADHARA</b><small>SANACIÓN &amp; BIENESTAR</small></span></span><a class="lp-back" href="/">← Volver al sitio</a></div></header>
 
-<section class="lp-hero"><svg class="hero-motif" style="color:var(--on-brand)" aria-hidden="true"><use href="#mark"/></svg><div class="wrap">
+<section class="lp-hero hero-light"><svg class="hero-motif" aria-hidden="true"><use href="#mark"/></svg><div class="wrap">
   <div>
     <span class="eyebrow">Gratis · En vivo · Todos los sábados</span>
     <h1>Clase gratis: descubre el Péndulo Hebreo</h1>
@@ -32,7 +52,7 @@
     <p class="next-class" id="next-class">Próxima clase: este sábado · 19:00</p>
   </div>
   <form class="lp-form" data-lead="clase-pendulo">
-    <h3>Reserva tu lugar gratis</h3>
+    <h3>Reserva tu lugar <em>gratis</em></h3>
     <label>Nombre<input name="name" type="text" autocomplete="name" placeholder="Tu nombre" required></label>
     <label>WhatsApp<input name="whatsapp" type="tel" autocomplete="tel" placeholder="+56 9 1234 5678" required></label>
     <label>Correo electrónico<input name="email" type="email" autocomplete="email" placeholder="tu@correo.com"></label>
@@ -44,7 +64,7 @@
     <p class="wa-alt">¿Prefieres escribirnos tú? <a href="https://wa.link/by9gjr" target="_blank" rel="noopener">Abrir WhatsApp</a></p>
   </form>
 </div></section>
-<section class="section"><div class="wrap">
+<section class="section tone-dark"><div class="wrap">
   <div class="section-head"><span class="eyebrow">Qué vas a aprender</span><h2>45 minutos para conocer el Péndulo Hebreo</h2></div>
   <div class="cols3">
     <div><b>Qué es el Péndulo Hebreo</b><p>De dónde viene y por qué funciona como herramienta de limpieza energética.</p></div>
@@ -52,15 +72,15 @@
     <div><b>Cómo empezar</b><p>Qué necesitas y el primer paso para practicar.</p></div>
   </div>
 </div></section>
-<section class="section" style="padding-top:0"><div class="wrap">
+<section class="section tone-light"><div class="wrap">
   <div class="section-head"><span class="eyebrow">Ellas ya aprendieron con Karen</span><h2>Clases y graduaciones de Péndulo Hebreo</h2></div>
   <div class="mini-gal"><img loading="lazy" decoding="async" src="assets/img/231aa77989.webp" alt="Graduación de Péndulo Hebreo Nivel 1"><img loading="lazy" decoding="async" src="assets/img/f08f46f33a.webp" alt="Graduación de Péndulo Hebreo Nivel 1"><img loading="lazy" decoding="async" src="assets/img/292ddf3bf0.webp" alt="Graduación de Péndulo Hebreo Nivel 1"><img loading="lazy" decoding="async" src="assets/img/81f0a09164.webp" alt="Graduación de Péndulo Hebreo Nivel 1"><img loading="lazy" decoding="async" src="assets/img/41a246e938.webp" alt="Clase práctica de Péndulo Hebreo"><img loading="lazy" decoding="async" src="assets/img/37953e38df.webp" alt="Graduación de Péndulo Hebreo Nivel 1"></div>
 </div></section>
-<section class="section" style="padding-top:0"><div class="wrap kit">
+<section class="section tone-dark"><div class="wrap kit">
   <img class="lp-photo" src="assets/img/e2ec26d75a.webp" alt="Karen Oyarce Sáez, Maestra Holística">
   <div><span class="eyebrow">Quién te acompaña</span><h2 style="font-size:clamp(1.8rem,3.6vw,2.6rem);margin-block:12px">Hola, soy Karen</h2><p style="color:var(--muted)">Llevo más de 5 años acompañando procesos de sanación y formando terapeutas con el Método Casa Muladhara. Cada sábado te muestro cómo el Péndulo Hebreo puede ayudarte desde el primer día. Te espero.</p></div>
 </div></section>
-<section class="section" style="padding-top:0"><div class="wrap">
+<section class="section tone-light"><div class="wrap">
   <div class="section-head"><span class="eyebrow">Preguntas frecuentes</span><h2>Antes de reservar</h2></div>
   <div class="faq">
     <details><summary>¿Tiene algún costo?</summary><p>No. La clase es gratis. Al final Karen cuenta del curso Nivel 1, pero no tienes ninguna obligación.</p></details>
