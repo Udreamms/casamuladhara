@@ -6,7 +6,7 @@
 import { FieldValue } from 'firebase-admin/firestore';
 import { auth, db, json } from '@/lib/server/services.js';
 
-const FORMS = ['pendulo', 'formacion', 'sala', 'terapias', 'meditacion', 'regalo'];
+const FORMS = ['pendulo', 'clase-pendulo', 'formacion', 'sala', 'terapias', 'meditacion', 'regalo'];
 const UTM = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'fbclid', 'gclid'];
 const str = (v, max) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
