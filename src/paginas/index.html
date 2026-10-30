@@ -59,8 +59,6 @@ d.classList.add('fx');setTimeout(function(){if(!window.__casonaReady)d.classList
       <a href="#inicio">Tour</a>
       <a href="/formacion">Formaciones</a>
       <a href="/clase-pendulo">Péndulo Hebreo</a>
-      <a href="/aula">Aula virtual</a>
-      <a class="staff" href="/staff">Staff</a>
     </nav>
     <div class="tools">
       <button class="icon-btn round" type="button" aria-label="Activar sonido ambiente" aria-pressed="false" id="sound-btn" title="Sonido ambiente">
@@ -70,7 +68,7 @@ d.classList.add('fx');setTimeout(function(){if(!window.__casonaReady)d.classList
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
         <span class="acct-label">Mi cuenta</span>
       </a>
-      <button class="icon-btn round" type="button" aria-label="Carrito" id="cart-btn">
+      <button class="icon-btn round" type="button" aria-label="Carrito" id="cart-btn" hidden><!-- carrito desactivado hasta que haya productos a la venta -->
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
         <span class="badge" id="cart-count">0</span>
       </button>
@@ -103,7 +101,7 @@ d.classList.add('fx');setTimeout(function(){if(!window.__casonaReady)d.classList
     <p class="lede">Fórmate como terapeuta en la Escuela de Formación Holística Casa Muladhara, un camino completo de cinco pasos, presencial y online en vivo.</p>
     <div class="ctas">
       <a class="btn btn-cream" href="#escuela">Conocer la Escuela</a>
-      <a class="btn btn-ghost" href="#sala">Clase gratis en vivo</a>
+      <a class="btn btn-ghost" href="/clase-pendulo">Clase gratis en vivo</a>
     </div>
     <p class="invite">Karen te invita a su casona. <b>Desliza para entrar</b></p>
   </div>
@@ -318,7 +316,7 @@ d.classList.add('fx');setTimeout(function(){if(!window.__casonaReady)d.classList
             <li><b>Lavanda:</b> favorece la calma, la relajación y la armonía.</li>
             <li>Rocía alrededor de tu cuerpo a 20 cm, con los ojos cerrados, o en tus espacios y objetos sagrados.</li>
           </ul>
-          <div class="buy"><div class="price">$6.990<small>CLP · 30 ml</small></div><button class="btn btn-cream" type="button" data-add="Spray Áurico">Agregar al carrito</button></div>
+          <div class="buy"><div class="price">$6.990<small>CLP · 30 ml</small></div><button class="btn btn-cream" type="button" data-add="Spray Áurico" hidden>Agregar al carrito</button></div>
         </div>
       </article>
       <article class="product">
@@ -332,7 +330,7 @@ d.classList.add('fx');setTimeout(function(){if(!window.__casonaReady)d.classList
             <li>Limpieza, descarga y armonización, junto a las etiquetas hebreas y el trabajo vibracional del péndulo.</li>
           </ul>
           <span class="warn">Uso externo · No ingerir</span>
-          <div class="buy"><div class="price">$9.990<small>CLP · 30 ml</small></div><button class="btn btn-cream" type="button" data-add="Tintura de Muérdago">Agregar al carrito</button></div>
+          <div class="buy"><div class="price">$9.990<small>CLP · 30 ml</small></div><button class="btn btn-cream" type="button" data-add="Tintura de Muérdago" hidden>Agregar al carrito</button></div>
         </div>
       </article>
     </div>
@@ -365,7 +363,7 @@ d.classList.add('fx');setTimeout(function(){if(!window.__casonaReady)d.classList
     <p>Gracias por recorrer la casona. Cuando quieras, la puerta está abierta.</p>
     <div class="ctas">
       <button class="btn btn-cream" type="button" data-open-login data-tab="signup">Reservar mi cupo</button>
-      <a class="btn btn-ghost" href="#sala">Clase gratis en vivo</a>
+      <a class="btn btn-ghost" href="/clase-pendulo">Clase gratis en vivo</a>
     </div>
   </div>
 </section>
@@ -382,6 +380,7 @@ d.classList.add('fx');setTimeout(function(){if(!window.__casonaReady)d.classList
       <div><h4>Explora</h4><a href="#escuela">Escuela</a><a href="#plataforma">Aula virtual</a><a href="#tienda">Tienda</a><a href="#terapias">Terapias</a><a href="#maestra-karen">Maestra Karen</a></div>
       <div><h4>Landing pages</h4><a href="/sala">Sala Abierta con Karen</a><a href="/clase-pendulo">Clase gratis de Péndulo Hebreo</a><a href="/terapias">Agendar terapia</a></div>
       <div><h4>Tu cuenta</h4><a href="/aula">Ingresar al aula</a><a href="#plataforma" data-open-login data-tab="signup">Crear cuenta</a><a href="#tienda">Mis pedidos</a></div>
+      <div><h4>Equipo</h4><a href="/staff">Staff</a></div>
       <div><h4>Contacto</h4><a href="https://wa.link/by9gjr" target="_blank" rel="noopener">WhatsApp</a><a href="https://www.instagram.com/casa.muladhara/" target="_blank" rel="noopener">Instagram @casa.muladhara</a><a href="https://www.youtube.com/@casamaestrakaren" target="_blank" rel="noopener">YouTube Maestra Karen</a></div>
     </div>
     <div class="legal"><span>© 2026 Casa Muladhara</span><span>casamuladhara.com</span></div>
