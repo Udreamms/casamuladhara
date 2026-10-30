@@ -85,6 +85,8 @@ const CM = {
   uid, isAdmin, lvl: isAdmin ? 5 : Number(token.claims.lvl) || 0, paid,
   // tokens antiguos sin lvls: todos los niveles hasta lvl
   lvls: isAdmin ? [1, 2, 3, 41, 42, 43, 44, 5] : Array.isArray(token.claims.lvls) ? token.claims.lvls : Array.from({ length: Number(token.claims.lvl) || 0 }, (_, i) => i + 1),
+  // cls: clases abiertas de los cursos del Nivel 4 (412 = 4.1, Clase 2); tokens antiguos sin cls: todas las de sus cursos
+  cls: !isAdmin && Array.isArray(token.claims.cls) ? token.claims.cls : null,
   blocked: p.blocked === true,
   editor: { api: profileApi(uid), hasGoogle: !!googlePhoto() },
   profile: { ...p, name, ini: initials(name), c: colorFor(uid), accessLevel: Number(p.accessLevel) || 1, plan: p.plan || 'none', paymentStatus: p.paymentStatus || 'none' },

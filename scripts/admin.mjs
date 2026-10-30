@@ -30,10 +30,10 @@ const pos = rest.filter((a, i) => !a.startsWith('--') && !rest[i - 1]?.startsWit
 const applyAccess = async (uid) => {
   const ref = db.doc(`users/${uid}`);
   const p = (await ref.get()).data() || {};
-  const { role, lvls, lvl } = accessFor(p);
+  const { role, lvls, lvl, cls } = accessFor(p);
   if (p.role !== role) await ref.set({ role }, { merge: true });
   const u = await admin.auth().getUser(uid);
-  await admin.auth().setCustomUserClaims(uid, { ...(u.customClaims || {}), lvl, lvls, member: lvl > 0 });
+  await admin.auth().setCustomUserClaims(uid, { ...(u.customClaims || {}), lvl, lvls, cls, member: lvl > 0 });
   return lvls.length ? `abre el Nivel ${lvls.join(', ')}` : 'todo bloqueado';
 };
 const byEmail = async (email) => {

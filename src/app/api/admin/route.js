@@ -4,8 +4,10 @@
 //                      y devuelve { admin, verified }.
 //   action 'access' -> { uid, ownedLevels?: [..], unlockedLevels?: [..], completedLevels?: [..], blocked?: bool } cambia los niveles
 //                      de una alumna (ver src/lib/server/access.js) y los aplica al instante (rol en Firestore y claims).
+//                      n4Classes?: { '41': [1, 2] } cambia las clases abiertas de esos cursos del Nivel 4.
+//                      Devuelve también n4Classes completo, porque abrir un curso nuevo lo guarda con sus clases cerradas.
 import { FieldValue } from 'firebase-admin/firestore';
-import { cleanLevels } from '@/lib/server/access.js';
+import { cleanClasses, cleanLevels, ownedOf, SUBLEVELS, unlockedOf } from '@/lib/server/access.js';
 import { applyAccess } from '@/lib/server/apply.js';
 import { auth, db, json } from '@/lib/server/services.js';
 
@@ -67,13 +69,30 @@ export async function POST(request) {
         if (!v) return json({ error: 'Niveles no válidos.' }, 400);
         data[k] = v;
       }
+      // Clases del Nivel 4: un curso que se abre por primera vez empieza con sus 4 clases cerradas
+      const classes = {};
+      if ('n4Classes' in body) {
+        const v = body.n4Classes;
+        if (!v || typeof v !== 'object' || Array.isArray(v)) return json({ error: 'Clases no válidas.' }, 400);
+        for (const [c, ks] of Object.entries(v)) {
+          const list = cleanClasses(ks);
+          if (!SUBLEVELS.includes(Number(c)) || !list) return json({ error: 'Clases no válidas.' }, 400);
+          classes[c] = list;
+        }
+      }
+      const before = [...ownedOf(profile), ...unlockedOf(profile)];
+      for (const c of SUBLEVELS) {
+        if ([...(data.ownedLevels || []), ...(data.unlockedLevels || [])].includes(c) && !before.includes(c)
+          && !profile.n4Classes?.[c] && !(c in classes)) classes[c] = [];
+      }
+      if (Object.keys(classes).length) data.n4Classes = classes;
       if ('blocked' in body) {
         if (typeof body.blocked !== 'boolean') return json({ error: 'Valor no válido.' }, 400);
         data.blocked = body.blocked;
       }
       if (!Object.keys(data).length) return json({ error: 'No hay cambios.' }, 400);
       await ref.set({ ...data, accessUpdatedAt: FieldValue.serverTimestamp() }, { merge: true });
-      return json(await applyAccess(uid));
+      return json({ ...(await applyAccess(uid)), n4Classes: { ...(profile.n4Classes || {}), ...classes } });
     }
 
     return json({ error: 'Acción desconocida.' }, 400);

@@ -55,7 +55,7 @@ document.addEventListener('click',e=>{
   if(d.go)go(d.go);
   else if(d.openLevel)openLevel(d.openLevel);
   else if(d.openLesson){const [id,i,j]=d.openLesson.split(',');S.level=id;S.lesson=[+i,+j];S.view='curso';S.tab='temas';S.t=0;stopPlay();render()}
-  else if(d.les){if(t.getAttribute('aria-disabled')){toast('Esta clase se abre al completar el nivel anterior');return}S.lesson=d.les.split(',').map(Number);S.t=0;S.tab='temas';stopPlay();render(false);if(innerWidth<1100)window.scrollTo({top:0,behavior:'smooth'})}
+  else if(d.les){if(t.getAttribute('aria-disabled')){toast(S.level==='especializaciones'?'Esta clase se abre cuando la Maestra te la habilite':'Esta clase se abre al completar el nivel anterior');return}S.lesson=d.les.split(',').map(Number);S.t=0;S.tab='temas';stopPlay();render(false);if(innerWidth<1100)window.scrollTo({top:0,behavior:'smooth'})}
   else if(d.slide!==undefined)goSlide(d.slide);
   else if(d.mod){const lv=S.level;const k=lv+d.mod;const cur=t.getAttribute('aria-expanded')==='true';S.openMods[k]=!cur;render(false)}
   else if(d.tab){S.tab=d.tab;render(false)}

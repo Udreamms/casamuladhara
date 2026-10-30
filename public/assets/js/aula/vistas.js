@@ -45,9 +45,11 @@ V.formacion=()=>`
 V.curso=()=>{
   const lv=LEVELS.find(l=>l.id===S.level);const [mi,li]=S.lesson;const les=lv.modules[mi].lessons[li];
   // en el Nivel 4 cada módulo es un curso que se abre por separado (4.1 a 4.4)
-  const locked=lv.status==='locked'||!modOpen(lv,mi);
-  const lvTag=lv.n===4?'Nivel 4.'+(mi+1):'Nivel '+lv.n,lockTitle=lv.n===4?esc(lv.modules[mi].title):lv.title;
-  const nextTxt=lv.n===4?'Este curso se abre cuando la Maestra te lo habilite':'Se desbloquea al completar el Nivel '+(lv.n-1);
+  // y dentro del curso, cada clase (Clase 1 a 4) se abre por separado
+  const clsLock=lv.status!=='locked'&&modOpen(lv,mi)&&!clsOpen(lv,mi,les);
+  const locked=lv.status==='locked'||!modOpen(lv,mi)||clsLock;
+  const lvTag=lv.n===4?'Nivel 4.'+(mi+1):'Nivel '+lv.n,lockTitle=clsLock?esc(les.t):lv.n===4?esc(lv.modules[mi].title):lv.title;
+  const nextTxt=clsLock?'Esta clase se abre cuando la Maestra te la habilite':lv.n===4?'Este curso se abre cuando la Maestra te lo habilite':'Se desbloquea al completar el Nivel '+(lv.n-1);
   const flat=allLessons(lv);const doneN=flat.filter(l=>l.done).length;
   const upcoming=!locked&&!les.done&&/En vivo/.test(les.len);
   const isSl=!!les.slides;
@@ -72,7 +74,7 @@ V.curso=()=>{
   <div class="crumbs"><button data-go="formacion">Mi formación</button><span>/</span><span>Nivel ${lv.n} · ${lv.title}</span></div>
   <div class="course">
     <div style="display:grid;gap:20px;min-width:0">
-      ${locked?`<div class="player"><svg class="motif"><use href="#mark"/></svg><div style="position:relative;display:grid;gap:12px;justify-items:center;text-align:center;padding:20px"><span class="pill pres">${lvTag}</span><b style="font:400 clamp(1.2rem,3vw,1.8rem)/1.2 var(--f-display)">${lockTitle}</b>${S.paying?`<span style="color:#b9c4b5;font-size:.9rem">${nextTxt}</span><button class="btn btn-primary btn-sm" style="background:#e9e4d0;color:#1f3f32" data-go="pagos">Ver mi plan</button>`:`<span style="color:#b9c4b5;font-size:.9rem;max-width:30em">Esta clase es parte de la formación completa. Inscríbete para abrir las clases, videos y materiales nivel a nivel.</span><button class="btn btn-primary btn-sm" style="background:#e9e4d0;color:#1f3f32" data-go="pagos">Ver cómo inscribirme</button>`}</div></div>`:
+      ${locked?`<div class="player"><svg class="motif"><use href="#mark"/></svg><div style="position:relative;display:grid;gap:12px;justify-items:center;text-align:center;padding:20px"><span class="pill pres">${lvTag}</span><b style="font:400 clamp(1.2rem,3vw,1.8rem)/1.2 var(--f-display)">${lockTitle}</b>${S.paying||clsLock?`<span style="color:#b9c4b5;font-size:.9rem">${nextTxt}</span>${clsLock?'':`<button class="btn btn-primary btn-sm" style="background:#e9e4d0;color:#1f3f32" data-go="pagos">Ver mi plan</button>`}`:`<span style="color:#b9c4b5;font-size:.9rem;max-width:30em">Esta clase es parte de la formación completa. Inscríbete para abrir las clases, videos y materiales nivel a nivel.</span><button class="btn btn-primary btn-sm" style="background:#e9e4d0;color:#1f3f32" data-go="pagos">Ver cómo inscribirme</button>`}</div></div>`:
       live&&!isSl?live:upcoming?`<div class="player"><svg class="motif"><use href="#mark"/></svg><div class="cap"><div><small>Nivel ${lv.n} · Próxima clase en vivo</small><b>${esc(les.t)}</b></div></div><div style="position:relative;display:grid;gap:12px;justify-items:center;text-align:center"><span class="pill live" style="color:#ece7d3;border-color:rgba(236,231,211,.4)">${les.len.replace('En vivo','En vivo el')}</span><span style="color:#b9c4b5;font-size:.88rem">La Maestra publicará aquí la fecha y el enlace de la sala.</span><span style="color:#b9c4b5;font-size:.82rem">La grabación queda aquí al terminar</span></div></div>`:
       isSl?(live||'')+deckHTML(les,si):`<div class="player" id="player"><svg class="motif"><use href="#mark"/></svg>
         <div class="cap"><div><small>Nivel ${lv.n} · ${esc(lv.modules[mi].title)}</small><b>${esc(les.t)}</b></div></div>
@@ -82,7 +84,7 @@ V.curso=()=>{
         <span id="tnow">${fmt(S.t)}</span><div class="track" id="track"><i id="tfill" style="width:${S.t/dur*100}%"></i>${les.topics.slice(1).map(c=>`<span style="left:${toSec(c.ts)/dur*100}%"></span>`).join('')}</div><span>${les.len}</span></div></div>`}
       <div class="lesson-head"><div><div style="display:flex;gap:8px;flex-wrap:wrap">${modePill(lv)}${les.done?'<span class="pill done">Vista</span>':''}</div><h2>${esc(les.t)}</h2></div>
         ${!locked&&!upcoming?`<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ${les.done?'btn-ghost':'btn-primary'} btn-sm" id="mark-done">${les.done?'Marcar como no vista':'Marcar como vista'}</button><button class="btn btn-ghost btn-sm" id="next-les">Siguiente clase</button></div>`:''}</div>
-      ${locked?`<div class="lock-note">${icLock}<span>${S.paying?`Puedes revisar el programa completo. ${lv.n===4?'Las clases, videos y materiales de este curso se abren cuando la Maestra te lo habilite.':`Las clases, videos y materiales se abren cuando completes el Nivel ${lv.n-1}.`}`:`Puedes revisar el programa completo. Las clases, videos y materiales se abren al inscribirte en la formación: 9 cuotas de 55 USD o un solo pago.`}</span></div>`:
+      ${locked?`<div class="lock-note">${icLock}<span>${clsLock?'Ya tienes este curso. Las clases se abren una por una, cuando la Maestra te las habilite.':S.paying?`Puedes revisar el programa completo. ${lv.n===4?'Las clases, videos y materiales de este curso se abren cuando la Maestra te lo habilite.':`Las clases, videos y materiales se abren cuando completes el Nivel ${lv.n-1}.`}`:`Puedes revisar el programa completo. Las clases, videos y materiales se abren al inscribirte en la formación: 9 cuotas de 55 USD o un solo pago.`}</span></div>`:
       `<div class="tabs" role="tablist">${tabs.map(([k,n])=>`<button role="tab" aria-selected="${S.tab===k}" data-tab="${k}">${n}${k==='preguntas'&&qa.length?` (${qa.length})`:''}</button>`).join('')}</div><div>${body[S.tab]}</div>`}
     </div>
     <aside class="card syllabus">
@@ -90,7 +92,7 @@ V.curso=()=>{
       ${lv.modules.map((m,i)=>{const open=S.openMods[lv.id+i]!==undefined?S.openMods[lv.id+i]:i===mi;const md=m.lessons.filter(l=>l.done).length;
         const ml=lv.status==='locked'||!modOpen(lv,i);
         return `<div class="mod"><button class="mod-h" aria-expanded="${open}" data-mod="${i}"><b>${lv.n===4&&ml&&!CM.isAdmin?icLock+' ':''}${esc(m.title)}</b><small>${md}/${m.lessons.length}</small><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
-        <div ${open?'':'hidden'}>${m.lessons.map((l,j)=>`<button class="les ${i===mi&&j===li?'cur':''} ${ml?'locked':''}" data-les="${i},${j}" ${ml?'aria-disabled="true"':''}><span class="chk ${l.done?'on':''} ${ml?'lk':''}">${ml?icLock:''}</span><span>${esc(l.t)}</span><small>${esc(l.len)}</small></button>`).join('')}</div></div>`}).join('')}
+        <div ${open?'':'hidden'}>${m.lessons.map((l,j)=>{const lk=ml||!clsOpen(lv,i,l);return `<button class="les ${i===mi&&j===li?'cur':''} ${lk?'locked':''}" data-les="${i},${j}" ${lk?'aria-disabled="true"':''}><span class="chk ${l.done?'on':''} ${lk?'lk':''}">${lk?icLock:''}</span><span>${esc(l.t)}</span><small>${esc(l.len)}</small></button>`}).join('')}</div></div>`}).join('')}
       ${!S.paying&&!CM.isAdmin?`<div style="padding:18px;display:grid;gap:10px;border-top:1px solid var(--line)"><p class="muted" style="margin:0;font-size:.88rem">Las clases, videos y materiales se abren al inscribirte en la formación completa.</p><button class="btn btn-primary btn-sm" data-go="pagos">${CTA_TXT}</button></div>`:''}
     </aside>
   </div>${CM.isAdmin&&!locked?liveEditor(lv,mi,li):''}`;

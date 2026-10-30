@@ -4,6 +4,7 @@
 // p. ej. [3]; lvl es el más alto. La Maestra (admin) abre todo.
 //   /assets/n2/...  (materiales)  -> requiere el Nivel 2 abierto
 //   /assets/n4/nino/... (materiales de un curso del Nivel 4) -> requiere ese curso: nino 4.1, vidas 4.2, trans 4.3, utero 4.4
+//   /assets/n4/nino/c2-...  (de una clase de ese curso)   -> además requiere esa clase abierta (claim cls, p. ej. 412)
 //   /curso/n2.js    (código)      -> requiere lvl >= 2: el código de cada nivel usa piezas de los anteriores,
 //                                    así que se descargan juntos; el aula solo muestra los niveles abiertos
 import { NextResponse } from 'next/server';
@@ -27,6 +28,12 @@ const N4 = { nino: 41, vidas: 42, trans: 43, utero: 44 };
 const levelOf = (path) => N4[path.match(/^\/assets\/n4\/([a-z]+)\//)?.[1]]
   || Number(path.match(/^\/(?:curso\/n|assets\/n)(\d+)(?:\.js$|\/)/)?.[1]) || 99;
 
+// Clase del Nivel 4 a la que pertenece un material (412 = 4.1, Clase 2); 0 si es del curso entero
+const classOf = (path) => {
+  const m = path.match(/^\/assets\/n4\/([a-z]+)\/c(\d)-/);
+  return m && N4[m[1]] ? N4[m[1]] * 10 + Number(m[2]) : 0;
+};
+
 export async function proxy(request) {
   const token = (request.headers.get('cookie') || '').match(/(?:^|;\s*)cm_session=([^;]+)/)?.[1];
   if (!token) return deny(401, 'Inicia sesión en el aula para ver este contenido.');
@@ -40,7 +47,9 @@ export async function proxy(request) {
   const need = levelOf(path);
   if (payload.admin === true) return NextResponse.next();
   const lvl = Number(payload.lvl) || 0;
-  const open = Array.isArray(payload.lvls) ? payload.lvls.includes(need) : lvl >= need; // tokens antiguos: solo lvl
+  const cls = classOf(path);
+  const open = (Array.isArray(payload.lvls) ? payload.lvls.includes(need) : lvl >= need) // tokens antiguos: solo lvl
+    && (!cls || !Array.isArray(payload.cls) || payload.cls.includes(cls)); // tokens sin cls: todas las clases de sus cursos
   if (path.startsWith('/curso/n') ? lvl >= need : open) return NextResponse.next();
   return deny(403, 'Este contenido se abre cuando tengas acceso a este nivel.');
 }

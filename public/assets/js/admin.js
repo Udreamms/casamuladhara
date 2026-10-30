@@ -49,6 +49,9 @@ const inOrder = (ns) => UNITS.map((l) => l.n).filter((n) => ns.includes(n));
 const list = (v) => (Array.isArray(v) ? inOrder(v.map(Number)) : null);
 const ownedOf = (u) => list(u.ownedLevels) ?? upTo(u.grantLevel);
 const unlockedOf = (u) => list(u.unlockedLevels) ?? upTo(Math.max(Number(u.accessLevel) || 1, (Number(u.grantLevel) || 0) + 1));
+// Clases de cada curso del Nivel 4 (1 a 4): un curso sin entrada en n4Classes las tiene todas abiertas (alumnas de antes)
+const CLASSES = [1, 2, 3, 4];
+const classesOf = (u, c) => (Array.isArray(u.n4Classes?.[c]) ? CLASSES.filter((k) => u.n4Classes[c].map(Number).includes(k)) : CLASSES);
 const openOf = (u) => (u.blocked ? [] : inOrder([...ownedOf(u), ...(paying(u) ? unlockedOf(u) : [])]));
 const payState = (u) => (u.plan === 'completo' ? ['done', 'Pagó completo']
   : u.plan === 'mensual' ? (u.paymentStatus === 'overdue' ? ['bad', 'Cuota pendiente'] : ['pres', 'En cuotas al día'])
@@ -74,8 +77,8 @@ async function loadAll() {
 }
 const data = {
   setAccess: async (uid, body) => {
-    await api({ action: 'access', uid, ...body });
-    Object.assign(A.students.find((x) => x.id === uid), body);
+    const out = await api({ action: 'access', uid, ...body });
+    Object.assign(A.students.find((x) => x.id === uid), body, { n4Classes: out.n4Classes || {} });
   },
   payments: async (uid) => {
     if (!A.payments[uid]) {
@@ -156,6 +159,8 @@ const levelPills = (u) => (u.blocked ? '<span class="pill bad">Bloqueada</span>'
   : openOf(u).map((n) => `<span class="pill done">Nivel ${lvName(n)}</span>`).join(' ') || '<span class="pill lock">Ninguno</span>');
 // Fila de niveles para marcar o desmarcar (field: ownedLevels o unlockedLevels)
 const levelBoxes = (u, field, cur) => `<div class="lvbox" role="group">${UNITS.map((l) => `<label title="${esc(l.t)}"><input type="checkbox" data-lv="${field}" data-uid="${u.id}" value="${l.n}" ${cur.includes(l.n) ? 'checked' : ''}><span>Nivel ${lvName(l.n)}${l.n > 10 ? ` · ${esc(l.t)}` : ''}</span></label>`).join('')}</div>`;
+// Clases de los cursos del Nivel 4 que tiene marcados, para abrírselas una por una
+const classBoxes = (u) => UNITS.filter((l) => l.n > 10 && [...ownedOf(u), ...unlockedOf(u)].includes(l.n)).map((l) => `<div style="display:grid;gap:4px"><small><b>Nivel ${lvName(l.n)} · ${esc(l.t)}</b></small><div class="lvbox" role="group">${CLASSES.map((k) => `<label><input type="checkbox" data-cls="${l.n}" data-uid="${u.id}" value="${k}" ${classesOf(u, l.n).includes(k) ? 'checked' : ''}><span>Clase ${k}</span></label>`).join('')}</div></div>`).join('');
 const blockBtn = (u) => `<button class="btn ${u.blocked ? 'btn-primary' : 'btn-ghost'} btn-sm" data-block="${u.id}">${u.blocked ? 'Desbloquear' : 'Bloquear'}</button>`;
 
 const V = {};
@@ -185,6 +190,7 @@ V.ficha = () => {
       <dl class="kv"><dt>Abiertos ahora</dt><dd>${levelPills(u)}</dd><dt>Pago</dt><dd><span class="pill ${k}">${t}</span></dd>${u.plan === 'mensual' ? `<dt>Cuotas</dt><dd>${Number(u.paidInstallments) || 0} de ${total}</dd>` : ''}${u.currentPeriodEnd?.toDate ? `<dt>Próximo cobro</dt><dd>${fdate(u.currentPeriodEnd)}</dd>` : ''}</dl>
       <div style="display:grid;gap:6px"><b style="font-size:.88rem">Desbloqueados en el programa completo</b>${levelBoxes(u, 'unlockedLevels', unlockedOf(u))}<small class="muted">Se abren mientras su programa esté pagado o con las cuotas al día.</small>${paying(u) ? '' : `<div class="alert" style="padding:12px 14px;font-size:.86rem"><span><b style="display:inline;font:inherit;font-weight:700">${esc(nameOf(u).split(' ')[0])} no tiene el programa pagado</b>, así que lo que marques aquí no se le abre todavía. Para abrirle un nivel ahora, márcalo abajo en «Abiertos siempre».</span></div>`}</div>
       <div style="display:grid;gap:6px"><b style="font-size:.88rem">Abiertos siempre (comprados aparte o regalados)</b>${levelBoxes(u, 'ownedLevels', ownedOf(u))}<small class="muted">Quedan abiertos siempre, pague o no el programa.</small></div>
+      ${classBoxes(u) ? `<div style="display:grid;gap:8px"><b style="font-size:.88rem">Clases del Nivel 4</b>${classBoxes(u)}<small class="muted">Cada curso del Nivel 4 tiene 4 clases. Al abrirle un curso empiezan cerradas: márcale cada clase cuando quieras que la vea.</small></div>` : ''}
       <div style="display:grid;gap:6px"><b style="font-size:.88rem">Niveles completados</b>${levelBoxes(u, 'completedLevels', list(u.completedLevels) || [])}<small class="muted">Los que ya terminó, por ejemplo antes de la plataforma. En su aula salen completados al 100 % y con su insignia.</small></div>
     </section>
     <section class="card panel"><div class="panel-h"><h3>Datos de la alumna</h3><button class="btn btn-ghost btn-sm" data-edit-student="${u.id}">Editar</button></div>
@@ -386,6 +392,12 @@ function bind() {
     document.querySelectorAll('input[data-lv]').forEach((x) => (x.disabled = true));
     try { await data.setAccess(uid, { [field]: levels }); render(false); const u = student(uid);
       toast(field === 'completedLevels' ? `Nivel ${lvName(+cb.value)} ${cb.checked ? 'marcado como completado' : 'ya no está completado'}` : field === 'unlockedLevels' && cb.checked && !paying(u) ? `Nivel ${lvName(+cb.value)} guardado, pero no se le abre hasta que pague. Para abrírselo ya, márcalo en «Abiertos siempre».` : `${cb.checked ? 'Desbloqueado' : 'Cerrado'} el Nivel ${lvName(+cb.value)}`); } catch (e) { fail(e); render(false); }
+  }));
+  document.querySelectorAll('input[data-cls]').forEach((cb) => (cb.onchange = async () => {
+    const { cls: c, uid } = cb.dataset;
+    const ks = [...document.querySelectorAll(`input[data-cls="${c}"][data-uid="${uid}"]`)].filter((x) => x.checked).map((x) => Number(x.value));
+    document.querySelectorAll('input[data-cls]').forEach((x) => (x.disabled = true));
+    try { await data.setAccess(uid, { n4Classes: { [c]: ks } }); render(false); toast(`${cb.checked ? 'Abierta' : 'Cerrada'} la Clase ${cb.value} del Nivel ${lvName(+c)}`); } catch (e) { fail(e); render(false); }
   }));
   document.querySelectorAll('form[data-msg-one]').forEach((f) => (f.onsubmit = async (e) => {
     e.preventDefault(); const v = f.querySelector('textarea').value.trim(); if (!v) return;
