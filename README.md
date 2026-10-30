@@ -14,7 +14,7 @@ src/
     page.js             /            portada 3D
     login/ aula/        /login /aula
     staff/ admin/       /staff /admin  portal de la Maestra
-    terapias/ pendulo/ meditacion/ sala/
+    terapias/ clase-pendulo/ formacion/ meditacion/ sala/
     api/                rutas de API: admin, billing, stripe-webhook
     layout.js
   lib/
