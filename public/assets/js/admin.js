@@ -62,13 +62,15 @@ const A = { students: [], questions: [], tickets: [], posts: [], config: {}, pay
 let api = null; // llama a /api/admin con el token de la Maestra
 
 async function loadAll() {
-  const [us, qs, tk, ps, cf] = await Promise.all([
+  const [us, qs, tk, ps, cf, fm] = await Promise.all([
     getDocs(query(collection(db, 'users'), orderBy('createdAt', 'desc'))),
     getDocs(query(collectionGroup(db, 'questions'), where('answered', '==', false), orderBy('createdAt', 'desc'), limit(100))),
     getDocs(query(collectionGroup(db, 'tickets'), where('status', '==', 'open'), orderBy('createdAt', 'desc'), limit(100))),
     getDocs(query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(60))),
     getDoc(doc(db, 'config', 'aula')),
+    getDoc(doc(db, 'config', 'formacion')),
   ]);
+  A.formacion = fm.data() || {};
   A.students = us.docs.map((d) => ({ id: d.id, ...d.data() })).filter((u) => u.role !== 'admin');
   A.questions = qs.docs.map((d) => ({ id: d.id, uid: d.ref.parent.parent.id, ...d.data() }));
   A.tickets = tk.docs.map((d) => ({ id: d.id, uid: d.ref.parent.parent.id, ...d.data() }));
@@ -147,6 +149,8 @@ const data = {
   },
   deletePost: async (id) => { await deleteDoc(doc(db, 'posts', id)); A.posts = A.posts.filter((p) => p.id !== id); },
   saveConfig: async (d) => { await setDoc(doc(db, 'config', 'aula'), { ...d, updatedAt: serverTimestamp() }, { merge: true }); Object.assign(A.config, d); },
+  // Fecha de inicio y cupos del próximo grupo de la formación: los muestra la landing /formacion (src/app/api/formacion)
+  saveFormacion: async (d) => { await setDoc(doc(db, 'config', 'formacion'), { ...d, updatedAt: serverTimestamp() }, { merge: true }); Object.assign(A.formacion, d); },
 };
 
 // ---------- Vista ----------
@@ -368,6 +372,8 @@ V.comunidad = () => `<div class="view-head"><div><span class="eyebrow">Portal de
 V.ajustes = () => `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>Ajustes del aula</h1></div></div>
   <section class="card panel"><h3>Video de bienvenida</h3><p class="muted" style="margin:0;font-size:.88rem">Lo ven las cuentas gratis en Inicio. Pega el enlace de YouTube, Vimeo o Google Drive. Déjalo vacío para mostrar "Muy pronto".</p>
     <form id="wv-form" style="display:flex;gap:8px;flex-wrap:wrap"><input type="url" id="wv-url" placeholder="https://" value="${esc(A.config.welcomeVideo || '')}" style="flex:1;min-width:220px"><button class="btn btn-primary btn-sm">Guardar</button></form></section>
+  <section class="card panel"><h3>Formación: próximo grupo</h3><p class="muted" style="margin:0;font-size:.88rem">Fecha de inicio y cupos que muestra la página /formacion. Déjala vacía para mostrar "Próximo grupo: escríbenos y te avisamos". Cuando la fecha pasa, la página deja de mostrarla sola.</p>
+    <form id="fm-form" style="display:flex;gap:8px;flex-wrap:wrap;align-items:end"><label style="display:grid;gap:6px;font-size:.84rem"><b>Fecha de inicio</b><input type="date" id="fm-start" value="${esc(A.formacion?.nextStart || '')}"></label><label style="display:grid;gap:6px;font-size:.84rem"><b>Cupos</b><input type="number" id="fm-seats" min="1" max="200" step="1" placeholder="Ej.: 10" value="${esc(A.formacion?.seats ?? '')}" style="width:110px"></label><button class="btn btn-primary btn-sm">Guardar</button></form></section>
   <section class="card panel"><h3>Clases en vivo</h3><p class="muted" style="margin:0;font-size:.88rem">Las clases en vivo y sus grabaciones se programan dentro de cada clase del aula, donde ves el contenido.</p><a class="btn btn-ghost btn-sm" style="justify-self:start" href="/aula">Ir al aula</a></section>`;
 
 // Un solo manejador para todos los [data-go]: el menú se vuelve a pintar solo (p. ej. al llegar una alumna nueva) y sus botones siguen funcionando
@@ -475,6 +481,13 @@ function bind() {
   const wv = $('#wv-form'); if (wv) wv.onsubmit = async (e) => {
     e.preventDefault(); const u = $('#wv-url').value.trim(); if (u && !isHttps(u)) return toast('El enlace debe empezar con https://');
     try { await data.saveConfig({ welcomeVideo: u }); toast('Video de bienvenida guardado'); } catch (err) { fail(err); }
+  };
+  const fm = $('#fm-form'); if (fm) fm.onsubmit = async (e) => {
+    e.preventDefault();
+    const nextStart = $('#fm-start').value; const n = $('#fm-seats').value.trim();
+    const seats = n === '' ? null : Number(n);
+    if (seats !== null && !(Number.isInteger(seats) && seats > 0)) return toast('Los cupos deben ser un número entero mayor que 0.');
+    try { await data.saveFormacion({ nextStart, seats }); toast('Próximo grupo guardado'); } catch (err) { fail(err); }
   };
 }
 const papi = (uid) => profileApi(uid);
