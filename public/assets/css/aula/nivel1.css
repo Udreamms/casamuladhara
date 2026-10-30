@@ -81,6 +81,7 @@
 .detail .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
 .detail .btn-primary{background:#2b5443;color:#ece7d3}
 .detail .btn-ghost{color:#22302a;border-color:rgba(43,84,67,.4)}
+.detail .tg{background:rgba(255,253,246,.7);border-color:rgba(43,84,67,.25);color:#22302a}
 /* línea de tiempo */
 .tl{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;position:relative}
 .tl::before{content:"";position:absolute;left:12%;right:12%;top:25px;height:1px;background:var(--line)}

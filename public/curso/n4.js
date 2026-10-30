@@ -4,6 +4,21 @@
 const N4P='assets/n4/';
 (function(){const c=document.createElement('style');c.id='ni-css';c.textContent=`
 .ni{--ni-lil:#e6dcf2;--ni-lil2:#7a5aa6;--ni-tea:#d6e8e2;--ni-tea2:#3f7d6e;--ni-olv:#3b4a24;--ni-red:#c0392b}
+/* Superficies claras (lila, menta, rosa…): por dentro el texto va oscuro también con el tema oscuro.
+   Va primero para que las reglas de cada pieza que ya ponen su propio color sigan mandando. */
+.ni-tbl tr.on,.ni-time button[aria-pressed="true"],.ni-med button[aria-pressed="true"],.ni-med button.ok,.ni-ring[aria-pressed="true"]:not(:last-child),
+.nj-steps>div.cur,.nj-det,.nj-card.l:not([style*="background:var(--nb-paper)"]),.nj-card.t,.nj-card.b,.ni-quote,.ni-box.t,.ni-box.l,.ni-cmp .r,.ni-cmp .a,.ni-mask .f,.nl-frase:not(.d),.nl-role .who,
+.tg-flow>button:last-child.lit,.tg-gen button[aria-pressed="true"],.tg-groups button[aria-pressed="true"],.tb-ls button[aria-pressed="true"],
+.tb-frs button:is(:nth-child(4n+1),:nth-child(4n)):not([aria-pressed="true"]),.tb-quiz .ok,.tb-5 button.s,.tb-ej>div:is(:first-child,:last-child),
+.tb-say button.ok,.tb-say button.no,.tc-mem button.i,.va-yn>button.va-n[aria-pressed="true"],.va-ty>button[aria-pressed="true"],.va-int>button:nth-child(2),
+.vb-grp>button.o,.vb-ron>div:nth-child(3),.vc-cz.c>button:not([aria-pressed="true"]),.vc-vf>button.l,.vd-opt,.lu-pc>div:is(:nth-child(2),:nth-child(3)),
+:where(.dk-body) :is([style*="background:#f"],[style*="background:#e"],[style*="background:#d"],[style*="background:#c9"],[style*="background:var(--ni-lil)"],[style*="background:var(--ni-tea)"])
+{--nb-paper:#fbf7ea;--nb-paper2:#f3ecd8;--nb-ink:#1c3a2b;--nb-soft:#51655a;--nb-gold:#9b6f27;--nb-gold2:#c99b4b;--nb-line:#e2d7b6;--nb-leaf:#6f8a5e;--nb-glass:#cfe6df;
+ --surface:#fffdf6;--surface-2:#f0ede1;--fg:#22302a;--muted:#5d6b63;--line:#d9d5c3;--brass:#a77a3b;--accent:#2b5443;--accent-fg:#ece7d3;color:var(--nb-ink)}
+/* y al revés: las tarjetas verde oliva llevan por dentro los colores del tema oscuro, también con el tema claro */
+:where(.dk-body) [style*="background:var(--ni-olv)"]
+{--nb-paper:#14231b;--nb-paper2:#1b2f24;--nb-ink:#efe8d2;--nb-soft:#b3c1b0;--nb-gold:#dcb468;--nb-gold2:#e8c680;--nb-line:#30463a;--nb-leaf:#8fae80;--nb-glass:#2c4a40;
+ --surface:#1b2520;--surface-2:#202c26;--fg:#e8e4d4;--muted:#a3ada2;--line:#2e3a33;--brass:#d2a565;--accent:#e8bd63;--accent-fg:#1f3f32;color:#ece7d3}
 .ni-tag{display:inline-block;font:600 .62rem/1 var(--f-caps);letter-spacing:.18em;text-transform:uppercase;color:var(--ni-lil2)}
 .ni-cover{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:26px;align-items:center}
 .ni-cover .nb-cover{min-height:0}
@@ -92,6 +107,18 @@ const N4P='assets/n4/';
 .ni-tbl tr.on td{background:var(--ni-lil);border-color:transparent}
 .ni-tbl td:nth-child(2){color:var(--ni-lil2);font-weight:600}
 .ni-tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+/* en el teléfono: las tablas anchas avisan que se deslizan, y la de las cinco heridas pasa a tarjetas */
+@media (max-width:640px){
+.ni-tw:has(.nj-ficha,.nl-pauta)::before{content:"Desliza la tabla hacia el lado para verla completa →";position:sticky;left:0;display:block;margin-bottom:4px;font-size:.74rem;color:var(--nb-soft)}
+.ni-tbl.ni-cards,.ni-tbl.ni-cards tbody,.ni-tbl.ni-cards tr,.ni-tbl.ni-cards td{display:block}
+.ni-tbl.ni-cards thead{display:none}
+.ni-tbl.ni-cards tbody{display:grid;gap:8px}
+.ni-tbl.ni-cards tr{border:1px solid var(--nb-line);border-radius:14px;background:var(--nb-paper);padding:12px 14px;display:grid;gap:8px}
+.ni-tbl.ni-cards tr.on{background:var(--ni-lil);border-color:var(--ni-lil2)}
+.ni-tbl.ni-cards td,.ni-tbl.ni-cards tr.on td{padding:0;border:0;border-radius:0;background:none}
+.ni-tbl.ni-cards td:first-child{font:400 1.15rem/1.2 var(--f-display)}
+.ni-tbl.ni-cards td[data-l]::before{content:attr(data-l);display:block;margin-bottom:2px;font:600 .56rem/1.2 var(--f-caps);letter-spacing:.14em;text-transform:uppercase;color:var(--ni-lil2)}
+}
 .ni-conf{position:relative;height:120px;border-radius:18px;background:linear-gradient(90deg,var(--ni-lil),var(--nb-paper) 50%,var(--ni-tea));overflow:hidden}
 .ni-conf .c{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;background:var(--ni-red);opacity:.85;animation:niBeat 1.6s ease-in-out infinite;display:grid;place-items:center;color:#fff;font:600 .5rem/1 var(--f-caps);letter-spacing:.1em}
 .ni-conf .p{position:absolute;top:50%;width:40px;height:40px;margin-top:-20px;border-radius:50%;display:grid;place-items:center}
@@ -241,11 +268,11 @@ RICH.ni6=()=>{const s=n3clamp(st('nipa',0),0,4);
  `<div class="ni" style="display:grid;gap:14px"><div class="ni-chain">${NI_PA.map((x,i)=>`<button class="${i<=s?'lit':''} ${i===s?'cur':''} ${i===3?'mask':''}" ${rxa('set','nipa',i)}><small>Paso ${i+1}</small><b>${x[0]}</b><span>${x[1]}</span></button>`).join('')}</div>
  ${s<4?`<div class="dk-cta" style="justify-content:center"><button class="btn btn-primary btn-sm" ${rxa('set','nipa',s+1)}>Siguiente paso</button></div>`:`<div class="ni-quote ni-in">Por eso en el gráfico la herida y la máscara están juntas: <b>la herida es lo que dolió; la máscara, lo que la persona aprendió a hacer para no sentirlo.</b></div>`}</div>`};
 RICH.ni7=()=>{const s=st('nivt',0),all=st('nivtA',0);
- const row=(h,i)=>`<tr class="${i===s?'on':''}"><td>${h.n}</td><td>${h.m}</td><td>${h.need}</td><td>${h.act}</td><td>${h.sana}</td></tr>`;
+ const row=(h,i)=>`<tr class="${i===s?'on':''}"><td>${h.n}</td><td data-l="Máscara">${h.m}</td><td data-l="Lo que el niño necesitaba">${h.need}</td><td data-l="Se activa cuando…">${h.act}</td><td data-l="Lo que se sana">${h.sana}</td></tr>`;
  return dkH('Cómo se forma una herida','Las cinco heridas de un vistazo','Toca una herida para ver qué necesitaba el niño, cuándo se activa y lo que se sana.')+
  `<div class="ni" style="display:grid;gap:12px"><div class="ni-hpills">${NI_H.map((h,i)=>`<button ${rxa('set','nivt',i)} aria-current="${i===s}">${ic(h.ic,16)}${h.n}</button>`).join('')}</div>
  ${s>=0&&!all?`<div class="ni-row ni-st" style="grid-template-columns:repeat(4,minmax(0,1fr))"><div><small>Máscara</small><span><b>${NI_H[s].m}</b></span></div><div><small>Lo que el niño necesitaba</small><span>${NI_H[s].need}</span></div><div><small>Se activa cuando…</small><span>${NI_H[s].act}</span></div><div><small>Lo que se sana</small><span>${NI_H[s].sana}</span></div></div>`:''}
- ${all?`<div class="ni-tw ni-in"><table class="ni-tbl"><thead><tr><th>Herida</th><th>Máscara</th><th>Lo que el niño necesitaba</th><th>Se activa cuando…</th><th>Lo que se sana</th></tr></thead><tbody>${NI_H.map(row).join('')}</tbody></table></div>`:''}
+ ${all?`<div class="ni-tw ni-in"><table class="ni-tbl ni-cards"><thead><tr><th>Herida</th><th>Máscara</th><th>Lo que el niño necesitaba</th><th>Se activa cuando…</th><th>Lo que se sana</th></tr></thead><tbody>${NI_H.map(row).join('')}</tbody></table></div>`:''}
  <div class="dk-cta" style="justify-content:center"><button class="btn btn-ghost btn-sm" ${rxa('set','nivtA',all?0:1)}>${all?'Ver una por una':'Ver la tabla completa'}</button></div></div>`+
  niNote('Basado en el enfoque de las cinco heridas de Lise Bourbeau, adaptado al gráfico del niño interno de Casa Muladhara.')};
 
@@ -2314,7 +2341,7 @@ RICH.vd20=()=>`<div class="ni">${nbHero('Especialización Vidas Pasadas','Gracia
 .lu-tree i{display:grid;place-items:center;border-radius:50%;font:600 1.15rem var(--f-body);background:#f6e2ef;border:2px solid #efd3e6;color:#3b4a24;transition:transform .35s,box-shadow .35s,background .35s}
 .lu-tree button:nth-child(odd) i{background:#ecc3dc}
 .lu-tree button:first-child i{background:var(--ni-olv);border-color:var(--ni-olv);color:#fff}
-.lu-tree b{font:600 .82rem/1.2 var(--f-body);color:#3b4a24}.lu-tree small{font-size:.72rem;color:#7a5aa6;min-height:1em}
+.lu-tree b{font:600 .82rem/1.2 var(--f-body);color:var(--nb-ink)}.lu-tree small{font-size:.72rem;color:#7a5aa6;min-height:1em}
 .lu-tree button[aria-pressed="true"] i{transform:scale(1.12);box-shadow:0 0 0 4px #b0589a55}
 .lu-tree button.dim{opacity:.35}
 .lu-two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
@@ -2327,9 +2354,9 @@ RICH.vd20=()=>`<div class="ni">${nbHero('Especialización Vidas Pasadas','Gracia
 .lu-pc>div{border-radius:16px;padding:16px;display:grid;gap:6px;transition:opacity .35s,transform .35s;border:1px solid var(--nb-line)}
 .lu-pc>div:nth-child(1){background:var(--nb-paper)}.lu-pc>div:nth-child(2){background:#f6e2ef;border-color:#f6e2ef}.lu-pc>div:nth-child(3){background:#ecc3dc;border-color:#ecc3dc}
 .lu-pc>div.off{opacity:.35}.lu-pc>div.on{transform:translateY(-4px);box-shadow:0 8px 20px #b0589a33}
-.lu-pc b{font:400 1.3rem var(--f-display);color:#3b4a24}.lu-pc span{font-size:.9rem;color:#4a4a3a}
+.lu-pc b{font:400 1.3rem var(--f-display);color:var(--nb-ink)}.lu-pc span{font-size:.9rem;color:var(--nb-soft)}
 .lu-pct{display:grid;grid-template-columns:repeat(11,minmax(0,1fr));gap:4px}
-.lu-pct button{all:unset;box-sizing:border-box;cursor:pointer;text-align:center;padding:8px 0;border-radius:10px;font:600 .78rem var(--f-body);background:var(--nb-paper);border:1px solid var(--nb-line);color:#3b4a24}
+.lu-pct button{all:unset;box-sizing:border-box;cursor:pointer;text-align:center;padding:8px 0;border-radius:10px;font:600 .78rem var(--f-body);background:var(--nb-paper);border:1px solid var(--nb-line);color:var(--nb-ink)}
 .lu-pct button[aria-pressed="true"]{background:#b0589a;border-color:#b0589a;color:#fff}
 .lu-meter{height:10px;border-radius:6px;background:linear-gradient(90deg,#fbf3f8,#ecc3dc 50%,#b0589a);position:relative}
 .lu-meter i{position:absolute;top:-5px;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #b0589a;margin-left:-10px;transition:left .4s}
@@ -2562,7 +2589,7 @@ RICH.lv14=()=>{const m=njMapaTxt();
 RICH.lv15=()=>{const v=st('lv15',0);
  return dkH('Paso 4 · Opción 3','Cuándo ir al Transgeneracional','Si la memoria viene de un hecho del linaje.')+
  `<div class="ni tc-side"><div class="nj-fig">${niOrig('lv15O','trans/transgeneracional.webp','Lámina original del gráfico Transgeneracional de Casa Muladhara',trChart(v?{hot:['i0','o6','o11','o3','o25'],cap:'Abortos · abusos · secretos · uniones forzadas · muertes tempranas.'}:{}))}</div>
- <div style="display:grid;gap:10px">${niBox('l','Cuándo','Si la memoria viene de un hecho del linaje.')}<button class="nj-card" style="all:unset;box-sizing:border-box;cursor:pointer;border-radius:16px;padding:14px 16px;display:grid;gap:6px;background:#f6e2ef;${v?'box-shadow:0 0 0 3px #b0589a':''}" ${rxa('set','lv15',v?0:1)} ${pressed(!!v)}><b style="font:400 1.05rem var(--f-display)">Por ejemplo</b><span>Abortos, abusos, secretos, uniones forzadas, muertes tempranas.</span><small style="color:#7a5aa6;font-weight:600">${v?'Ocultar en el gráfico':'Verlos en el gráfico'}</small></button>${niBox('d','Después','Limpiar, oración del linaje y volver a medir.')}<div class="dk-cta"><button class="btn btn-ghost btn-sm" data-les="2,20">Repasar el Transgeneracional</button></div></div></div>`};
+ <div style="display:grid;gap:10px">${niBox('l','Cuándo','Si la memoria viene de un hecho del linaje.')}<button class="nj-card" style="all:unset;box-sizing:border-box;cursor:pointer;border-radius:16px;padding:14px 16px;display:grid;gap:6px;background:#f6e2ef;color:#4a2340;${v?'box-shadow:0 0 0 3px #b0589a':''}" ${rxa('set','lv15',v?0:1)} ${pressed(!!v)}><b style="font:400 1.05rem var(--f-display)">Por ejemplo</b><span>Abortos, abusos, secretos, uniones forzadas, muertes tempranas.</span><small style="color:#7a5aa6;font-weight:600">${v?'Ocultar en el gráfico':'Verlos en el gráfico'}</small></button>${niBox('d','Después','Limpiar, oración del linaje y volver a medir.')}<div class="dk-cta"><button class="btn btn-ghost btn-sm" data-les="2,20">Repasar el Transgeneracional</button></div></div></div>`};
 
 /* ----- 7 · Leer con cuidado y derivar ----- */
 RICH.lv16=()=>dkH('Cuidado','Leer con cuidado','Seis acuerdos. Márcalos a medida que los conversan.')+
