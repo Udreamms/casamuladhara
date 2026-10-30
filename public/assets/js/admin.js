@@ -159,9 +159,11 @@ const levelPills = (u) => (u.blocked ? '<span class="pill bad">Bloqueada</span>'
   : openOf(u).map((n) => `<span class="pill done">Nivel ${lvName(n)}</span>`).join(' ') || '<span class="pill lock">Ninguno</span>');
 // Fila de niveles para marcar o desmarcar (field: ownedLevels o unlockedLevels)
 const levelBoxes = (u, field, cur) => `<div class="lvbox" role="group">${UNITS.map((l) => `<label title="${esc(l.t)}"><input type="checkbox" data-lv="${field}" data-uid="${u.id}" value="${l.n}" ${cur.includes(l.n) ? 'checked' : ''}><span>Nivel ${lvName(l.n)}${l.n > 10 ? ` · ${esc(l.t)}` : ''}</span></label>`).join('')}</div>`;
-// Clases de los cuatro cursos del Nivel 4, para abrírselas una por una (solo en los cursos que tiene marcados)
-const classBoxes = (u) => UNITS.filter((l) => l.n > 10).map((l) => { const has = [...ownedOf(u), ...unlockedOf(u)].includes(l.n);
-  return `<div style="display:grid;gap:4px"><small><b>Nivel ${lvName(l.n)} · ${esc(l.t)}</b>${has ? '' : ' <span class="muted">· primero márcale este curso arriba</span>'}</small><div class="lvbox" role="group">${CLASSES.map((k) => `<label><input type="checkbox" data-cls="${l.n}" data-uid="${u.id}" value="${k}" ${has && classesOf(u, l.n).includes(k) ? 'checked' : ''} ${has ? '' : 'disabled'}><span>Clase ${k}</span></label>`).join('')}</div></div>`; }).join('');
+// Clases de los cuatro cursos del Nivel 4, para abrírselas una por una
+// (en un curso que aún no tiene, marcar una clase le abre también el curso)
+const hasCourse = (u, c) => [...ownedOf(u), ...unlockedOf(u)].includes(c);
+const classBoxes = (u) => UNITS.filter((l) => l.n > 10).map((l) => { const has = hasCourse(u, l.n);
+  return `<div style="display:grid;gap:4px"><small><b>Nivel ${lvName(l.n)} · ${esc(l.t)}</b>${has ? '' : ' <span class="muted">· aún no tiene este curso: al marcarle una clase se le abre</span>'}</small><div class="lvbox" role="group">${CLASSES.map((k) => `<label><input type="checkbox" data-cls="${l.n}" data-uid="${u.id}" value="${k}" ${has && classesOf(u, l.n).includes(k) ? 'checked' : ''}><span>Clase ${k}</span></label>`).join('')}</div></div>`; }).join('');
 const blockBtn = (u) => `<button class="btn ${u.blocked ? 'btn-primary' : 'btn-ghost'} btn-sm" data-block="${u.id}">${u.blocked ? 'Desbloquear' : 'Bloquear'}</button>`;
 
 const V = {};
@@ -398,7 +400,10 @@ function bind() {
     const { cls: c, uid } = cb.dataset;
     const ks = [...document.querySelectorAll(`input[data-cls="${c}"][data-uid="${uid}"]`)].filter((x) => x.checked).map((x) => Number(x.value));
     document.querySelectorAll('input[data-cls]').forEach((x) => (x.disabled = true));
-    try { await data.setAccess(uid, { n4Classes: { [c]: ks } }); render(false); toast(`${cb.checked ? 'Abierta' : 'Cerrada'} la Clase ${cb.value} del Nivel ${lvName(+c)}`); } catch (e) { fail(e); render(false); }
+    // curso que aún no tiene: se le abre en el programa si lo tiene pagado, si no en «Abiertos siempre»
+    const u = student(uid), body = { n4Classes: { [c]: ks } };
+    if (!hasCourse(u, +c)) { const f = paying(u) ? 'unlockedLevels' : 'ownedLevels'; body[f] = inOrder([...(f === 'unlockedLevels' ? unlockedOf(u) : ownedOf(u)), +c]); }
+    try { await data.setAccess(uid, body); render(false); toast(`${cb.checked ? 'Abierta' : 'Cerrada'} la Clase ${cb.value} del Nivel ${lvName(+c)}`); } catch (e) { fail(e); render(false); }
   }));
   document.querySelectorAll('form[data-msg-one]').forEach((f) => (f.onsubmit = async (e) => {
     e.preventDefault(); const v = f.querySelector('textarea').value.trim(); if (!v) return;
