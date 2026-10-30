@@ -43,7 +43,7 @@ scripts/                administración desde tu computador (alumnas, Maestra, r
 - Imports del servidor con el alias `@/` → `src/` (`jsconfig.json`).
 
 ## Formación y pagos (Stripe)
-Una sola inscripción para la formación completa de cinco niveles: **9 cuotas de 55 USD** (Stripe deja de cobrar sola después de la novena) o **499 USD al contado**. Quien paga en cuotas puede pagar lo que le falta al contado cuando quiera.
+Una sola inscripción para la formación completa de cinco niveles: **9 cuotas de 55 USD** (Stripe deja de cobrar sola después de la novena) o **449 USD al contado**. Quien paga en cuotas puede pagar lo que le falta al contado cuando quiera.
 
 - **Roles** (`users/{uid}.role`): `admin` (la Maestra), `student_free` (toda cuenta nueva: ve el programa y la comunidad, todo bloqueado), `student_subscribed` (paga en cuotas al día o ya pagó todo) y `student_permanent` (alumnas que pagaron niveles antes de la plataforma). Nadie elige su rol: lo ponen el webhook de Stripe o la Maestra, y las reglas de Firestore impiden cambiarlo desde el navegador.
 - **Niveles abiertos** (claims `lvls` y `lvl` en el token): cada alumna tiene los suyos, no necesariamente en orden. Se suman los niveles que compró aparte (`ownedLevels`, alumnas antiguas, permanentes) y, si el programa está pagado o al día, los que la Maestra le desbloqueó (`unlockedLevels`). `blocked: true` la bloquea. Se cambian desde el portal de la Maestra (`/staff`). `src/proxy.js` y las reglas los exigen antes de servir el contenido de cada nivel.
@@ -58,7 +58,7 @@ node scripts/admin.mjs enroll ana@correo.com --levels 1,2   # niveles del progra
 Para regalar la formación completa: `enroll correo --plan completo`.
 
 ### Puesta en marcha
-1. En Stripe: un producto con un precio recurrente mensual de 55 USD y otro único de 499 USD; activa el portal de clientes (cambiar tarjeta y cancelar).
+1. En Stripe: un producto con un precio recurrente mensual de 55 USD y otro único de 449 USD; activa el portal de clientes (cambiar tarjeta y cancelar).
 2. En Stripe → Webhooks: el endpoint `https://TU-DOMINIO/api/stripe-webhook` con `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid` e `invoice.payment_failed`.
 3. En Vercel → Settings → Environment Variables, las del archivo `.env.local` de tu computador (no se sube a GitHub): `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID`, `STRIPE_PRICE_FULL_ID`, `STRIPE_WEBHOOK_SECRET`, `FIREBASE_SERVICE_ACCOUNT`, `APP_URL`, `ADMIN_EMAILS`, `STAFF_USER` y `STAFF_PASSWORD` (usuario y contraseña de `/staff`).
 4. Después de publicar: `node scripts/deploy-backend.mjs` (reglas), el `grant` de cada alumna actual y una vez `node scripts/admin.mjs sync-members`.

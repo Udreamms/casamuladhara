@@ -231,7 +231,7 @@ V.trabaja=()=>{
 V.pagos=()=>{
   const P=CM.profile,total=Number(P.installments)||9,paid=Math.min(total,Number(P.paidInstallments)||0);
   const full=S.plan==='completo',cuotas=S.plan==='mensual',noplan=S.plan==='none',grant=Number(P.grantLevel)||0;
-  const contado=cuotas?(total-paid)*55:total===9?499:total*55;
+  const contado=cuotas?(total-paid)*55:total===9?449:total*55;
   const next=P.currentPeriodEnd&&P.currentPeriodEnd.toDate?fmtDay(P.currentPeriodEnd.toDate()):'';
   return `<div class="view-head"><div><span class="eyebrow">Mi plan</span><h1>Mis pagos</h1><p>Una sola inscripción para la formación completa de cinco niveles. Los niveles se abren a medida que avanzas.</p></div></div>
   ${grant&&!full?`<div class="card panel" style="margin-bottom:18px"><p style="margin:0">Tienes <b>acceso permanente hasta el Nivel ${grant}</b>, que ya pagaste. ${cuotas?'Tus cuotas abren los niveles siguientes.':'Para seguir con los niveles siguientes, inscríbete en la formación.'}</p></div>`:''}
@@ -239,7 +239,7 @@ V.pagos=()=>{
     <article class="card plan ${cuotas?'cur':''}">${cuotas?'<span class="pill prog tagc">Tu plan</span>':''}<span class="eyebrow">En cuotas</span><div class="price">55<small>USD al mes · ${total} cuotas</small></div>
       <ul><li>Cobro automático cada mes con tu tarjeta</li><li>Después de la cuota ${total} se deja de cobrar y la formación queda pagada</li><li>Los niveles se abren a medida que avanzas</li><li>Puedes pagar lo que falta al contado cuando quieras</li></ul>
       ${full?'':noplan?`<button class="btn btn-primary btn-sm" style="justify-self:start" data-checkout="cuotas">Inscribirme en cuotas</button>`:`<div class="bar"><i style="width:${paid/total*100}%"></i></div><span class="muted" style="font-size:.82rem">Cuota ${paid} de ${total}</span><button class="btn btn-ghost btn-sm" style="justify-self:start" data-checkout="portal">Cambiar tarjeta o cancelar</button>`}</article>
-    <article class="card plan ${full?'cur':''}">${full?'<span class="pill done tagc">Tu plan</span>':''}<span class="eyebrow">${cuotas?'Pagar lo que falta':'Pago completo'}</span><div class="price">${full?499:contado}<small>USD una vez</small></div>
+    <article class="card plan ${full?'cur':''}">${full?'<span class="pill done tagc">Tu plan</span>':''}<span class="eyebrow">${cuotas?'Pagar lo que falta':'Pago completo'}</span><div class="price">${full?449:contado}<small>USD una vez</small></div>
       <ul>${cuotas?`<li>Pagas al contado las ${total-paid} cuotas que te faltan</li><li>No se te cobra nada más</li>`:'<li>Un solo pago por toda la formación</li><li>Sin cobros mensuales</li>'}<li>Acceso garantizado hasta tu certificación</li></ul>
       ${full?'<span class="pill done" style="justify-self:start">Formación pagada</span>':`<button class="btn btn-primary btn-sm" style="justify-self:start" data-checkout="completo">${cuotas?'Pagar lo que falta':'Pagar la formación completa'}</button>`}</article>
   </div>
