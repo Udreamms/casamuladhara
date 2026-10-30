@@ -47,7 +47,7 @@ d.classList.add('fx');setTimeout(function(){if(!window.__casonaReady)d.classList
   <div class="veil-bar"><i id="veil-bar"></i></div>
 </div>
 
-<div class="ribbon">Formaciones holísticas · Últimos cupos</div>
+<div class="ribbon">Grupo Fundadoras de la Formación · inicia el 1 de diciembre · 10 cupos</div>
 
 <header class="top">
   <div class="wrap">
@@ -56,12 +56,10 @@ d.classList.add('fx');setTimeout(function(){if(!window.__casonaReady)d.classList
       <span class="brand-name"><b>CASA MULADHARA</b><small>SANACIÓN &amp; BIENESTAR</small></span>
     </a>
     <nav class="main" id="nav">
-      <a href="#maestra">Karen</a>
-      <a href="#escuela">Escuela</a>
+      <a href="#inicio">Tour</a>
+      <a href="/formacion">Formaciones</a>
+      <a href="/pendulo">Péndulo Hebreo</a>
       <a href="/aula">Aula virtual</a>
-      <a href="#tienda">Tienda</a>
-      <a href="#terapias">Terapias</a>
-      <a href="#maestra-karen">Niños</a>
       <a class="staff" href="/staff">Staff</a>
     </nav>
     <div class="tools">
@@ -261,11 +259,11 @@ d.classList.add('fx');setTimeout(function(){if(!window.__casonaReady)d.classList
       <li><b>Sábado · 11:00</b><span>30 minutos en vivo con Karen</span></li>
     </ul>
     <small class="note-small">Horario de Chile. Al registrarte te enviamos el tema y el enlace de cada clase.</small>
-    <form class="gift-form" id="gift-form">
-      <label>Nombre<input id="g-name" type="text" autocomplete="name" placeholder="Tu nombre" required></label>
-      <label>Correo electrónico<input id="g-email" type="email" autocomplete="email" placeholder="tu@correo.com" required></label>
-      <label>WhatsApp<input id="g-wa" type="tel" autocomplete="tel" placeholder="+56 9 1234 5678"></label>
-      <label>¿A qué clase quieres ir?<select id="g-when"><option>Martes · 19:00</option><option>Sábado · 11:00</option><option>Avísenme de todas las clases</option></select></label>
+    <form class="gift-form" id="gift-form" data-lead="regalo">
+      <label>Nombre<input id="g-name" name="name" type="text" autocomplete="name" placeholder="Tu nombre" required></label>
+      <label>Correo electrónico<input id="g-email" name="email" type="email" autocomplete="email" placeholder="tu@correo.com" required></label>
+      <label>WhatsApp<input id="g-wa" name="whatsapp" type="tel" autocomplete="tel" placeholder="+56 9 1234 5678"></label>
+      <label>¿A qué clase quieres ir?<select id="g-when" name="interest"><option>Martes · 19:00</option><option>Sábado · 11:00</option><option>Avísenme de todas las clases</option></select></label>
       <button class="btn btn-cream" type="submit">Reservar mi lugar gratis</button>
       <p class="gift-ok" id="gift-ok" hidden>¡Listo! Te enviamos el enlace de la sala por correo y WhatsApp, y un recordatorio 1 hora antes.</p>
       <small>Sin costo. Puedes darte de baja cuando quieras.</small>
@@ -416,8 +414,8 @@ nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{nav.classLi
 
 // "Mi cuenta" y "Crear cuenta" llevan al login real (Firebase Auth)
 document.querySelectorAll('[data-open-login]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();location.href=b.dataset.tab==='signup'?'/login?register=true':'/login?mode=login'}));
-$('#gift-form').addEventListener('submit',e=>{e.preventDefault();$('#gift-ok').hidden=false});
 </script>
+<script src="/assets/js/landing/captacion.js"></script>
 <script src="assets/vendor/lenis.min.js" defer></script>
 <script type="module" src="assets/js/recorrido.js"></script>
 </body>

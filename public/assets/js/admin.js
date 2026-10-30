@@ -134,6 +134,17 @@ const data = {
     A.answers = out.answers.sort((a, b) => b.updatedAt - a.updatedAt);
     return A.answers;
   },
+  // Personas que dejaron sus datos en las landings (src/app/api/leads): las más recientes primero
+  leads: async (body = { action: 'all' }) => {
+    const r = await fetch('/api/leads', {
+      method: 'POST', headers: { Authorization: `Bearer ${await auth.currentUser.getIdToken()}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const out = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(out.error || 'No se pudieron cargar las interesadas.');
+    if (body.action === 'all') A.leads = out.leads;
+    return A.leads;
+  },
   deletePost: async (id) => { await deleteDoc(doc(db, 'posts', id)); A.posts = A.posts.filter((p) => p.id !== id); },
   saveConfig: async (d) => { await setDoc(doc(db, 'config', 'aula'), { ...d, updatedAt: serverTimestamp() }, { merge: true }); Object.assign(A.config, d); },
 };
@@ -142,6 +153,7 @@ const data = {
 const S = { view: 'alumnas', q: '', open: null, filter: 'todas', lvOpen: {}, fq: '', cls: null, ansWho: '', ansLv: 0 };
 const NAV = [
   ['alumnas', 'Alumnas', '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5a6.5 6.5 0 0 1 3.5 5.5"/>', () => A.students.filter(isNew).length],
+  ['interesadas', 'Interesadas', '<path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/>', () => (A.leads || []).filter((l) => l.status === 'nuevo').length],
   ['formacion', 'Formación completa', '<path d="M3 8 12 4l9 4-9 4z"/><path d="M7 10v5c3 2 7 2 10 0v-5"/>'],
   ['pagos', 'Pagos', '<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h4"/>'],
   ['mensajes', 'Mensajes', '<path d="M4 5h16v11H9l-5 4z"/>'],
@@ -306,6 +318,25 @@ V.clase = () => {
   <div class="view-head"><div><span class="eyebrow">Nivel ${lv.n} · ${esc(lv.title)}</span><h1 style="font-size:clamp(1.4rem,2.6vw,1.9rem)">${esc(m.title)}</h1><p>Así la ven tus alumnas. Desde el temario del nivel puedes recorrer todas sus clases.</p></div><a class="btn btn-ghost btn-sm" href="${src}" target="_blank" rel="noopener">Abrir en otra pestaña</a></div>
   <iframe class="aula-frame" src="${src}&embed=1" title="Clase: ${esc(l.t)}"></iframe>`;
 };
+const LEAD_FORMS = { pendulo: 'Péndulo Hebreo', formacion: 'Formación', sala: 'Sala Abierta', terapias: 'Terapias', meditacion: 'Meditación', regalo: 'Portada · Sala Abierta' };
+const LEAD_STATES = [['nuevo', 'Nueva'], ['contactado', 'Contactada'], ['inscrita', 'Inscrita'], ['descartado', 'Descartada']];
+const waLink = (n) => { const d = String(n || '').replace(/\D/g, ''); return d ? `https://wa.me/${d}` : ''; };
+V.interesadas = () => {
+  const head = `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>Interesadas</h1><p>Personas que dejaron sus datos en los formularios de la página. Escríbeles por WhatsApp y marca cómo va cada una.</p></div><button class="btn btn-ghost btn-sm" data-leads-reload>Actualizar</button></div>`;
+  if (!A.leads) return `${head}<div class="card empty">Cargando interesadas…</div>`;
+  const by = (s) => A.leads.filter((l) => l.status === s).length;
+  return `${head}
+  <div class="kpis">${LEAD_STATES.map(([k, t]) => `<div><b>${by(k)}</b><span>${t.toLowerCase()}s</span></div>`).join('')}</div>
+  <section class="card panel"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Persona</th><th>Formulario</th><th>Le interesa</th><th>Origen</th><th>Fecha</th><th>Estado</th></tr></thead><tbody>
+  ${A.leads.map((l) => { const wa = waLink(l.whatsapp); return `<tr>
+    <td><b>${esc(l.name)}</b><br><span class="muted" style="font-size:.84rem">${wa ? `<a href="${wa}" target="_blank" rel="noopener">${esc(l.whatsapp)}</a>` : ''}${l.whatsapp && l.email ? ' · ' : ''}${esc(l.email)}${l.country ? ` · ${esc(l.country)}` : ''}</span></td>
+    <td>${esc(LEAD_FORMS[l.form] || l.form)}</td>
+    <td>${esc(l.interest)}${l.message ? `<br><span class="muted" style="font-size:.84rem">${esc(l.message)}</span>` : ''}</td>
+    <td class="muted" style="font-size:.84rem">${esc([l.utm?.utm_source, l.utm?.utm_campaign, l.utm?.utm_content].filter(Boolean).join(' · ') || 'Directo')}</td>
+    <td class="muted" style="font-size:.84rem">${fdateMs(l.createdAt)}</td>
+    <td><select data-lead-status="${esc(l.id)}" aria-label="Estado">${LEAD_STATES.map(([k, t]) => `<option value="${k}" ${l.status === k ? 'selected' : ''}>${t}</option>`).join('')}</select></td></tr>`; }).join('') || '<tr><td colspan="6" class="muted">Todavía no hay interesadas.</td></tr>'}
+  </tbody></table></div></section>`;
+};
 V.pagos = () => {
   const cuotas = A.students.filter((u) => u.plan === 'mensual' && u.paymentStatus !== 'overdue');
   const rows = A.students.filter((u) => u.plan !== 'none' || Number(u.grantLevel)).sort((a, b) => (b.paymentStatus === 'overdue') - (a.paymentStatus === 'overdue'));
@@ -358,6 +389,7 @@ function go(v) {
   if (v === 'respuestas') {
     loadAnswers(true).then(() => { if (S.view === 'respuestas') render(false); }).catch(fail);
   }
+  if (v === 'interesadas') data.leads().then(() => { if (S.view === 'interesadas') render(false); }).catch(fail);
 }
 async function openStudent(uid) {
   S.open = uid; go('ficha');
@@ -369,6 +401,11 @@ function bind() {
   document.querySelectorAll('[data-ans-lv]').forEach((b) => (b.onclick = () => { S.ansLv = Number(b.dataset.ansLv); render(false); }));
   document.querySelectorAll('[data-ans-who]').forEach((b) => (b.onclick = () => { S.ansWho = b.dataset.ansWho; S.ansLv = 0; go('respuestas'); }));
   document.querySelectorAll('[data-ans-reload]').forEach((b) => (b.onclick = () => { b.disabled = true; loadAnswers(true).then(() => render(false)).catch(fail); }));
+  document.querySelectorAll('[data-leads-reload]').forEach((b) => (b.onclick = () => { b.disabled = true; data.leads().then(() => render(false)).catch(fail); }));
+  document.querySelectorAll('[data-lead-status]').forEach((s) => (s.onchange = async () => {
+    const l = A.leads.find((x) => x.id === s.dataset.leadStatus);
+    try { await data.leads({ action: 'status', id: l.id, status: s.value }); l.status = s.value; paintNav(); toast('Estado guardado.'); } catch (e) { fail(e); s.value = l.status; }
+  }));
   const aw = $('#ans-who'); if (aw) aw.onchange = () => { S.ansWho = aw.value; render(false); };
   document.querySelectorAll('[data-lvopen]').forEach((b) => (b.onclick = () => { S.lvOpen[b.dataset.lvopen] = !S.lvOpen[b.dataset.lvopen]; render(false); }));
   document.querySelectorAll('[data-cls]').forEach((b) => (b.onclick = () => { const [id, i, j] = b.dataset.cls.split(','); S.cls = [id, +i, +j]; go('clase'); }));
@@ -518,6 +555,7 @@ async function enter(u, auto = false) {
     await loadAll();
     watchStudents();
     loadAnswers().then(paintNav).catch((e) => console.warn('respuestas', e.message));
+    data.leads().then(paintNav).catch((e) => console.warn('interesadas', e.message));
     const p = (await getDoc(doc(db, 'users', u.uid))).data() || {};
     start({ id: u.uid, ...p, displayName: p.displayName || 'Maestra Holística' });
   } catch (e) { console.error(e); say(e.message || 'No pudimos abrir el portal. Inténtalo de nuevo.'); }

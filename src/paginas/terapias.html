@@ -34,14 +34,14 @@
     <p class="lede">Sesiones presenciales en Casa Muladhara u online por videollamada. Cuéntanos qué estás viviendo y te orientamos hacia la terapia que más te ayuda.</p>
     <div class="facts"><span class="hl">Presencial u online</span><span>Primera orientación sin costo</span></div>
   </div>
-  <form class="lp-form" data-lp>
+  <form class="lp-form" data-lead="terapias">
     <h3>Solicita tu hora</h3>
-    <label>Nombre<input id="t-name" type="text" autocomplete="name" placeholder="Tu nombre" required></label>
-    <label>WhatsApp<input id="t-wa" type="tel" autocomplete="tel" placeholder="+56 9 1234 5678" required></label>
-    <label>Terapia<select id="t-type"><option>No sé, quiero orientación</option><option>Reiki</option><option>Radiestesia y Sanación del Alma</option><option>Péndulo Hebreo</option><option>Registros Akáshicos</option><option>Vidas Pasadas</option><option>Sanando Niño Interior</option><option>Terapia Transgeneracional</option><option>Tarot Terapéutico y Evolutivo</option><option>Limpieza energética de espacios</option></select></label>
-    <label>Modalidad<select id="t-mode"><option>Presencial</option><option>Online por videollamada</option></select></label>
+    <label>Nombre<input id="t-name" name="name" type="text" autocomplete="name" placeholder="Tu nombre" required></label>
+    <label>WhatsApp<input id="t-wa" name="whatsapp" type="tel" autocomplete="tel" placeholder="+56 9 1234 5678" required></label>
+    <label>Terapia<select id="t-type" name="interest"><option>No sé, quiero orientación</option><option>Reiki</option><option>Radiestesia y Sanación del Alma</option><option>Péndulo Hebreo</option><option>Registros Akáshicos</option><option>Vidas Pasadas</option><option>Sanando Niño Interior</option><option>Terapia Transgeneracional</option><option>Tarot Terapéutico y Evolutivo</option><option>Limpieza energética de espacios</option></select></label>
+    <label>Modalidad<select id="t-mode" name="message"><option>Presencial</option><option>Online por videollamada</option></select></label>
     <button class="btn" type="submit">Solicitar mi hora</button>
-    <p class="lp-ok" hidden>Vista previa: aquí la solicitud llegaría a Karen y la persona recibiría la confirmación por WhatsApp.</p>
+    <p class="lp-ok" hidden>¡Listo! Karen recibió tu solicitud y te escribirá por WhatsApp para coordinar tu hora.</p>
   </form>
 </div></section>
 <section class="section"><div class="wrap">
@@ -54,5 +54,5 @@
 </div></section>
 <footer style="padding-block:28px"><div class="wrap legal" style="margin:0;border:0;padding:0"><span>© 2026 Casa Muladhara</span><span>Instagram @casa.muladhara</span></div></footer>
 <script src="/assets/js/landing/petalos.js"></script>
-<script>document.querySelectorAll('form[data-lp]').forEach(f=>f.addEventListener('submit',e=>{e.preventDefault();f.querySelector('.lp-ok').hidden=false}));</script>
+<script src="/assets/js/landing/captacion.js"></script>
 </body></html>

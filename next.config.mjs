@@ -1,4 +1,4 @@
-const PAGINAS = 'index|login|aula|admin|terapias|pendulo|meditacion|sala';
+const PAGINAS = 'index|login|aula|admin|terapias|pendulo|formacion|meditacion|sala';
 
 /** @type {import('next').NextConfig} */
 export default {

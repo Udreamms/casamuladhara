@@ -34,13 +34,13 @@
     <p class="lede">Karen, Maestra Holística, grabó esta meditación para que sueltes tensiones y limpies tu energía en cualquier momento del día. Déjanos tus datos y te la enviamos ahora.</p>
     <div class="facts"><span class="hl">Gratis</span><span>Audio grabado</span><span>Para escuchar desde el celular</span></div>
   </div>
-  <form class="lp-form" data-lp>
+  <form class="lp-form" data-lead="meditacion">
     <h3>¿Dónde te la enviamos?</h3>
-    <label>Nombre<input id="m-name" type="text" autocomplete="name" placeholder="Tu nombre" required></label>
-    <label>Correo electrónico<input id="m-email" type="email" autocomplete="email" placeholder="tu@correo.com" required></label>
-    <label>WhatsApp<input id="m-wa" type="tel" autocomplete="tel" placeholder="+56 9 1234 5678"></label>
+    <label>Nombre<input id="m-name" name="name" type="text" autocomplete="name" placeholder="Tu nombre" required></label>
+    <label>Correo electrónico<input id="m-email" name="email" type="email" autocomplete="email" placeholder="tu@correo.com" required></label>
+    <label>WhatsApp<input id="m-wa" name="whatsapp" type="tel" autocomplete="tel" placeholder="+56 9 1234 5678"></label>
     <button class="btn" type="submit">Enviarme la meditación</button>
-    <p class="lp-ok" hidden>Vista previa: aquí se mostraría la página de gracias con el audio y la invitación a Péndulo Hebreo Nivel 1.</p>
+    <p class="lp-ok" hidden>¡Listo! Te enviaremos la meditación a tu correo o WhatsApp.</p>
     <small>Sin spam. Puedes darte de baja cuando quieras.</small>
   </form>
 </div></section>
@@ -59,5 +59,5 @@
 </div></section>
 <footer style="padding-block:28px"><div class="wrap legal" style="margin:0;border:0;padding:0"><span>© 2026 Casa Muladhara</span><span>Instagram @casa.muladhara</span></div></footer>
 <script src="/assets/js/landing/petalos.js"></script>
-<script>document.querySelectorAll('form[data-lp]').forEach(f=>f.addEventListener('submit',e=>{e.preventDefault();f.querySelector('.lp-ok').hidden=false}));</script>
+<script src="/assets/js/landing/captacion.js"></script>
 </body></html>
