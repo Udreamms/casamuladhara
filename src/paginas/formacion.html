@@ -36,6 +36,7 @@
 .plans .main .eyebrow{color:var(--sun)}.plans .main .amount{color:var(--on-brand)}.plans .main .cur,.plans .main .sub{color:var(--on-brand-muted)}
 .plans .save{justify-self:start;margin-top:4px;font:600 .66rem/1 var(--f-caps);letter-spacing:.12em;text-transform:uppercase;padding:8px 12px;border-radius:999px;background:var(--sun);color:var(--forest-deep)}
 .wa-alt{font-size:.85rem;text-align:center;color:var(--muted)}.wa-alt a{color:var(--forest);font-weight:700}
+.wa-row{display:grid;grid-template-columns:minmax(0,9.5em) minmax(0,1fr);gap:8px}.wa-row select{min-width:0}
 @media (max-width:860px){.levels,.plans{grid-template-columns:1fr}.students{grid-template-columns:1fr 1fr}}</style></head><body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
@@ -64,9 +65,8 @@
   <form class="lp-form" data-lead="formacion">
     <h3>Quiero saber más</h3>
     <label>Nombre<input name="name" type="text" autocomplete="name" placeholder="Tu nombre" required></label>
-    <label>WhatsApp<input name="whatsapp" type="tel" autocomplete="tel" placeholder="+56 9 1234 5678" required></label>
+    <label>WhatsApp<span class="wa-row"><select name="cc" data-cc aria-label="Código de país"><option value="+56" data-country="Chile">Chile +56</option></select><input name="whatsapp" type="tel" autocomplete="tel-national" placeholder="9 1234 5678" required></span></label>
     <label>Correo electrónico<input name="email" type="email" autocomplete="email" placeholder="tu@correo.com"></label>
-    <label>¿Desde qué país nos escribes?<input name="country" type="text" autocomplete="country-name" placeholder="Ej.: Chile"></label>
     <label>¿Qué te interesa?<select name="interest"><option>Quiero inscribirme en el próximo grupo</option><option>Quiero más información</option><option>Ya hice Péndulo Hebreo Nivel 1</option></select></label>
     <button class="btn" type="submit">Enviar</button>
     <p class="lp-ok" hidden>¡Gracias! Te escribiremos por WhatsApp para contarte todo y resolver tus dudas.</p>

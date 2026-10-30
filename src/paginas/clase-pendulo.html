@@ -30,6 +30,7 @@
 .hero-light .lp-err{color:#ffd9cc!important}
 .wa-alt{font-size:.85rem;text-align:center;color:#c3cdbf}.wa-alt a{color:#f2c66d;font-weight:700}
 #reservar{scroll-margin-top:16px}
+.wa-row{display:grid;grid-template-columns:minmax(0,9.5em) minmax(0,1fr);gap:8px}.wa-row select{min-width:0}
 .btn-sun{background:#f2c66d;color:#1f3f32;justify-content:center}
 /* Karen pequeña junto al eyebrow, para que su cara se vea apenas se abre la página */
 .con-karen{display:flex;align-items:center;gap:12px;margin-bottom:14px}
@@ -67,7 +68,7 @@
   <form class="lp-form" id="reservar" data-lead="clase-pendulo">
     <h3>Reserva tu lugar <em>gratis</em></h3>
     <label>Nombre<input name="name" type="text" autocomplete="name" placeholder="Tu nombre" required></label>
-    <label>WhatsApp<input name="whatsapp" type="tel" autocomplete="tel" placeholder="+56 9 1234 5678" required></label>
+    <label>WhatsApp<span class="wa-row"><select name="cc" data-cc aria-label="Código de país"><option value="+56" data-country="Chile">Chile +56</option></select><input name="whatsapp" type="tel" autocomplete="tel-national" placeholder="9 1234 5678" required></span></label>
     <label>Correo (para enviarte el material de la clase)<input name="email" type="email" autocomplete="email" placeholder="tu@correo.com"></label>
     <label>¿Qué sábado te acomoda?<select name="interest" id="saturdays"><option>El próximo sábado · 19:00</option></select></label>
     <button class="btn" type="submit">Quiero mi lugar gratis</button>

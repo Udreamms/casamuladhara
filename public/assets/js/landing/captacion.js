@@ -27,6 +27,15 @@
     if (a) fbq('track', 'Contact', { content_name: location.pathname });
   });
 
+  // Códigos de país del WhatsApp: el HTML trae solo Chile (por si falla el script) y aquí se completa la lista
+  const PAISES = [['Chile', '+56'], ['Argentina', '+54'], ['Bolivia', '+591'], ['Colombia', '+57'], ['Costa Rica', '+506'], ['Ecuador', '+593'],
+    ['El Salvador', '+503'], ['España', '+34'], ['Estados Unidos', '+1'], ['Guatemala', '+502'], ['Honduras', '+504'], ['México', '+52'],
+    ['Nicaragua', '+505'], ['Panamá', '+507'], ['Paraguay', '+595'], ['Perú', '+51'], ['Puerto Rico', '+1'], ['Rep. Dominicana', '+1'],
+    ['Uruguay', '+598'], ['Venezuela', '+58'], ['Australia', '+61'], ['Canadá', '+1'], ['Otro país', '']];
+  document.querySelectorAll('select[data-cc]').forEach((s) => {
+    s.replaceChildren(...PAISES.map(([p, c]) => { const o = new Option(c ? `${p} ${c}` : p, c); o.dataset.country = p === 'Otro país' ? '' : p; return o; }));
+  });
+
   document.querySelectorAll('form[data-lead]').forEach((f) => {
     // Campo trampa para bots, invisible para las personas
     f.insertAdjacentHTML('beforeend', '<input name="web" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">');
@@ -39,9 +48,13 @@
       e.preventDefault();
       if (f.dataset.sending) return;
       const val = (n) => f.elements[n]?.value ?? '';
+      // Con selector de código de país, el WhatsApp se guarda completo (+56 9 1234 5678) y el país sale del código
+      const cc = f.elements.cc, pais = cc?.selectedOptions[0]?.dataset.country || '';
+      const numero = val('whatsapp').trim();
+      const whatsapp = cc && cc.value && numero && !numero.startsWith('+') ? `${cc.value} ${numero}` : numero;
       const body = {
         action: 'save', form: f.dataset.lead,
-        name: val('name'), email: val('email'), whatsapp: val('whatsapp'), country: val('country'),
+        name: val('name'), email: val('email'), whatsapp, country: val('country') || pais,
         interest: val('interest'), message: val('message'), web: val('web'),
         page: location.pathname, utm: origen(),
       };
