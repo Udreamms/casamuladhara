@@ -377,6 +377,7 @@ const CAL_TYPES = {
   bloqueado: ['Karen no disponible', '#b8402f'],
   receso: ['Receso', '#8d8a80'],
   interno: ['Recordatorio interno', '#3d6a8f'],
+  terapia: ['Terapia agendada', '#d1568b'],
 };
 const LIBRE_NO = ['bloqueado', 'receso'];
 const MES_N = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
@@ -396,6 +397,23 @@ const calPorDia = () => {
   Object.values(m).forEach((l) => l.sort((a, b) => (a.time || '99').localeCompare(b.time || '99')));
   return m;
 };
+// Terapias agendadas desde la web (type 'terapia'): mensaje de recordatorio listo para enviar por WhatsApp o Gmail
+const DIR_PRESENCIAL = 'Bellas Artes, Santiago de Chile';
+const cuando = (ts, tz) => new Intl.DateTimeFormat('es', { timeZone: tz, weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(ts);
+function recordatorio(e) {
+  const cl = e.start ? cuando(e.start, 'America/Santiago') : `${fechaLarga(e.date)} ${e.time || ''}`.trim();
+  const suyo = e.start && e.clientTz && e.clientTz !== 'America/Santiago' ? cuando(e.start, e.clientTz) : '';
+  const lugar = e.modalidad === 'online' ? `Online por Google Meet: ${A.clases?.enlaceTerapias || '(falta el enlace en Ajustes)'}`
+    : /limpieza/i.test(e.terapia || '') ? `En ${e.direccion || 'tu dirección'}` : `Presencial en ${DIR_PRESENCIAL} (te confirmo la dirección exacta)`;
+  const texto = `Hola ${(e.name || '').split(' ')[0]}, te escribe Karen de Casa Muladhara. Te recuerdo tu sesión de ${e.terapia || 'terapia'}:\n- Día y hora: ${suyo ? `${suyo} (tu hora, ${e.clientTz})\n- En Chile: ${cl}` : `${cl} (hora de Chile)`}\n- ${lugar}\n\n¡Te espero!`;
+  const asunto = `Tu sesión de ${e.terapia || 'terapia'} con Karen · Casa Muladhara`;
+  const wa = String(e.whatsapp || '').replace(/\D/g, '');
+  return {
+    wa: wa ? `https://wa.me/${wa}?text=${encodeURIComponent(texto)}` : '',
+    mail: e.email ? `https://mail.google.com/mail/?view=cm&authuser=holamaestrakaren%40gmail.com&to=${encodeURIComponent(e.email)}&su=${encodeURIComponent(asunto)}&body=${encodeURIComponent(texto)}` : '',
+  };
+}
+const botonesRec = (e) => { const r = recordatorio(e); return `${r.wa ? `<a class="btn btn-ghost btn-sm" href="${esc(r.wa)}" target="_blank" rel="noopener">WhatsApp</a>` : ''}${r.mail ? `<a class="btn btn-ghost btn-sm" href="${esc(r.mail)}" target="_blank" rel="noopener">Correo</a>` : ''}`; };
 const choque = (l) => l.some((e) => LIBRE_NO.includes(e.type)) && l.some((e) => !LIBRE_NO.includes(e.type));
 const calChip = (e) => { const [n, c] = CAL_TYPES[e.type] || ['Fecha', '#5d6b63']; return `<button class="cal-ev" style="--c:${c}" data-cal-ev="${esc(e.id)}" title="${esc(n)}">${e.time ? `<b>${esc(e.time)}</b> ` : ''}${esc(e.title || n)}</button>`; };
 V.calendario = () => {
@@ -415,12 +433,17 @@ V.calendario = () => {
   // Próximos 30 días (lo único que se ve en el celular)
   const prox = [];
   for (let t = hoy, n = 0; n < 30; t += 864e5, n++) { const k = ymd(t); if (dias[k]) prox.push([k, dias[k]]); }
+  // Sesiones de terapia de hoy y mañana, con los botones para recordárselas a la persona
+  const claveHoy = ymd(hoy), claveMan = ymd(hoy + 864e5);
+  const porRecordar = (A.cal || []).filter((e) => e.type === 'terapia' && (e.date === claveHoy || e.date === claveMan)).sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
+  const recordar = porRecordar.length ? `<section class="card panel"><h3>Por recordar: hoy y mañana</h3>${porRecordar.map((e) => `<div class="cal-row"><b>${e.date === claveHoy ? 'Hoy' : 'Mañana'} · ${esc(e.time || '')}</b><div>${calChip(e)}<div style="display:flex;gap:6px;flex-wrap:wrap">${botonesRec(e)}</div></div></div>`).join('')}</section>` : '';
   return `${head}
   <div class="cal-legend">${Object.entries(CAL_TYPES).map(([, [n, c]]) => `<span style="--c:${c}">${esc(n)}</span>`).join('')}</div>
   <section class="card panel cal-month">
     <div class="panel-h"><button class="btn btn-ghost btn-sm" data-cal-mes="-1" aria-label="Mes anterior">←</button><h3 style="text-transform:capitalize">${MES_N[mo]} ${y}</h3><button class="btn btn-ghost btn-sm" data-cal-mes="1" aria-label="Mes siguiente">→</button></div>
     <div class="cal-grid">${['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((d) => `<div class="cal-wd">${d}</div>`).join('')}${celdas.join('')}</div>
   </section>
+  ${recordar}
   <section class="card panel"><h3>Próximos 30 días</h3>
     ${prox.length ? prox.map(([k, l]) => `<div class="cal-row${choque(l) ? ' clash' : ''}"><b>${fechaLarga(k)}</b>${choque(l) ? '<span class="cal-clash">Choque: Karen no disponible</span>' : ''}<div>${l.map(calChip).join('')}</div></div>`).join('') : '<p class="muted" style="margin:0">No hay fechas en los próximos 30 días.</p>'}
   </section>`;
@@ -434,13 +457,15 @@ function calForm(e) {
     <label style="display:grid;gap:6px;font-size:.84rem"><b>Título</b><input id="cf-title" maxlength="120" value="${esc(v.title || '')}" placeholder="Si lo dejas vacío, se usa el tipo"></label>
     <div style="display:flex;gap:8px;flex-wrap:wrap"><label style="display:grid;gap:6px;font-size:.84rem;flex:1"><b>Fecha</b><input type="date" id="cf-date" required value="${esc(v.date || '')}"></label><label style="display:grid;gap:6px;font-size:.84rem"><b>Hora</b><input type="time" id="cf-time" value="${esc(v.time || '')}"></label></div>
     <label style="display:grid;gap:6px;font-size:.84rem"><b>Fecha de término (opcional, para rangos)</b><input type="date" id="cf-end" value="${esc(v.endDate || '')}"></label>
+    <label style="display:grid;gap:6px;font-size:.84rem"><b>Duración en minutos (opcional)</b><input type="number" id="cf-dur" min="15" max="480" step="15" placeholder="Vacío: terapias 120, clases gratis 60" value="${esc(v.duration > 0 ? v.duration : '')}"><span class="muted" style="font-size:.76rem">Si una sesión dura menos, acórtala aquí y esa hora vuelve a quedar libre en la web.</span></label>
+    ${v.type === 'terapia' && (v.whatsapp || v.email) ? `<div class="card" style="padding:12px 14px;display:grid;gap:6px;font-size:.84rem"><b>${esc(v.name || '')}</b><span>${esc(v.modalidad === 'online' ? 'Online' : v.direccion ? `Presencial · ${v.direccion}` : 'Presencial')}${v.clientTz ? ` · Zona: ${esc(v.clientTz)}` : ''}</span><span>${esc(v.whatsapp || '')} · ${esc(v.email || '')}</span><div style="display:flex;gap:6px;flex-wrap:wrap">${botonesRec(v)}</div></div>` : ''}
     <label style="display:grid;gap:6px;font-size:.84rem"><b>Nota</b><textarea id="cf-note" maxlength="500" rows="2">${esc(v.note || '')}</textarea></label>
     ${e ? '' : '<label style="display:flex;gap:8px;align-items:center;font-size:.84rem"><input type="checkbox" id="cf-rep"> Repetir cada semana hasta <input type="date" id="cf-until"></label>'}
     <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between"><button class="btn btn-primary btn-sm">Guardar</button>${e ? '<button type="button" class="btn btn-ghost btn-sm" id="cf-del">Borrar</button>' : ''}</div>
   </form>`);
   $('#cal-form').onsubmit = async (ev) => {
     ev.preventDefault();
-    const d = { type: $('#cf-type').value, title: $('#cf-title').value.trim(), date: $('#cf-date').value, time: $('#cf-time').value, endDate: $('#cf-end').value, note: $('#cf-note').value.trim() };
+    const d = { type: $('#cf-type').value, title: $('#cf-title').value.trim(), date: $('#cf-date').value, time: $('#cf-time').value, endDate: $('#cf-end').value, note: $('#cf-note').value.trim(), duration: Math.round(Number($('#cf-dur').value)) || 0 };
     if (!d.date) return toast('Elige la fecha.');
     if (d.endDate && d.endDate < d.date) return toast('La fecha de término no puede ser antes de la fecha.');
     try {
@@ -498,8 +523,8 @@ V.ajustes = () => `<div class="view-head"><div><span class="eyebrow">Portal de l
     <form id="wv-form" style="display:flex;gap:8px;flex-wrap:wrap"><input type="url" id="wv-url" placeholder="https://" value="${esc(A.config.welcomeVideo || '')}" style="flex:1;min-width:220px"><button class="btn btn-primary btn-sm">Guardar</button></form></section>
   <section class="card panel"><h3>Formación: próximo grupo</h3><p class="muted" style="margin:0;font-size:.88rem">Fecha de inicio y cupos que muestra la página /formacion. Déjala vacía para mostrar "Próximo grupo: escríbenos y te avisamos". Cuando la fecha pasa, la página deja de mostrarla sola.</p>
     <form id="fm-form" style="display:flex;gap:8px;flex-wrap:wrap;align-items:end"><label style="display:grid;gap:6px;font-size:.84rem"><b>Fecha de inicio</b><input type="date" id="fm-start" value="${esc(A.formacion?.nextStart || '')}"></label><label style="display:grid;gap:6px;font-size:.84rem"><b>Cupos</b><input type="number" id="fm-seats" min="1" max="200" step="1" placeholder="Ej.: 10" value="${esc(A.formacion?.seats ?? '')}" style="width:110px"></label><button class="btn btn-primary btn-sm">Guardar</button></form></section>
-  <section class="card panel"><h3>Clases gratis: enlaces de Google Meet</h3><p class="muted" style="margin:0;font-size:.88rem">Al reservar su lugar, la persona ve un botón para entrar a la clase con este enlace. Déjalo vacío para mostrar "Te enviamos el enlace por WhatsApp".</p>
-    <form id="cl-form" style="display:grid;gap:10px"><label style="display:grid;gap:6px;font-size:.84rem"><b>Enlace de Google Meet · clase de Péndulo (sábados)</b><input type="url" id="cl-pendulo" placeholder="https://meet.google.com/abc-defg-hij" value="${esc(A.clases?.enlacePendulo || '')}"></label><label style="display:grid;gap:6px;font-size:.84rem"><b>Enlace de Google Meet · clase de Tarot (martes)</b><input type="url" id="cl-tarot" placeholder="https://meet.google.com/abc-defg-hij" value="${esc(A.clases?.enlaceTarot || '')}"></label><button class="btn btn-primary btn-sm" style="justify-self:start">Guardar</button></form></section>
+  <section class="card panel"><h3>Google Meet: clases gratis y terapias online</h3><p class="muted" style="margin:0;font-size:.88rem">Al reservar su lugar, la persona ve un botón para entrar a la clase con este enlace. Déjalo vacío para mostrar "Te enviamos el enlace por WhatsApp".</p>
+    <form id="cl-form" style="display:grid;gap:10px"><label style="display:grid;gap:6px;font-size:.84rem"><b>Enlace de Google Meet · clase de Péndulo (sábados)</b><input type="url" id="cl-pendulo" placeholder="https://meet.google.com/abc-defg-hij" value="${esc(A.clases?.enlacePendulo || '')}"></label><label style="display:grid;gap:6px;font-size:.84rem"><b>Enlace de Google Meet · clase de Tarot (martes)</b><input type="url" id="cl-tarot" placeholder="https://meet.google.com/abc-defg-hij" value="${esc(A.clases?.enlaceTarot || '')}"></label><label style="display:grid;gap:6px;font-size:.84rem"><b>Enlace de Google Meet · terapias online</b><input type="url" id="cl-terapias" placeholder="https://meet.google.com/abc-defg-hij" value="${esc(A.clases?.enlaceTerapias || '')}"></label><button class="btn btn-primary btn-sm" style="justify-self:start">Guardar</button></form></section>
   <section class="card panel"><h3>Cursos: próximo inicio</h3><p class="muted" style="margin:0;font-size:.88rem">Las páginas /pendulo y /tarot muestran la fecha más cercana que tengas en el Calendario como "Curso Péndulo Hebreo Nivel 1" o "Grupo de Tarot Terapéutico".</p><button class="btn btn-ghost btn-sm" style="justify-self:start" data-go="calendario">Abrir el calendario</button></section>
   <section class="card panel"><h3>Clases en vivo</h3><p class="muted" style="margin:0;font-size:.88rem">Las clases en vivo y sus grabaciones se programan dentro de cada clase del aula, donde ves el contenido.</p><a class="btn btn-ghost btn-sm" style="justify-self:start" href="/aula">Ir al aula</a></section>`;
 
@@ -625,9 +650,9 @@ function bind() {
   };
   const cl = $('#cl-form'); if (cl) cl.onsubmit = async (e) => {
     e.preventDefault();
-    const enlacePendulo = $('#cl-pendulo').value.trim(), enlaceTarot = $('#cl-tarot').value.trim();
-    if ([enlacePendulo, enlaceTarot].some((u) => u && !isHttps(u))) return toast('Los enlaces deben empezar con https://');
-    try { await data.saveClases({ enlacePendulo, enlaceTarot }); toast('Enlaces de Google Meet guardados'); } catch (err) { fail(err); }
+    const enlacePendulo = $('#cl-pendulo').value.trim(), enlaceTarot = $('#cl-tarot').value.trim(), enlaceTerapias = $('#cl-terapias').value.trim();
+    if ([enlacePendulo, enlaceTarot, enlaceTerapias].some((u) => u && !isHttps(u))) return toast('Los enlaces deben empezar con https://');
+    try { await data.saveClases({ enlacePendulo, enlaceTarot, enlaceTerapias }); toast('Enlaces de Google Meet guardados'); } catch (err) { fail(err); }
   };
 }
 const papi = (uid) => profileApi(uid);
