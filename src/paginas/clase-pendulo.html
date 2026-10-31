@@ -5,43 +5,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Josefin+Sans:wght@300;400;600&family=Mulish:wght@400;500;700&family=Fredoka:wght@500;600&display=swap">
 <link rel="stylesheet" href="/assets/css/landing.css">
-<style>html,body{margin:0}body{font-size:16px}img{max-width:100%}[hidden]{display:none!important}
-/* Bloques que alternan claro y oscuro con colores fijos (no cambian con el modo oscuro del equipo) */
-.tone-light{--bg:#f6f4ec;--surface:#fffdf6;--fg:#22302a;--muted:#5d6b63;--line:#d9d5c3;background:var(--bg);color:var(--fg)}
-.tone-dark{--surface:#24483a;--fg:#ece7d3;--muted:#c3cdbf;--line:rgba(236,231,211,.16);background:#1f3f32;color:var(--fg)}
-.tone-dark .eyebrow{color:#f2c66d}
-.tone-light .eyebrow{color:#8a6430}
-/* Primer bloque en blanco: el título en verde y el formulario en verde para que resalte */
-.lp-hero.hero-light{background:#fffdf6;color:#2b5443}
-.hero-light .hero-motif{color:#2b5443!important;opacity:.06}
-.hero-light h1{color:#2b5443}
-.hero-light .lede{color:#4a5a51}
-.hero-light .eyebrow{color:#8a6430}
-.hero-light .facts span{border-color:rgba(43,84,67,.35);color:#2b5443}
-.hero-light .facts span.hl{background:#f2c66d;border-color:#f2c66d;color:#1f3f32}
-.next-class{display:inline-flex;align-items:center;gap:10px;margin-top:22px;padding:12px 16px;border-radius:14px;background:#fbf0d4;border:1px solid #f2c66d;color:#1f3f32;font-weight:700}
-.next-class::before{content:"";width:9px;height:9px;border-radius:50%;background:#2b5443;flex:none}
-.hero-light .lp-form{background:#2b5443;color:#ece7d3;box-shadow:0 30px 60px -25px rgba(31,63,50,.55)}
-.hero-light .lp-form h3{color:#ece7d3}.hero-light .lp-form h3 em{font-style:normal;color:#f2c66d}
-.hero-light .lp-form input,.hero-light .lp-form select{background:#fffdf6;border-color:#fffdf6;color:#1f3f32}
-.hero-light .lp-form .btn{background:#f2c66d;color:#1f3f32}
-.hero-light .lp-form small{color:#c3cdbf}
-.hero-light .lp-ok{background:#fffdf6;color:#1f3f32}
-.hero-light .lp-err{color:#ffd9cc!important}
-.wa-alt{font-size:.85rem;text-align:center;color:#c3cdbf}.wa-alt a{color:#f2c66d;font-weight:700}
-#reservar{scroll-margin-top:16px}
-.wa-row{display:grid;grid-template-columns:minmax(0,9.5em) minmax(0,1fr);gap:8px}.wa-row select{min-width:0}
-.btn-sun{background:#f2c66d;color:#1f3f32;justify-content:center}
-/* Karen pequeña junto al eyebrow, para que su cara se vea apenas se abre la página */
-.con-karen{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-.con-karen img{width:64px;height:64px;border-radius:50%;object-fit:cover;object-position:50% 20%;border:2px solid #f2c66d;flex:none}
-.con-karen small{display:block;font-size:.85rem;font-weight:700;color:#2b5443;margin-bottom:4px}
-@media (min-width:861px){.con-karen img{width:80px;height:80px}}
-/* Botón de la primera pantalla: solo en celular, donde el formulario queda más abajo */
-.go-form{display:none}
-@media (max-width:860px){.go-form{display:flex;width:100%;margin-top:18px}}
-.cierre{text-align:center}.cierre .wrap{display:grid;justify-items:center;gap:20px}
-.cierre h2{font-size:clamp(1.9rem,4vw,2.8rem)}</style></head><body>
+<style>html,body{margin:0}body{font-size:16px}img{max-width:100%}[hidden]{display:none!important}</style></head><body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
     <symbol id="mark" viewBox="-50 -50 100 100">
@@ -54,7 +18,16 @@
     </symbol>
   </defs>
 </svg>
-<header class="lp-top"><div class="wrap"><span class="brand"><svg style="color:var(--on-brand)"><use href="#mark"/></svg><span class="brand-name"><b>CASA MULADHARA</b><small>SANACIÓN &amp; BIENESTAR</small></span></span><a class="lp-back" href="/">← Volver al sitio</a></div></header>
+<header class="lp-top"><div class="wrap">
+  <a class="brand" href="/" aria-label="Casa Muladhara, inicio"><svg style="color:var(--on-brand)"><use href="#mark"/></svg><span class="brand-name"><b>CASA MULADHARA</b><small>SANACIÓN &amp; BIENESTAR</small></span></a>
+  <nav class="menu" id="menu" aria-label="Menú principal">
+    <a href="/">Tour</a>
+    <details class="dd"><summary>Clases gratis</summary><div class="dd-panel"><a href="/clase-pendulo"><b>Péndulo Hebreo</b><span>Sábados 19:00 (Chile)</span></a><a href="/clase-tarot"><b>Tarot Terapéutico</b><span>Martes 19:00 (Chile)</span></a></div></details>
+    <details class="dd"><summary>Formaciones</summary><div class="dd-panel"><a href="/pendulo">Péndulo Hebreo Nivel 1</a><a href="/tarot">Tarot Terapéutico</a><a href="/formacion">Terapeuta Holística Integral</a></div></details>
+  </nav>
+  <a class="icon-btn acct" href="/aula" id="acct-btn" aria-label="Mi cuenta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg><span class="acct-label">Mi cuenta</span></a>
+  <button class="icon-btn round menu-toggle" type="button" id="menu-btn" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</div></header>
 
 <section class="lp-hero hero-light"><svg class="hero-motif" aria-hidden="true"><use href="#mark"/></svg><div class="wrap">
   <div>
@@ -65,7 +38,7 @@
     <p class="next-class" id="next-class">Próxima clase: este sábado · 19:00</p>
     <a class="btn btn-sun go-form" href="#reservar">Quiero mi lugar gratis</a>
   </div>
-  <form class="lp-form" id="reservar" data-lead="clase-pendulo">
+  <form class="lp-form" id="reservar" data-lead="clase-pendulo" data-clase="Péndulo Hebreo">
     <h3>Reserva tu lugar <em>gratis</em></h3>
     <label>Nombre<input name="name" type="text" autocomplete="name" placeholder="Tu nombre" required></label>
     <label>WhatsApp<span class="wa-row"><select name="cc" data-cc aria-label="Código de país"><option value="+56" data-country="Chile">Chile +56</option></select><input name="whatsapp" type="tel" autocomplete="tel-national" placeholder="9 1234 5678" required></span></label>
@@ -108,12 +81,14 @@
 <footer style="padding-block:28px"><div class="wrap legal" style="margin:0;border:0;padding:0"><span>© 2026 Casa Muladhara</span><span>Instagram @casa.muladhara</span></div></footer>
 <script src="/assets/js/landing/petalos.js"></script>
 <script>
-// Próximos sábados de clase (19:00, hora de Chile) calculados en el navegador, para que la página sirva todas las semanas.
+// Próximas clases (19:00, hora de Chile) calculadas en el navegador, para que la página sirva todas las semanas.
 // Se usa la hora de Santiago y no la del visitante, que puede escribir desde otro país.
-// El sábado de esta semana vale hasta las 19:30 (fin de la clase); después pasa al sábado siguiente.
+// La clase de esta semana vale hasta las 19:30 (fin de la clase); después pasa a la semana siguiente.
+// Cada opción lleva data-date (AAAA-MM-DD) para el calendario del gracias (captacion.js).
 (() => {
   const PRUEBA = null; // para revisar: '2026-11-04T12:00' (hora de Chile). En producción: null
-  const DESDE = [2026, 11, 7]; // primera clase: nunca se ofrecen sábados anteriores
+  const DIA = 6, NOMBRE = 'Sábado'; // 0 domingo … 6 sábado
+  const DESDE = [2026, 11, 7]; // primera clase: nunca se ofrecen fechas anteriores
   const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
   try {
     let y, m, d, min;
@@ -125,17 +100,19 @@
       y = +p.year; m = +p.month; d = +p.day; min = (+p.hour % 24) * 60 + +p.minute;
     }
     const hoy = new Date(Date.UTC(y, m - 1, d));
-    let falta = (6 - hoy.getUTCDay() + 7) % 7;
+    let falta = (DIA - hoy.getUTCDay() + 7) % 7;
     if (falta === 0 && min >= 19 * 60 + 30) falta = 7;
     const primero = new Date(Math.max(Date.UTC(y, m - 1, d + falta), Date.UTC(DESDE[0], DESDE[1] - 1, DESDE[2])));
-    const sabado = (semanas) => new Date(primero.getTime() + 7 * semanas * 864e5);
-    const texto = (s) => `Sábado ${s.getUTCDate()} de ${MESES[s.getUTCMonth()]} · 19:00`;
-    const proximos = [0, 1, 2].map((k) => texto(sabado(k)));
-    document.getElementById('next-class').textContent = `Próxima clase: ${proximos[0].replace('Sábado', 'sábado')}`;
+    const clase = (semanas) => new Date(primero.getTime() + 7 * semanas * 864e5);
+    const texto = (s) => `${NOMBRE} ${s.getUTCDate()} de ${MESES[s.getUTCMonth()]} · 19:00`;
+    const proximos = [0, 1, 2].map((k) => clase(k));
+    document.getElementById('next-class').textContent = `Próxima clase: ${texto(proximos[0]).replace(NOMBRE, NOMBRE.toLowerCase())}`;
     const sel = document.getElementById('saturdays');
-    sel.replaceChildren(...[...proximos, 'Avísenme del próximo sábado'].map((t) => new Option(t, t)));
-  } catch (e) { /* sin fechas: queda la opción fija "El próximo sábado · 19:00" */ }
+    sel.replaceChildren(...proximos.map((s) => { const o = new Option(texto(s), texto(s)); o.dataset.date = s.toISOString().slice(0, 10); return o; }),
+      new Option(`Avísenme del próximo ${NOMBRE.toLowerCase()}`, `Avísenme del próximo ${NOMBRE.toLowerCase()}`));
+  } catch (e) { /* sin fechas: queda la opción fija del HTML */ }
 })();
 </script>
+<script src="/assets/js/landing/menu.js"></script>
 <script src="/assets/js/landing/captacion.js"></script>
 </body></html>

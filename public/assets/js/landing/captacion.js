@@ -36,6 +36,46 @@
     s.replaceChildren(...PAISES.map(([p, c]) => { const o = new Option(c ? `${p} ${c}` : p, c); o.dataset.country = p === 'Otro país' ? '' : p; return o; }));
   });
 
+  // ---------- Gracias de las clases gratis: Zoom, archivo .ics y Google Calendar ----------
+  // La clase es a las 19:00 hora de Chile y dura 30 minutos; se pasa a UTC para que el calendario la muestre bien en cualquier país.
+  const utcDeChile = (y, m, d, h, mi) => {
+    const deseado = Date.UTC(y, m - 1, d, h, mi);
+    let t = deseado;
+    for (let i = 0; i < 3; i++) {
+      const p = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: 'America/Santiago', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hourCycle: 'h23' })
+        .formatToParts(new Date(t)).map((x) => [x.type, x.value]));
+      t += deseado - Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour % 24, +p.minute);
+    }
+    return new Date(t);
+  };
+  const utc = (dt) => dt.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+  const icsTexto = (s) => String(s).replace(/\\/g, '\\\\').replace(/[,;]/g, (c) => `\\${c}`).replace(/\n/g, '\\n');
+  const el = (tag, attrs = {}, text = '') => { const e = document.createElement(tag); Object.assign(e, attrs); if (text) e.textContent = text; return e; };
+  function graciasClase(f, zoom) {
+    const op = f.elements.interest?.selectedOptions[0];
+    const fecha = op?.dataset.date; // 'AAAA-MM-DD' si eligió un día concreto
+    const dia = (op?.textContent || '').split(' · ')[0].toLowerCase();
+    const titulo = `Clase gratis de ${f.dataset.clase} con Karen`;
+    const nodos = [el('b', {}, fecha ? `¡Listo, tu lugar está reservado! Te esperamos el ${dia} a las 19:00 (hora de Chile).` : '¡Listo, tu lugar está reservado! La clase es a las 19:00 (hora de Chile).')];
+    const acciones = el('span', { className: 'gracias-acciones' });
+    acciones.append(el('a', { className: 'btn btn-zoom', href: zoom, target: '_blank', rel: 'noopener' }, 'Entrar a la clase por Zoom'));
+    if (fecha) {
+      const [y, m, d] = fecha.split('-').map(Number);
+      const ini = utcDeChile(y, m, d, 19, 0), fin = new Date(ini.getTime() + 30 * 60000);
+      const detalle = `Entra a la clase por Zoom: ${zoom}`;
+      const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Casa Muladhara//Clases gratis//ES', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'BEGIN:VEVENT',
+        `UID:${fecha}-${f.dataset.lead}@casamuladhara`, `DTSTAMP:${utc(new Date())}`, `DTSTART:${utc(ini)}`, `DTEND:${utc(fin)}`,
+        `SUMMARY:${icsTexto(titulo)}`, `DESCRIPTION:${icsTexto(detalle)}`, `LOCATION:${icsTexto(zoom)}`, `URL:${zoom}`,
+        'BEGIN:VALARM', 'TRIGGER:-PT1H', 'ACTION:DISPLAY', `DESCRIPTION:${icsTexto(titulo)}`, 'END:VALARM', 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+      const cal = el('a', { className: 'btn btn-cal', href: URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' })), download: `clase-gratis-${fecha}.ics` }, 'Agregar a mi calendario');
+      const g = new URL('https://calendar.google.com/calendar/render');
+      g.search = new URLSearchParams({ action: 'TEMPLATE', text: titulo, dates: `${utc(ini)}/${utc(fin)}`, details: detalle, location: zoom }).toString();
+      acciones.append(cal, el('a', { className: 'gcal', href: g.toString(), target: '_blank', rel: 'noopener' }, 'Google Calendar'));
+    }
+    nodos.push(acciones, el('small', {}, 'También te lo enviamos por WhatsApp con un recordatorio 1 hora antes.'));
+    return nodos;
+  }
+
   document.querySelectorAll('form[data-lead]').forEach((f) => {
     // Campo trampa para bots, invisible para las personas
     f.insertAdjacentHTML('beforeend', '<input name="web" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">');
@@ -66,6 +106,8 @@
         if (!r.ok) throw new Error(out.error || 'No pudimos enviar tus datos.');
         fbq('track', 'Lead', { content_name: f.dataset.lead });
         f.querySelectorAll('label, button, small').forEach((el) => (el.hidden = true));
+        // Clase gratis con enlace de Zoom guardado: el gracias trae el botón de Zoom y el calendario
+        if (ok && out.zoom && f.dataset.clase) ok.replaceChildren(...graciasClase(f, out.zoom));
         if (ok) { ok.hidden = false; ok.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
       } catch (ex) {
         const m = ex.message || 'No pudimos enviar tus datos.';

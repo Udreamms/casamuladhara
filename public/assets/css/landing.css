@@ -394,3 +394,80 @@ form.auth .btn{justify-content:center;margin-top:6px}
 .final-cta h2{font-size:clamp(1.9rem,4vw,2.8rem)}.final-cta p{color:var(--on-brand-muted)}
 .next-step{margin-top:14px;padding:18px 20px;border-radius:16px;background:var(--linen);color:#22302a}
 @media (max-width:860px){.lp-hero .wrap,.kit{grid-template-columns:1fr}.cols3{grid-template-columns:1fr}.mini-gal{grid-template-columns:1fr 1fr}}
+
+/* Menú de las landings: Tour · Clases gratis ▾ · Formaciones ▾ · Mi cuenta. Los desplegables son <details> (se abren con un toque) */
+.lp-top{position:sticky;top:0;z-index:30}
+.lp-top .wrap{justify-content:flex-start;gap:22px}
+.lp-top .brand{margin-right:auto;color:inherit}
+.menu{display:flex;align-items:center;gap:24px}
+.menu>a,.dd>summary{font:600 .68rem/1 var(--f-caps);letter-spacing:.16em;text-transform:uppercase;color:var(--on-brand);text-decoration:none;opacity:.9;cursor:pointer;padding:8px 0;list-style:none;white-space:nowrap}
+.menu>a:hover,.dd>summary:hover,.dd[open]>summary{opacity:1;color:var(--sun)}
+.dd{position:relative}
+.dd>summary::-webkit-details-marker{display:none}
+.dd>summary::after{content:"";display:inline-block;width:6px;height:6px;margin-left:8px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:translateY(-3px) rotate(45deg);transition:transform .2s}
+.dd[open]>summary::after{transform:translateY(0) rotate(-135deg)}
+.dd-panel{position:absolute;top:calc(100% + 12px);left:-14px;min-width:260px;background:#fffdf6;color:#22302a;border-radius:16px;padding:8px;display:grid;gap:2px;box-shadow:0 24px 50px -20px rgba(15,31,25,.55)}
+.dd-panel a{display:grid;gap:3px;padding:11px 13px;border-radius:11px;text-decoration:none;font-size:.93rem;font-weight:700;color:#1f3f32}
+.dd-panel a span{font-weight:400;font-size:.8rem;color:#5d6b63}
+.dd-panel a:hover,.dd-panel a:focus-visible{background:#f1ecd9}
+.lp-top .acct{height:38px;padding:0 14px;font:600 .64rem/1 var(--f-caps);letter-spacing:.14em;text-transform:uppercase;text-decoration:none;color:var(--on-brand)}
+.menu-toggle{display:none}
+@media (max-width:860px){
+  .menu{display:none;position:absolute;left:0;right:0;top:100%;background:var(--forest-deep);flex-direction:column;align-items:stretch;gap:0;padding:4px 20px 18px;border-bottom:1px solid rgba(236,231,211,.15);max-height:calc(100vh - 70px);overflow:auto}
+  .menu.open{display:flex}
+  .menu>a,.dd>summary{padding:15px 0;border-bottom:1px solid rgba(236,231,211,.12)}
+  .dd-panel{position:static;box-shadow:none;margin:8px 0 12px;min-width:0}
+  .menu-toggle{display:inline-flex}
+}
+@media (max-width:520px){.lp-top .wrap{gap:10px}.lp-top .acct-label{display:none}.lp-top .acct{width:38px;padding:0;justify-content:center}}
+
+/* Gracias de las clases gratis: Zoom y calendario */
+.lp-ok b{display:block;margin-bottom:10px}
+.gracias-acciones{display:grid;gap:8px;margin:6px 0 10px}
+.gracias-acciones .btn{justify-content:center;width:100%}
+.btn-zoom{background:#f2c66d;color:#1f3f32;font-size:.85rem;padding:1.1em 1.5em}
+.btn-cal{background:transparent;border:1px solid #2b5443;color:#1f3f32}
+.gracias-acciones .gcal{justify-self:center;font-size:.85rem;color:#2b5443;font-weight:700}
+.lp-ok small{display:block;color:#4a5a51}
+
+
+/* ---------- Landings en modo claro: hero blanco con Karen, formulario destacado y bloques que alternan ---------- */
+/* Bloques que alternan claro y oscuro con colores fijos (no cambian con el modo oscuro del equipo) */
+.tone-light{--bg:#f6f4ec;--surface:#fffdf6;--fg:#22302a;--muted:#5d6b63;--line:#d9d5c3;background:var(--bg);color:var(--fg)}
+.tone-dark{--surface:#24483a;--fg:#ece7d3;--muted:#c3cdbf;--line:rgba(236,231,211,.16);background:#1f3f32;color:var(--fg)}
+.tone-dark .eyebrow{color:#f2c66d}
+.tone-light .eyebrow{color:#8a6430}
+/* Primer bloque en blanco: el título en verde y el formulario en verde para que resalte */
+.lp-hero.hero-light{background:#fffdf6;color:#2b5443}
+.hero-light .hero-motif{color:#2b5443!important;opacity:.06}
+.hero-light h1{color:#2b5443}
+.hero-light .lede{color:#4a5a51}
+.hero-light .eyebrow{color:#8a6430}
+.hero-light .facts span{border-color:rgba(43,84,67,.35);color:#2b5443}
+.hero-light .facts span.hl{background:#f2c66d;border-color:#f2c66d;color:#1f3f32}
+.next-class{display:inline-flex;align-items:center;gap:10px;margin-top:22px;padding:12px 16px;border-radius:14px;background:#fbf0d4;border:1px solid #f2c66d;color:#1f3f32;font-weight:700}
+.next-class::before{content:"";width:9px;height:9px;border-radius:50%;background:#2b5443;flex:none}
+.hero-light .lp-form{background:#2b5443;color:#ece7d3;box-shadow:0 30px 60px -25px rgba(31,63,50,.55)}
+.hero-light .lp-form h3{color:#ece7d3}.hero-light .lp-form h3 em{font-style:normal;color:#f2c66d}
+.hero-light .lp-form input,.hero-light .lp-form select{background:#fffdf6;border-color:#fffdf6;color:#1f3f32}
+.hero-light .lp-form .btn{background:#f2c66d;color:#1f3f32}
+.hero-light .lp-form small{color:#c3cdbf}
+.hero-light .lp-ok{background:#fffdf6;color:#1f3f32}
+.hero-light .lp-err{color:#ffd9cc!important}
+.wa-alt{font-size:.85rem;text-align:center;color:#c3cdbf}.wa-alt a{color:#f2c66d;font-weight:700}
+#reservar{scroll-margin-top:16px}
+.wa-row{display:grid;grid-template-columns:minmax(0,9.5em) minmax(0,1fr);gap:8px}.wa-row select{min-width:0}
+.btn-sun{background:#f2c66d;color:#1f3f32;justify-content:center}
+/* Karen pequeña junto al eyebrow, para que su cara se vea apenas se abre la página */
+.con-karen{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.con-karen img{width:64px;height:64px;border-radius:50%;object-fit:cover;object-position:50% 20%;border:2px solid #f2c66d;flex:none}
+.con-karen small{display:block;font-size:.85rem;font-weight:700;color:#2b5443;margin-bottom:4px}
+@media (min-width:861px){.con-karen img{width:80px;height:80px}}
+/* Botón de la primera pantalla: solo en celular, donde el formulario queda más abajo */
+.go-form{display:none}
+@media (max-width:860px){.go-form{display:flex;width:100%;margin-top:18px}}
+.cierre{text-align:center}.cierre .wrap{display:grid;justify-items:center;gap:20px}
+.cierre h2{font-size:clamp(1.9rem,4vw,2.8rem)}
+/* Dentro de la tarjeta del formulario: Zoom es el botón principal; el calendario, secundario y legible */
+.hero-light .lp-form .btn-cal{background:transparent;border:1px solid currentColor;color:#1f3f32}
+.hero-light .lp-ok small{color:#4a5a51}

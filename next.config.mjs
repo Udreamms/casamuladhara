@@ -1,4 +1,4 @@
-const PAGINAS = 'index|login|aula|admin|terapias|clase-pendulo|formacion|meditacion|sala';
+const PAGINAS = 'index|login|aula|admin|terapias|pendulo|clase-pendulo|tarot|clase-tarot|formacion|meditacion|sala';
 
 /** @type {import('next').NextConfig} */
 export default {
@@ -7,9 +7,6 @@ export default {
     return [
       { source: '/index.html', destination: '/', permanent: true },
       { source: `/:pagina(${PAGINAS}).html`, destination: '/:pagina', permanent: true },
-      // Péndulo Hebreo tiene una sola landing: la clase gratis. El curso de 70 USD lo vende Karen por WhatsApp.
-      { source: '/pendulo', destination: '/clase-pendulo', permanent: false },
-      { source: '/pendulo.html', destination: '/clase-pendulo', permanent: false },
     ];
   },
   async headers() {

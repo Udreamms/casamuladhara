@@ -57,8 +57,8 @@ d.classList.add('fx');setTimeout(function(){if(!window.__casonaReady)d.classList
     </a>
     <nav class="main" id="nav">
       <a href="#inicio">Tour</a>
-      <a href="/formacion">Formaciones</a>
-      <a href="/clase-pendulo">Péndulo Hebreo</a>
+      <details class="dd"><summary>Clases gratis</summary><div class="dd-panel"><a href="/clase-pendulo"><b>Péndulo Hebreo</b><span>Sábados 19:00 (Chile)</span></a><a href="/clase-tarot"><b>Tarot Terapéutico</b><span>Martes 19:00 (Chile)</span></a></div></details>
+      <details class="dd"><summary>Formaciones</summary><div class="dd-panel"><a href="/pendulo">Péndulo Hebreo Nivel 1</a><a href="/tarot">Tarot Terapéutico</a><a href="/formacion">Terapeuta Holística Integral</a></div></details>
     </nav>
     <div class="tools">
       <button class="icon-btn round" type="button" aria-label="Activar sonido ambiente" aria-pressed="false" id="sound-btn" title="Sonido ambiente" hidden>
@@ -410,6 +410,11 @@ $('#cart-btn').addEventListener('click',()=>say(cart?('Tienes '+cart+' producto'
 const menuBtn=$('#menu-btn'),nav=$('#nav');
 menuBtn.addEventListener('click',()=>{const o=nav.classList.toggle('open');menuBtn.setAttribute('aria-expanded',o)});
 nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{nav.classList.remove('open');menuBtn.setAttribute('aria-expanded','false')}));
+// Desplegables del menú (Clases gratis, Formaciones): uno abierto a la vez; se cierran al tocar fuera o con Esc
+const dds=[...nav.querySelectorAll('.dd')],closeDds=keep=>dds.forEach(d=>{if(d!==keep)d.open=false});
+dds.forEach(d=>d.addEventListener('toggle',()=>{if(d.open)closeDds(d)}));
+document.addEventListener('click',e=>{if(!e.target.closest('#nav'))closeDds()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDds()});
 
 // "Mi cuenta" y "Crear cuenta" llevan al login real (Firebase Auth)
 document.querySelectorAll('[data-open-login]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();location.href=b.dataset.tab==='signup'?'/login?register=true':'/login?mode=login'}));

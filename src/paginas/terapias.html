@@ -25,7 +25,16 @@
   </defs>
 </svg>
 <div class="ribbon">Vista previa · landing para publicidad · sin menú, un solo objetivo</div>
-<header class="lp-top"><div class="wrap"><span class="brand"><svg style="color:var(--on-brand)"><use href="#mark"/></svg><span class="brand-name"><b>CASA MULADHARA</b><small>SANACIÓN &amp; BIENESTAR</small></span></span><a class="lp-back" href="/">← Volver al sitio</a></div></header>
+<header class="lp-top"><div class="wrap">
+  <a class="brand" href="/" aria-label="Casa Muladhara, inicio"><svg style="color:var(--on-brand)"><use href="#mark"/></svg><span class="brand-name"><b>CASA MULADHARA</b><small>SANACIÓN &amp; BIENESTAR</small></span></a>
+  <nav class="menu" id="menu" aria-label="Menú principal">
+    <a href="/">Tour</a>
+    <details class="dd"><summary>Clases gratis</summary><div class="dd-panel"><a href="/clase-pendulo"><b>Péndulo Hebreo</b><span>Sábados 19:00 (Chile)</span></a><a href="/clase-tarot"><b>Tarot Terapéutico</b><span>Martes 19:00 (Chile)</span></a></div></details>
+    <details class="dd"><summary>Formaciones</summary><div class="dd-panel"><a href="/pendulo">Péndulo Hebreo Nivel 1</a><a href="/tarot">Tarot Terapéutico</a><a href="/formacion">Terapeuta Holística Integral</a></div></details>
+  </nav>
+  <a class="icon-btn acct" href="/aula" id="acct-btn" aria-label="Mi cuenta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg><span class="acct-label">Mi cuenta</span></a>
+  <button class="icon-btn round menu-toggle" type="button" id="menu-btn" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</div></header>
 
 <section class="lp-hero"><svg class="hero-motif" style="color:var(--on-brand)" aria-hidden="true"><use href="#mark"/></svg><div class="wrap">
   <div>
@@ -54,5 +63,6 @@
 </div></section>
 <footer style="padding-block:28px"><div class="wrap legal" style="margin:0;border:0;padding:0"><span>© 2026 Casa Muladhara</span><span>Instagram @casa.muladhara</span></div></footer>
 <script src="/assets/js/landing/petalos.js"></script>
+<script src="/assets/js/landing/menu.js"></script>
 <script src="/assets/js/landing/captacion.js"></script>
 </body></html>

@@ -6,7 +6,10 @@
 import { FieldValue } from 'firebase-admin/firestore';
 import { auth, db, json } from '@/lib/server/services.js';
 
-const FORMS = ['pendulo', 'clase-pendulo', 'formacion', 'sala', 'terapias', 'meditacion', 'regalo'];
+const FORMS = ['pendulo', 'clase-pendulo', 'tarot', 'clase-tarot', 'formacion', 'sala', 'terapias', 'meditacion', 'regalo'];
+// Clases gratis: al registrarse, la respuesta trae el enlace de Zoom guardado por la Maestra en config/clases (nunca va en el HTML)
+const ZOOM = { 'clase-pendulo': 'zoomPendulo', 'clase-tarot': 'zoomTarot' };
+const HTTPS = /^https:\/\/[^\s"'<>]+$/i;
 const UTM = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'fbclid', 'gclid'];
 const str = (v, max) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -37,7 +40,12 @@ export async function POST(request) {
       if (!lead.whatsapp && !lead.email) return json({ error: 'Déjanos tu WhatsApp o tu correo para poder escribirte.' }, 400);
       if (lead.email && !EMAIL.test(lead.email)) return json({ error: 'Revisa tu correo.' }, 400);
       const ref = await db().collection('leads').add(lead);
-      return json({ ok: true, id: ref.id });
+      let zoom = '';
+      if (ZOOM[form]) {
+        const enlace = ((await db().doc('config/clases').get()).data() || {})[ZOOM[form]];
+        if (typeof enlace === 'string' && HTTPS.test(enlace.trim())) zoom = enlace.trim();
+      }
+      return json({ ok: true, id: ref.id, ...(zoom ? { zoom } : {}) });
     }
     if (body.action === 'all' || body.action === 'status') {
       let user;

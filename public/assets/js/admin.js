@@ -62,15 +62,19 @@ const A = { students: [], questions: [], tickets: [], posts: [], config: {}, pay
 let api = null; // llama a /api/admin con el token de la Maestra
 
 async function loadAll() {
-  const [us, qs, tk, ps, cf, fm] = await Promise.all([
+  const [us, qs, tk, ps, cf, fm, cl, cu] = await Promise.all([
     getDocs(query(collection(db, 'users'), orderBy('createdAt', 'desc'))),
     getDocs(query(collectionGroup(db, 'questions'), where('answered', '==', false), orderBy('createdAt', 'desc'), limit(100))),
     getDocs(query(collectionGroup(db, 'tickets'), where('status', '==', 'open'), orderBy('createdAt', 'desc'), limit(100))),
     getDocs(query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(60))),
     getDoc(doc(db, 'config', 'aula')),
     getDoc(doc(db, 'config', 'formacion')),
+    getDoc(doc(db, 'config', 'clases')),
+    getDoc(doc(db, 'config', 'cursos')),
   ]);
   A.formacion = fm.data() || {};
+  A.clases = cl.data() || {};
+  A.cursos = cu.data() || {};
   A.students = us.docs.map((d) => ({ id: d.id, ...d.data() })).filter((u) => u.role !== 'admin');
   A.questions = qs.docs.map((d) => ({ id: d.id, uid: d.ref.parent.parent.id, ...d.data() }));
   A.tickets = tk.docs.map((d) => ({ id: d.id, uid: d.ref.parent.parent.id, ...d.data() }));
@@ -150,6 +154,9 @@ const data = {
   deletePost: async (id) => { await deleteDoc(doc(db, 'posts', id)); A.posts = A.posts.filter((p) => p.id !== id); },
   saveConfig: async (d) => { await setDoc(doc(db, 'config', 'aula'), { ...d, updatedAt: serverTimestamp() }, { merge: true }); Object.assign(A.config, d); },
   // Fecha de inicio y cupos del próximo grupo de la formación: los muestra la landing /formacion (src/app/api/formacion)
+  // Enlaces de Zoom de las clases gratis (se entregan al registrarse, src/app/api/leads) y fechas de inicio de los cursos (src/app/api/proximas)
+  saveClases: async (d) => { await setDoc(doc(db, 'config', 'clases'), { ...d, updatedAt: serverTimestamp() }, { merge: true }); Object.assign(A.clases, d); },
+  saveCursos: async (d) => { await setDoc(doc(db, 'config', 'cursos'), { ...d, updatedAt: serverTimestamp() }, { merge: true }); Object.assign(A.cursos, d); },
   saveFormacion: async (d) => { await setDoc(doc(db, 'config', 'formacion'), { ...d, updatedAt: serverTimestamp() }, { merge: true }); Object.assign(A.formacion, d); },
 };
 
@@ -322,7 +329,7 @@ V.clase = () => {
   <div class="view-head"><div><span class="eyebrow">Nivel ${lv.n} · ${esc(lv.title)}</span><h1 style="font-size:clamp(1.4rem,2.6vw,1.9rem)">${esc(m.title)}</h1><p>Así la ven tus alumnas. Desde el temario del nivel puedes recorrer todas sus clases.</p></div><a class="btn btn-ghost btn-sm" href="${src}" target="_blank" rel="noopener">Abrir en otra pestaña</a></div>
   <iframe class="aula-frame" src="${src}&embed=1" title="Clase: ${esc(l.t)}"></iframe>`;
 };
-const LEAD_FORMS = { pendulo: 'Péndulo Hebreo', 'clase-pendulo': 'Clase gratis Péndulo', formacion: 'Formación', sala: 'Sala Abierta', terapias: 'Terapias', meditacion: 'Meditación', regalo: 'Portada · Sala Abierta' };
+const LEAD_FORMS = { pendulo: 'Péndulo Hebreo', 'clase-pendulo': 'Clase gratis Péndulo', tarot: 'Tarot Terapéutico', 'clase-tarot': 'Clase gratis Tarot', formacion: 'Formación', sala: 'Sala Abierta', terapias: 'Terapias', meditacion: 'Meditación', regalo: 'Portada · Sala Abierta' };
 const LEAD_STATES = [['nuevo', 'Nueva'], ['contactado', 'Contactada'], ['inscrita', 'Inscrita'], ['descartado', 'Descartada']];
 const waLink = (n) => { const d = String(n || '').replace(/\D/g, ''); return d ? `https://wa.me/${d}` : ''; };
 V.interesadas = () => {
@@ -374,6 +381,10 @@ V.ajustes = () => `<div class="view-head"><div><span class="eyebrow">Portal de l
     <form id="wv-form" style="display:flex;gap:8px;flex-wrap:wrap"><input type="url" id="wv-url" placeholder="https://" value="${esc(A.config.welcomeVideo || '')}" style="flex:1;min-width:220px"><button class="btn btn-primary btn-sm">Guardar</button></form></section>
   <section class="card panel"><h3>Formación: próximo grupo</h3><p class="muted" style="margin:0;font-size:.88rem">Fecha de inicio y cupos que muestra la página /formacion. Déjala vacía para mostrar "Próximo grupo: escríbenos y te avisamos". Cuando la fecha pasa, la página deja de mostrarla sola.</p>
     <form id="fm-form" style="display:flex;gap:8px;flex-wrap:wrap;align-items:end"><label style="display:grid;gap:6px;font-size:.84rem"><b>Fecha de inicio</b><input type="date" id="fm-start" value="${esc(A.formacion?.nextStart || '')}"></label><label style="display:grid;gap:6px;font-size:.84rem"><b>Cupos</b><input type="number" id="fm-seats" min="1" max="200" step="1" placeholder="Ej.: 10" value="${esc(A.formacion?.seats ?? '')}" style="width:110px"></label><button class="btn btn-primary btn-sm">Guardar</button></form></section>
+  <section class="card panel"><h3>Clases gratis: enlaces de Zoom</h3><p class="muted" style="margin:0;font-size:.88rem">Al reservar su lugar, la persona ve un botón para entrar a la clase con este enlace. Déjalo vacío para mostrar "Te enviamos el enlace por WhatsApp".</p>
+    <form id="cl-form" style="display:grid;gap:10px"><label style="display:grid;gap:6px;font-size:.84rem"><b>Enlace de Zoom · clase de Péndulo (sábados)</b><input type="url" id="cl-pendulo" placeholder="https://zoom.us/j/…" value="${esc(A.clases?.zoomPendulo || '')}"></label><label style="display:grid;gap:6px;font-size:.84rem"><b>Enlace de Zoom · clase de Tarot (martes)</b><input type="url" id="cl-tarot" placeholder="https://zoom.us/j/…" value="${esc(A.clases?.zoomTarot || '')}"></label><button class="btn btn-primary btn-sm" style="justify-self:start">Guardar</button></form></section>
+  <section class="card panel"><h3>Cursos: próximo inicio</h3><p class="muted" style="margin:0;font-size:.88rem">Fecha de inicio que muestran /pendulo y /tarot. Déjala vacía para mostrar "Próximo grupo: escríbenos y te avisamos". Cuando la fecha pasa, la página deja de mostrarla sola.</p>
+    <form id="cu-form" style="display:flex;gap:8px;flex-wrap:wrap;align-items:end"><label style="display:grid;gap:6px;font-size:.84rem"><b>Péndulo Hebreo Nivel 1</b><input type="date" id="cu-pendulo" value="${esc(A.cursos?.pendulo || '')}"></label><label style="display:grid;gap:6px;font-size:.84rem"><b>Tarot Terapéutico</b><input type="date" id="cu-tarot" value="${esc(A.cursos?.tarot || '')}"></label><button class="btn btn-primary btn-sm">Guardar</button></form></section>
   <section class="card panel"><h3>Clases en vivo</h3><p class="muted" style="margin:0;font-size:.88rem">Las clases en vivo y sus grabaciones se programan dentro de cada clase del aula, donde ves el contenido.</p><a class="btn btn-ghost btn-sm" style="justify-self:start" href="/aula">Ir al aula</a></section>`;
 
 // Un solo manejador para todos los [data-go]: el menú se vuelve a pintar solo (p. ej. al llegar una alumna nueva) y sus botones siguen funcionando
@@ -488,6 +499,16 @@ function bind() {
     const seats = n === '' ? null : Number(n);
     if (seats !== null && !(Number.isInteger(seats) && seats > 0)) return toast('Los cupos deben ser un número entero mayor que 0.');
     try { await data.saveFormacion({ nextStart, seats }); toast('Próximo grupo guardado'); } catch (err) { fail(err); }
+  };
+  const cl = $('#cl-form'); if (cl) cl.onsubmit = async (e) => {
+    e.preventDefault();
+    const zoomPendulo = $('#cl-pendulo').value.trim(), zoomTarot = $('#cl-tarot').value.trim();
+    if ([zoomPendulo, zoomTarot].some((u) => u && !isHttps(u))) return toast('Los enlaces deben empezar con https://');
+    try { await data.saveClases({ zoomPendulo, zoomTarot }); toast('Enlaces de Zoom guardados'); } catch (err) { fail(err); }
+  };
+  const cu = $('#cu-form'); if (cu) cu.onsubmit = async (e) => {
+    e.preventDefault();
+    try { await data.saveCursos({ pendulo: $('#cu-pendulo').value, tarot: $('#cu-tarot').value }); toast('Fechas de los cursos guardadas'); } catch (err) { fail(err); }
   };
 }
 const papi = (uid) => profileApi(uid);
