@@ -61,10 +61,10 @@ d.classList.add('fx');setTimeout(function(){if(!window.__casonaReady)d.classList
       <a href="/clase-pendulo">Péndulo Hebreo</a>
     </nav>
     <div class="tools">
-      <button class="icon-btn round" type="button" aria-label="Activar sonido ambiente" aria-pressed="false" id="sound-btn" title="Sonido ambiente">
+      <button class="icon-btn round" type="button" aria-label="Activar sonido ambiente" aria-pressed="false" id="sound-btn" title="Sonido ambiente" hidden>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 10v4h4l5 4V6L8 10z"/><path class="wave" d="M16 9c1.5 1.7 1.5 4.3 0 6M18.5 6.5c3 3.2 3 7.8 0 11"/></svg>
       </button>
-      <a class="icon-btn acct" href="/aula" id="acct-btn">
+      <a class="icon-btn acct" href="/aula" id="acct-btn" aria-label="Mi cuenta">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
         <span class="acct-label">Mi cuenta</span>
       </a>
@@ -417,5 +417,6 @@ document.querySelectorAll('[data-open-login]').forEach(b=>b.addEventListener('cl
 <script src="/assets/js/landing/captacion.js"></script>
 <script src="assets/vendor/lenis.min.js" defer></script>
 <script type="module" src="assets/js/recorrido.js"></script>
+<script type="module" src="/assets/js/landing/cuenta.js"></script>
 </body>
 </html>

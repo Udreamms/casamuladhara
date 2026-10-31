@@ -21,6 +21,20 @@ soundBtn?.addEventListener('click', () => {
   soundBtn.setAttribute('aria-label', on ? 'Silenciar sonido ambiente' : 'Activar sonido ambiente');
   audio.set(on);
 });
+// El botón de sonido se ve solo dentro de la casona (desde las puertas hasta la despedida), no en la llegada ni en el pie.
+// Al salir, el sonido se apaga para que nadie quede con música sin un botón a la vista para pararla.
+if (soundBtn) {
+  const salas = stops.filter(s => Number(s.dataset.stop) >= 1);
+  // Dentro = alguna sala cruza el centro de la pantalla
+  const revisar = () => {
+    const mid = innerHeight / 2;
+    soundBtn.hidden = !salas.some(s => { const r = s.getBoundingClientRect(); return r.top < mid && r.bottom > mid; });
+    if (soundBtn.hidden && soundBtn.getAttribute('aria-pressed') === 'true') soundBtn.click();
+  };
+  addEventListener('scroll', revisar, { passive: true });
+  addEventListener('resize', revisar);
+  revisar();
+}
 // Cuencos afinados en Do pentatónico (Do Re Mi Sol La), así todas las notas combinan entre sí,
 // sobre un zumbido grave y quieto de Do y Sol. Se genera en el navegador: sin archivos de audio.
 function makeAmbient() {
