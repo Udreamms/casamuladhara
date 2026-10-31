@@ -163,10 +163,10 @@
     const sinAnio = d.getUTCFullYear() === anioHoy || (d.getUTCFullYear() === anioHoy + 1 && t - hoy < 183 * 864e5);
     return `${DIAS[d.getUTCDay()]} ${d.getUTCDate()} de ${MESES[d.getUTCMonth()]}${sinAnio ? '' : ` de ${d.getUTCFullYear()}`}`;
   };
-  fetch('/api/formacion').then((r) => (r.ok ? r.json() : Promise.reject())).then(({ nextStart, seats }) => {
+  fetch('/api/formacion').then((r) => (r.ok ? r.json() : Promise.reject())).then(({ nextStart }) => {
     const f = fecha(nextStart);
     document.querySelectorAll('[data-next-start]').forEach((el) => (el.textContent = f || 'escríbenos y te avisamos'));
-    document.querySelectorAll('[data-seats]').forEach((el) => (el.textContent = f && seats > 0 ? ` · ${seats} cupos` : ''));
+    document.querySelectorAll('[data-seats]').forEach((el) => (el.textContent = f ? ' · cupos limitados' : ''));
     document.querySelectorAll('[data-next-wrap]').forEach((el) => (el.hidden = false));
   }).catch(() => { /* queda "Inscripciones abiertas" */ });
 })();

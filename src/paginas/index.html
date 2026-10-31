@@ -47,7 +47,7 @@ d.classList.add('fx');setTimeout(function(){if(!window.__casonaReady)d.classList
   <div class="veil-bar"><i id="veil-bar"></i></div>
 </div>
 
-<div class="ribbon">Grupo Fundadoras de la Formación · inicia el 1 de diciembre · 10 cupos</div>
+<div class="ribbon">Grupo Fundadoras de la Formación · <span data-fi-ribbon>inscripciones abiertas</span> · cupos limitados</div>
 
 <header class="top">
   <div class="wrap">
@@ -236,7 +236,7 @@ d.classList.add('fx');setTimeout(function(){if(!window.__casonaReady)d.classList
     </div>
     <div class="offer-buy">
       <span class="seats">Cupos limitados por generación</span>
-      <div class="start">Próxima generación <b>2027</b></div>
+      <div class="start">Próximo grupo · <b data-fi-start>inscripciones abiertas</b></div>
       <div class="price">$449<small>al contado, o 9 cuotas de $55 mensuales</small></div>
       <button class="btn btn-cream" type="button" data-open-login data-tab="signup">Reservar mi cupo</button>
       <a class="alt" href="/clase-pendulo">Prefiero empezar con la clase gratis de Péndulo Hebreo →</a>
@@ -253,15 +253,15 @@ d.classList.add('fx');setTimeout(function(){if(!window.__casonaReady)d.classList
     <h2>Sala Abierta con Karen</h2>
     <p>Cada martes y sábado Karen abre una sala en vivo y gratuita donde comparte pequeñas formaciones de las que se hacen en la Escuela. En 30 minutos responde tus preguntas y conversa contigo. Es la mejor forma de conocerla antes de formarte.</p>
     <ul class="sala-list">
-      <li><b>Martes · 19:00</b><span>30 minutos en vivo con Karen</span></li>
-      <li><b>Sábado · 11:00</b><span>30 minutos en vivo con Karen</span></li>
+      <li><b>Martes · 19:00</b><span>Clase gratis de Tarot Terapéutico · 30 minutos en vivo con Karen</span></li>
+      <li><b>Sábado · 19:00</b><span>Clase gratis de Péndulo Hebreo · 30 minutos en vivo con Karen</span></li>
     </ul>
     <small class="note-small">Horario de Chile. Al registrarte te enviamos el tema y el enlace de cada clase.</small>
     <form class="gift-form" id="gift-form" data-lead="regalo">
       <label>Nombre<input id="g-name" name="name" type="text" autocomplete="name" placeholder="Tu nombre" required></label>
       <label>Correo electrónico<input id="g-email" name="email" type="email" autocomplete="email" placeholder="tu@correo.com" required></label>
       <label>WhatsApp<input id="g-wa" name="whatsapp" type="tel" autocomplete="tel" placeholder="+56 9 1234 5678"></label>
-      <label>¿A qué clase quieres ir?<select id="g-when" name="interest"><option>Martes · 19:00</option><option>Sábado · 11:00</option><option>Avísenme de todas las clases</option></select></label>
+      <label>¿A qué clase quieres ir?<select id="g-when" name="interest"><option>Martes · 19:00</option><option>Sábado · 19:00</option><option>Avísenme de todas las clases</option></select></label>
       <button class="btn btn-cream" type="submit">Reservar mi lugar gratis</button>
       <p class="gift-ok" id="gift-ok" hidden>¡Listo! Tu lugar quedó reservado. Karen te escribirá por WhatsApp antes de la clase con el enlace de la sala.</p>
       <small>Sin costo. Puedes darte de baja cuando quieras.</small>
@@ -421,6 +421,7 @@ document.querySelectorAll('[data-open-login]').forEach(b=>b.addEventListener('cl
 </script>
 <script src="/assets/js/landing/captacion.js"></script>
 <script src="/assets/js/landing/agendar.js" defer></script>
+<script src="/assets/js/landing/formacion-inicio.js" defer></script>
 <script src="assets/vendor/lenis.min.js" defer></script>
 <script type="module" src="assets/js/recorrido.js"></script>
 <script type="module" src="/assets/js/landing/cuenta.js"></script>

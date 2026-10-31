@@ -521,8 +521,7 @@ V.comunidad = () => `<div class="view-head"><div><span class="eyebrow">Portal de
 V.ajustes = () => `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>Ajustes del aula</h1></div></div>
   <section class="card panel"><h3>Video de bienvenida</h3><p class="muted" style="margin:0;font-size:.88rem">Lo ven las cuentas gratis en Inicio. Pega el enlace de YouTube, Vimeo o Google Drive. Déjalo vacío para mostrar "Muy pronto".</p>
     <form id="wv-form" style="display:flex;gap:8px;flex-wrap:wrap"><input type="url" id="wv-url" placeholder="https://" value="${esc(A.config.welcomeVideo || '')}" style="flex:1;min-width:220px"><button class="btn btn-primary btn-sm">Guardar</button></form></section>
-  <section class="card panel"><h3>Formación: próximo grupo</h3><p class="muted" style="margin:0;font-size:.88rem">Fecha de inicio y cupos que muestra la página /formacion. Déjala vacía para mostrar "Próximo grupo: escríbenos y te avisamos". Cuando la fecha pasa, la página deja de mostrarla sola.</p>
-    <form id="fm-form" style="display:flex;gap:8px;flex-wrap:wrap;align-items:end"><label style="display:grid;gap:6px;font-size:.84rem"><b>Fecha de inicio</b><input type="date" id="fm-start" value="${esc(A.formacion?.nextStart || '')}"></label><label style="display:grid;gap:6px;font-size:.84rem"><b>Cupos</b><input type="number" id="fm-seats" min="1" max="200" step="1" placeholder="Ej.: 10" value="${esc(A.formacion?.seats ?? '')}" style="width:110px"></label><button class="btn btn-primary btn-sm">Guardar</button></form></section>
+  <section class="card panel"><h3>Formación: próximo grupo</h3><p class="muted" style="margin:0;font-size:.88rem">La portada y la página /formacion muestran la fecha más cercana de tipo "Inicio de un grupo de formación" que tengas en el Calendario, con "cupos limitados". Cuando la fecha pasa, dejan de mostrarla solas.</p><button class="btn btn-ghost btn-sm" style="justify-self:start" data-go="calendario">Abrir el calendario</button></section>
   <section class="card panel"><h3>Google Meet: clases gratis y terapias online</h3><p class="muted" style="margin:0;font-size:.88rem">Al reservar su lugar, la persona ve un botón para entrar a la clase con este enlace. Déjalo vacío para mostrar "Te enviamos el enlace por WhatsApp".</p>
     <form id="cl-form" style="display:grid;gap:10px"><label style="display:grid;gap:6px;font-size:.84rem"><b>Enlace de Google Meet · clase de Péndulo (sábados)</b><input type="url" id="cl-pendulo" placeholder="https://meet.google.com/abc-defg-hij" value="${esc(A.clases?.enlacePendulo || '')}"></label><label style="display:grid;gap:6px;font-size:.84rem"><b>Enlace de Google Meet · clase de Tarot (martes)</b><input type="url" id="cl-tarot" placeholder="https://meet.google.com/abc-defg-hij" value="${esc(A.clases?.enlaceTarot || '')}"></label><label style="display:grid;gap:6px;font-size:.84rem"><b>Enlace de Google Meet · terapias online</b><input type="url" id="cl-terapias" placeholder="https://meet.google.com/abc-defg-hij" value="${esc(A.clases?.enlaceTerapias || '')}"></label><button class="btn btn-primary btn-sm" style="justify-self:start">Guardar</button></form></section>
   <section class="card panel"><h3>Cursos: próximo inicio</h3><p class="muted" style="margin:0;font-size:.88rem">Las páginas /pendulo y /tarot muestran la fecha más cercana que tengas en el Calendario como "Curso Péndulo Hebreo Nivel 1" o "Grupo de Tarot Terapéutico".</p><button class="btn btn-ghost btn-sm" style="justify-self:start" data-go="calendario">Abrir el calendario</button></section>
@@ -641,13 +640,7 @@ function bind() {
     e.preventDefault(); const u = $('#wv-url').value.trim(); if (u && !isHttps(u)) return toast('El enlace debe empezar con https://');
     try { await data.saveConfig({ welcomeVideo: u }); toast('Video de bienvenida guardado'); } catch (err) { fail(err); }
   };
-  const fm = $('#fm-form'); if (fm) fm.onsubmit = async (e) => {
-    e.preventDefault();
-    const nextStart = $('#fm-start').value; const n = $('#fm-seats').value.trim();
-    const seats = n === '' ? null : Number(n);
-    if (seats !== null && !(Number.isInteger(seats) && seats > 0)) return toast('Los cupos deben ser un número entero mayor que 0.');
-    try { await data.saveFormacion({ nextStart, seats }); toast('Próximo grupo guardado'); } catch (err) { fail(err); }
-  };
+
   const cl = $('#cl-form'); if (cl) cl.onsubmit = async (e) => {
     e.preventDefault();
     const enlacePendulo = $('#cl-pendulo').value.trim(), enlaceTarot = $('#cl-tarot').value.trim(), enlaceTerapias = $('#cl-terapias').value.trim();
