@@ -75,5 +75,6 @@ node scripts/admin.mjs enroll alumna@correo.com --levels 1,2 --plan mensual --pa
 node scripts/admin.mjs list
 node scripts/deploy-backend.mjs     # publica reglas (e índices, si la cuenta tiene permiso)
 node scripts/test-rules.mjs         # prueba de aislamiento (crea y borra cuentas de prueba)
+node scripts/calendario-inicial.mjs # carga una vez las fechas iniciales del Calendario de la Maestra (no duplica)
 node scripts/auth-domains.mjs mi-dominio.vercel.app   # autoriza un dominio para el login
 ```

@@ -8,7 +8,7 @@ import {
   onAuthStateChanged, onIdTokenChanged, signOut,
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 import {
-  doc, getDoc, setDoc, updateDoc, deleteDoc, collection, collectionGroup, getDocs, query, orderBy, where, limit,
+  doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, collection, collectionGroup, getDocs, query, orderBy, where, limit,
   writeBatch, serverTimestamp, onSnapshot,
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 
@@ -62,7 +62,7 @@ const A = { students: [], questions: [], tickets: [], posts: [], config: {}, pay
 let api = null; // llama a /api/admin con el token de la Maestra
 
 async function loadAll() {
-  const [us, qs, tk, ps, cf, fm, cl, cu] = await Promise.all([
+  const [us, qs, tk, ps, cf, fm, cl] = await Promise.all([
     getDocs(query(collection(db, 'users'), orderBy('createdAt', 'desc'))),
     getDocs(query(collectionGroup(db, 'questions'), where('answered', '==', false), orderBy('createdAt', 'desc'), limit(100))),
     getDocs(query(collectionGroup(db, 'tickets'), where('status', '==', 'open'), orderBy('createdAt', 'desc'), limit(100))),
@@ -70,11 +70,9 @@ async function loadAll() {
     getDoc(doc(db, 'config', 'aula')),
     getDoc(doc(db, 'config', 'formacion')),
     getDoc(doc(db, 'config', 'clases')),
-    getDoc(doc(db, 'config', 'cursos')),
   ]);
   A.formacion = fm.data() || {};
   A.clases = cl.data() || {};
-  A.cursos = cu.data() || {};
   A.students = us.docs.map((d) => ({ id: d.id, ...d.data() })).filter((u) => u.role !== 'admin');
   A.questions = qs.docs.map((d) => ({ id: d.id, uid: d.ref.parent.parent.id, ...d.data() }));
   A.tickets = tk.docs.map((d) => ({ id: d.id, uid: d.ref.parent.parent.id, ...d.data() }));
@@ -140,6 +138,24 @@ const data = {
     A.answers = out.answers.sort((a, b) => b.updatedAt - a.updatedAt);
     return A.answers;
   },
+  // Calendario de la Maestra (calendario/{id}): clases gratis, cursos, formación, recesos, bloqueos y recordatorios
+  cal: async () => {
+    const s = await getDocs(query(collection(db, 'calendario'), orderBy('date', 'asc')));
+    A.cal = s.docs.map((d) => ({ id: d.id, ...d.data() }));
+    return A.cal;
+  },
+  calSave: async (id, d) => {
+    if (id) await updateDoc(doc(db, 'calendario', id), d);
+    else await addDoc(collection(db, 'calendario'), { ...d, createdAt: serverTimestamp() });
+  },
+  calAddMany: async (list) => {
+    for (let i = 0; i < list.length; i += 400) {
+      const b = writeBatch(db);
+      list.slice(i, i + 400).forEach((d) => b.set(doc(collection(db, 'calendario')), { ...d, createdAt: serverTimestamp() }));
+      await b.commit();
+    }
+  },
+  calDelete: async (id) => { await deleteDoc(doc(db, 'calendario', id)); },
   // Personas que dejaron sus datos en las landings (src/app/api/leads): las más recientes primero
   leads: async (body = { action: 'all' }) => {
     const r = await fetch('/api/leads', {
@@ -154,9 +170,9 @@ const data = {
   deletePost: async (id) => { await deleteDoc(doc(db, 'posts', id)); A.posts = A.posts.filter((p) => p.id !== id); },
   saveConfig: async (d) => { await setDoc(doc(db, 'config', 'aula'), { ...d, updatedAt: serverTimestamp() }, { merge: true }); Object.assign(A.config, d); },
   // Fecha de inicio y cupos del próximo grupo de la formación: los muestra la landing /formacion (src/app/api/formacion)
-  // Enlaces de Google Meet de las clases gratis (se entregan al registrarse, src/app/api/leads) y fechas de inicio de los cursos (src/app/api/proximas)
+  // Enlaces de Google Meet de las clases gratis (se entregan al registrarse, src/app/api/leads).
+  // El inicio de los cursos (/pendulo, /tarot) sale del Calendario (src/app/api/proximas).
   saveClases: async (d) => { await setDoc(doc(db, 'config', 'clases'), { ...d, updatedAt: serverTimestamp() }, { merge: true }); Object.assign(A.clases, d); },
-  saveCursos: async (d) => { await setDoc(doc(db, 'config', 'cursos'), { ...d, updatedAt: serverTimestamp() }, { merge: true }); Object.assign(A.cursos, d); },
   saveFormacion: async (d) => { await setDoc(doc(db, 'config', 'formacion'), { ...d, updatedAt: serverTimestamp() }, { merge: true }); Object.assign(A.formacion, d); },
 };
 
@@ -165,6 +181,7 @@ const S = { view: 'alumnas', q: '', open: null, filter: 'todas', lvOpen: {}, fq:
 const NAV = [
   ['alumnas', 'Alumnas', '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5a6.5 6.5 0 0 1 3.5 5.5"/>', () => A.students.filter(isNew).length],
   ['interesadas', 'Interesadas', '<path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/>', () => (A.leads || []).filter((l) => l.status === 'nuevo').length],
+  ['calendario', 'Calendario', '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'],
   ['formacion', 'Formación completa', '<path d="M3 8 12 4l9 4-9 4z"/><path d="M7 10v5c3 2 7 2 10 0v-5"/>'],
   ['pagos', 'Pagos', '<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h4"/>'],
   ['mensajes', 'Mensajes', '<path d="M4 5h16v11H9l-5 4z"/>'],
@@ -348,6 +365,106 @@ V.interesadas = () => {
     <td><select data-lead-status="${esc(l.id)}" aria-label="Estado">${LEAD_STATES.map(([k, t]) => `<option value="${k}" ${l.status === k ? 'selected' : ''}>${t}</option>`).join('')}</select></td></tr>`; }).join('') || '<tr><td colspan="6" class="muted">Todavía no hay interesadas.</td></tr>'}
   </tbody></table></div></section>`;
 };
+// ---------- Calendario de la Maestra ----------
+// Fechas como texto AAAA-MM-DD (día de Chile), sin horas de por medio: así no hay corrimientos por zona horaria.
+const CAL_TYPES = {
+  'clase-pendulo': ['Clase gratis Péndulo', '#d9a93f'],
+  'clase-tarot': ['Clase gratis Tarot', '#7a5c8e'],
+  'curso-pendulo': ['Curso Péndulo Hebreo Nivel 1 (70 USD)', '#b07d1f'],
+  tarot: ['Grupo de Tarot Terapéutico (35 USD/mes)', '#5a3f6e'],
+  formacion: ['Formación (clase de un grupo)', '#3f7a5e'],
+  'formacion-inicio': ['Inicio de un grupo de formación', '#2b5443'],
+  bloqueado: ['Karen no disponible', '#b8402f'],
+  receso: ['Receso', '#8d8a80'],
+  interno: ['Recordatorio interno', '#3d6a8f'],
+};
+const LIBRE_NO = ['bloqueado', 'receso'];
+const MES_N = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+const DIA_N = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+const ymd = (t) => new Date(t).toISOString().slice(0, 10);
+const tOf = (s) => { const [y, m, d] = s.split('-').map(Number); return Date.UTC(y, m - 1, d); };
+const hoyCL = () => { const p = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: 'America/Santiago', year: 'numeric', month: 'numeric', day: 'numeric' }).formatToParts(new Date()).map((x) => [x.type, x.value])); return Date.UTC(+p.year, +p.month - 1, +p.day); };
+const fechaLarga = (s) => { const d = new Date(tOf(s)); return `${DIA_N[d.getUTCDay()]} ${d.getUTCDate()} de ${MES_N[d.getUTCMonth()]}`; };
+// Cada evento ocupa sus días (un rango como el receso, hasta 120 días); devuelve { 'AAAA-MM-DD': [eventos] }
+const calPorDia = () => {
+  const m = {};
+  for (const e of A.cal || []) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(e.date || '')) continue;
+    const fin = /^\d{4}-\d{2}-\d{2}$/.test(e.endDate || '') && e.endDate > e.date ? tOf(e.endDate) : tOf(e.date);
+    for (let t = tOf(e.date), n = 0; t <= fin && n < 120; t += 864e5, n++) (m[ymd(t)] ||= []).push(e);
+  }
+  Object.values(m).forEach((l) => l.sort((a, b) => (a.time || '99').localeCompare(b.time || '99')));
+  return m;
+};
+const choque = (l) => l.some((e) => LIBRE_NO.includes(e.type)) && l.some((e) => !LIBRE_NO.includes(e.type));
+const calChip = (e) => { const [n, c] = CAL_TYPES[e.type] || ['Fecha', '#5d6b63']; return `<button class="cal-ev" style="--c:${c}" data-cal-ev="${esc(e.id)}" title="${esc(n)}">${e.time ? `<b>${esc(e.time)}</b> ` : ''}${esc(e.title || n)}</button>`; };
+V.calendario = () => {
+  const head = `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>Calendario</h1><p>Clases gratis, cursos, formación, recesos y días en que no estás disponible. Solo tú lo ves.</p></div><button class="btn btn-primary btn-sm" data-cal-add>Agregar fecha</button></div>`;
+  if (!A.cal) return `${head}<div class="card empty">Cargando calendario…</div>`;
+  const hoy = hoyCL(), dias = calPorDia();
+  const base = S.calMes || (() => { const d = new Date(hoy); return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1); })();
+  const b = new Date(base), y = b.getUTCFullYear(), mo = b.getUTCMonth();
+  const desfase = (b.getUTCDay() + 6) % 7; // la grilla parte el lunes
+  const enMes = new Date(Date.UTC(y, mo + 1, 0)).getUTCDate();
+  const celdas = [];
+  for (let i = 0; i < desfase; i++) celdas.push('<div class="cal-day out"></div>');
+  for (let d = 1; d <= enMes; d++) {
+    const k = ymd(Date.UTC(y, mo, d)), l = dias[k] || [];
+    celdas.push(`<div class="cal-day${tOf(k) === hoy ? ' today' : ''}${choque(l) ? ' clash' : ''}"><span class="cal-n">${d}</span>${choque(l) ? '<span class="cal-clash">Choque: Karen no disponible</span>' : ''}${l.map(calChip).join('')}</div>`);
+  }
+  // Próximos 30 días (lo único que se ve en el celular)
+  const prox = [];
+  for (let t = hoy, n = 0; n < 30; t += 864e5, n++) { const k = ymd(t); if (dias[k]) prox.push([k, dias[k]]); }
+  return `${head}
+  <div class="cal-legend">${Object.entries(CAL_TYPES).map(([, [n, c]]) => `<span style="--c:${c}">${esc(n)}</span>`).join('')}</div>
+  <section class="card panel cal-month">
+    <div class="panel-h"><button class="btn btn-ghost btn-sm" data-cal-mes="-1" aria-label="Mes anterior">←</button><h3 style="text-transform:capitalize">${MES_N[mo]} ${y}</h3><button class="btn btn-ghost btn-sm" data-cal-mes="1" aria-label="Mes siguiente">→</button></div>
+    <div class="cal-grid">${['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((d) => `<div class="cal-wd">${d}</div>`).join('')}${celdas.join('')}</div>
+  </section>
+  <section class="card panel"><h3>Próximos 30 días</h3>
+    ${prox.length ? prox.map(([k, l]) => `<div class="cal-row${choque(l) ? ' clash' : ''}"><b>${fechaLarga(k)}</b>${choque(l) ? '<span class="cal-clash">Choque: Karen no disponible</span>' : ''}<div>${l.map(calChip).join('')}</div></div>`).join('') : '<p class="muted" style="margin:0">No hay fechas en los próximos 30 días.</p>'}
+  </section>`;
+};
+// Formulario para agregar o editar una fecha (en la ventana del portal)
+function calForm(e) {
+  const v = e || { type: 'clase-pendulo', date: ymd(hoyCL()) };
+  dialog(`<span class="eyebrow">Calendario</span><h3>${e ? 'Editar fecha' : 'Agregar fecha'}</h3>
+  <form id="cal-form" style="display:grid;gap:10px;margin-top:12px">
+    <label style="display:grid;gap:6px;font-size:.84rem"><b>Tipo</b><select id="cf-type">${Object.entries(CAL_TYPES).map(([k, [n]]) => `<option value="${k}" ${v.type === k ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select></label>
+    <label style="display:grid;gap:6px;font-size:.84rem"><b>Título</b><input id="cf-title" maxlength="120" value="${esc(v.title || '')}" placeholder="Si lo dejas vacío, se usa el tipo"></label>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><label style="display:grid;gap:6px;font-size:.84rem;flex:1"><b>Fecha</b><input type="date" id="cf-date" required value="${esc(v.date || '')}"></label><label style="display:grid;gap:6px;font-size:.84rem"><b>Hora</b><input type="time" id="cf-time" value="${esc(v.time || '')}"></label></div>
+    <label style="display:grid;gap:6px;font-size:.84rem"><b>Fecha de término (opcional, para rangos)</b><input type="date" id="cf-end" value="${esc(v.endDate || '')}"></label>
+    <label style="display:grid;gap:6px;font-size:.84rem"><b>Nota</b><textarea id="cf-note" maxlength="500" rows="2">${esc(v.note || '')}</textarea></label>
+    ${e ? '' : '<label style="display:flex;gap:8px;align-items:center;font-size:.84rem"><input type="checkbox" id="cf-rep"> Repetir cada semana hasta <input type="date" id="cf-until"></label>'}
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between"><button class="btn btn-primary btn-sm">Guardar</button>${e ? '<button type="button" class="btn btn-ghost btn-sm" id="cf-del">Borrar</button>' : ''}</div>
+  </form>`);
+  $('#cal-form').onsubmit = async (ev) => {
+    ev.preventDefault();
+    const d = { type: $('#cf-type').value, title: $('#cf-title').value.trim(), date: $('#cf-date').value, time: $('#cf-time').value, endDate: $('#cf-end').value, note: $('#cf-note').value.trim() };
+    if (!d.date) return toast('Elige la fecha.');
+    if (d.endDate && d.endDate < d.date) return toast('La fecha de término no puede ser antes de la fecha.');
+    try {
+      const rep = $('#cf-rep')?.checked, hasta = $('#cf-until')?.value;
+      if (!e && rep) {
+        if (!hasta || hasta < d.date) return toast('Elige hasta qué fecha se repite.');
+        const lista = [], largo = d.endDate ? tOf(d.endDate) - tOf(d.date) : 0;
+        for (let t = tOf(d.date); t <= tOf(hasta) && lista.length < 104; t += 7 * 864e5) lista.push({ ...d, date: ymd(t), endDate: d.endDate ? ymd(t + largo) : '' });
+        await data.calAddMany(lista);
+        toast(`${lista.length} fechas agregadas`);
+      } else {
+        await data.calSave(e?.id, d);
+        toast(e ? 'Fecha guardada' : 'Fecha agregada');
+      }
+      $('#dlg').close();
+      await data.cal(); render(false);
+    } catch (err) { fail(err); }
+  };
+  const del = $('#cf-del');
+  if (del) del.onclick = async () => {
+    if (!confirm(`¿Borrar "${e.title || CAL_TYPES[e.type]?.[0] || 'esta fecha'}" del ${fechaLarga(e.date)}?`)) return;
+    try { await data.calDelete(e.id); toast('Fecha borrada'); $('#dlg').close(); await data.cal(); render(false); } catch (err) { fail(err); }
+  };
+}
 V.pagos = () => {
   const cuotas = A.students.filter((u) => u.plan === 'mensual' && u.paymentStatus !== 'overdue');
   const rows = A.students.filter((u) => u.plan !== 'none' || Number(u.grantLevel)).sort((a, b) => (b.paymentStatus === 'overdue') - (a.paymentStatus === 'overdue'));
@@ -383,8 +500,7 @@ V.ajustes = () => `<div class="view-head"><div><span class="eyebrow">Portal de l
     <form id="fm-form" style="display:flex;gap:8px;flex-wrap:wrap;align-items:end"><label style="display:grid;gap:6px;font-size:.84rem"><b>Fecha de inicio</b><input type="date" id="fm-start" value="${esc(A.formacion?.nextStart || '')}"></label><label style="display:grid;gap:6px;font-size:.84rem"><b>Cupos</b><input type="number" id="fm-seats" min="1" max="200" step="1" placeholder="Ej.: 10" value="${esc(A.formacion?.seats ?? '')}" style="width:110px"></label><button class="btn btn-primary btn-sm">Guardar</button></form></section>
   <section class="card panel"><h3>Clases gratis: enlaces de Google Meet</h3><p class="muted" style="margin:0;font-size:.88rem">Al reservar su lugar, la persona ve un botón para entrar a la clase con este enlace. Déjalo vacío para mostrar "Te enviamos el enlace por WhatsApp".</p>
     <form id="cl-form" style="display:grid;gap:10px"><label style="display:grid;gap:6px;font-size:.84rem"><b>Enlace de Google Meet · clase de Péndulo (sábados)</b><input type="url" id="cl-pendulo" placeholder="https://meet.google.com/abc-defg-hij" value="${esc(A.clases?.enlacePendulo || '')}"></label><label style="display:grid;gap:6px;font-size:.84rem"><b>Enlace de Google Meet · clase de Tarot (martes)</b><input type="url" id="cl-tarot" placeholder="https://meet.google.com/abc-defg-hij" value="${esc(A.clases?.enlaceTarot || '')}"></label><button class="btn btn-primary btn-sm" style="justify-self:start">Guardar</button></form></section>
-  <section class="card panel"><h3>Cursos: próximo inicio</h3><p class="muted" style="margin:0;font-size:.88rem">Fecha de inicio que muestran /pendulo y /tarot. Déjala vacía para mostrar "Próximo grupo: escríbenos y te avisamos". Cuando la fecha pasa, la página deja de mostrarla sola.</p>
-    <form id="cu-form" style="display:flex;gap:8px;flex-wrap:wrap;align-items:end"><label style="display:grid;gap:6px;font-size:.84rem"><b>Péndulo Hebreo Nivel 1</b><input type="date" id="cu-pendulo" value="${esc(A.cursos?.pendulo || '')}"></label><label style="display:grid;gap:6px;font-size:.84rem"><b>Tarot Terapéutico</b><input type="date" id="cu-tarot" value="${esc(A.cursos?.tarot || '')}"></label><button class="btn btn-primary btn-sm">Guardar</button></form></section>
+  <section class="card panel"><h3>Cursos: próximo inicio</h3><p class="muted" style="margin:0;font-size:.88rem">Las páginas /pendulo y /tarot muestran la fecha más cercana que tengas en el Calendario como "Curso Péndulo Hebreo Nivel 1" o "Grupo de Tarot Terapéutico".</p><button class="btn btn-ghost btn-sm" style="justify-self:start" data-go="calendario">Abrir el calendario</button></section>
   <section class="card panel"><h3>Clases en vivo</h3><p class="muted" style="margin:0;font-size:.88rem">Las clases en vivo y sus grabaciones se programan dentro de cada clase del aula, donde ves el contenido.</p><a class="btn btn-ghost btn-sm" style="justify-self:start" href="/aula">Ir al aula</a></section>`;
 
 // Un solo manejador para todos los [data-go]: el menú se vuelve a pintar solo (p. ej. al llegar una alumna nueva) y sus botones siguen funcionando
@@ -407,6 +523,7 @@ function go(v) {
     loadAnswers(true).then(() => { if (S.view === 'respuestas') render(false); }).catch(fail);
   }
   if (v === 'interesadas') data.leads().then(() => { if (S.view === 'interesadas') render(false); }).catch(fail);
+  if (v === 'calendario') data.cal().then(() => { if (S.view === 'calendario') render(false); }).catch(fail);
 }
 async function openStudent(uid) {
   S.open = uid; go('ficha');
@@ -419,6 +536,12 @@ function bind() {
   document.querySelectorAll('[data-ans-who]').forEach((b) => (b.onclick = () => { S.ansWho = b.dataset.ansWho; S.ansLv = 0; go('respuestas'); }));
   document.querySelectorAll('[data-ans-reload]').forEach((b) => (b.onclick = () => { b.disabled = true; loadAnswers(true).then(() => render(false)).catch(fail); }));
   document.querySelectorAll('[data-leads-reload]').forEach((b) => (b.onclick = () => { b.disabled = true; data.leads().then(() => render(false)).catch(fail); }));
+  document.querySelectorAll('[data-cal-add]').forEach((b) => (b.onclick = () => calForm()));
+  document.querySelectorAll('[data-cal-ev]').forEach((b) => (b.onclick = () => calForm(A.cal.find((e) => e.id === b.dataset.calEv))));
+  document.querySelectorAll('[data-cal-mes]').forEach((b) => (b.onclick = () => {
+    const d = new Date(S.calMes || (() => { const h = new Date(hoyCL()); return Date.UTC(h.getUTCFullYear(), h.getUTCMonth(), 1); })());
+    S.calMes = Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + Number(b.dataset.calMes), 1); render(false);
+  }));
   document.querySelectorAll('[data-lead-status]').forEach((s) => (s.onchange = async () => {
     const l = A.leads.find((x) => x.id === s.dataset.leadStatus);
     try { await data.leads({ action: 'status', id: l.id, status: s.value }); l.status = s.value; paintNav(); toast('Estado guardado.'); } catch (e) { fail(e); s.value = l.status; }
@@ -505,10 +628,6 @@ function bind() {
     const enlacePendulo = $('#cl-pendulo').value.trim(), enlaceTarot = $('#cl-tarot').value.trim();
     if ([enlacePendulo, enlaceTarot].some((u) => u && !isHttps(u))) return toast('Los enlaces deben empezar con https://');
     try { await data.saveClases({ enlacePendulo, enlaceTarot }); toast('Enlaces de Google Meet guardados'); } catch (err) { fail(err); }
-  };
-  const cu = $('#cu-form'); if (cu) cu.onsubmit = async (e) => {
-    e.preventDefault();
-    try { await data.saveCursos({ pendulo: $('#cu-pendulo').value, tarot: $('#cu-tarot').value }); toast('Fechas de los cursos guardadas'); } catch (err) { fail(err); }
   };
 }
 const papi = (uid) => profileApi(uid);

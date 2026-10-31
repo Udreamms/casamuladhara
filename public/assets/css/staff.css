@@ -206,3 +206,22 @@ table.tbl{width:100%;border-collapse:collapse;font-size:.88rem;min-width:520px}
 .ans-list{display:grid;gap:4px 0;margin:0}
 .ans-list dt{font-size:.82rem;font-weight:700}
 .ans-list dd{margin:0 0 8px;white-space:pre-line;font-size:.92rem;padding:8px 12px;border-radius:10px;background:var(--surface)}
+
+/* ---------- Calendario de la Maestra ---------- */
+.cal-legend{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:.78rem;color:var(--muted)}
+.cal-legend span{display:inline-flex;align-items:center;gap:6px}.cal-legend span::before{content:"";width:10px;height:10px;border-radius:3px;background:var(--c)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.cal-wd{font:700 .6rem/1 var(--f-caps);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:6px 4px}
+.cal-day{min-height:96px;border:1px solid var(--line);border-radius:10px;padding:6px;display:flex;flex-direction:column;gap:4px;min-width:0;background:var(--surface)}
+.cal-day.out{border:0;background:none}
+.cal-day.today{border-color:var(--brass);box-shadow:inset 0 0 0 1px var(--brass)}
+.cal-day.clash,.cal-row.clash{border-color:#b8402f;background:color-mix(in srgb,#b8402f 7%,var(--surface))}
+.cal-n{font-size:.78rem;font-weight:700;color:var(--muted)}
+.cal-ev{display:block;width:100%;text-align:left;border:0;border-left:3px solid var(--c);border-radius:6px;background:color-mix(in srgb,var(--c) 14%,transparent);color:var(--fg);font:500 .72rem/1.25 var(--f-body);padding:4px 6px;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cal-ev:hover{background:color-mix(in srgb,var(--c) 26%,transparent)}
+.cal-clash{display:block;font:700 .62rem/1.2 var(--f-body);color:#b8402f}
+.cal-row{display:grid;grid-template-columns:150px 1fr;gap:6px 14px;align-items:start;padding:12px 10px;border-top:1px solid var(--line);border-radius:10px}
+.cal-row .cal-clash{grid-column:1}
+.cal-row>div{display:grid;gap:4px;grid-column:2;grid-row:1 / span 2}
+.cal-row .cal-ev{white-space:normal;font-size:.84rem;padding:6px 8px}
+@media (max-width:760px){.cal-month{display:none}.cal-row{grid-template-columns:1fr}.cal-row>div{grid-column:1;grid-row:auto}}

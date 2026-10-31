@@ -201,5 +201,10 @@ service cloud.firestore {
       allow read: if signedIn();
       allow write: if isAdmin();
     }
+
+    // ---------- Calendario de la Maestra (clases gratis, cursos, recesos, bloqueos). Solo ella lo ve ----------
+    match /calendario/{id} {
+      allow read, write: if isAdmin();
+    }
   }
 }

@@ -163,6 +163,17 @@ try {
   await denied('A NO programa clases', () => setDoc(doc(a.db, 'agenda', 'x_' + tag), { level: 1, title: 'x' }));
   await denied('A NO cambia el video de bienvenida', () => setDoc(doc(a.db, 'config', 'aula'), { welcomeVideo: 'x' }));
 
+  console.log('\nCalendario de la Maestra');
+  await allowed('Maestra agenda una fecha', async () => {
+    await setDoc(doc(m.db, 'calendario', 'test_' + tag), { type: 'interno', title: 'Prueba', date: '2030-01-01', createdAt: serverTimestamp() });
+    created.push(doc(m.db, 'calendario', 'test_' + tag));
+  });
+  await allowed('Maestra lee el calendario', () => getDocs(collection(m.db, 'calendario')));
+  await denied('A NO lee el calendario', () => getDocs(collection(a.db, 'calendario')));
+  await denied('A NO lee una fecha del calendario', () => getDoc(doc(a.db, 'calendario', 'test_' + tag)));
+  await denied('F NO lee el calendario', () => getDocs(collection(f.db, 'calendario')));
+  await denied('A NO agrega fechas', () => setDoc(doc(a.db, 'calendario', 'x_' + tag), { type: 'interno', title: 'x', date: '2030-01-01' }));
+
   console.log('\nMaestra y visitantes');
   await allowed('Maestra lista usuarios', () => getDocs(collection(m.db, 'users')));
   await allowed('Maestra lee notas de A', () => getDocs(collection(m.db, 'users', A.uid, 'notes')));

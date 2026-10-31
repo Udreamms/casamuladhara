@@ -1,4 +1,4 @@
-// Próximo inicio de un curso (/pendulo, /tarot): la fecha la pone la Maestra en su portal (config/cursos, /api/proximas).
+// Próximo inicio de un curso (/pendulo, /tarot): sale del Calendario de la Maestra (/api/proximas).
 // Uso: <script src="/assets/js/landing/proximo.js" data-curso="pendulo"></script>
 // Rellena [data-next-start] y muestra [data-next-wrap]. Sin fecha, o si ya pasó: "escríbenos y te avisamos".
 // Mientras carga o si falla, los [data-next-wrap] quedan ocultos: nunca se ve una fecha vieja.
