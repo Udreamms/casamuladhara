@@ -15,6 +15,7 @@ const FECHAS = [
   ...['2026-11-07', '2026-11-14', '2026-11-21', '2026-11-28', '2026-12-05', '2026-12-19', '2027-01-09', '2027-01-23', '2027-01-30']
     .map((d) => ev('clase-pendulo', 'Clase gratis Péndulo', d, { time: '19:00' })),
   ...['2026-11-10', '2026-11-17'].map((d) => ev('clase-tarot', 'Clase gratis Tarot', d, { time: '19:00' })),
+  ...['2026-11-17', '2026-11-19'].map((d) => ev('curso-pendulo', 'Péndulo 1 · clase online', d, { time: '09:00', note: 'Online en vivo, 9:00-11:00' })),
   ev('curso-pendulo', 'Péndulo 1', '2026-11-21'),
   ev('curso-pendulo', 'Péndulo 2', '2027-01-23'),
   ev('tarot', 'Inicio Tarot grupo 1', '2026-11-24', { note: 'por confirmar con Karen' }),
