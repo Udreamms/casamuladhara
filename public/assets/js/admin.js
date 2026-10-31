@@ -154,7 +154,7 @@ const data = {
   deletePost: async (id) => { await deleteDoc(doc(db, 'posts', id)); A.posts = A.posts.filter((p) => p.id !== id); },
   saveConfig: async (d) => { await setDoc(doc(db, 'config', 'aula'), { ...d, updatedAt: serverTimestamp() }, { merge: true }); Object.assign(A.config, d); },
   // Fecha de inicio y cupos del próximo grupo de la formación: los muestra la landing /formacion (src/app/api/formacion)
-  // Enlaces de Zoom de las clases gratis (se entregan al registrarse, src/app/api/leads) y fechas de inicio de los cursos (src/app/api/proximas)
+  // Enlaces de Google Meet de las clases gratis (se entregan al registrarse, src/app/api/leads) y fechas de inicio de los cursos (src/app/api/proximas)
   saveClases: async (d) => { await setDoc(doc(db, 'config', 'clases'), { ...d, updatedAt: serverTimestamp() }, { merge: true }); Object.assign(A.clases, d); },
   saveCursos: async (d) => { await setDoc(doc(db, 'config', 'cursos'), { ...d, updatedAt: serverTimestamp() }, { merge: true }); Object.assign(A.cursos, d); },
   saveFormacion: async (d) => { await setDoc(doc(db, 'config', 'formacion'), { ...d, updatedAt: serverTimestamp() }, { merge: true }); Object.assign(A.formacion, d); },
@@ -381,8 +381,8 @@ V.ajustes = () => `<div class="view-head"><div><span class="eyebrow">Portal de l
     <form id="wv-form" style="display:flex;gap:8px;flex-wrap:wrap"><input type="url" id="wv-url" placeholder="https://" value="${esc(A.config.welcomeVideo || '')}" style="flex:1;min-width:220px"><button class="btn btn-primary btn-sm">Guardar</button></form></section>
   <section class="card panel"><h3>Formación: próximo grupo</h3><p class="muted" style="margin:0;font-size:.88rem">Fecha de inicio y cupos que muestra la página /formacion. Déjala vacía para mostrar "Próximo grupo: escríbenos y te avisamos". Cuando la fecha pasa, la página deja de mostrarla sola.</p>
     <form id="fm-form" style="display:flex;gap:8px;flex-wrap:wrap;align-items:end"><label style="display:grid;gap:6px;font-size:.84rem"><b>Fecha de inicio</b><input type="date" id="fm-start" value="${esc(A.formacion?.nextStart || '')}"></label><label style="display:grid;gap:6px;font-size:.84rem"><b>Cupos</b><input type="number" id="fm-seats" min="1" max="200" step="1" placeholder="Ej.: 10" value="${esc(A.formacion?.seats ?? '')}" style="width:110px"></label><button class="btn btn-primary btn-sm">Guardar</button></form></section>
-  <section class="card panel"><h3>Clases gratis: enlaces de Zoom</h3><p class="muted" style="margin:0;font-size:.88rem">Al reservar su lugar, la persona ve un botón para entrar a la clase con este enlace. Déjalo vacío para mostrar "Te enviamos el enlace por WhatsApp".</p>
-    <form id="cl-form" style="display:grid;gap:10px"><label style="display:grid;gap:6px;font-size:.84rem"><b>Enlace de Zoom · clase de Péndulo (sábados)</b><input type="url" id="cl-pendulo" placeholder="https://zoom.us/j/…" value="${esc(A.clases?.zoomPendulo || '')}"></label><label style="display:grid;gap:6px;font-size:.84rem"><b>Enlace de Zoom · clase de Tarot (martes)</b><input type="url" id="cl-tarot" placeholder="https://zoom.us/j/…" value="${esc(A.clases?.zoomTarot || '')}"></label><button class="btn btn-primary btn-sm" style="justify-self:start">Guardar</button></form></section>
+  <section class="card panel"><h3>Clases gratis: enlaces de Google Meet</h3><p class="muted" style="margin:0;font-size:.88rem">Al reservar su lugar, la persona ve un botón para entrar a la clase con este enlace. Déjalo vacío para mostrar "Te enviamos el enlace por WhatsApp".</p>
+    <form id="cl-form" style="display:grid;gap:10px"><label style="display:grid;gap:6px;font-size:.84rem"><b>Enlace de Google Meet · clase de Péndulo (sábados)</b><input type="url" id="cl-pendulo" placeholder="https://meet.google.com/abc-defg-hij" value="${esc(A.clases?.enlacePendulo || '')}"></label><label style="display:grid;gap:6px;font-size:.84rem"><b>Enlace de Google Meet · clase de Tarot (martes)</b><input type="url" id="cl-tarot" placeholder="https://meet.google.com/abc-defg-hij" value="${esc(A.clases?.enlaceTarot || '')}"></label><button class="btn btn-primary btn-sm" style="justify-self:start">Guardar</button></form></section>
   <section class="card panel"><h3>Cursos: próximo inicio</h3><p class="muted" style="margin:0;font-size:.88rem">Fecha de inicio que muestran /pendulo y /tarot. Déjala vacía para mostrar "Próximo grupo: escríbenos y te avisamos". Cuando la fecha pasa, la página deja de mostrarla sola.</p>
     <form id="cu-form" style="display:flex;gap:8px;flex-wrap:wrap;align-items:end"><label style="display:grid;gap:6px;font-size:.84rem"><b>Péndulo Hebreo Nivel 1</b><input type="date" id="cu-pendulo" value="${esc(A.cursos?.pendulo || '')}"></label><label style="display:grid;gap:6px;font-size:.84rem"><b>Tarot Terapéutico</b><input type="date" id="cu-tarot" value="${esc(A.cursos?.tarot || '')}"></label><button class="btn btn-primary btn-sm">Guardar</button></form></section>
   <section class="card panel"><h3>Clases en vivo</h3><p class="muted" style="margin:0;font-size:.88rem">Las clases en vivo y sus grabaciones se programan dentro de cada clase del aula, donde ves el contenido.</p><a class="btn btn-ghost btn-sm" style="justify-self:start" href="/aula">Ir al aula</a></section>`;
@@ -502,9 +502,9 @@ function bind() {
   };
   const cl = $('#cl-form'); if (cl) cl.onsubmit = async (e) => {
     e.preventDefault();
-    const zoomPendulo = $('#cl-pendulo').value.trim(), zoomTarot = $('#cl-tarot').value.trim();
-    if ([zoomPendulo, zoomTarot].some((u) => u && !isHttps(u))) return toast('Los enlaces deben empezar con https://');
-    try { await data.saveClases({ zoomPendulo, zoomTarot }); toast('Enlaces de Zoom guardados'); } catch (err) { fail(err); }
+    const enlacePendulo = $('#cl-pendulo').value.trim(), enlaceTarot = $('#cl-tarot').value.trim();
+    if ([enlacePendulo, enlaceTarot].some((u) => u && !isHttps(u))) return toast('Los enlaces deben empezar con https://');
+    try { await data.saveClases({ enlacePendulo, enlaceTarot }); toast('Enlaces de Google Meet guardados'); } catch (err) { fail(err); }
   };
   const cu = $('#cu-form'); if (cu) cu.onsubmit = async (e) => {
     e.preventDefault();

@@ -7,8 +7,8 @@ import { FieldValue } from 'firebase-admin/firestore';
 import { auth, db, json } from '@/lib/server/services.js';
 
 const FORMS = ['pendulo', 'clase-pendulo', 'tarot', 'clase-tarot', 'formacion', 'sala', 'terapias', 'meditacion', 'regalo'];
-// Clases gratis: al registrarse, la respuesta trae el enlace de Zoom guardado por la Maestra en config/clases (nunca va en el HTML)
-const ZOOM = { 'clase-pendulo': 'zoomPendulo', 'clase-tarot': 'zoomTarot' };
+// Clases gratis: al registrarse, la respuesta trae el enlace de Google Meet guardado por la Maestra en config/clases (nunca va en el HTML)
+const ENLACE = { 'clase-pendulo': 'enlacePendulo', 'clase-tarot': 'enlaceTarot' };
 const HTTPS = /^https:\/\/[^\s"'<>]+$/i;
 const UTM = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'fbclid', 'gclid'];
 const str = (v, max) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
@@ -40,12 +40,12 @@ export async function POST(request) {
       if (!lead.whatsapp && !lead.email) return json({ error: 'Déjanos tu WhatsApp o tu correo para poder escribirte.' }, 400);
       if (lead.email && !EMAIL.test(lead.email)) return json({ error: 'Revisa tu correo.' }, 400);
       const ref = await db().collection('leads').add(lead);
-      let zoom = '';
-      if (ZOOM[form]) {
-        const enlace = ((await db().doc('config/clases').get()).data() || {})[ZOOM[form]];
-        if (typeof enlace === 'string' && HTTPS.test(enlace.trim())) zoom = enlace.trim();
+      let enlace = '';
+      if (ENLACE[form]) {
+        const guardado = ((await db().doc('config/clases').get()).data() || {})[ENLACE[form]];
+        if (typeof guardado === 'string' && HTTPS.test(guardado.trim())) enlace = guardado.trim();
       }
-      return json({ ok: true, id: ref.id, ...(zoom ? { zoom } : {}) });
+      return json({ ok: true, id: ref.id, ...(enlace ? { enlace } : {}) });
     }
     if (body.action === 'all' || body.action === 'status') {
       let user;

@@ -421,11 +421,11 @@ form.auth .btn{justify-content:center;margin-top:6px}
 }
 @media (max-width:520px){.lp-top .wrap{gap:10px}.lp-top .acct-label{display:none}.lp-top .acct{width:38px;padding:0;justify-content:center}}
 
-/* Gracias de las clases gratis: Zoom y calendario */
+/* Gracias de las clases gratis: Google Meet y calendario */
 .lp-ok b{display:block;margin-bottom:10px}
 .gracias-acciones{display:grid;gap:8px;margin:6px 0 10px}
 .gracias-acciones .btn{justify-content:center;width:100%}
-.btn-zoom{background:#f2c66d;color:#1f3f32;font-size:.85rem;padding:1.1em 1.5em}
+.btn-clase{background:#f2c66d;color:#1f3f32;font-size:.85rem;padding:1.1em 1.5em}
 .btn-cal{background:transparent;border:1px solid #2b5443;color:#1f3f32}
 .gracias-acciones .gcal{justify-self:center;font-size:.85rem;color:#2b5443;font-weight:700}
 .lp-ok small{display:block;color:#4a5a51}
@@ -468,6 +468,6 @@ form.auth .btn{justify-content:center;margin-top:6px}
 @media (max-width:860px){.go-form{display:flex;width:100%;margin-top:18px}}
 .cierre{text-align:center}.cierre .wrap{display:grid;justify-items:center;gap:20px}
 .cierre h2{font-size:clamp(1.9rem,4vw,2.8rem)}
-/* Dentro de la tarjeta del formulario: Zoom es el botón principal; el calendario, secundario y legible */
+/* Dentro de la tarjeta del formulario: entrar a la clase es el botón principal; el calendario, secundario y legible */
 .hero-light .lp-form .btn-cal{background:transparent;border:1px solid currentColor;color:#1f3f32}
 .hero-light .lp-ok small{color:#4a5a51}
