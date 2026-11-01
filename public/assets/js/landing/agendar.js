@@ -133,7 +133,7 @@
     error('');
     const f = new FormData(q('#ag-form')), elegido = q('[data-horas] [aria-pressed=true]');
     if (!elegido) return error('Elige el día y la hora de tu sesión.');
-    const body = { terapia: f.get('terapia'), modalidad: f.get('modalidad'), start: Number(elegido.dataset.ts), name: f.get('name'), whatsapp: f.get('whatsapp'), email: f.get('email'), direccion: f.get('direccion'), tz: miTz, web: f.get('web') };
+    const body = { terapia: f.get('terapia'), modalidad: f.get('modalidad'), start: Number(elegido.dataset.ts), name: f.get('name'), whatsapp: f.get('whatsapp'), email: f.get('email'), direccion: f.get('direccion'), tz: miTz, web: f.get('web'), eventId: crypto.randomUUID?.() || String(Date.now()) + Math.random().toString(36).slice(2, 10) };
     if (String(body.name).trim().length < 2) return error('Escribe tu nombre.');
     if (String(body.whatsapp).replace(/\D/g, '').length < 8) return error('Escribe tu WhatsApp con el código de país.');
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(body.email).trim())) return error('Revisa tu correo.');
@@ -143,7 +143,7 @@
       const r = await fetch('/api/terapias', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       const d = await r.json().catch(() => ({}));
       if (!r.ok) { if (d.refrescar) await cargar(true); throw new Error(d.error || 'No pudimos agendar tu sesión.'); }
-      if (window.fbq) fbq('track', 'Schedule', { content_name: body.terapia });
+      if (window.fbq) fbq('track', 'Schedule', { content_name: body.terapia }, { eventID: body.eventId });
       gracias(body, d);
     } catch (e) { error(e.message); } finally { go.disabled = false; go.textContent = 'Confirmar mi sesión'; }
   }

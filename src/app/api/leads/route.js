@@ -5,6 +5,7 @@
 //   action 'all'  -> { leads: [{ id, form, name, ..., createdAt }] }   solo la Maestra (Authorization: Bearer <token>)
 import { FieldValue } from 'firebase-admin/firestore';
 import { auth, db, json } from '@/lib/server/services.js';
+import { contexto, enviarDespues, idValido, usuario } from '@/lib/server/meta.js';
 
 const FORMS = ['pendulo', 'clase-pendulo', 'tarot', 'clase-tarot', 'formacion', 'sala', 'terapias', 'meditacion', 'regalo'];
 // Clases gratis: al registrarse, la respuesta trae el enlace de Google Meet guardado por la Maestra en config/clases (nunca va en el HTML)
@@ -40,6 +41,9 @@ export async function POST(request) {
       if (!lead.whatsapp && !lead.email) return json({ error: 'Déjanos tu WhatsApp o tu correo para poder escribirte.' }, 400);
       if (lead.email && !EMAIL.test(lead.email)) return json({ error: 'Revisa tu correo.' }, 400);
       const ref = await db().collection('leads').add(lead);
+      // API de conversiones de Meta: el mismo Lead que registra el Píxel, con el mismo id para que no se cuente doble
+      const ctx = contexto(request, lead.utm.fbclid);
+      enviarDespues({ nombre: 'Lead', id: idValido(body.eventId) || `lead-${ref.id}`, url: ctx.url, user: usuario({ email: lead.email, phone: lead.whatsapp, nombre: lead.name }, ctx), custom: { content_name: form } });
       let enlace = '';
       if (ENLACE[form]) {
         const guardado = ((await db().doc('config/clases').get()).data() || {})[ENLACE[form]];
