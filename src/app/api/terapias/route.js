@@ -5,6 +5,7 @@
 // La escritura se hace aquí, con la llave de servicio: el navegador no escribe en Firestore.
 import { FieldValue } from 'firebase-admin/firestore';
 import { db, json } from '@/lib/server/services.js';
+import { contexto, enviarDespues, idValido, usuario } from '@/lib/server/meta.js';
 import { TERAPIAS, LIMPIEZA, ZONAS_CHILE, DURACION, TZ, horasLibres, utcAChile } from '@/lib/server/agenda.js';
 
 const str = (v, max) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
@@ -63,6 +64,9 @@ export async function POST(request) {
     });
     if (cita === null) return json({ error: 'Ese horario ya no está disponible. Elige otro, por favor.', refrescar: true }, 409);
     if (cita === 'limite') return json({ error: 'Ya tienes varias sesiones agendadas. Escríbenos por WhatsApp si necesitas otra.' }, 429);
+    // API de conversiones de Meta: el mismo Schedule que registra el Píxel, con el mismo id para que no se cuente doble
+    const ctx = contexto(request);
+    enviarDespues({ nombre: 'Schedule', id: idValido(b.eventId) || `terapia-${ref.id}`, url: ctx.url, user: usuario({ email, phone: whatsapp, nombre: name }, ctx), custom: { content_name: terapia, modalidad } });
     let enlace = '';
     if (modalidad === 'online') {
       const g = ((await firestore.doc('config/clases').get()).data() || {}).enlaceTerapias;

@@ -97,6 +97,7 @@
         name: val('name'), email: val('email'), whatsapp, country: val('country') || pais,
         interest: val('interest'), message: val('message'), web: val('web'),
         page: location.pathname, utm: origen(),
+        eventId: crypto.randomUUID?.() || String(Date.now()) + Math.random().toString(36).slice(2, 10), // mismo id en el Píxel y en la API de conversiones
       };
       f.dataset.sending = '1'; err.hidden = true;
       const txt = btn?.textContent; if (btn) { btn.disabled = true; btn.textContent = 'Enviando…'; }
@@ -104,7 +105,7 @@
         const r = await fetch('/api/leads', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
         const out = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(out.error || 'No pudimos enviar tus datos.');
-        fbq('track', 'Lead', { content_name: f.dataset.lead });
+        fbq('track', 'Lead', { content_name: f.dataset.lead }, { eventID: body.eventId });
         f.querySelectorAll('label, button, small').forEach((el) => (el.hidden = true));
         // Clase gratis con enlace de Google Meet guardado: el gracias trae el botón para entrar y el calendario
         if (ok && out.enlace && f.dataset.clase) ok.replaceChildren(...graciasClase(f, out.enlace));

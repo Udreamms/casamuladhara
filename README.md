@@ -63,6 +63,17 @@ Para regalar la formación completa: `enroll correo --plan completo`.
 3. En Vercel → Settings → Environment Variables, las del archivo `.env.local` de tu computador (no se sube a GitHub): `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID`, `STRIPE_PRICE_FULL_ID`, `STRIPE_WEBHOOK_SECRET`, `FIREBASE_SERVICE_ACCOUNT`, `APP_URL`, `ADMIN_EMAILS`, `STAFF_USER` y `STAFF_PASSWORD` (usuario y contraseña de `/staff`).
 4. Después de publicar: `node scripts/deploy-backend.mjs` (reglas), el `grant` de cada alumna actual y una vez `node scripts/admin.mjs sync-members`.
 
+## Meta: Píxel y API de conversiones
+El Píxel (navegador) está en `public/assets/js/landing/captacion.js`. La API de conversiones (servidor) está en `src/lib/server/meta.js` y envía los mismos eventos con el mismo `event_id`, para que Meta los cuente una sola vez:
+- **Lead:** formularios de las landings (`/api/leads`).
+- **Schedule:** reserva de una terapia (`/api/terapias`).
+- **Purchase:** pago al contado de la formación o primera cuota (`/api/stripe-webhook`). Las cuotas siguientes no se envían.
+
+Correo, teléfono y nombre viajan cifrados (SHA-256). Variables en Vercel (y `.env.local`), nunca en el código:
+- `META_CAPI_TOKEN`: token del conjunto de datos (Administrador de eventos → Configuración → Generar token). Sin él no se envía nada y el sitio funciona igual.
+- `META_TEST_EVENT_CODE` (opcional): código de "Probar eventos". Con él, los eventos solo aparecen en esa pestaña y no cuentan en los anuncios. Se quita al terminar de probar.
+- `META_PIXEL_ID` y `META_GRAPH_VERSION` (opcionales): por defecto, el Píxel Casa Muladhara y la versión `v23.0`.
+
 ## Administración (en tu computador)
 Requiere la llave de servicio en `~/.config/casamuladhara/service-account.json` (fuera del repo).
 

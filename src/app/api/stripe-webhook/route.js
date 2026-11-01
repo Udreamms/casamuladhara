@@ -10,6 +10,7 @@ import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { INSTALLMENTS } from '@/lib/server/access.js';
 import { applyAccess } from '@/lib/server/apply.js';
 import { db, json, stripe, webhookSecret } from '@/lib/server/services.js';
+import { enviarDespues, usuario } from '@/lib/server/meta.js';
 
 const ACTIVE = ['active', 'trialing'];
 const OVERDUE = ['past_due', 'unpaid'];
@@ -121,6 +122,12 @@ async function paidInFull(session) {
   await applyAccess(uid);
 }
 
+// API de conversiones de Meta: compra de la formación (pago al contado, o primera cuota). Un fallo aquí no afecta al pago.
+const compraMeta = ({ id, email, valor, moneda, creado, uid }) => enviarDespues({
+  nombre: 'Purchase', id: `compra-${id}`, tiempo: creado * 1000,
+  user: usuario({ email, uid }), custom: { value: valor, currency: String(moneda || 'usd').toUpperCase(), content_name: 'Formación Terapeuta Holística Integral' },
+});
+
 const subscriptionOf = (inv) => idOf(inv.parent?.subscription_details?.subscription ?? inv.subscription);
 
 export async function POST(request) {
@@ -136,7 +143,10 @@ export async function POST(request) {
     switch (event.type) {
       case 'checkout.session.completed':
         if (o.mode === 'subscription' && o.subscription) await syncSubscription(idOf(o.subscription), o.client_reference_id);
-        else if (o.mode === 'payment' && o.payment_status === 'paid' && o.metadata?.kind === 'completo') await paidInFull(o);
+        else if (o.mode === 'payment' && o.payment_status === 'paid' && o.metadata?.kind === 'completo') {
+          await paidInFull(o);
+          compraMeta({ id: o.id, email: o.customer_details?.email || o.customer_email, valor: o.amount_total / 100, moneda: o.currency, creado: o.created, uid: o.metadata?.uid || o.client_reference_id });
+        }
         break;
       case 'customer.subscription.created':
       case 'customer.subscription.updated':
@@ -149,6 +159,8 @@ export async function POST(request) {
       case 'invoice.payment_failed': {
         const paid = event.type === 'invoice.paid';
         const uid = await recordInvoice(o, paid);
+        // Meta: solo la primera cuota cuenta como compra; las siguientes son la misma venta
+        if (paid && o.billing_reason === 'subscription_create') compraMeta({ id: o.id, email: o.customer_email, valor: o.amount_paid / 100, moneda: o.currency, creado: o.created, uid });
         const sub = subscriptionOf(o);
         if (sub && uid && paid) await countInstallments(uid, sub);
         if (sub) await syncSubscription(sub, uid);
