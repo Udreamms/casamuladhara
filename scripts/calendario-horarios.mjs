@@ -19,7 +19,7 @@ const BLOQUEADOS = ['2026-12-11', '2026-12-12', '2027-01-15', '2027-01-16'];
 const RECESO = ['2026-12-21', '2027-01-04'];
 const HASTA = '2027-07-31'; // las clases gratis se generan hasta el final del último grupo de Tarot
 const libre = (f) => !BLOQUEADOS.includes(f) && !(f >= RECESO[0] && f <= RECESO[1]);
-const tent = (f) => f >= '2027-01-01'; // desde enero: por confirmar
+const tent = (f) => f > '2027-05-31'; // hasta el 31 de mayo de 2027 la planificación está confirmada; después, por confirmar
 const hm = (m) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 const min = (t) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3));
 const ev = (type, title, date, time, dur, extra = {}) => ({

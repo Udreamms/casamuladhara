@@ -425,56 +425,128 @@ const calChip = (e) => {
   const aviso = [e.tentative ? 'Por confirmar' : '', sinHora(e) ? AVISO_SIN_HORA : ''].filter(Boolean).join(' · ');
   return `<button class="cal-ev${e.tentative ? ' tent' : ''}" style="--c:${c}" data-cal-ev="${esc(e.id)}" title="${esc(aviso ? `${n} · ${aviso}` : n)}">${sinHora(e) ? '<span aria-hidden="true">⚠ </span>' : ''}${e.time ? `<b>${esc(e.time)}${fin ? `–${esc(fin)}` : ''}</b> ` : ''}${esc(e.title || n)}${e.tentative ? ' <i class="tent-tag">por confirmar</i>' : ''}</button>`;
 };
+// ---------- Vistas del calendario: día, semana, mes y año (como Google Calendar) ----------
+const HORA_PX = 44; // alto de una hora en la grilla de día y semana
+const DIA_LARGO = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+const lunesDe = (t) => t - ((new Date(t).getUTCDay() + 6) % 7) * 864e5;
+const minDe = (h) => (/^\d{2}:\d{2}$/.test(h || '') ? Number(h.slice(0, 2)) * 60 + Number(h.slice(3)) : null);
+const calTitulo = (v, ref) => {
+  const d = new Date(ref);
+  if (v === 'dia') return `${DIA_LARGO[d.getUTCDay()]} ${d.getUTCDate()} de ${MES_N[d.getUTCMonth()]} de ${d.getUTCFullYear()}`;
+  if (v === 'mes') return `${MES_N[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+  if (v === 'anio') return String(d.getUTCFullYear());
+  const a = new Date(lunesDe(ref)), b = new Date(lunesDe(ref) + 6 * 864e5);
+  return a.getUTCMonth() === b.getUTCMonth() ? `${a.getUTCDate()} al ${b.getUTCDate()} de ${MES_N[b.getUTCMonth()]} de ${b.getUTCFullYear()}` : `${a.getUTCDate()} de ${MES_N[a.getUTCMonth()]} al ${b.getUTCDate()} de ${MES_N[b.getUTCMonth()]} de ${b.getUTCFullYear()}`;
+};
+const horaAhoraCL = () => { const p = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: 'America/Santiago', hour: 'numeric', minute: 'numeric', hourCycle: 'h23' }).formatToParts(new Date()).map((x) => [x.type, x.value])); return (+p.hour % 24) * 60 + +p.minute; };
+// Grilla de horas para uno o siete días: lo que no tiene hora va arriba ("todo el día"); lo demás se posiciona según su hora
+function calGrilla(dias, porDia) {
+  const hoy = hoyCL(), claves = dias.map(ymd);
+  let desde = 7 * 60, hasta = 23 * 60;
+  for (const k of claves) for (const e of porDia[k] || []) { const a = minDe(e.time); if (a === null) continue; const b = minDe(finDe(e)) ?? a + 60; desde = Math.min(desde, Math.floor(a / 60) * 60); hasta = Math.max(hasta, Math.min(24 * 60, Math.ceil(b / 60) * 60)); }
+  const filas = (hasta - desde) / 60, px = (m) => ((m - desde) * HORA_PX) / 60;
+  const horas = Array.from({ length: filas }, (_, i) => `<span style="top:${i * HORA_PX}px">${String(desde / 60 + i).padStart(2, '0')}:00</span>`).join('');
+  const cab = dias.map((t, i) => { const d = new Date(t), l = porDia[claves[i]] || []; return `<button class="tg-dia${t === hoy ? ' hoy' : ''}${choque(l) ? ' clash' : ''}" data-cal-dia="${claves[i]}" title="${choque(l) ? 'Choque: Karen no disponible' : 'Ver este día'}"><small>${DIA_N[d.getUTCDay()]}</small><b>${d.getUTCDate()}</b></button>`; }).join('');
+  const todoDia = claves.map((k) => `<div class="tg-ad">${(porDia[k] || []).filter((e) => minDe(e.time) === null).map(calChip).join('')}</div>`).join('');
+  const ahora = horaAhoraCL();
+  const cols = claves.map((k, i) => {
+    const evs = (porDia[k] || []).filter((e) => minDe(e.time) !== null)
+      .map((e) => { const a = minDe(e.time); return { e, a, b: Math.max(minDe(finDe(e)) ?? a + 60, a + 25) }; }).sort((x, y) => x.a - y.a || y.b - x.b);
+    // Eventos que se pisan se reparten en carriles lado a lado
+    let grupo = [], fines = [], finMax = -1;
+    const cerrar = () => { grupo.forEach((x) => (x.n = fines.length)); grupo = []; fines = []; finMax = -1; };
+    for (const x of evs) {
+      if (grupo.length && x.a >= finMax) cerrar();
+      let c = fines.findIndex((f) => f <= x.a); if (c < 0) { c = fines.length; fines.push(0); }
+      fines[c] = x.b; x.c = c; grupo.push(x); finMax = Math.max(finMax, x.b);
+    }
+    cerrar();
+    const bloques = evs.map(({ e, a, b, c, n }) => {
+      const [nom, col] = CAL_TYPES[e.type] || ['Fecha', '#5d6b63'], fin = finDe(e);
+      return `<button class="tg-ev${e.tentative ? ' tent' : ''}" style="--c:${col};top:${px(a)}px;height:${Math.max(px(b) - px(a) - 2, 20)}px;left:calc(${(c / n) * 100}% + 1px);width:calc(${100 / n}% - 3px)" data-cal-ev="${esc(e.id)}" title="${esc(`${nom}${e.tentative ? ' · Por confirmar' : ''}`)}"><b>${esc(e.time)}${fin ? `–${esc(fin)}` : ''}</b> ${esc(e.title || nom)}${e.tentative ? ' <i class="tent-tag">por confirmar</i>' : ''}</button>`;
+    }).join('');
+    const linea = dias[i] === hoy && ahora >= desde && ahora <= hasta ? `<div class="tg-now" style="top:${px(ahora)}px"></div>` : '';
+    return `<div class="tg-col${dias[i] === hoy ? ' hoy' : ''}">${bloques}${linea}</div>`;
+  }).join('');
+  return `<div class="tg" style="--n:${dias.length};--hp:${HORA_PX}px"><div class="tg-in">
+    <div class="tg-row"><i></i>${cab}</div>
+    <div class="tg-row tg-allday"><i>todo el día</i>${todoDia}</div>
+    <div class="tg-body" style="height:${filas * HORA_PX}px"><div class="tg-hours">${horas}</div>${cols}</div>
+  </div></div>`;
+}
+// Año: doce mini meses; los días con algo en el calendario se marcan y al tocarlos se abre ese día
+function calAnio(anio, porDia) {
+  const hoy = hoyCL();
+  return `<div class="yr">${MES_N.map((nom, m) => {
+    const off = (new Date(Date.UTC(anio, m, 1)).getUTCDay() + 6) % 7, n = new Date(Date.UTC(anio, m + 1, 0)).getUTCDate();
+    const dias = Array.from({ length: n }, (_, i) => {
+      const t = Date.UTC(anio, m, i + 1), k = ymd(t), l = porDia[k] || [];
+      const cls = [l.length ? 'has' : '', l.some((e) => LIBRE_NO.includes(e.type)) ? 'blk' : '', t === hoy ? 'hoy' : ''].filter(Boolean).join(' ');
+      return `<button class="${cls}" data-cal-dia="${k}" title="${esc(l.slice(0, 4).map((e) => e.title || '').join(' · '))}">${i + 1}</button>`;
+    });
+    return `<section class="yr-m"><button class="yr-t" data-cal-mes-ir="${anio}-${String(m + 1).padStart(2, '0')}-01">${nom}</button><div class="yr-g">${['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d) => `<b>${d}</b>`).join('')}${'<i></i>'.repeat(off)}${dias.join('')}</div></section>`;
+  }).join('')}</div>`;
+}
+// Terapias que alguien agendó desde la web: siempre a la vista, con los botones para recordarle por WhatsApp o correo
+function calTerapias(hoy) {
+  const hoyK = ymd(hoy), manK = ymd(hoy + 864e5);
+  const lista = (A.cal || []).filter((e) => e.type === 'terapia' && e.date >= hoyK).sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
+  const fila = (e) => { const fin = finDe(e), cuando = e.date === hoyK ? 'Hoy' : e.date === manK ? 'Mañana' : fechaLarga(e.date); return `<div class="cal-row"><b>${cuando}${e.time ? ` · ${esc(e.time)}${fin ? `–${esc(fin)}` : ''}` : ''}</b><div><button class="cal-ev" style="--c:#d1568b" data-cal-ev="${esc(e.id)}">${esc(e.terapia || 'Terapia')} · ${esc(e.name || '')} <i class="tent-tag">${e.modalidad === 'online' ? 'online' : 'presencial'}</i></button><div class="rec">${botonesRec(e) || '<span class="muted">Sin datos de contacto</span>'}</div></div></div>`; };
+  return `<section class="card panel"><h3>Terapias agendadas y recordatorios</h3>
+    <p class="muted" style="margin:0;font-size:.88rem">Cuando alguien agenda una terapia desde la web aparece aquí. Los botones <b>WhatsApp</b> y <b>Correo</b> abren el recordatorio ya escrito (día, hora en su zona, enlace de Meet o dirección): solo pulsas enviar.</p>
+    ${lista.length ? lista.map(fila).join('') : '<p class="muted" style="margin:0"><b>Aún no hay terapias agendadas.</b> La primera que se reserve aparecerá en esta lista.</p>'}
+  </section>`;
+}
 V.calendario = () => {
   const head = `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>Calendario</h1><p>Clases gratis, cursos, formación y los momentos en que no estás disponible (citas, trámites, vacaciones). Solo tú lo ves.</p></div><button class="btn btn-primary btn-sm" data-cal-add>Agregar fecha</button></div>`;
   if (!A.cal) return `${head}<div class="card empty">Cargando calendario…</div>`;
-  const hoy = hoyCL(), dias = calPorDia();
-  const base = S.calMes || (() => { const d = new Date(hoy); return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1); })();
-  const b = new Date(base), y = b.getUTCFullYear(), mo = b.getUTCMonth();
-  const desfase = (b.getUTCDay() + 6) % 7; // la grilla parte el lunes
-  const enMes = new Date(Date.UTC(y, mo + 1, 0)).getUTCDate();
-  const celdas = [];
-  for (let i = 0; i < desfase; i++) celdas.push('<div class="cal-day out"></div>');
-  for (let d = 1; d <= enMes; d++) {
-    const k = ymd(Date.UTC(y, mo, d)), l = dias[k] || [];
-    celdas.push(`<div class="cal-day${tOf(k) === hoy ? ' today' : ''}${choque(l) ? ' clash' : ''}"><span class="cal-n">${d}</span>${choque(l) ? '<span class="cal-clash">Choque: Karen no disponible</span>' : ''}${l.map(calChip).join('')}</div>`);
+  const hoy = hoyCL(), porDia = calPorDia();
+  S.calVista ||= innerWidth < 760 ? 'dia' : 'semana';
+  S.calRef ||= hoy;
+  const v = S.calVista, ref = S.calRef, r = new Date(ref);
+  let cuerpo;
+  if (v === 'dia') cuerpo = calGrilla([ref], porDia);
+  else if (v === 'semana') cuerpo = calGrilla(Array.from({ length: 7 }, (_, i) => lunesDe(ref) + i * 864e5), porDia);
+  else if (v === 'anio') cuerpo = calAnio(r.getUTCFullYear(), porDia);
+  else {
+    const y = r.getUTCFullYear(), mo = r.getUTCMonth(), desfase = (new Date(Date.UTC(y, mo, 1)).getUTCDay() + 6) % 7, enMes = new Date(Date.UTC(y, mo + 1, 0)).getUTCDate(), celdas = [];
+    for (let i = 0; i < desfase; i++) celdas.push('<div class="cal-day out"></div>');
+    for (let d = 1; d <= enMes; d++) {
+      const k = ymd(Date.UTC(y, mo, d)), l = porDia[k] || [];
+      celdas.push(`<div class="cal-day${tOf(k) === hoy ? ' today' : ''}${choque(l) ? ' clash' : ''}"><button class="cal-n" data-cal-dia="${k}" title="Ver este día">${d}</button>${choque(l) ? '<span class="cal-clash">Choque: Karen no disponible</span>' : ''}${l.map(calChip).join('')}</div>`);
+    }
+    cuerpo = `<div class="cal-scroll"><div class="cal-grid">${['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((d) => `<div class="cal-wd">${d}</div>`).join('')}${celdas.join('')}</div></div>`;
   }
-  // Próximos 30 días (lo único que se ve en el celular)
-  const prox = [];
-  for (let t = hoy, n = 0; n < 30; t += 864e5, n++) { const k = ymd(t); if (dias[k]) prox.push([k, dias[k]]); }
-  // Sesiones de terapia de hoy y mañana, con los botones para recordárselas a la persona
-  const claveHoy = ymd(hoy), claveMan = ymd(hoy + 864e5);
-  const porRecordar = (A.cal || []).filter((e) => e.type === 'terapia' && (e.date === claveHoy || e.date === claveMan)).sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
-  const recordar = porRecordar.length ? `<section class="card panel"><h3>Por recordar: hoy y mañana</h3>${porRecordar.map((e) => `<div class="cal-row"><b>${e.date === claveHoy ? 'Hoy' : 'Mañana'} · ${esc(e.time || '')}</b><div>${calChip(e)}<div style="display:flex;gap:6px;flex-wrap:wrap">${botonesRec(e)}</div></div></div>`).join('')}</section>` : '';
   return `${head}
+  ${calTerapias(hoy)}
   <div class="cal-legend">${Object.entries(CAL_TYPES).map(([, [n, c]]) => `<span style="--c:${c}">${esc(n)}</span>`).join('')}<span class="tent-leg">Borde punteado: por confirmar</span></div>
-  <section class="card panel cal-month">
-    <div class="panel-h"><button class="btn btn-ghost btn-sm" data-cal-mes="-1" aria-label="Mes anterior">←</button><h3 style="text-transform:capitalize">${MES_N[mo]} ${y}</h3><button class="btn btn-ghost btn-sm" data-cal-mes="1" aria-label="Mes siguiente">→</button></div>
-    <div class="cal-grid">${['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((d) => `<div class="cal-wd">${d}</div>`).join('')}${celdas.join('')}</div>
-  </section>
-  ${recordar}
-  <section class="card panel"><h3>Próximos 30 días</h3>
-    ${prox.length ? prox.map(([k, l]) => `<div class="cal-row${choque(l) ? ' clash' : ''}"><b>${fechaLarga(k)}</b>${choque(l) ? '<span class="cal-clash">Choque: Karen no disponible</span>' : ''}<div>${l.map(calChip).join('')}</div></div>`).join('') : '<p class="muted" style="margin:0">No hay fechas en los próximos 30 días.</p>'}
+  <section class="card panel cal-main">
+    <div class="cal-bar">
+      <div class="cal-nav"><button class="btn btn-ghost btn-sm" data-cal-hoy>Hoy</button><button class="btn btn-ghost btn-sm" data-cal-nav="-1" aria-label="Anterior">←</button><button class="btn btn-ghost btn-sm" data-cal-nav="1" aria-label="Siguiente">→</button><h3 class="cal-title">${esc(calTitulo(v, ref))}</h3></div>
+      <div class="seg" role="group" aria-label="Vista del calendario">${[['dia', 'Día'], ['semana', 'Semana'], ['mes', 'Mes'], ['anio', 'Año']].map(([k, n]) => `<button class="${v === k ? 'on' : ''}" data-cal-vista="${k}" aria-pressed="${v === k}">${n}</button>`).join('')}</div>
+    </div>
+    ${cuerpo}
   </section>`;
 };
 // Formulario para agregar o editar una fecha (en la ventana del portal)
 function calForm(e) {
-  const v = e || { type: 'bloqueado', date: ymd(hoyCL()) };
+  const v = e || { type: 'bloqueado', date: ymd(S.calRef || hoyCL()) };
   dialog(`<span class="eyebrow">Calendario</span><h3>${e ? 'Editar fecha' : 'Agregar fecha'}</h3>
-  <form id="cal-form" style="display:grid;gap:10px;margin-top:12px">
-    <label style="display:grid;gap:6px;font-size:.84rem"><b>Tipo</b><select id="cf-type">${Object.entries(CAL_TYPES).map(([k, [n]]) => `<option value="${k}" ${v.type === k ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select></label>
-    <label style="display:grid;gap:6px;font-size:.84rem"><b>Título</b><input id="cf-title" maxlength="120" value="${esc(v.title || '')}" placeholder="Si lo dejas vacío, se usa el tipo"></label>
-    <div style="display:flex;gap:8px;flex-wrap:wrap"><label style="display:grid;gap:6px;font-size:.84rem;flex:1"><b>Fecha</b><input type="date" id="cf-date" required value="${esc(v.date || '')}"></label><label style="display:grid;gap:6px;font-size:.84rem"><b>Hora de inicio</b><input type="time" id="cf-time" value="${esc(v.time || '')}"></label></div>
-    <label id="cf-allday-row" style="display:flex;gap:8px;align-items:center;font-size:.84rem" hidden><input type="checkbox" id="cf-allday" ${v.type === 'bloqueado' && e && !e.time ? 'checked' : ''}> Todo el día</label>
-    <label style="display:grid;gap:6px;font-size:.84rem"><b>Hasta el día (opcional, si son varios días seguidos)</b><input type="date" id="cf-end" value="${esc(v.endDate || '')}"></label>
-    <label style="display:grid;gap:6px;font-size:.84rem"><b>Hora de término</b><input type="time" id="cf-endtime" value="${esc(finDe(v))}"><span class="muted" id="cf-help" style="font-size:.76rem">El evento bloquea solo desde la hora de inicio hasta la de término. Si dura menos, cambia la hora de término y esa hora vuelve a quedar libre en la web.</span></label>
-    <p id="cf-warn" role="alert" style="margin:0;font-size:.82rem;font-weight:700;color:#b8402f" hidden>${AVISO_SIN_HORA}.</p>
-    <label style="display:flex;gap:8px;align-items:center;font-size:.84rem"><input type="checkbox" id="cf-tent" ${v.tentative ? 'checked' : ''}> Por confirmar (se ve con borde punteado y no se muestra en las landings)</label>
-    ${v.type === 'terapia' && (v.whatsapp || v.email) ? `<div class="card" style="padding:12px 14px;display:grid;gap:6px;font-size:.84rem"><b>${esc(v.name || '')}</b><span>${esc(v.modalidad === 'online' ? 'Online' : v.direccion ? `Presencial · ${v.direccion}` : 'Presencial')}${v.clientTz ? ` · Zona: ${esc(v.clientTz)}` : ''}</span><span>${esc(v.whatsapp || '')} · ${esc(v.email || '')}</span><div style="display:flex;gap:6px;flex-wrap:wrap">${botonesRec(v)}</div></div>` : ''}
-    <label style="display:grid;gap:6px;font-size:.84rem"><b>Nota</b><textarea id="cf-note" maxlength="500" rows="2">${esc(v.note || '')}</textarea></label>
-    ${e ? '' : '<label style="display:flex;gap:8px;align-items:center;font-size:.84rem"><input type="checkbox" id="cf-rep"> Repetir cada semana hasta <input type="date" id="cf-until"></label>'}
-    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between"><button class="btn btn-primary btn-sm">Guardar</button>${e ? '<button type="button" class="btn btn-ghost btn-sm" id="cf-del">Borrar</button>' : ''}</div>
-  </form>`);
+  <form id="cal-form" class="cal-form">
+    <label><b>Tipo</b><select id="cf-type">${Object.entries(CAL_TYPES).map(([k, [n]]) => `<option value="${k}" ${v.type === k ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select></label>
+    <label><b>Título</b><input id="cf-title" maxlength="120" value="${esc(v.title || '')}" placeholder="Si lo dejas vacío, se usa el tipo"></label>
+    <label><b>Fecha</b><input type="date" id="cf-date" required value="${esc(v.date || '')}"></label>
+    <label><b>Hasta el día (opcional, varios días seguidos)</b><input type="date" id="cf-end" value="${esc(v.endDate || '')}"></label>
+    <label><b>Hora de inicio</b><input type="time" id="cf-time" value="${esc(v.time || '')}"></label>
+    <label><b>Hora de término</b><input type="time" id="cf-endtime" value="${esc(finDe(v))}"></label>
+    <div class="full chks"><label id="cf-allday-row" hidden><input type="checkbox" id="cf-allday" ${v.type === 'bloqueado' && e && !e.time ? 'checked' : ''}> Todo el día</label><label><input type="checkbox" id="cf-tent" ${v.tentative ? 'checked' : ''}> Por confirmar (borde punteado; no se muestra en las landings)</label></div>
+    <p class="full muted" style="margin:-4px 0 0;font-size:.78rem">El evento bloquea solo desde la hora de inicio hasta la de término. Si dura menos, cambia la hora de término y esa hora vuelve a quedar libre en la web.</p>
+    <p id="cf-warn" class="full" role="alert" style="margin:0;font-size:.82rem;font-weight:700;color:#b8402f" hidden>${AVISO_SIN_HORA}.</p>
+    ${v.type === 'terapia' && (v.whatsapp || v.email) ? `<div class="card full" style="padding:12px 14px;display:grid;gap:6px;font-size:.84rem"><b>${esc(v.name || '')}</b><span>${esc(v.modalidad === 'online' ? 'Online' : v.direccion ? `Presencial · ${v.direccion}` : 'Presencial')}${v.clientTz ? ` · Zona: ${esc(v.clientTz)}` : ''}</span><span>${esc(v.whatsapp || '')} · ${esc(v.email || '')}</span><div style="display:flex;gap:6px;flex-wrap:wrap">${botonesRec(v)}</div></div>` : ''}
+    <label class="full"><b>Nota</b><textarea id="cf-note" maxlength="500" rows="2">${esc(v.note || '')}</textarea></label>
+    ${e ? '' : '<label class="full rep"><input type="checkbox" id="cf-rep"> Repetir cada semana hasta <input type="date" id="cf-until"></label>'}
+    <div class="full actions"><button class="btn btn-primary btn-sm">Guardar</button>${e ? '<button type="button" class="btn btn-ghost btn-sm" id="cf-del">Borrar</button>' : ''}</div>
+  </form>`, true);
   // Aviso en vivo: un evento sin hora bloquea el día completo
   const avisar = () => {
     const bloq = $('#cf-type').value === 'bloqueado', todo = bloq && $('#cf-allday').checked;
@@ -589,10 +661,15 @@ function bind() {
   document.querySelectorAll('[data-leads-reload]').forEach((b) => (b.onclick = () => { b.disabled = true; data.leads().then(() => render(false)).catch(fail); }));
   document.querySelectorAll('[data-cal-add]').forEach((b) => (b.onclick = () => calForm()));
   document.querySelectorAll('[data-cal-ev]').forEach((b) => (b.onclick = () => calForm(A.cal.find((e) => e.id === b.dataset.calEv))));
-  document.querySelectorAll('[data-cal-mes]').forEach((b) => (b.onclick = () => {
-    const d = new Date(S.calMes || (() => { const h = new Date(hoyCL()); return Date.UTC(h.getUTCFullYear(), h.getUTCMonth(), 1); })());
-    S.calMes = Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + Number(b.dataset.calMes), 1); render(false);
+  document.querySelectorAll('[data-cal-vista]').forEach((b) => (b.onclick = () => { S.calVista = b.dataset.calVista; render(false); }));
+  document.querySelectorAll('[data-cal-hoy]').forEach((b) => (b.onclick = () => { S.calRef = hoyCL(); render(false); }));
+  document.querySelectorAll('[data-cal-nav]').forEach((b) => (b.onclick = () => {
+    const n = Number(b.dataset.calNav), d = new Date(S.calRef || hoyCL()), v = S.calVista;
+    S.calRef = v === 'dia' ? d.getTime() + n * 864e5 : v === 'semana' ? d.getTime() + n * 7 * 864e5 : v === 'mes' ? Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + n, 1) : Date.UTC(d.getUTCFullYear() + n, d.getUTCMonth(), 1);
+    render(false);
   }));
+  document.querySelectorAll('[data-cal-dia]').forEach((b) => (b.onclick = () => { S.calRef = tOf(b.dataset.calDia); S.calVista = 'dia'; render(false); }));
+  document.querySelectorAll('[data-cal-mes-ir]').forEach((b) => (b.onclick = () => { S.calRef = tOf(b.dataset.calMesIr); S.calVista = 'mes'; render(false); }));
   document.querySelectorAll('[data-lead-status]').forEach((s) => (s.onchange = async () => {
     const l = A.leads.find((x) => x.id === s.dataset.leadStatus);
     try { await data.leads({ action: 'status', id: l.id, status: s.value }); l.status = s.value; paintNav(); toast('Estado guardado.'); } catch (e) { fail(e); s.value = l.status; }
@@ -676,7 +753,7 @@ function bind() {
   };
 }
 const papi = (uid) => profileApi(uid);
-function dialog(html) { $('#dlg-body').innerHTML = html; const d = $('#dlg'); if (!d.open) d.showModal(); }
+function dialog(html, ancha = false) { $('#dlg-body').innerHTML = html; const d = $('#dlg'); d.classList.toggle('wide', ancha); if (!d.open) d.showModal(); }
 $('#dlg-x').onclick = () => $('#dlg').close();
 $('#dlg').addEventListener('click', (e) => { if (e.target.id === 'dlg') $('#dlg').close(); });
 function paintMe() {
