@@ -24,7 +24,7 @@
   // Botones de WhatsApp: cuentan como contacto para Meta
   document.addEventListener('click', (e) => {
     const a = e.target.closest('a[href*="wa.link"], a[href*="wa.me"], a[href*="api.whatsapp.com"]');
-    if (a) fbq('track', 'Contact', { content_name: location.pathname });
+    if (a) fbq('track', 'Contact');
   });
 
   // Códigos de país del WhatsApp: el HTML trae solo Chile (por si falla el script) y aquí se completa la lista
@@ -105,7 +105,7 @@
         const r = await fetch('/api/leads', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
         const out = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(out.error || 'No pudimos enviar tus datos.');
-        fbq('track', 'Lead', { content_name: f.dataset.lead }, { eventID: body.eventId });
+        fbq('track', 'Lead', {}, { eventID: body.eventId });
         f.querySelectorAll('label, button, small').forEach((el) => (el.hidden = true));
         // Clase gratis con enlace de Google Meet guardado: el gracias trae el botón para entrar y el calendario
         if (ok && out.enlace && f.dataset.clase) ok.replaceChildren(...graciasClase(f, out.enlace));

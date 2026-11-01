@@ -43,7 +43,7 @@ export async function POST(request) {
       const ref = await db().collection('leads').add(lead);
       // API de conversiones de Meta: el mismo Lead que registra el Píxel, con el mismo id para que no se cuente doble
       const ctx = contexto(request, lead.utm.fbclid);
-      enviarDespues({ nombre: 'Lead', id: idValido(body.eventId) || `lead-${ref.id}`, url: ctx.url, user: usuario({ email: lead.email, phone: lead.whatsapp, nombre: lead.name }, ctx), custom: { content_name: form } });
+      enviarDespues({ nombre: 'Lead', id: idValido(body.eventId) || `lead-${ref.id}`, url: ctx.url, user: usuario({ email: lead.email, phone: lead.whatsapp, nombre: lead.name }, ctx) });
       let enlace = '';
       if (ENLACE[form]) {
         const guardado = ((await db().doc('config/clases').get()).data() || {})[ENLACE[form]];

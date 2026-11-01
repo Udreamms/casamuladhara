@@ -175,7 +175,7 @@
       const r = await fetch('/api/terapias', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       const d = await r.json().catch(() => ({}));
       if (!r.ok) { if (d.refrescar) await cargar(true); throw new Error(d.error || 'No pudimos agendar tu sesión.'); }
-      if (window.fbq) fbq('track', 'Schedule', { content_name: body.terapia }, { eventID: body.eventId });
+      if (window.fbq) fbq('track', 'Schedule', {}, { eventID: body.eventId });
       gracias(body, d);
     } catch (e) { error(e.message); } finally { go.disabled = false; go.textContent = 'Confirmar mi sesión'; }
   }

@@ -14,6 +14,7 @@ const PIXEL = process.env.META_PIXEL_ID || '716765743270935';
 const VERSION = process.env.META_GRAPH_VERSION || 'v23.0';
 const sha = (v) => createHash('sha256').update(v).digest('hex');
 const texto = (v) => (typeof v === 'string' ? v.trim().toLowerCase() : '');
+const origen = (u) => { try { return new URL(u).origin + '/'; } catch { return ''; } };
 const digitos = (v) => String(v || '').replace(/\D/g, '');
 const cookie = (cabecera, nombre) => {
   const m = new RegExp(`(?:^|;\\s*)${nombre}=([^;]+)`).exec(cabecera || '');
@@ -59,7 +60,7 @@ export async function enviar({ nombre, id, url, user, custom, tiempo }) {
     event_time: Math.floor((tiempo || Date.now()) / 1000),
     event_id: id,
     action_source: 'website',
-    ...(url ? { event_source_url: url } : {}),
+    ...(origen(url) ? { event_source_url: origen(url) } : {}), // solo el dominio: las rutas (/tarot, /meditacion…) pueden leerse como creencias religiosas o espirituales
     user_data: user || {},
     ...(custom ? { custom_data: custom } : {}),
   };

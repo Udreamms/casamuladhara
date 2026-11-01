@@ -125,7 +125,7 @@ async function paidInFull(session) {
 // API de conversiones de Meta: compra de la formación (pago al contado, o primera cuota). Un fallo aquí no afecta al pago.
 const compraMeta = ({ id, email, valor, moneda, creado, uid }) => enviarDespues({
   nombre: 'Purchase', id: `compra-${id}`, tiempo: creado * 1000,
-  user: usuario({ email, uid }), custom: { value: valor, currency: String(moneda || 'usd').toUpperCase(), content_name: 'Formación Terapeuta Holística Integral' },
+  user: usuario({ email, uid }), custom: { value: valor, currency: String(moneda || 'usd').toUpperCase() },
 });
 
 const subscriptionOf = (inv) => idOf(inv.parent?.subscription_details?.subscription ?? inv.subscription);
