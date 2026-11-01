@@ -63,22 +63,21 @@ sesiones.forEach((f, i) => {
 const finF1 = sesiones.at(-1);
 E.push(ev('formacion-inicio', 'Formación grupo 2 · N2 Limpieza energética de casa 1/2', '2027-05-25', '19:30', 120, { note: 'Mismas 38 sesiones, termina aprox. el 29 de septiembre' }));
 
-// Días sin clases, receso y recordatorio
+// Días sin clases y receso
 BLOQUEADOS.forEach((f) => E.push(ev('bloqueado', 'Karen no disponible', f, '', 0)));
 E.push(ev('bloqueado', 'Receso', RECESO[0], '', 0, { endDate: RECESO[1] })); // el receso es "Karen no disponible" en varios días seguidos
-E.push(ev('interno', 'Revisión de anuncios y planificación de enero y febrero', '2026-12-20', '', 0));
 
 // ---------- revisión de choques ----------
 const choques = [];
 const tramo = (e) => (e.time ? [Date.parse(`${e.date}T${e.time}:00Z`), Date.parse(`${e.date}T${e.endTime}:00Z`)] : null);
 for (let i = 0; i < E.length; i++) for (let j = i + 1; j < E.length; j++) {
   const a = E[i], b = E[j];
-  if (a.type === 'interno' || b.type === 'interno' || a.date !== b.date) continue;
+  if (a.date !== b.date) continue;
   const ta = tramo(a), tb = tramo(b);
   if ((ta && tb && ta[0] < tb[1] && tb[0] < ta[1]) || (!ta && tb) || (!tb && ta)) choques.push(`${a.date} ${a.title} ↔ ${b.title}`);
 }
 for (const e of E) { // nada dentro del receso ni de un día bloqueado
-  if (['bloqueado', 'interno'].includes(e.type)) continue;
+  if (e.type === 'bloqueado') continue;
   if (!libre(e.date)) choques.push(`${e.date} ${e.title} cae en un día sin clases`);
 }
 const horario = (e) => { const d = dow(e.date), t = e.time; if (!t) return ''; if (d >= 1 && d <= 5) return t >= '19:00' && e.endTime <= '21:30' ? '' : `${e.date} ${e.title} fuera de 19:00 a 21:30`; if (d === 6) return (t >= '09:00' && e.endTime <= '13:00') || (t === '19:00' && e.endTime === '19:30') ? '' : `${e.date} ${e.title} fuera del horario del sábado`; return `${e.date} ${e.title} en domingo`; };

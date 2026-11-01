@@ -375,7 +375,6 @@ const CAL_TYPES = {
   tarot: ['Grupo de Tarot Terapéutico (16 clases en 8 semanas, 70 USD al mes)', '#5a3f6e'],
   formacion: ['Formación (clase de un grupo)', '#3f7a5e'],
   'formacion-inicio': ['Inicio de un grupo de formación', '#2b5443'],
-  interno: ['Recordatorio interno', '#3d6a8f'],
   terapia: ['Terapia agendada', '#d1568b'],
 };
 const LIBRE_NO = ['bloqueado', 'receso'];
@@ -418,7 +417,7 @@ const choque = (l) => l.some((e) => LIBRE_NO.includes(e.type)) && l.some((e) => 
 const hmDe = (m) => `${String(Math.floor(m / 60) % 24).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 const finDe = (e) => e.endTime || (/^\d{2}:\d{2}$/.test(e.time || '') && e.duration > 0 ? hmDe(Number(e.time.slice(0, 2)) * 60 + Number(e.time.slice(3)) + e.duration) : '');
 // Sin hora, un evento bloquea el día completo (en "Karen no disponible" es lo esperado: es el "todo el día")
-const SIN_HORA_OK = ['bloqueado', 'interno'];
+const SIN_HORA_OK = ['bloqueado'];
 const sinHora = (e) => !e.time && !SIN_HORA_OK.includes(e.type);
 const AVISO_SIN_HORA = 'Sin hora, este evento bloquea el día completo';
 const calChip = (e) => {
