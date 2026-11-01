@@ -360,7 +360,7 @@ V.interesadas = () => {
     <td><b>${esc(l.name)}</b><br><span class="muted" style="font-size:.84rem">${wa ? `<a href="${wa}" target="_blank" rel="noopener">${esc(l.whatsapp)}</a>` : ''}${l.whatsapp && l.email ? ' · ' : ''}${esc(l.email)}${l.country ? ` · ${esc(l.country)}` : ''}</span></td>
     <td>${esc(LEAD_FORMS[l.form] || l.form)}</td>
     <td>${esc(l.interest)}${l.message ? `<br><span class="muted" style="font-size:.84rem">${esc(l.message)}</span>` : ''}</td>
-    <td class="muted" style="font-size:.84rem">${esc([l.utm?.utm_source, l.utm?.utm_campaign, l.utm?.utm_content].filter(Boolean).join(' · ') || 'Directo')}</td>
+    <td class="muted" style="font-size:.84rem">${esc([l.utm?.utm_source && l.utm?.utm_medium ? `${l.utm.utm_source} / ${l.utm.utm_medium}` : l.utm?.utm_source, l.utm?.utm_campaign, l.utm?.utm_content].filter(Boolean).join(' · ') || 'Directo')}</td>
     <td class="muted" style="font-size:.84rem">${fdateMs(l.createdAt)}</td>
     <td><select data-lead-status="${esc(l.id)}" aria-label="Estado">${LEAD_STATES.map(([k, t]) => `<option value="${k}" ${l.status === k ? 'selected' : ''}>${t}</option>`).join('')}</select></td></tr>`; }).join('') || '<tr><td colspan="6" class="muted">Todavía no hay interesadas.</td></tr>'}
   </tbody></table></div></section>`;

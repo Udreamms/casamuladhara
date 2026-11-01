@@ -1,4 +1,4 @@
-const PAGINAS = 'index|login|aula|admin|terapias|pendulo|clase-pendulo|tarot|clase-tarot|formacion|meditacion|sala';
+const PAGINAS = 'index|login|aula|admin|terapias|pendulo|clase-pendulo|tarot|clase-tarot|formacion|meditacion|sala|links';
 
 /** @type {import('next').NextConfig} */
 export default {

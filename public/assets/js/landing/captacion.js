@@ -18,6 +18,8 @@
   const ORIGEN = 'cm-origen';
   const qs = new URLSearchParams(location.search);
   const desdeUrl = Object.fromEntries(KEYS.map((k) => [k, qs.get(k)]).filter(([, v]) => v));
+  // /links es el enlace de la bio de Instagram: si llega sin UTM, el origen igual es "instagram / bio"
+  if (location.pathname === '/links' && !desdeUrl.utm_source) { desdeUrl.utm_source = 'instagram'; desdeUrl.utm_medium = 'bio'; }
   try { if (Object.keys(desdeUrl).length) sessionStorage.setItem(ORIGEN, JSON.stringify(desdeUrl)); } catch { /* sin almacenamiento */ }
   const origen = () => { try { return JSON.parse(sessionStorage.getItem(ORIGEN)) || desdeUrl; } catch { return desdeUrl; } };
 
