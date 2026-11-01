@@ -14,6 +14,9 @@ const PIXEL = process.env.META_PIXEL_ID || '716765743270935';
 const VERSION = process.env.META_GRAPH_VERSION || 'v23.0';
 const sha = (v) => createHash('sha256').update(v).digest('hex');
 const texto = (v) => (typeof v === 'string' ? v.trim().toLowerCase() : '');
+// Solo el sitio real manda eventos: las pruebas desde el computador o las vistas previas no cuentan (salvo con el código de "Probar eventos")
+const SITIOS = ['casamuladhara.com', 'www.casamuladhara.com'];
+const esSitioReal = (u) => { if (!u) return true; try { return SITIOS.includes(new URL(u).hostname); } catch { return true; } };
 const origen = (u) => { try { return new URL(u).origin + '/'; } catch { return ''; } };
 const digitos = (v) => String(v || '').replace(/\D/g, '');
 const cookie = (cabecera, nombre) => {
@@ -55,6 +58,7 @@ export async function enviar({ nombre, id, url, user, custom, tiempo }) {
   const token = (process.env.META_CAPI_TOKEN || '').trim(); // sin espacios sobrantes si se pegó con uno
   const dry = process.env.META_CAPI_DRY_RUN === '1';
   if (!token && !dry) return { saltado: true };
+  if (!dry && !process.env.META_TEST_EVENT_CODE && !esSitioReal(url)) return { saltado: true };
   const evento = {
     event_name: nombre,
     event_time: Math.floor((tiempo || Date.now()) / 1000),

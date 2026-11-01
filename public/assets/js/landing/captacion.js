@@ -5,13 +5,16 @@
   const PIXEL = '716765743270935'; // Píxel Casa Muladhara (Business Casa Muladhara)
 
   /* Píxel de Meta: código base oficial */
-  !function (f, b, e, v, n, t, s) {
-    if (f.fbq) return; n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
-    if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = []; t = b.createElement(e); t.async = !0;
-    t.src = v; s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s);
-  }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
-  fbq('init', PIXEL);
-  fbq('track', 'PageView');
+  // El Píxel solo cuenta visitas del sitio real: no las de pruebas en el computador ni las de vistas previas (localhost, *.vercel.app)
+  if (['casamuladhara.com', 'www.casamuladhara.com'].includes(location.hostname)) {
+    !function (f, b, e, v, n, t, s) {
+      if (f.fbq) return; n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
+      if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = []; t = b.createElement(e); t.async = !0;
+      t.src = v; s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s);
+    }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', PIXEL);
+    fbq('track', 'PageView');
+  } else window.fbq = () => {};
 
   // Origen de la visita: se guarda en la primera página con UTM y acompaña a la persona mientras navega el sitio
   const KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'fbclid', 'gclid'];

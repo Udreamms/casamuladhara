@@ -73,6 +73,7 @@
       <label>Correo<input name="email" type="email" autocomplete="email" maxlength="160" required></label>
       <label data-dir hidden>Dirección del lugar a limpiar (Chile)<input name="direccion" maxlength="240" placeholder="Calle, número, comuna"></label>
       <div class="ag-hp" aria-hidden="true"><label>Web<input name="web" tabindex="-1" autocomplete="off"></label></div>
+      <p class="ag-note">Las terapias holísticas acompañan tu bienestar y no reemplazan la atención médica ni psicológica.</p>
       <p class="ag-err" data-err role="alert" hidden></p>
       <button class="ag-go" type="submit">Confirmar mi sesión</button>
     </form>
