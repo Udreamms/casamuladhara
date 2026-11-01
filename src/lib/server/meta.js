@@ -51,7 +51,7 @@ export function usuario({ email, phone, nombre, uid } = {}, ctx = {}) {
 
 // Envía un evento a Meta. Nunca lanza errores: un fallo de Meta no debe romper un formulario, una reserva ni un pago.
 export async function enviar({ nombre, id, url, user, custom, tiempo }) {
-  const token = process.env.META_CAPI_TOKEN;
+  const token = (process.env.META_CAPI_TOKEN || '').trim(); // sin espacios sobrantes si se pegó con uno
   const dry = process.env.META_CAPI_DRY_RUN === '1';
   if (!token && !dry) return { saltado: true };
   const evento = {
@@ -63,7 +63,7 @@ export async function enviar({ nombre, id, url, user, custom, tiempo }) {
     user_data: user || {},
     ...(custom ? { custom_data: custom } : {}),
   };
-  const cuerpo = { data: [evento], ...(process.env.META_TEST_EVENT_CODE ? { test_event_code: process.env.META_TEST_EVENT_CODE } : {}) };
+  const cuerpo = { data: [evento], ...(process.env.META_TEST_EVENT_CODE?.trim() ? { test_event_code: process.env.META_TEST_EVENT_CODE.trim() } : {}) };
   if (dry) { console.log('[meta dry-run]', JSON.stringify(cuerpo)); return { dry: true, cuerpo }; }
   try {
     const r = await fetch(`https://graph.facebook.com/${VERSION}/${PIXEL}/events`, {
