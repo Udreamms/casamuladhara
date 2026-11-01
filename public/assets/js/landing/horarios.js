@@ -2,7 +2,7 @@
 // Uso: <script src="/assets/js/landing/horarios.js" data-clase="clase-tarot|clase-pendulo" | data-curso="tarot|pendulo" defer></script>
 //   data-clase  -> "Próxima clase", el selector de fechas (#saturdays) y el bloque "Tu siguiente paso"
 //   data-curso  -> rellena [data-next-start] (inicio) y [data-next-detalle] (todas las fechas) y muestra [data-next-wrap]
-//   en cualquier página rellena [data-hr-zona] (diferencia horaria) y [data-hr-form] (próximo grupo de la formación)
+//   en cualquier página rellena [data-hr-zona] (hora de Chile y su equivalente en la zona de quien mira) y [data-hr-form] (próximo grupo de la formación)
 // Si falla, o si no hay fechas confirmadas, queda el texto fijo de la página (sin fechas): nunca una fecha vieja.
 (() => {
   const yo = document.currentScript?.dataset || {};
@@ -38,19 +38,25 @@
     }).map(may).join(' · ');
   };
 
-  // Diferencia horaria con Chile en la fecha dada (Chile cambia de horario: en verano, Colombia y Perú 2 horas menos y México 3; en invierno, 1 y 2)
+  // Hora de Chile y su equivalente en la zona de quien mira la página: sirve para cualquier país y cambia sola con el horario de verano de Chile
+  const CHILE = ['America/Santiago', 'America/Punta_Arenas', 'Pacific/Easter'];
+  const miZona = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch { return ''; } })();
   const desfase = (tz, ts) => { const p = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: tz, hourCycle: 'h23', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' }).formatToParts(ts).map((x) => [x.type, x.value])); return (Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute) - ts) / 36e5; };
-  const zona = (f) => {
-    const [y, m, d] = f.split('-').map(Number), ts = Date.UTC(y, m - 1, d, 22, 0); // las 19:00 de Chile: sirve para saber si ese día es horario de verano o de invierno
-    const cl = desfase('America/Santiago', ts), co = Math.round(cl - desfase('America/Bogota', ts)), mx = Math.round(cl - desfase('America/Mexico_City', ts));
-    const u = (n) => `${n} ${n === 1 ? 'hora' : 'horas'}`;
-    return `Hora de Chile. En Colombia y Perú son ${u(co)} menos, en México ${mx} menos.`;
+  // 'AAAA-MM-DD' + 'HH:MM' en hora de Chile -> instante (ms UTC)
+  const chileAUtc = (f, h) => { const [y, m, d] = f.split('-').map(Number), [hh, mm] = h.split(':').map(Number), base = Date.UTC(y, m - 1, d, hh, mm), o = (t) => desfase('America/Santiago', t) * 36e5; return base - o(base - o(base)); };
+  const zona = (f, h = '19:00') => {
+    if (!miZona || CHILE.includes(miZona)) return 'Hora de Chile.';
+    try {
+      const t = chileAUtc(f, h), dia = new Intl.DateTimeFormat('en-CA', { timeZone: miZona }).format(t);
+      const hora = new Intl.DateTimeFormat('es', { timeZone: miZona, hour: 'numeric', minute: '2-digit', hourCycle: 'h23' }).format(t);
+      return `Hora de Chile. En tu zona horaria (${miZona.replace(/_/g, ' ')}) serían las ${hora}${dia > f ? ' del día siguiente' : dia < f ? ' del día anterior' : ''}.`;
+    } catch { return 'Hora de Chile.'; }
   };
   const hoyISO = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Santiago' }).format(new Date());
 
   fetch('/api/horarios').then((r) => (r.ok ? r.json() : Promise.reject())).then((d) => {
-    const ref = (yo.clase === 'clase-tarot' ? d.claseTarot?.[0]?.fecha : yo.clase === 'clase-pendulo' ? d.clasePendulo?.[0]?.fecha : yo.curso === 'tarot' ? d.tarot?.fecha : yo.curso === 'pendulo' ? d.pendulo?.sesiones?.[0]?.fecha : '') || hoyISO();
-    document.querySelectorAll('[data-hr-zona]').forEach((el) => { el.textContent = zona(ref); el.hidden = false; });
+    const prim = yo.clase === 'clase-tarot' ? d.claseTarot?.[0] : yo.clase === 'clase-pendulo' ? d.clasePendulo?.[0] : yo.curso === 'tarot' ? d.tarot : yo.curso === 'pendulo' ? d.pendulo?.sesiones?.[0] : null;
+    document.querySelectorAll('[data-hr-zona]').forEach((el) => { el.textContent = zona(prim?.fecha || hoyISO(), el.dataset.hora || prim?.hora || '19:00'); el.hidden = false; });
     const form = d.formacion?.fecha ? fecha(d.formacion.fecha) : '';
     document.querySelectorAll('[data-hr-form]').forEach((el) => (el.textContent = form));
 
@@ -87,5 +93,5 @@
   }).catch(() => { /* quedan los textos fijos de la página, sin fechas */ });
 
   // La diferencia horaria también se muestra si falla la carga (con la fecha de hoy)
-  document.querySelectorAll('[data-hr-zona]').forEach((el) => { el.textContent = zona(hoyISO()); el.hidden = false; });
+  document.querySelectorAll('[data-hr-zona]').forEach((el) => { el.textContent = zona(hoyISO(), el.dataset.hora || '19:00'); el.hidden = false; });
 })();

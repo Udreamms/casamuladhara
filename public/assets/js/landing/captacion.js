@@ -32,7 +32,7 @@
     ['El Salvador', '+503'], ['España', '+34'], ['Estados Unidos', '+1'], ['Guatemala', '+502'], ['Honduras', '+504'], ['México', '+52'],
     ['Nicaragua', '+505'], ['Panamá', '+507'], ['Paraguay', '+595'], ['Perú', '+51'], ['Puerto Rico', '+1'], ['Rep. Dominicana', '+1'],
     ['Uruguay', '+598'], ['Venezuela', '+58'], ['Australia', '+61'], ['Canadá', '+1'], ['Otro país', '']];
-  document.querySelectorAll('select[data-cc]').forEach((s) => {
+  document.querySelectorAll('select[data-cc]:not([data-solo])').forEach((s) => {
     s.replaceChildren(...PAISES.map(([p, c]) => { const o = new Option(c ? `${p} ${c}` : p, c); o.dataset.country = p === 'Otro país' ? '' : p; return o; }));
   });
 

@@ -141,7 +141,7 @@ const data = {
   // Calendario de la Maestra (calendario/{id}): clases gratis, cursos, formación, recesos, bloqueos y recordatorios
   cal: async () => {
     const s = await getDocs(query(collection(db, 'calendario'), orderBy('date', 'asc')));
-    A.cal = s.docs.map((d) => ({ id: d.id, ...d.data() }));
+    A.cal = s.docs.map((d) => { const x = { id: d.id, ...d.data() }; if (x.type === 'receso') x.type = 'bloqueado'; return x; });
     return A.cal;
   },
   calSave: async (id, d) => {
@@ -368,14 +368,13 @@ V.interesadas = () => {
 // ---------- Calendario de la Maestra ----------
 // Fechas como texto AAAA-MM-DD (día de Chile), sin horas de por medio: así no hay corrimientos por zona horaria.
 const CAL_TYPES = {
+  bloqueado: ['Karen no disponible', '#b8402f'],
   'clase-pendulo': ['Clase gratis Péndulo', '#d9a93f'],
   'clase-tarot': ['Clase gratis Tarot', '#7a5c8e'],
-  'curso-pendulo': ['Curso de Péndulo Hebreo (70 USD)', '#b07d1f'],
-  tarot: ['Grupo de Tarot Terapéutico (70 USD al mes por 2 meses)', '#5a3f6e'],
+  'curso-pendulo': ['Curso de Péndulo Hebreo ($69.900 CLP)', '#b07d1f'],
+  tarot: ['Grupo de Tarot Terapéutico (16 clases en 8 semanas, 70 USD al mes)', '#5a3f6e'],
   formacion: ['Formación (clase de un grupo)', '#3f7a5e'],
   'formacion-inicio': ['Inicio de un grupo de formación', '#2b5443'],
-  bloqueado: ['Karen no disponible', '#b8402f'],
-  receso: ['Receso', '#8d8a80'],
   interno: ['Recordatorio interno', '#3d6a8f'],
   terapia: ['Terapia agendada', '#d1568b'],
 };
@@ -418,8 +417,8 @@ const choque = (l) => l.some((e) => LIBRE_NO.includes(e.type)) && l.some((e) => 
 // Hora de término: la guardada, o inicio + duración (terapias reservadas en la web)
 const hmDe = (m) => `${String(Math.floor(m / 60) % 24).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 const finDe = (e) => e.endTime || (/^\d{2}:\d{2}$/.test(e.time || '') && e.duration > 0 ? hmDe(Number(e.time.slice(0, 2)) * 60 + Number(e.time.slice(3)) + e.duration) : '');
-// Sin hora, un evento bloquea el día completo (en los de tipo bloqueado y receso es lo esperado)
-const SIN_HORA_OK = ['bloqueado', 'receso', 'interno'];
+// Sin hora, un evento bloquea el día completo (en "Karen no disponible" es lo esperado: es el "todo el día")
+const SIN_HORA_OK = ['bloqueado', 'interno'];
 const sinHora = (e) => !e.time && !SIN_HORA_OK.includes(e.type);
 const AVISO_SIN_HORA = 'Sin hora, este evento bloquea el día completo';
 const calChip = (e) => {
@@ -428,7 +427,7 @@ const calChip = (e) => {
   return `<button class="cal-ev${e.tentative ? ' tent' : ''}" style="--c:${c}" data-cal-ev="${esc(e.id)}" title="${esc(aviso ? `${n} · ${aviso}` : n)}">${sinHora(e) ? '<span aria-hidden="true">⚠ </span>' : ''}${e.time ? `<b>${esc(e.time)}${fin ? `–${esc(fin)}` : ''}</b> ` : ''}${esc(e.title || n)}${e.tentative ? ' <i class="tent-tag">por confirmar</i>' : ''}</button>`;
 };
 V.calendario = () => {
-  const head = `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>Calendario</h1><p>Clases gratis, cursos, formación, recesos y días en que no estás disponible. Solo tú lo ves.</p></div><button class="btn btn-primary btn-sm" data-cal-add>Agregar fecha</button></div>`;
+  const head = `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>Calendario</h1><p>Clases gratis, cursos, formación y los momentos en que no estás disponible (citas, trámites, vacaciones). Solo tú lo ves.</p></div><button class="btn btn-primary btn-sm" data-cal-add>Agregar fecha</button></div>`;
   if (!A.cal) return `${head}<div class="card empty">Cargando calendario…</div>`;
   const hoy = hoyCL(), dias = calPorDia();
   const base = S.calMes || (() => { const d = new Date(hoy); return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1); })();
@@ -461,14 +460,15 @@ V.calendario = () => {
 };
 // Formulario para agregar o editar una fecha (en la ventana del portal)
 function calForm(e) {
-  const v = e || { type: 'clase-pendulo', date: ymd(hoyCL()) };
+  const v = e || { type: 'bloqueado', date: ymd(hoyCL()) };
   dialog(`<span class="eyebrow">Calendario</span><h3>${e ? 'Editar fecha' : 'Agregar fecha'}</h3>
   <form id="cal-form" style="display:grid;gap:10px;margin-top:12px">
     <label style="display:grid;gap:6px;font-size:.84rem"><b>Tipo</b><select id="cf-type">${Object.entries(CAL_TYPES).map(([k, [n]]) => `<option value="${k}" ${v.type === k ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select></label>
     <label style="display:grid;gap:6px;font-size:.84rem"><b>Título</b><input id="cf-title" maxlength="120" value="${esc(v.title || '')}" placeholder="Si lo dejas vacío, se usa el tipo"></label>
-    <div style="display:flex;gap:8px;flex-wrap:wrap"><label style="display:grid;gap:6px;font-size:.84rem;flex:1"><b>Fecha</b><input type="date" id="cf-date" required value="${esc(v.date || '')}"></label><label style="display:grid;gap:6px;font-size:.84rem"><b>Hora</b><input type="time" id="cf-time" value="${esc(v.time || '')}"></label></div>
-    <label style="display:grid;gap:6px;font-size:.84rem"><b>Fecha de término (opcional, para rangos)</b><input type="date" id="cf-end" value="${esc(v.endDate || '')}"></label>
-    <label style="display:grid;gap:6px;font-size:.84rem"><b>Hora de término</b><input type="time" id="cf-endtime" value="${esc(finDe(v))}"><span class="muted" style="font-size:.76rem">El evento bloquea solo desde la hora de inicio hasta la de término. Si una sesión dura menos, cambia la hora de término y esa hora vuelve a quedar libre en la web.</span></label>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><label style="display:grid;gap:6px;font-size:.84rem;flex:1"><b>Fecha</b><input type="date" id="cf-date" required value="${esc(v.date || '')}"></label><label style="display:grid;gap:6px;font-size:.84rem"><b>Hora de inicio</b><input type="time" id="cf-time" value="${esc(v.time || '')}"></label></div>
+    <label id="cf-allday-row" style="display:flex;gap:8px;align-items:center;font-size:.84rem" hidden><input type="checkbox" id="cf-allday" ${v.type === 'bloqueado' && e && !e.time ? 'checked' : ''}> Todo el día</label>
+    <label style="display:grid;gap:6px;font-size:.84rem"><b>Hasta el día (opcional, si son varios días seguidos)</b><input type="date" id="cf-end" value="${esc(v.endDate || '')}"></label>
+    <label style="display:grid;gap:6px;font-size:.84rem"><b>Hora de término</b><input type="time" id="cf-endtime" value="${esc(finDe(v))}"><span class="muted" id="cf-help" style="font-size:.76rem">El evento bloquea solo desde la hora de inicio hasta la de término. Si dura menos, cambia la hora de término y esa hora vuelve a quedar libre en la web.</span></label>
     <p id="cf-warn" role="alert" style="margin:0;font-size:.82rem;font-weight:700;color:#b8402f" hidden>${AVISO_SIN_HORA}.</p>
     <label style="display:flex;gap:8px;align-items:center;font-size:.84rem"><input type="checkbox" id="cf-tent" ${v.tentative ? 'checked' : ''}> Por confirmar (se ve con borde punteado y no se muestra en las landings)</label>
     ${v.type === 'terapia' && (v.whatsapp || v.email) ? `<div class="card" style="padding:12px 14px;display:grid;gap:6px;font-size:.84rem"><b>${esc(v.name || '')}</b><span>${esc(v.modalidad === 'online' ? 'Online' : v.direccion ? `Presencial · ${v.direccion}` : 'Presencial')}${v.clientTz ? ` · Zona: ${esc(v.clientTz)}` : ''}</span><span>${esc(v.whatsapp || '')} · ${esc(v.email || '')}</span><div style="display:flex;gap:6px;flex-wrap:wrap">${botonesRec(v)}</div></div>` : ''}
@@ -477,11 +477,20 @@ function calForm(e) {
     <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between"><button class="btn btn-primary btn-sm">Guardar</button>${e ? '<button type="button" class="btn btn-ghost btn-sm" id="cf-del">Borrar</button>' : ''}</div>
   </form>`);
   // Aviso en vivo: un evento sin hora bloquea el día completo
-  const avisar = () => { $('#cf-warn').hidden = !!$('#cf-time').value || SIN_HORA_OK.includes($('#cf-type').value); };
-  $('#cf-type').onchange = avisar; $('#cf-time').oninput = avisar; avisar();
+  const avisar = () => {
+    const bloq = $('#cf-type').value === 'bloqueado', todo = bloq && $('#cf-allday').checked;
+    $('#cf-allday-row').hidden = !bloq;
+    $('#cf-time').disabled = $('#cf-endtime').disabled = todo;
+    if (todo) { $('#cf-time').value = ''; $('#cf-endtime').value = ''; }
+    $('#cf-title').placeholder = bloq ? 'Ej.: Médico, trámite, vacaciones (vacío: Karen no disponible)' : 'Si lo dejas vacío, se usa el tipo';
+    $('#cf-warn').hidden = !!$('#cf-time').value || SIN_HORA_OK.includes($('#cf-type').value);
+  };
+  $('#cf-type').onchange = avisar; $('#cf-time').oninput = avisar; $('#cf-allday').onchange = avisar; avisar();
   $('#cal-form').onsubmit = async (ev) => {
     ev.preventDefault();
-    const time = $('#cf-time').value, endTime = time ? $('#cf-endtime').value : '';
+    const bloq = $('#cf-type').value === 'bloqueado', todo = bloq && $('#cf-allday').checked;
+    const time = todo ? '' : $('#cf-time').value, endTime = time ? $('#cf-endtime').value : '';
+    if (bloq && !todo && (!time || !endTime)) return toast('Elige la hora de inicio y de término, o marca "Todo el día".');
     if (endTime && endTime <= time) return toast('La hora de término debe ser después de la de inicio.');
     const duration = endTime ? (Number(endTime.slice(0, 2)) * 60 + Number(endTime.slice(3))) - (Number(time.slice(0, 2)) * 60 + Number(time.slice(3))) : 0;
     const d = { type: $('#cf-type').value, title: $('#cf-title').value.trim(), date: $('#cf-date').value, time, endTime, duration, endDate: $('#cf-end').value, note: $('#cf-note').value.trim(), tentative: $('#cf-tent').checked };
