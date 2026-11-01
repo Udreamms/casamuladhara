@@ -34,7 +34,7 @@
   .ag-horas button small{font-weight:400;font-size:.68rem;color:#5d6b63}
   .ag-horas button[aria-pressed="true"]{background:#2b5443;border-color:#2b5443;color:#ece7d3}.ag-horas button[aria-pressed="true"] small{color:#b9c4b5}
   .ag-cal{border:1px solid #d9d5c3;border-radius:14px;padding:10px;background:#f6f4ec}
-  .ag-cal-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;font-weight:700;text-transform:capitalize}
+  .ag-cal-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;font-weight:700}
   .ag-cal-h button{border:0;background:none;font-size:1.4rem;line-height:1;padding:4px 12px;cursor:pointer;color:#2b5443}.ag-cal-h button:disabled{opacity:.25;cursor:default}
   .ag-cal-g{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
   .ag-cal-g span{font-size:.66rem;font-weight:700;letter-spacing:.1em;color:#5d6b63;padding:4px 0}
@@ -61,7 +61,7 @@
       <label>Terapia<select name="terapia"><option value="" disabled selected>Elige tu terapia</option>${TERAPIAS.map((t) => `<option>${t}</option>`).join('')}</select></label>
       <fieldset class="ag-mod"><legend>Modalidad</legend>
         <label><input type="radio" name="modalidad" value="online" checked> Online</label>
-        <label data-pres><input type="radio" name="modalidad" value="presencial"> Presencial · Bellas Artes, Santiago</label>
+        <label data-pres><input type="radio" name="modalidad" value="presencial"> Presencial · Calle Mosqueto #459, piso 3, oficina 301 (salida metro Bellas Artes)</label>
       </fieldset>
       <p class="ag-note" data-pres-note hidden></p>
       <p class="ag-tz" data-tz></p>
@@ -120,7 +120,7 @@
     ant.disabled = mes <= primero; sig.disabled = mes >= ultimo;
     ant.onclick = () => { mes = vecino(-1); pintarCal(); };
     sig.onclick = () => { mes = vecino(1); pintarCal(); };
-    cab.append(ant, el('span', '', new Intl.DateTimeFormat('es', { timeZone: 'UTC', month: 'long', year: 'numeric' }).format(Date.UTC(y, m0, 1))), sig);
+    cab.append(ant, el('span', '', mayus(new Intl.DateTimeFormat('es', { timeZone: 'UTC', month: 'long', year: 'numeric' }).format(Date.UTC(y, m0, 1)))), sig);
     const grilla = el('div', 'ag-cal-g');
     ['L', 'M', 'M', 'J', 'V', 'S', 'D'].forEach((d) => grilla.append(el('span', '', d)));
     for (let i = (new Date(Date.UTC(y, m0, 1)).getUTCDay() + 6) % 7; i > 0; i--) grilla.append(el('i'));
@@ -189,13 +189,12 @@
     fila('Terapia', b.terapia);
     fila(enChile || miTz === CL ? 'Día y hora (Chile)' : `Día y hora (tu hora, ${miTz.replace('_', ' ')})`, `${mayus(dia(d.start, miTz))} · ${hora(d.start, miTz)}`);
     if (!enChile && miTz !== CL) fila('En hora de Chile', `${mayus(dia(d.start, CL))} · ${hora(d.start, CL)}`);
-    fila('Modalidad', d.modalidad === 'online' ? 'Online por Google Meet' : b.terapia === LIMPIEZA ? `En tu lugar: ${b.direccion}` : 'Presencial · Bellas Artes, Santiago de Chile');
+    fila('Modalidad', d.modalidad === 'online' ? 'Online por Google Meet' : b.terapia === LIMPIEZA ? `En tu lugar: ${b.direccion}` : 'Presencial · Calle Mosqueto #459, piso 3, oficina 301 (salida metro Bellas Artes), Santiago de Chile');
     const botones = el('div'); botones.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap';
     if (d.enlace) { const a = el('a', 'ag-btn', 'Enlace de la sesión (Meet)'); a.href = d.enlace; a.target = '_blank'; a.rel = 'noopener'; botones.append(a); }
     const c = el('a', 'ag-btn alt', 'Agregar a mi calendario'); c.href = cal; c.target = '_blank'; c.rel = 'noopener'; botones.append(c);
     ok.replaceChildren(el('span', 'ag-eyebrow', 'Sesión agendada'), el('h3', '', `¡Listo, ${String(b.name).trim().split(' ')[0]}!`),
       el('p', 'ag-note', 'Tu hora quedó reservada. Karen te escribirá por WhatsApp y a tu correo para confirmar los detalles y recordarte tu sesión.'), dl, botones);
-    if (d.modalidad === 'presencial' && b.terapia !== LIMPIEZA) ok.insertBefore(el('p', 'ag-note', 'Te enviaremos la dirección exacta antes de tu sesión.'), botones);
     q('#ag-form').hidden = true; ok.hidden = false;
     slots = slots.filter((t) => !(t < fin && t + d.duracion * 6e4 > d.start));
   }
@@ -213,6 +212,9 @@
     const a = e.target.closest('[data-agendar]');
     if (!a) return;
     e.preventDefault();
+    document.querySelectorAll('.dd[open]').forEach((d) => d.removeAttribute('open'));
+    const nav = document.getElementById('nav') || document.getElementById('menu'), mb = document.getElementById('menu-btn');
+    if (nav) nav.classList.remove('open'); if (mb) mb.setAttribute('aria-expanded', 'false');
     abrir(a.dataset.agendar);
   });
 })();

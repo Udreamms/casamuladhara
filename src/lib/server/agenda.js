@@ -13,7 +13,7 @@ export const DURACION = 120; // minutos que se reservan por defecto: las sesione
 export const ANTICIPACION_H = 4;
 export const DIAS_ADELANTE = 31;
 export const ZONAS_CHILE = ['America/Santiago', 'America/Punta_Arenas', 'Pacific/Easter'];
-export const DIRECCION = 'Bellas Artes, Santiago de Chile';
+export const DIRECCION = 'Calle Mosqueto #459, piso 3, oficina 301 (salida metro Bellas Artes), Santiago de Chile';
 
 const FECHA = /^\d{4}-\d{2}-\d{2}$/;
 const HORA = /^([01]\d|2[0-3]):[0-5]\d$/;

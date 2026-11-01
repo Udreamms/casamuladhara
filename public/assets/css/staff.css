@@ -219,6 +219,9 @@ table.tbl{width:100%;border-collapse:collapse;font-size:.88rem;min-width:520px}
 .cal-n{font-size:.78rem;font-weight:700;color:var(--muted)}
 .cal-ev{display:block;width:100%;text-align:left;border:0;border-left:3px solid var(--c);border-radius:6px;background:color-mix(in srgb,var(--c) 14%,transparent);color:var(--fg);font:500 .72rem/1.25 var(--f-body);padding:4px 6px;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cal-ev:hover{background:color-mix(in srgb,var(--c) 26%,transparent)}
+.cal-ev.tent{border:1px dashed var(--c);border-left:3px dashed var(--c);background:transparent}
+.tent-tag{font-style:normal;font-weight:700;font-size:.62rem;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.cal-legend .tent-leg{font-style:italic;border:1px dashed var(--muted);border-radius:4px;padding:1px 6px}.cal-legend .tent-leg::before{display:none}
 .cal-clash{display:block;font:700 .62rem/1.2 var(--f-body);color:#b8402f}
 .cal-row{display:grid;grid-template-columns:150px 1fr;gap:6px 14px;align-items:start;padding:12px 10px;border-top:1px solid var(--line);border-radius:10px}
 .cal-row .cal-clash{grid-column:1}

@@ -24,6 +24,7 @@
     <a href="/">Tour</a>
     <details class="dd"><summary>Clases gratis</summary><div class="dd-panel"><a href="/clase-pendulo"><b>Péndulo Hebreo</b><span>Sábados 19:00 (Chile)</span></a><a href="/clase-tarot"><b>Tarot Terapéutico</b><span>Martes 19:00 (Chile)</span></a></div></details>
     <details class="dd"><summary>Formaciones</summary><div class="dd-panel"><a href="/pendulo">Péndulo Hebreo Nivel 1</a><a href="/tarot">Tarot Terapéutico</a><a href="/formacion">Terapeuta Holística Integral</a></div></details>
+      <details class="dd"><summary>Terapias</summary><div class="dd-panel"><a href="#agendar" data-agendar="Reiki">Reiki</a><a href="#agendar" data-agendar="Radiestesia y Sanación del Alma">Radiestesia y Sanación del Alma</a><a href="#agendar" data-agendar="Péndulo Hebreo">Péndulo Hebreo</a><a href="#agendar" data-agendar="Registros Akáshicos">Registros Akáshicos</a><a href="#agendar" data-agendar="Vidas Pasadas">Vidas Pasadas</a><a href="#agendar" data-agendar="Sanando Niño Interior">Sanando Niño Interior</a><a href="#agendar" data-agendar="Terapia Transgeneracional">Terapia Transgeneracional</a><a href="#agendar" data-agendar="Tarot Terapéutico y Evolutivo">Tarot Terapéutico y Evolutivo</a><a href="#agendar" data-agendar="Limpieza energética de espacios">Limpieza energética de espacios</a></div></details>
   </nav>
   <a class="icon-btn acct" href="/aula" id="acct-btn" aria-label="Mi cuenta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg><span class="acct-label">Mi cuenta</span></a>
   <button class="icon-btn round menu-toggle" type="button" id="menu-btn" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
@@ -34,8 +35,9 @@
     <div class="con-karen"><img src="assets/img/e2ec26d75a.webp" alt="Karen Oyarce Sáez, Maestra Holística"><div><small>Con Karen Oyarce</small><span class="eyebrow">Gratis · En vivo · Todos los sábados</span></div></div>
     <h1>Clase gratis: descubre el Péndulo Hebreo</h1>
     <p class="lede">Cada sábado, en 30 minutos, Karen te explica qué es el Péndulo Hebreo, cómo ayuda a limpiar y equilibrar tu energía y la de tu casa, y cómo puedes empezar a usarlo. Puedes hacerle tus preguntas en vivo.</p>
-    <div class="facts"><span class="hl">Gratis</span><span>Sábados · 19:00 (Chile)</span><span>Online en vivo</span><span>Desde cualquier país</span></div>
-    <p class="next-class" id="next-class">Próxima clase: este sábado · 19:00</p>
+    <div class="facts"><span class="hl">Gratis</span><span>Todos los sábados · 19:00 (hora de Chile) · 30 minutos</span><span>Online en vivo</span><span>Desde cualquier país</span></div>
+    <p class="next-class" id="next-class">Todos los sábados a las 19:00 (hora de Chile), 30 minutos</p>
+    <p class="hr-zona" data-hr-zona hidden style="margin:8px 0 0;font-size:.85rem;opacity:.85"></p>
     <a class="btn btn-sun go-form" href="#reservar">Quiero mi lugar gratis</a>
   </div>
   <form class="lp-form" id="reservar" data-lead="clase-pendulo" data-clase="Péndulo Hebreo">
@@ -56,6 +58,10 @@
     <div><b>Qué es el Péndulo Hebreo</b><p>De dónde viene y por qué funciona como herramienta de limpieza energética.</p></div>
     <div><b>Para qué lo puedes usar</b><p>Para tu energía, la de tu familia y la de tu casa.</p></div>
     <div><b>Cómo empezar</b><p>Qué necesitas y el primer paso para practicar.</p></div>
+  </div>
+  <div class="next-step" data-hr-siguiente hidden><b>Tu siguiente paso</b>
+    <div data-hr-linea style="margin-top:6px">Próximo curso de Péndulo Hebreo: <b data-hr-curso></b>. <a href="/pendulo" style="color:#2b5443">Ver el curso</a></div>
+    <div data-hr-linea style="margin-top:6px">Luego: Formación de Terapeuta Holística Integral, próximo grupo <b data-hr-form></b>. Lo que pagaste en el curso se descuenta de la formación. <a href="/formacion" style="color:#2b5443">Ver la formación</a></div>
   </div>
 </div></section>
 <section class="section tone-light"><div class="wrap">
@@ -80,39 +86,8 @@
 </div></section>
 <footer style="padding-block:28px"><div class="wrap legal" style="margin:0;border:0;padding:0"><span>© 2026 Casa Muladhara</span><span>Instagram @casa.muladhara</span></div></footer>
 <script src="/assets/js/landing/petalos.js"></script>
-<script>
-// Próximas clases (19:00, hora de Chile) calculadas en el navegador, para que la página sirva todas las semanas.
-// Se usa la hora de Santiago y no la del visitante, que puede escribir desde otro país.
-// La clase de esta semana vale hasta las 19:30 (fin de la clase); después pasa a la semana siguiente.
-// Cada opción lleva data-date (AAAA-MM-DD) para el calendario del gracias (captacion.js).
-(() => {
-  const PRUEBA = null; // para revisar: '2026-11-04T12:00' (hora de Chile). En producción: null
-  const DIA = 6, NOMBRE = 'Sábado'; // 0 domingo … 6 sábado
-  const DESDE = [2026, 11, 7]; // primera clase: nunca se ofrecen fechas anteriores
-  const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-  try {
-    let y, m, d, min;
-    if (PRUEBA) {
-      const [f, h] = PRUEBA.split('T'); [y, m, d] = f.split('-').map(Number); const [hh, mm] = h.split(':').map(Number); min = hh * 60 + mm;
-    } else {
-      const p = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: 'America/Santiago', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hourCycle: 'h23' })
-        .formatToParts(new Date()).map((x) => [x.type, x.value]));
-      y = +p.year; m = +p.month; d = +p.day; min = (+p.hour % 24) * 60 + +p.minute;
-    }
-    const hoy = new Date(Date.UTC(y, m - 1, d));
-    let falta = (DIA - hoy.getUTCDay() + 7) % 7;
-    if (falta === 0 && min >= 19 * 60 + 30) falta = 7;
-    const primero = new Date(Math.max(Date.UTC(y, m - 1, d + falta), Date.UTC(DESDE[0], DESDE[1] - 1, DESDE[2])));
-    const clase = (semanas) => new Date(primero.getTime() + 7 * semanas * 864e5);
-    const texto = (s) => `${NOMBRE} ${s.getUTCDate()} de ${MESES[s.getUTCMonth()]} · 19:00`;
-    const proximos = [0, 1, 2].map((k) => clase(k));
-    document.getElementById('next-class').textContent = `Próxima clase: ${texto(proximos[0]).replace(NOMBRE, NOMBRE.toLowerCase())}`;
-    const sel = document.getElementById('saturdays');
-    sel.replaceChildren(...proximos.map((s) => { const o = new Option(texto(s), texto(s)); o.dataset.date = s.toISOString().slice(0, 10); return o; }),
-      new Option(`Avísenme del próximo ${NOMBRE.toLowerCase()}`, `Avísenme del próximo ${NOMBRE.toLowerCase()}`));
-  } catch (e) { /* sin fechas: queda la opción fija del HTML */ }
-})();
-</script>
+<script src="/assets/js/landing/horarios.js" data-clase="clase-pendulo" defer></script>
 <script src="/assets/js/landing/menu.js"></script>
 <script src="/assets/js/landing/captacion.js"></script>
+<script src="/assets/js/landing/agendar.js" defer></script>
 </body></html>

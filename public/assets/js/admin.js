@@ -370,8 +370,8 @@ V.interesadas = () => {
 const CAL_TYPES = {
   'clase-pendulo': ['Clase gratis Péndulo', '#d9a93f'],
   'clase-tarot': ['Clase gratis Tarot', '#7a5c8e'],
-  'curso-pendulo': ['Curso Péndulo Hebreo Nivel 1 (70 USD)', '#b07d1f'],
-  tarot: ['Grupo de Tarot Terapéutico (35 USD/mes)', '#5a3f6e'],
+  'curso-pendulo': ['Curso de Péndulo Hebreo (70 USD)', '#b07d1f'],
+  tarot: ['Grupo de Tarot Terapéutico (70 USD al mes por 2 meses)', '#5a3f6e'],
   formacion: ['Formación (clase de un grupo)', '#3f7a5e'],
   'formacion-inicio': ['Inicio de un grupo de formación', '#2b5443'],
   bloqueado: ['Karen no disponible', '#b8402f'],
@@ -398,13 +398,13 @@ const calPorDia = () => {
   return m;
 };
 // Terapias agendadas desde la web (type 'terapia'): mensaje de recordatorio listo para enviar por WhatsApp o Gmail
-const DIR_PRESENCIAL = 'Bellas Artes, Santiago de Chile';
+const DIR_PRESENCIAL = 'Calle Mosqueto #459, piso 3, oficina 301 (salida metro Bellas Artes), Santiago de Chile';
 const cuando = (ts, tz) => new Intl.DateTimeFormat('es', { timeZone: tz, weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(ts);
 function recordatorio(e) {
   const cl = e.start ? cuando(e.start, 'America/Santiago') : `${fechaLarga(e.date)} ${e.time || ''}`.trim();
   const suyo = e.start && e.clientTz && e.clientTz !== 'America/Santiago' ? cuando(e.start, e.clientTz) : '';
   const lugar = e.modalidad === 'online' ? `Online por Google Meet: ${A.clases?.enlaceTerapias || '(falta el enlace en Ajustes)'}`
-    : /limpieza/i.test(e.terapia || '') ? `En ${e.direccion || 'tu dirección'}` : `Presencial en ${DIR_PRESENCIAL} (te confirmo la dirección exacta)`;
+    : /limpieza/i.test(e.terapia || '') ? `En ${e.direccion || 'tu dirección'}` : `Presencial en ${DIR_PRESENCIAL}`;
   const texto = `Hola ${(e.name || '').split(' ')[0]}, te escribe Karen de Casa Muladhara. Te recuerdo tu sesión de ${e.terapia || 'terapia'}:\n- Día y hora: ${suyo ? `${suyo} (tu hora, ${e.clientTz})\n- En Chile: ${cl}` : `${cl} (hora de Chile)`}\n- ${lugar}\n\n¡Te espero!`;
   const asunto = `Tu sesión de ${e.terapia || 'terapia'} con Karen · Casa Muladhara`;
   const wa = String(e.whatsapp || '').replace(/\D/g, '');
@@ -415,7 +415,18 @@ function recordatorio(e) {
 }
 const botonesRec = (e) => { const r = recordatorio(e); return `${r.wa ? `<a class="btn btn-ghost btn-sm" href="${esc(r.wa)}" target="_blank" rel="noopener">WhatsApp</a>` : ''}${r.mail ? `<a class="btn btn-ghost btn-sm" href="${esc(r.mail)}" target="_blank" rel="noopener">Correo</a>` : ''}`; };
 const choque = (l) => l.some((e) => LIBRE_NO.includes(e.type)) && l.some((e) => !LIBRE_NO.includes(e.type));
-const calChip = (e) => { const [n, c] = CAL_TYPES[e.type] || ['Fecha', '#5d6b63']; return `<button class="cal-ev" style="--c:${c}" data-cal-ev="${esc(e.id)}" title="${esc(n)}">${e.time ? `<b>${esc(e.time)}</b> ` : ''}${esc(e.title || n)}</button>`; };
+// Hora de término: la guardada, o inicio + duración (terapias reservadas en la web)
+const hmDe = (m) => `${String(Math.floor(m / 60) % 24).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+const finDe = (e) => e.endTime || (/^\d{2}:\d{2}$/.test(e.time || '') && e.duration > 0 ? hmDe(Number(e.time.slice(0, 2)) * 60 + Number(e.time.slice(3)) + e.duration) : '');
+// Sin hora, un evento bloquea el día completo (en los de tipo bloqueado y receso es lo esperado)
+const SIN_HORA_OK = ['bloqueado', 'receso', 'interno'];
+const sinHora = (e) => !e.time && !SIN_HORA_OK.includes(e.type);
+const AVISO_SIN_HORA = 'Sin hora, este evento bloquea el día completo';
+const calChip = (e) => {
+  const [n, c] = CAL_TYPES[e.type] || ['Fecha', '#5d6b63'], fin = finDe(e);
+  const aviso = [e.tentative ? 'Por confirmar' : '', sinHora(e) ? AVISO_SIN_HORA : ''].filter(Boolean).join(' · ');
+  return `<button class="cal-ev${e.tentative ? ' tent' : ''}" style="--c:${c}" data-cal-ev="${esc(e.id)}" title="${esc(aviso ? `${n} · ${aviso}` : n)}">${sinHora(e) ? '<span aria-hidden="true">⚠ </span>' : ''}${e.time ? `<b>${esc(e.time)}${fin ? `–${esc(fin)}` : ''}</b> ` : ''}${esc(e.title || n)}${e.tentative ? ' <i class="tent-tag">por confirmar</i>' : ''}</button>`;
+};
 V.calendario = () => {
   const head = `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>Calendario</h1><p>Clases gratis, cursos, formación, recesos y días en que no estás disponible. Solo tú lo ves.</p></div><button class="btn btn-primary btn-sm" data-cal-add>Agregar fecha</button></div>`;
   if (!A.cal) return `${head}<div class="card empty">Cargando calendario…</div>`;
@@ -438,7 +449,7 @@ V.calendario = () => {
   const porRecordar = (A.cal || []).filter((e) => e.type === 'terapia' && (e.date === claveHoy || e.date === claveMan)).sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
   const recordar = porRecordar.length ? `<section class="card panel"><h3>Por recordar: hoy y mañana</h3>${porRecordar.map((e) => `<div class="cal-row"><b>${e.date === claveHoy ? 'Hoy' : 'Mañana'} · ${esc(e.time || '')}</b><div>${calChip(e)}<div style="display:flex;gap:6px;flex-wrap:wrap">${botonesRec(e)}</div></div></div>`).join('')}</section>` : '';
   return `${head}
-  <div class="cal-legend">${Object.entries(CAL_TYPES).map(([, [n, c]]) => `<span style="--c:${c}">${esc(n)}</span>`).join('')}</div>
+  <div class="cal-legend">${Object.entries(CAL_TYPES).map(([, [n, c]]) => `<span style="--c:${c}">${esc(n)}</span>`).join('')}<span class="tent-leg">Borde punteado: por confirmar</span></div>
   <section class="card panel cal-month">
     <div class="panel-h"><button class="btn btn-ghost btn-sm" data-cal-mes="-1" aria-label="Mes anterior">←</button><h3 style="text-transform:capitalize">${MES_N[mo]} ${y}</h3><button class="btn btn-ghost btn-sm" data-cal-mes="1" aria-label="Mes siguiente">→</button></div>
     <div class="cal-grid">${['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((d) => `<div class="cal-wd">${d}</div>`).join('')}${celdas.join('')}</div>
@@ -457,15 +468,23 @@ function calForm(e) {
     <label style="display:grid;gap:6px;font-size:.84rem"><b>Título</b><input id="cf-title" maxlength="120" value="${esc(v.title || '')}" placeholder="Si lo dejas vacío, se usa el tipo"></label>
     <div style="display:flex;gap:8px;flex-wrap:wrap"><label style="display:grid;gap:6px;font-size:.84rem;flex:1"><b>Fecha</b><input type="date" id="cf-date" required value="${esc(v.date || '')}"></label><label style="display:grid;gap:6px;font-size:.84rem"><b>Hora</b><input type="time" id="cf-time" value="${esc(v.time || '')}"></label></div>
     <label style="display:grid;gap:6px;font-size:.84rem"><b>Fecha de término (opcional, para rangos)</b><input type="date" id="cf-end" value="${esc(v.endDate || '')}"></label>
-    <label style="display:grid;gap:6px;font-size:.84rem"><b>Duración en minutos (opcional)</b><input type="number" id="cf-dur" min="15" max="480" step="15" placeholder="Vacío: terapias 120, clases gratis 60" value="${esc(v.duration > 0 ? v.duration : '')}"><span class="muted" style="font-size:.76rem">Si una sesión dura menos, acórtala aquí y esa hora vuelve a quedar libre en la web.</span></label>
+    <label style="display:grid;gap:6px;font-size:.84rem"><b>Hora de término</b><input type="time" id="cf-endtime" value="${esc(finDe(v))}"><span class="muted" style="font-size:.76rem">El evento bloquea solo desde la hora de inicio hasta la de término. Si una sesión dura menos, cambia la hora de término y esa hora vuelve a quedar libre en la web.</span></label>
+    <p id="cf-warn" role="alert" style="margin:0;font-size:.82rem;font-weight:700;color:#b8402f" hidden>${AVISO_SIN_HORA}.</p>
+    <label style="display:flex;gap:8px;align-items:center;font-size:.84rem"><input type="checkbox" id="cf-tent" ${v.tentative ? 'checked' : ''}> Por confirmar (se ve con borde punteado y no se muestra en las landings)</label>
     ${v.type === 'terapia' && (v.whatsapp || v.email) ? `<div class="card" style="padding:12px 14px;display:grid;gap:6px;font-size:.84rem"><b>${esc(v.name || '')}</b><span>${esc(v.modalidad === 'online' ? 'Online' : v.direccion ? `Presencial · ${v.direccion}` : 'Presencial')}${v.clientTz ? ` · Zona: ${esc(v.clientTz)}` : ''}</span><span>${esc(v.whatsapp || '')} · ${esc(v.email || '')}</span><div style="display:flex;gap:6px;flex-wrap:wrap">${botonesRec(v)}</div></div>` : ''}
     <label style="display:grid;gap:6px;font-size:.84rem"><b>Nota</b><textarea id="cf-note" maxlength="500" rows="2">${esc(v.note || '')}</textarea></label>
     ${e ? '' : '<label style="display:flex;gap:8px;align-items:center;font-size:.84rem"><input type="checkbox" id="cf-rep"> Repetir cada semana hasta <input type="date" id="cf-until"></label>'}
     <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between"><button class="btn btn-primary btn-sm">Guardar</button>${e ? '<button type="button" class="btn btn-ghost btn-sm" id="cf-del">Borrar</button>' : ''}</div>
   </form>`);
+  // Aviso en vivo: un evento sin hora bloquea el día completo
+  const avisar = () => { $('#cf-warn').hidden = !!$('#cf-time').value || SIN_HORA_OK.includes($('#cf-type').value); };
+  $('#cf-type').onchange = avisar; $('#cf-time').oninput = avisar; avisar();
   $('#cal-form').onsubmit = async (ev) => {
     ev.preventDefault();
-    const d = { type: $('#cf-type').value, title: $('#cf-title').value.trim(), date: $('#cf-date').value, time: $('#cf-time').value, endDate: $('#cf-end').value, note: $('#cf-note').value.trim(), duration: Math.round(Number($('#cf-dur').value)) || 0 };
+    const time = $('#cf-time').value, endTime = time ? $('#cf-endtime').value : '';
+    if (endTime && endTime <= time) return toast('La hora de término debe ser después de la de inicio.');
+    const duration = endTime ? (Number(endTime.slice(0, 2)) * 60 + Number(endTime.slice(3))) - (Number(time.slice(0, 2)) * 60 + Number(time.slice(3))) : 0;
+    const d = { type: $('#cf-type').value, title: $('#cf-title').value.trim(), date: $('#cf-date').value, time, endTime, duration, endDate: $('#cf-end').value, note: $('#cf-note').value.trim(), tentative: $('#cf-tent').checked };
     if (!d.date) return toast('Elige la fecha.');
     if (d.endDate && d.endDate < d.date) return toast('La fecha de término no puede ser antes de la fecha.');
     try {
