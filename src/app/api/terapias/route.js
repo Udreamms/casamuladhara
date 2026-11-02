@@ -28,7 +28,9 @@ export async function POST(request) {
   const b = await request.json().catch(() => ({}));
   // Campo trampa para bots
   if (str(b.web, 200)) return json({ ok: true });
-  const terapia = TERAPIAS.includes(b.terapia) ? b.terapia : null;
+  const ANTIGUOS = { 'Sanando Niño Interior': 'Niño Interior', 'Radiestesia y Sanación del Alma': 'Radiestesia' }; // nombres de antes del cambio
+  const nombreTerapia = ANTIGUOS[b.terapia] || b.terapia;
+  const terapia = TERAPIAS.includes(nombreTerapia) ? nombreTerapia : null;
   const modalidad = ['online', 'presencial'].includes(b.modalidad) ? b.modalidad : null;
   const start = Number(b.start);
   const tz = zonaValida(str(b.tz, 60)) ? str(b.tz, 60) : '';

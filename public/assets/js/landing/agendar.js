@@ -4,7 +4,7 @@
   const CL = 'America/Santiago';
   const CHILE = [CL, 'America/Punta_Arenas', 'Pacific/Easter'];
   const LIMPIEZA = 'Limpieza energética de espacios';
-  const TERAPIAS = ['Reiki', 'Radiestesia y Sanación del Alma', 'Péndulo Hebreo', 'Registros Akáshicos', 'Vidas Pasadas', 'Sanando Niño Interior',
+  const TERAPIAS = ['Reiki', 'Radiestesia', 'Péndulo Hebreo', 'Registros Akáshicos', 'Vidas Pasadas', 'Niño Interior',
     'Terapia Transgeneracional', 'Tarot Terapéutico y Evolutivo', LIMPIEZA];
   const miTz = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || CL; } catch { return CL; } })();
   const enChile = CHILE.includes(miTz);
