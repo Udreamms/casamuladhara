@@ -68,15 +68,13 @@
       const [y, m, d] = fecha.split('-').map(Number);
       const ini = utcDeChile(y, m, d, 19, 0), fin = new Date(ini.getTime() + 30 * 60000);
       const detalle = `Entra a la clase por Google Meet: ${enlace}`;
-      const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Casa Muladhara//Clases gratis//ES', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'BEGIN:VEVENT',
-        `UID:${fecha}-${f.dataset.lead}@casamuladhara`, `DTSTAMP:${utc(new Date())}`, `DTSTART:${utc(ini)}`, `DTEND:${utc(fin)}`,
-        `SUMMARY:${icsTexto(titulo)}`, `DESCRIPTION:${icsTexto(detalle)}`, `LOCATION:${icsTexto(enlace)}`, `URL:${enlace}`,
-        'BEGIN:VALARM', 'TRIGGER:-PT1H', 'ACTION:DISPLAY', `DESCRIPTION:${icsTexto(titulo)}`, 'END:VALARM', 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
-      const cal = el('a', { className: 'btn btn-cal', href: URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' })), download: `clase-gratis-${fecha}.ics` }, 'Agregar a mi calendario');
       const g = new URL('https://calendar.google.com/calendar/render');
       g.search = new URLSearchParams({ action: 'TEMPLATE', text: titulo, dates: `${utc(ini)}/${utc(fin)}`, details: detalle, location: enlace }).toString();
-      acciones.append(cal, el('a', { className: 'gcal', href: g.toString(), target: '_blank', rel: 'noopener' }, 'Google Calendar'));
+      acciones.append(el('a', { className: 'btn btn-cal', href: g.toString(), target: '_blank', rel: 'noopener' }, 'Agregar a mi calendario'));
     }
+    // Debajo del calendario: dudas por WhatsApp de Karen, con el mensaje ya escrito
+    const duda = `Hola Karen, tengo una pregunta sobre la clase gratis de ${f.dataset.clase}`;
+    acciones.append(el('a', { className: 'btn btn-cal', href: `https://wa.me/56940044528?text=${encodeURIComponent(duda)}`, target: '_blank', rel: 'noopener' }, '¿Tienes preguntas? Escríbenos por WhatsApp'));
     nodos.push(acciones, el('small', {}, 'Agrégala a tu calendario para que te avise 1 hora antes. Karen también te escribirá por WhatsApp.'));
     return nodos;
   }
@@ -111,7 +109,7 @@
         const out = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(out.error || 'No pudimos enviar tus datos.');
         fbq('track', 'Lead', {}, { eventID: body.eventId });
-        f.querySelectorAll('label, button, small').forEach((el) => (el.hidden = true));
+        f.querySelectorAll(out.enlace && f.dataset.clase ? 'label, button, small, .wa-alt' : 'label, button, small').forEach((el) => (el.hidden = true));
         // Clase gratis con enlace de Google Meet guardado: el gracias trae el botón para entrar y el calendario
         if (ok && out.enlace && f.dataset.clase) ok.replaceChildren(...graciasClase(f, out.enlace));
         if (ok) { ok.hidden = false; ok.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
