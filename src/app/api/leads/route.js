@@ -3,6 +3,7 @@
 // Se guardan en leads/{id} desde el servidor: el navegador no escribe en Firestore y las reglas siguen denegando todo lo demás.
 //   action 'save' -> { form, name, email, whatsapp, country, interest, message, utm, page, web }   sin sesión, desde cualquier landing
 //   action 'all'  -> { leads: [{ id, form, name, ..., createdAt }] }   solo la Maestra (Authorization: Bearer <token>)
+//   action 'delete' -> { ids: [..] }   la Maestra elimina interesadas (hasta 100 a la vez); no se puede deshacer
 import { FieldValue } from 'firebase-admin/firestore';
 import { auth, db, json } from '@/lib/server/services.js';
 import { contexto, enviarDespues, idValido, usuario } from '@/lib/server/meta.js';
@@ -59,7 +60,7 @@ export async function POST(request) {
       }
       return json({ ok: true, id: ref.id, ...(enlace ? { enlace } : {}) });
     }
-    if (body.action === 'all' || body.action === 'status') {
+    if (body.action === 'all' || body.action === 'status' || body.action === 'delete') {
       let user;
       try {
         user = await auth().verifyIdToken((request.headers.get('authorization') || '').replace(/^Bearer\s+/i, ''));
@@ -67,6 +68,14 @@ export async function POST(request) {
         return json({ error: 'Tu sesión expiró. Vuelve a entrar al portal.' }, 401);
       }
       if (user.admin !== true) return json({ error: 'Esta acción es solo para la Maestra.' }, 403);
+      if (body.action === 'delete') {
+        const ids = Array.isArray(body.ids) ? [...new Set(body.ids)] : [];
+        if (!ids.length || ids.length > 100 || ids.some((id) => typeof id !== 'string' || !/^[A-Za-z0-9]{1,40}$/.test(id))) return json({ error: 'Datos no válidos.' }, 400);
+        const lote = db().batch();
+        ids.forEach((id) => lote.delete(db().doc(`leads/${id}`)));
+        await lote.commit();
+        return json({ ok: true, eliminadas: ids.length });
+      }
       if (body.action === 'status') {
         const status = ['nuevo', 'contactado', 'inscrita', 'descartado'].includes(body.status) ? body.status : null;
         if (!status || typeof body.id !== 'string' || !/^[A-Za-z0-9]{1,40}$/.test(body.id)) return json({ error: 'Datos no válidos.' }, 400);
