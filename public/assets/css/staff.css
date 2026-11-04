@@ -277,3 +277,24 @@ dialog input[type=checkbox]{width:auto;padding:0;accent-color:var(--accent)}
 .yr-g button.blk{background:color-mix(in srgb,#b8402f 24%,transparent)}
 .yr-g button.hoy{outline:2px solid var(--brass)}
 .yr-g button:hover{background:color-mix(in srgb,var(--accent) 35%,transparent)}
+
+/* Chat de WhatsApp dentro del portal */
+.wa{display:grid;grid-template-columns:minmax(220px,300px) 1fr;gap:0;height:min(70vh,640px);min-height:420px;padding:0;overflow:hidden}
+.wa-list{border-right:1px solid var(--line);overflow:auto;display:flex;flex-direction:column}
+.wa-item{display:grid;gap:2px;text-align:left;padding:12px 14px;border:0;border-bottom:1px solid var(--line);background:none;color:inherit;font:inherit;cursor:pointer}
+.wa-item:hover,.wa-item[aria-current="true"]{background:var(--surface-2)}
+.wa-item b{display:flex;justify-content:space-between;gap:8px;font-weight:700}
+.wa-item small{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wa-item .count{background:var(--ok);color:#fff;border-radius:999px;font:700 .68rem/1 var(--f-caps);padding:4px 7px}
+.wa-chat{display:grid;grid-template-rows:auto 1fr auto;min-width:0}
+.wa-top{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;align-items:center}
+.wa-msgs{overflow:auto;padding:14px 16px;display:flex;flex-direction:column;gap:6px;background:var(--surface-2)}
+.wa-m{max-width:78%;padding:8px 12px;border-radius:14px;background:var(--surface);box-shadow:var(--shadow);white-space:pre-wrap;overflow-wrap:anywhere;align-self:flex-start}
+.wa-m.out{align-self:flex-end;background:color-mix(in srgb,var(--ok) 18%,var(--surface))}
+.wa-m small{display:block;text-align:right;color:var(--muted);font-size:.7rem;margin-top:2px}
+.wa-m small.bad{color:var(--live)}
+.wa-send{display:grid;grid-template-columns:1fr auto;gap:8px;padding:10px 12px;border-top:1px solid var(--line);align-items:end}
+.wa-send textarea{resize:none;min-height:42px;max-height:140px;border-radius:14px}
+.wa-note{padding:10px 14px;font-size:.84rem;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:color-mix(in srgb,var(--sun) 22%,var(--surface))}
+.wa-empty{display:grid;place-items:center;color:var(--muted);padding:24px;text-align:center}
+@media (max-width:760px){.wa{grid-template-columns:1fr;height:auto}.wa-list{max-height:220px;border-right:0;border-bottom:1px solid var(--line)}.wa-chat{height:60vh}}

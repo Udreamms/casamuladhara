@@ -58,7 +58,7 @@ const payState = (u) => (u.plan === 'completo' ? ['done', 'Pagó completo']
     : ownedOf(u).length ? ['done', `Compró el Nivel ${ownedOf(u).map(lvName).join(', ')}`] : ['lock', 'Sin pago']);
 
 // ---------- Datos ----------
-const A = { students: [], questions: [], tickets: [], posts: [], config: {}, payments: {}, me: null, answers: null };
+const A = { wa: { chats: [], msgs: [], on: null }, students: [], questions: [], tickets: [], posts: [], config: {}, payments: {}, me: null, answers: null };
 let api = null; // llama a /api/admin con el token de la Maestra
 
 async function loadAll() {
@@ -181,6 +181,7 @@ const S = { view: 'alumnas', q: '', open: null, filter: 'todas', lvOpen: {}, fq:
 const NAV = [
   ['alumnas', 'Alumnas', '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5a6.5 6.5 0 0 1 3.5 5.5"/>', () => A.students.filter(isNew).length],
   ['interesadas', 'Interesadas', '<path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/>', () => (A.leads || []).filter((l) => l.status === 'nuevo').length],
+  ['whatsapp', 'WhatsApp', '<path d="M12 21a9 9 0 1 0-9-9c0 1.6.4 3.1 1.2 4.4L3 21l4.6-1.2A9 9 0 0 0 12 21z"/><path d="M9 8.5c.3 3 3 5.7 6.500 6.500"/>', () => A.wa.chats.reduce((n, c) => n + (c.unread || 0), 0)],
   ['calendario', 'Calendario', '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'],
   ['formacion', 'Formación completa', '<path d="M3 8 12 4l9 4-9 4z"/><path d="M7 10v5c3 2 7 2 10 0v-5"/>'],
   ['pagos', 'Pagos', '<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h4"/>'],
@@ -348,16 +349,20 @@ V.clase = () => {
 };
 const LEAD_FORMS = { pendulo: 'Péndulo Hebreo', 'clase-pendulo': 'Clase gratis Péndulo', tarot: 'Tarot Terapéutico', 'clase-tarot': 'Clase gratis Tarot', formacion: 'Formación', sala: 'Sala Abierta', terapias: 'Terapias', meditacion: 'Meditación', regalo: 'Portada · Sala Abierta' };
 const LEAD_STATES = [['nuevo', 'Nueva'], ['contactado', 'Contactada'], ['inscrita', 'Inscrita'], ['descartado', 'Descartada']];
+// Mismo criterio que src/lib/server/whatsapp.js: solo dígitos con código de país (un celular chileno de 9 dígitos que empieza en 9 se toma como +56)
+const waNum = (n) => { let d = String(n || '').replace(/\D/g, '').replace(/^00/, ''); if (d.length === 9 && d[0] === '9') d = `56${d}`; return d.length >= 8 && d.length <= 15 ? d : ''; };
 const waLink = (n) => { const d = String(n || '').replace(/\D/g, ''); return d ? `https://wa.me/${d}` : ''; };
 V.interesadas = () => {
   const head = `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>Interesadas</h1><p>Personas que dejaron sus datos en los formularios de la página. Escríbeles por WhatsApp y marca cómo va cada una.</p></div><button class="btn btn-ghost btn-sm" data-leads-reload>Actualizar</button></div>`;
   if (!A.leads) return `${head}<div class="card empty">Cargando interesadas…</div>`;
+  const sinLink = [['enlacePendulo', 'Péndulo'], ['enlaceTarot', 'Tarot'], ['enlaceTerapias', 'terapias online']].filter(([k]) => !A.clases?.[k]).map(([, n]) => n);
+  const aviso = sinLink.length ? `<div class="card" style="padding:12px 14px;font-size:.88rem;border-left:4px solid #b8402f"><b>Falta el enlace de Google Meet de ${sinLink.join(', ')}.</b> Mientras no esté, quienes se registren no ven el botón para entrar. Cárgalo en <button class="link" data-go="ajustes">Ajustes del aula</button>.</div>` : '';
   const by = (s) => A.leads.filter((l) => l.status === s).length;
-  return `${head}
+  return `${head}${aviso}
   <div class="kpis">${LEAD_STATES.map(([k, t]) => `<div><b>${by(k)}</b><span>${t.toLowerCase()}s</span></div>`).join('')}</div>
   <section class="card panel"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Persona</th><th>Formulario</th><th>Le interesa</th><th>Origen</th><th>Fecha</th><th>Estado</th></tr></thead><tbody>
   ${A.leads.map((l) => { const wa = waLink(l.whatsapp); return `<tr>
-    <td><b>${esc(l.name)}</b><br><span class="muted" style="font-size:.84rem">${wa ? `<a href="${wa}" target="_blank" rel="noopener">${esc(l.whatsapp)}</a>` : ''}${l.whatsapp && l.email ? ' · ' : ''}${esc(l.email)}${l.country ? ` · ${esc(l.country)}` : ''}</span></td>
+    <td><b>${esc(l.name)}</b><br><span class="muted" style="font-size:.84rem">${wa ? `<a href="${wa}" data-wa-open="${esc(waNum(l.whatsapp))}" data-wa-name="${esc(l.name)}" title="Escribirle desde el portal">${esc(l.whatsapp)}</a>` : ''}${l.whatsapp && l.email ? ' · ' : ''}${esc(l.email)}${l.country ? ` · ${esc(l.country)}` : ''}</span></td>
     <td>${esc(LEAD_FORMS[l.form] || l.form)}</td>
     <td>${esc(l.interest)}${l.message ? `<br><span class="muted" style="font-size:.84rem">${esc(l.message)}</span>` : ''}</td>
     <td class="muted" style="font-size:.84rem">${esc([l.utm?.utm_source && l.utm?.utm_medium ? `${l.utm.utm_source} / ${l.utm.utm_medium}` : l.utm?.utm_source, l.utm?.utm_campaign, l.utm?.utm_content].filter(Boolean).join(' · ') || 'Directo')}</td>
@@ -365,6 +370,89 @@ V.interesadas = () => {
     <td><select data-lead-status="${esc(l.id)}" aria-label="Estado">${LEAD_STATES.map(([k, t]) => `<option value="${k}" ${l.status === k ? 'selected' : ''}>${t}</option>`).join('')}</select></td></tr>`; }).join('') || '<tr><td colspan="6" class="muted">Todavía no hay interesadas.</td></tr>'}
   </tbody></table></div></section>`;
 };
+// ---------- Chat de WhatsApp Business (número de Karen, src/app/api/whatsapp) ----------
+// Las conversaciones llegan en vivo desde Firestore; enviar y marcar como leído pasa por el servidor, que es quien habla con Meta.
+const waApi = async (body) => {
+  const r = await fetch('/api/whatsapp', {
+    method: 'POST', headers: { Authorization: `Bearer ${await auth.currentUser.getIdToken()}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const out = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(out.error || 'No se pudo enviar por WhatsApp.');
+  return out;
+};
+const waNameOf = (n, chat) => chat?.name || A.leads?.find((l) => waNum(l.whatsapp) === n)?.name || A.students.find((u) => waNum(u.phone) === n)?.displayName || `+${n}`;
+const waHora = (ms) => { const d = new Date(ms); return d.toDateString() === new Date().toDateString() ? d.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' }) : d.toLocaleDateString('es', { day: 'numeric', month: 'short' }); };
+const waChats = () => {
+  const l = [...A.wa.chats];
+  if (S.waOpen && !l.some((c) => c.id === S.waOpen)) l.unshift({ id: S.waOpen, number: S.waOpen, name: S.waName, lastText: 'Conversación nueva', lastAt: null });
+  return l;
+};
+const waListHTML = () => waChats().map((c) => `<button class="wa-item" data-wa-chat="${esc(c.id)}" aria-current="${S.waOpen === c.id}"><b><span>${esc(waNameOf(c.id, c))}</span>${c.unread ? `<span class="count">${c.unread}</span>` : ''}</b><small>${esc(c.lastDir === 'out' ? 'Tú: ' : '')}${esc(c.lastText || '')}${c.lastAt?.toMillis ? ` · ${waHora(c.lastAt.toMillis())}` : ''}</small></button>`).join('') || '<div class="wa-empty">Todavía no hay conversaciones. Abre una desde Interesadas, tocando el número de WhatsApp de la persona.</div>';
+const waLibre = (c) => Date.now() - (c?.lastInboundAt?.toMillis?.() || 0) < 864e5;
+const waChatHTML = () => {
+  const n = S.waOpen;
+  if (!n) return '<div class="wa-empty">Elige una conversación para verla y responder desde aquí.</div>';
+  const c = A.wa.chats.find((x) => x.id === n), libre = waLibre(c);
+  const estado = (m) => (m.dir !== 'out' ? '' : { read: ' ✓✓ leído', delivered: ' ✓✓', failed: ' · no se pudo entregar' }[m.status] || ' ✓');
+  return `<div class="wa-chat"><div class="wa-top"><div><b>${esc(waNameOf(n, c))}</b><br><span class="muted" style="font-size:.84rem">+${esc(n)}</span></div></div>
+    <div class="wa-msgs" id="wa-msgs">${A.wa.msgs.map((m) => `<div class="wa-m ${m.dir === 'out' ? 'out' : ''}">${esc(m.text)}<small class="${m.status === 'failed' ? 'bad' : ''}">${m.ts?.toMillis ? waHora(m.ts.toMillis()) : ''}${estado(m)}</small></div>`).join('') || '<div class="wa-empty">Aún no hay mensajes. Empieza con la plantilla.</div>'}</div>
+    ${libre ? '<form class="wa-send" id="wa-form"><textarea id="wa-text" rows="1" placeholder="Escribe un mensaje…" aria-label="Mensaje"></textarea><button class="btn btn-primary btn-sm">Enviar</button></form>'
+    : `<div class="wa-note"><span>${c?.lastInboundAt ? 'Pasaron más de 24 horas desde su último mensaje.' : 'Esta persona aún no te ha escrito.'} WhatsApp solo permite empezar con un mensaje de plantilla; cuando responda podrás escribirle libremente.</span><button class="btn btn-primary btn-sm" data-wa-plantilla>Enviar plantilla</button></div>`}</div>`;
+};
+V.whatsapp = () => `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>WhatsApp</h1><p>Conversaciones desde el WhatsApp Business de Karen (+56 9 4004 4528). Lo que escribas aquí sale con ese número.</p></div></div>
+  ${A.wa.on === false ? '<div class="card empty">WhatsApp todavía no está conectado: faltan las llaves de Meta en Vercel (WHATSAPP_TOKEN y WHATSAPP_PHONE_ID). Los pasos están en el README.</div>' : ''}
+  <section class="card wa"><div class="wa-list" id="wa-list">${waListHTML()}</div><div id="wa-pane" style="display:grid;min-width:0;min-height:0">${waChatHTML()}</div></section>`;
+let waMsgsOff = null, waChatsOff = null;
+function waRepaint(soloMensajes = false) {
+  if (S.view !== 'whatsapp') return paintNav();
+  const l = $('#wa-list'); if (l && !soloMensajes) l.innerHTML = waListHTML();
+  const p = $('#wa-pane'); if (!p) return;
+  const t = $('#wa-text'), borrador = t?.value || '', foco = document.activeElement === t;
+  const m0 = $('#wa-msgs'), abajo = !m0 || m0.scrollHeight - m0.scrollTop - m0.clientHeight < 80;
+  p.innerHTML = waChatHTML(); waBind();
+  const t2 = $('#wa-text'); if (t2) { t2.value = borrador; if (foco) t2.focus(); }
+  const m = $('#wa-msgs'); if (m && abajo) m.scrollTop = m.scrollHeight;
+}
+function waWatch() {
+  waChatsOff?.();
+  waChatsOff = onSnapshot(query(collection(db, 'wa_chats'), orderBy('lastAt', 'desc'), limit(200)), (snap) => {
+    A.wa.chats = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    paintNav();
+    if (S.view === 'whatsapp') waRepaint();
+    // Si está leyendo esta conversación, lo que llega queda como leído
+    const c = A.wa.chats.find((x) => x.id === S.waOpen);
+    if (S.view === 'whatsapp' && c?.unread) waApi({ action: 'leido', to: c.id }).catch(() => {});
+  }, (e) => console.warn('whatsapp', e.code));
+}
+function waOpen(n, nombre) {
+  S.waOpen = n; S.waName = nombre || ''; A.wa.msgs = [];
+  waMsgsOff?.();
+  waMsgsOff = onSnapshot(query(collection(db, 'wa_chats', n, 'messages'), orderBy('ts', 'asc'), limit(300)), (snap) => {
+    A.wa.msgs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    waRepaint(true);
+  }, (e) => console.warn('whatsapp mensajes', e.code));
+  if (A.wa.chats.find((x) => x.id === n)?.unread) waApi({ action: 'leido', to: n }).catch(() => {});
+}
+function waBind() {
+  const form = $('#wa-form');
+  if (form) {
+    const t = $('#wa-text');
+    t.onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } };
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const text = t.value.trim(); if (!text) return;
+      const b = form.querySelector('button'); b.disabled = true;
+      try { await waApi({ action: 'enviar', to: S.waOpen, text, name: S.waName }); t.value = ''; } catch (err) { fail(err); }
+      b.disabled = false;
+    };
+  }
+  const pl = $('[data-wa-plantilla]');
+  if (pl) pl.onclick = async () => {
+    pl.disabled = true;
+    try { await waApi({ action: 'plantilla', to: S.waOpen, name: S.waName || waNameOf(S.waOpen) }); toast('Plantilla enviada. Cuando responda podrás escribirle aquí.'); } catch (err) { fail(err); pl.disabled = false; }
+  };
+}
 // ---------- Calendario de la Maestra ----------
 // Fechas como texto AAAA-MM-DD (día de Chile), sin horas de por medio: así no hay corrimientos por zona horaria.
 const CAL_TYPES = {
@@ -529,6 +617,15 @@ V.calendario = () => {
   </section>`;
 };
 // Formulario para agregar o editar una fecha (en la ventana del portal)
+// Clases gratis: quiénes se registraron para esa fecha (src/app/api/leads las asocia a la clase del Calendario)
+const claseInscritas = (v) => {
+  if (!v.id || !['clase-pendulo', 'clase-tarot'].includes(v.type)) return '';
+  const lista = (A.leads || []).filter((l) => l.claseEvento === v.id);
+  const enlace = A.clases?.[v.type === 'clase-pendulo' ? 'enlacePendulo' : 'enlaceTarot'] || '';
+  const texto = (l) => `Hola ${String(l.name || '').split(' ')[0]}, te recuerdo tu clase gratis de ${v.type === 'clase-pendulo' ? 'Péndulo Hebreo' : 'Tarot Terapéutico'}: ${fechaLarga(v.date)}${v.time ? ` a las ${v.time} (hora de Chile)` : ''}. ${enlace ? `Entra por Google Meet: ${enlace}` : ''} ¡Te espero!`;
+  const fila = (l) => `<tr><td><b>${esc(l.name)}</b>${l.country ? `<br><span class="muted">${esc(l.country)}</span>` : ''}</td><td>${l.whatsapp ? `<a href="${waLink(l.whatsapp)}" data-wa-open="${esc(waNum(l.whatsapp))}" data-wa-name="${esc(l.name)}">${esc(l.whatsapp)}</a>` : ''}</td><td>${l.email ? `<a href="mailto:${esc(l.email)}?subject=${encodeURIComponent('Tu clase gratis · Casa Muladhara')}&body=${encodeURIComponent(texto(l))}">${esc(l.email)}</a>` : ''}</td></tr>`;
+  return `<div class="card full" style="padding:12px 14px;display:grid;gap:8px;font-size:.84rem"><b>Inscritas a esta clase: ${lista.length}</b>${lista.length ? `<div class="tbl-wrap"><table class="tbl"><tbody>${lista.map(fila).join('')}</tbody></table></div>` : '<span class="muted">Todavía nadie se registró para esta fecha.</span>'}${enlace ? '' : '<span style="color:#b8402f;font-weight:700">Falta el enlace de Google Meet de esta clase en Ajustes del aula.</span>'}</div>`;
+};
 function calForm(e) {
   const v = e || { type: 'bloqueado', date: ymd(S.calRef || hoyCL()) };
   dialog(`<span class="eyebrow">Calendario</span><h3>${e ? 'Editar fecha' : 'Agregar fecha'}</h3>
@@ -543,6 +640,7 @@ function calForm(e) {
     <p class="full muted" style="margin:-4px 0 0;font-size:.78rem">El evento bloquea solo desde la hora de inicio hasta la de término. Si dura menos, cambia la hora de término y esa hora vuelve a quedar libre en la web.</p>
     <p id="cf-warn" class="full" role="alert" style="margin:0;font-size:.82rem;font-weight:700;color:#b8402f" hidden>${AVISO_SIN_HORA}.</p>
     ${v.type === 'terapia' && (v.whatsapp || v.email) ? `<div class="card full" style="padding:12px 14px;display:grid;gap:6px;font-size:.84rem"><b>${esc(v.name || '')}</b><span>${esc(v.modalidad === 'online' ? 'Online' : v.direccion ? `Presencial · ${v.direccion}` : 'Presencial')}${v.clientTz ? ` · Zona: ${esc(v.clientTz)}` : ''}</span><span>${esc(v.whatsapp || '')} · ${esc(v.email || '')}</span><div style="display:flex;gap:6px;flex-wrap:wrap">${botonesRec(v)}</div></div>` : ''}
+    ${claseInscritas(v)}
     <label class="full"><b>Nota</b><textarea id="cf-note" maxlength="500" rows="2">${esc(v.note || '')}</textarea></label>
     ${e ? '' : '<label class="full rep"><input type="checkbox" id="cf-rep"> Repetir cada semana hasta <input type="date" id="cf-until"></label>'}
     <div class="full actions"><button class="btn btn-primary btn-sm">Guardar</button>${e ? '<button type="button" class="btn btn-ghost btn-sm" id="cf-del">Borrar</button>' : ''}</div>
@@ -628,6 +726,8 @@ V.ajustes = () => `<div class="view-head"><div><span class="eyebrow">Portal de l
 
 // Un solo manejador para todos los [data-go]: el menú se vuelve a pintar solo (p. ej. al llegar una alumna nueva) y sus botones siguen funcionando
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-go]'); if (b) go(b.dataset.go); });
+document.addEventListener('click', (e) => { const a = e.target.closest('[data-wa-open]'); if (!a) return; e.preventDefault(); if ($('#dlg').open) $('#dlg').close(); waOpen(a.dataset.waOpen, a.dataset.waName); go('whatsapp'); });
+document.addEventListener('click', (e) => { const b = e.target.closest('[data-wa-chat]'); if (b) { waOpen(b.dataset.waChat, ''); waRepaint(); } });
 function paintNav() {
   $('#nav').innerHTML = NAV.map(([k, n, ic, c]) => { const cnt = c ? c() : 0; return `<button data-go="${k}" ${S.view === k || (S.view === 'ficha' && k === 'alumnas') || (S.view === 'clase' && k === 'formacion') ? 'aria-current="page"' : ''}><svg viewBox="0 0 24 24">${ic}</svg>${n}${cnt ? `<span class="count">${cnt}</span>` : ''}</button>`; }).join('');
 }
@@ -646,6 +746,10 @@ function go(v) {
     loadAnswers(true).then(() => { if (S.view === 'respuestas') render(false); }).catch(fail);
   }
   if (v === 'interesadas') data.leads().then(() => { if (S.view === 'interesadas') render(false); }).catch(fail);
+  if (v === 'whatsapp') {
+    if (A.wa.on === null) waApi({ action: 'estado' }).then((r) => { A.wa.on = r.configurado; if (!r.configurado && S.view === 'whatsapp') render(false); }).catch(() => {});
+    if (S.waOpen) { const m = $('#wa-msgs'); if (m) m.scrollTop = m.scrollHeight; }
+  }
   if (v === 'calendario') data.cal().then(() => { if (S.view === 'calendario') render(false); }).catch(fail);
 }
 async function openStudent(uid) {
@@ -658,6 +762,7 @@ function bind() {
   document.querySelectorAll('[data-ans-lv]').forEach((b) => (b.onclick = () => { S.ansLv = Number(b.dataset.ansLv); render(false); }));
   document.querySelectorAll('[data-ans-who]').forEach((b) => (b.onclick = () => { S.ansWho = b.dataset.ansWho; S.ansLv = 0; go('respuestas'); }));
   document.querySelectorAll('[data-ans-reload]').forEach((b) => (b.onclick = () => { b.disabled = true; loadAnswers(true).then(() => render(false)).catch(fail); }));
+  if (S.view === 'whatsapp') waBind();
   document.querySelectorAll('[data-leads-reload]').forEach((b) => (b.onclick = () => { b.disabled = true; data.leads().then(() => render(false)).catch(fail); }));
   document.querySelectorAll('[data-cal-add]').forEach((b) => (b.onclick = () => calForm()));
   document.querySelectorAll('[data-cal-ev]').forEach((b) => (b.onclick = () => calForm(A.cal.find((e) => e.id === b.dataset.calEv))));
@@ -829,6 +934,7 @@ async function enter(u, auto = false) {
     await u.getIdToken(true);
     await loadAll();
     watchStudents();
+    waWatch();
     loadAnswers().then(paintNav).catch((e) => console.warn('respuestas', e.message));
     data.leads().then(paintNav).catch((e) => console.warn('interesadas', e.message));
     const p = (await getDoc(doc(db, 'users', u.uid))).data() || {};

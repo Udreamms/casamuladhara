@@ -10,6 +10,7 @@ import { contexto, enviarDespues, idValido, usuario } from '@/lib/server/meta.js
 const FORMS = ['pendulo', 'clase-pendulo', 'tarot', 'clase-tarot', 'formacion', 'sala', 'terapias', 'meditacion', 'regalo'];
 // Clases gratis: al registrarse, la respuesta trae el enlace de Google Meet guardado por la Maestra en config/clases (nunca va en el HTML)
 const ENLACE = { 'clase-pendulo': 'enlacePendulo', 'clase-tarot': 'enlaceTarot' };
+const FECHA = /^\d{4}-\d{2}-\d{2}$/;
 const HTTPS = /^https:\/\/[^\s"'<>]+$/i;
 const UTM = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'fbclid', 'gclid'];
 const str = (v, max) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
@@ -40,6 +41,13 @@ export async function POST(request) {
       if (!lead.name) return json({ error: 'Escribe tu nombre.' }, 400);
       if (!lead.whatsapp && !lead.email) return json({ error: 'Déjanos tu WhatsApp o tu correo para poder escribirte.' }, 400);
       if (lead.email && !EMAIL.test(lead.email)) return json({ error: 'Revisa tu correo.' }, 400);
+      // Clase gratis con fecha elegida: queda asociada a esa clase del Calendario (así Karen ve quiénes vienen cada día)
+      if (ENLACE[form] && FECHA.test(str(body.date, 10))) {
+        try {
+          const s = await db().collection('calendario').where('type', '==', form).where('date', '==', str(body.date, 10)).limit(1).get();
+          if (!s.empty) Object.assign(lead, { claseEvento: s.docs[0].id, claseFecha: str(body.date, 10) });
+        } catch (e) { console.error('leads clase', e); } // sin la asociación igual se guarda la interesada
+      }
       const ref = await db().collection('leads').add(lead);
       // API de conversiones de Meta: el mismo Lead que registra el Píxel, con el mismo id para que no se cuente doble
       const ctx = contexto(request, lead.utm.fbclid);
