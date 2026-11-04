@@ -745,7 +745,7 @@ const claseInscritas = (v) => {
   const lista = (A.leads || []).filter((l) => l.claseEvento === v.id);
   const enlace = A.clases?.[v.type === 'clase-pendulo' ? 'enlacePendulo' : 'enlaceTarot'] || '';
   const texto = (l) => `Hola ${String(l.name || '').split(' ')[0]}, te recuerdo tu clase gratis de ${v.type === 'clase-pendulo' ? 'Péndulo Hebreo' : 'Tarot Terapéutico'}: ${fechaLarga(v.date)}${v.time ? ` a las ${v.time} (hora de Chile)` : ''}. ${enlace ? `Entra por Google Meet: ${enlace}` : ''} ¡Te espero!`;
-  const fila = (l) => `<tr><td><b>${esc(l.name)}</b>${l.country ? `<br><span class="muted">${esc(l.country)}</span>` : ''}</td><td>${l.whatsapp ? `<a href="${waLink(l.whatsapp)}" data-wa-open="${esc(waNum(l.whatsapp))}" data-wa-name="${esc(l.name)}">${esc(l.whatsapp)}</a>` : ''}</td><td>${l.email ? `<a href="mailto:${esc(l.email)}?subject=${encodeURIComponent('Tu clase gratis · Casa Muladhara')}&body=${encodeURIComponent(texto(l))}">${esc(l.email)}</a>` : ''}</td></tr>`;
+  const fila = (l) => `<tr><td><b>${esc(l.name)}</b>${l.country ? `<br><span class="muted">${esc(l.country)}</span>` : ''}</td><td>${l.whatsapp ? `<a href="${waLink(l.whatsapp)}" data-wa-open="${esc(waNum(l.whatsapp))}" data-wa-name="${esc(l.name)}">${esc(l.whatsapp)}</a>` : ''}</td><td>${l.email ? `<a href="mailto:${esc(l.email)}?subject=${encodeURIComponent('Tu clase gratis · Casa Muladhara')}&body=${encodeURIComponent(texto(l))}">${esc(l.email)}</a>` : ''}</td><td style="text-align:right"><button type="button" class="link" style="color:#b8402f" data-insc-del="${esc(l.id)}">Eliminar</button></td></tr>`;
   return `<div class="card full" style="padding:12px 14px;display:grid;gap:8px;font-size:.84rem"><b>Inscritas a esta clase: ${lista.length}</b>${lista.length ? `<div class="tbl-wrap"><table class="tbl"><tbody>${lista.map(fila).join('')}</tbody></table></div>` : '<span class="muted">Todavía nadie se registró para esta fecha.</span>'}${enlace ? '' : '<span style="color:#b8402f;font-weight:700">Falta el enlace de Google Meet de esta clase en Ajustes del aula.</span>'}</div>`;
 };
 function calForm(e) {
@@ -848,6 +848,18 @@ V.ajustes = () => `<div class="view-head"><div><span class="eyebrow">Portal de l
 
 // Un solo manejador para todos los [data-go]: el menú se vuelve a pintar solo (p. ej. al llegar una alumna nueva) y sus botones siguen funcionando
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-go]'); if (b) go(b.dataset.go); });
+document.addEventListener('click', async (e) => {
+  const b = e.target.closest('[data-insc-del]'); if (!b) return;
+  const l = (A.leads || []).find((x) => x.id === b.dataset.inscDel); if (!l) return;
+  if (!confirm(`¿Eliminar a ${l.name} de esta clase? También se borra de Interesadas y no se puede deshacer.`)) return;
+  b.disabled = true;
+  try {
+    await data.leads({ action: 'delete', ids: [l.id] });
+    A.leads = A.leads.filter((x) => x.id !== l.id); S.leadSel.delete(l.id); paintNav(); render(false);
+    const ev = (A.cal || []).find((x) => x.id === l.claseEvento); if (ev && $('#dlg').open) calForm(ev);
+    toast('Eliminada.');
+  } catch (err) { fail(err); b.disabled = false; }
+});
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-lead-alumna]'); if (b) { if ($('#dlg').open) $('#dlg').close(); openStudent(b.dataset.leadAlumna); } });
 document.addEventListener('click', (e) => { if (e.target.closest('[data-crm-hoy]')) { S.crmSeg = true; S.crmProg = ''; S.crmQ = ''; S.crmOrigen = ''; go('interesadas'); } });
 document.addEventListener('click', (e) => { const a = e.target.closest('[data-wa-open]'); if (!a) return; e.preventDefault(); if ($('#dlg').open) $('#dlg').close(); waOpen(a.dataset.waOpen, a.dataset.waName); go('whatsapp'); });
