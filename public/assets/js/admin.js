@@ -177,21 +177,26 @@ const data = {
 };
 
 // ---------- Vista ----------
-const S = { view: 'alumnas', q: '', open: null, filter: 'todas', lvOpen: {}, fq: '', cls: null, ansWho: '', ansLv: 0 };
+const S = { view: 'inicio', leadSel: new Set(), crmVista: 'embudo', crmProg: '', crmQ: '', crmOrigen: '', crmSeg: false, crmDesc: false, q: '', open: null, filter: 'todas', lvOpen: {}, fq: '', cls: null, ansWho: '', ansLv: 0 };
 const NAV = [
-  ['alumnas', 'Alumnas', '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5a6.5 6.5 0 0 1 3.5 5.5"/>', () => A.students.filter(isNew).length],
+  ['inicio', 'Inicio', '<path d="M4 11 12 4l8 7v9H4z"/><path d="M10 20v-6h4v6"/>', () => nuevasLeads().length + A.questions.length + A.tickets.length],
+  ['--', 'CRM'],
   ['interesadas', 'Interesadas', '<path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/>', () => (A.leads || []).filter((l) => l.status === 'nuevo').length],
   ['whatsapp', 'WhatsApp', '<path d="M12 21a9 9 0 1 0-9-9c0 1.6.4 3.1 1.2 4.4L3 21l4.6-1.2A9 9 0 0 0 12 21z"/><path d="M9 8.5c.3 3 3 5.7 6.500 6.500"/>', () => A.wa.chats.reduce((n, c) => n + (c.unread || 0), 0)],
   ['calendario', 'Calendario', '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'],
-  ['formacion', 'Formación completa', '<path d="M3 8 12 4l9 4-9 4z"/><path d="M7 10v5c3 2 7 2 10 0v-5"/>'],
+  ['--', 'Alumnas'],
+  ['alumnas', 'Alumnas', '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5a6.5 6.5 0 0 1 3.5 5.5"/>', () => A.students.filter(isNew).length],
   ['pagos', 'Pagos', '<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h4"/>'],
-  ['mensajes', 'Mensajes', '<path d="M4 5h16v11H9l-5 4z"/>'],
-  ['respuestas', 'Respuestas de clase', '<path d="M5 4h14v16H5z"/><path d="M8 9h8M8 13h8M8 17h5"/>', () => newAnswers().length],
   ['preguntas', 'Preguntas de clase', '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5V14M12 17.5v.01"/>', () => A.questions.length],
+  ['respuestas', 'Respuestas de clase', '<path d="M5 4h14v16H5z"/><path d="M8 9h8M8 13h8M8 17h5"/>', () => newAnswers().length],
   ['ayuda', 'Mensajes de ayuda', '<path d="M12 21a9 9 0 1 0-9-9c0 1.6.4 3.1 1.2 4.4L3 21l4.6-1.2A9 9 0 0 0 12 21z"/>', () => A.tickets.length],
+  ['--', 'Contenido'],
+  ['formacion', 'Formación completa', '<path d="M3 8 12 4l9 4-9 4z"/><path d="M7 10v5c3 2 7 2 10 0v-5"/>'],
   ['comunidad', 'Comunidad', '<path d="M7 10h10M7 14h6"/><path d="M4 4h16v13H8l-4 3z"/>'],
+  ['mensajes', 'Avisos a alumnas', '<path d="M4 5h16v11H9l-5 4z"/>'],
   ['ajustes', 'Ajustes del aula', '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'],
 ];
+const nuevasLeads = () => (A.leads || []).filter((l) => leadEtapa(l) === 'nuevo');
 const nameOf = (u) => u?.displayName || u?.email || 'Alumna';
 const photoCss = (u) => (typeof u === 'string' && /^https:\/\/[^\s"'()\\]+$/.test(u) ? `background-image:url('${u}')` : '');
 const av = (u) => { const ph = photoCss(u?.photoURL); return `<span class="av sm${ph ? ' ph' : ''}" style="--c:${colorFor(u?.id || nameOf(u))};${ph}">${ph ? '' : esc(initials(nameOf(u)))}</span>`; };
@@ -244,11 +249,13 @@ V.ficha = () => {
       <form data-msg-one="${u.id}" style="display:grid;gap:10px"><textarea maxlength="1900" placeholder="Hola ${esc(nameOf(u).split(' ')[0])}, …" aria-label="Mensaje"></textarea><button class="btn btn-primary btn-sm" style="justify-self:start">Enviar mensaje</button></form>
     </section>
   </div>
+  ${(() => { const ls = leadsDeAlumna(u); return ls.length ? `<section class="card panel"><h3>Cómo llegó</h3><p class="muted" style="font-size:.86rem;margin:0">Sus registros en los formularios de la página, antes o después de crear su cuenta.</p><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Fecha</th><th>Formulario</th><th>Le interesaba</th><th>Origen</th></tr></thead><tbody>${ls.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0)).map((l) => `<tr><td>${fdateMs(l.createdAt)}</td><td>${esc(LEAD_FORMS[l.form] || l.form)}</td><td>${esc(l.interest)}</td><td class="muted">${esc(leadOrigenTxt(l))}</td></tr>`).join('')}</tbody></table></div></section>` : ''; })()}
   <section class="card panel"><h3>Historial de pagos</h3><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Fecha</th><th>Detalle</th><th>Monto</th><th>Estado</th></tr></thead><tbody>
     ${!pays ? '<tr><td colspan="4" class="muted">Cargando…</td></tr>' : pays.map((p) => `<tr><td>${fdate(p.paidAt) || fdate(p.createdAt)}</td><td>${esc(p.concept || 'Pago')}</td><td>${esc(p.amount ?? 0)} USD</td><td><span class="pill ${p.status === 'failed' ? 'bad' : 'done'}">${p.status === 'failed' ? 'Rechazado' : 'Pagado'}</span></td></tr>`).join('') || '<tr><td colspan="4" class="muted">Aún no tiene pagos registrados.</td></tr>'}
   </tbody></table></div></section>
   <section class="card panel"><div class="panel-h"><h3>Respuestas en las clases</h3><button class="link" data-ans-who="${u.id}">Ver en Respuestas de clase</button></div>
-    ${answersHTML(A.answers && A.course ? A.answers.filter((a) => a.uid === u.id) : null, false)}</section>`;
+    ${answersHTML(A.answers && A.course ? A.answers.filter((a) => a.uid === u.id) : null, false)}</section>
+  <section class="card panel" style="border-color:#e3b8ae"><h3>Eliminar alumna</h3><p class="muted" style="font-size:.86rem;margin:0">Para cuentas de prueba o repetidas. Borra su cuenta y todo lo que cuelga de ella (avance, preguntas, pagos registrados). No se puede deshacer. Si tiene suscripción en Stripe, cancélala allá aparte. Para solo cerrarle el acceso, usa Bloquear.</p><button class="btn btn-ghost btn-sm" style="justify-self:start;color:#b8402f" data-del-student="${u.id}">Eliminar a ${esc(nameOf(u).split(' ')[0])}</button></section>`;
 };
 // La formación tal como la ven las alumnas, toda abierta para la Maestra: niveles, módulos y clases
 const lessonsOf = (lv) => lv.modules.flatMap((m) => m.lessons);
@@ -348,27 +355,137 @@ V.clase = () => {
   <iframe class="aula-frame" src="${src}&embed=1" title="Clase: ${esc(l.t)}"></iframe>`;
 };
 const LEAD_FORMS = { pendulo: 'Péndulo Hebreo', 'clase-pendulo': 'Clase gratis Péndulo', tarot: 'Tarot Terapéutico', 'clase-tarot': 'Clase gratis Tarot', formacion: 'Formación', sala: 'Sala Abierta', terapias: 'Terapias', meditacion: 'Meditación', regalo: 'Portada · Sala Abierta' };
-const LEAD_STATES = [['nuevo', 'Nueva'], ['contactado', 'Contactada'], ['inscrita', 'Inscrita'], ['descartado', 'Descartada']];
+const LEAD_STATES = [['nuevo', 'Nueva'], ['contactado', 'Contactada'], ['clase', 'Tomó la clase'], ['conversando', 'En conversación'], ['inscrita', 'Inscrita'], ['descartado', 'Descartada']];
+// Programas para filtrar: las dos clases gratis, los dos cursos, la formación completa y el resto de formularios
+const LEAD_PROGS = [['clase-pendulo', 'Clase gratis Péndulo', ['clase-pendulo']], ['clase-tarot', 'Clase gratis Tarot', ['clase-tarot']], ['pendulo', 'Curso Péndulo', ['pendulo']],
+  ['tarot', 'Tarot Terapéutico', ['tarot']], ['formacion', 'Formación completa', ['formacion']], ['otros', 'Otros', ['sala', 'terapias', 'meditacion', 'regalo']]];
 // Mismo criterio que src/lib/server/whatsapp.js: solo dígitos con código de país (un celular chileno de 9 dígitos que empieza en 9 se toma como +56)
 const waNum = (n) => { let d = String(n || '').replace(/\D/g, '').replace(/^00/, ''); if (d.length === 9 && d[0] === '9') d = `56${d}`; return d.length >= 8 && d.length <= 15 ? d : ''; };
 const waLink = (n) => { const d = String(n || '').replace(/\D/g, ''); return d ? `https://wa.me/${d}` : ''; };
+const leadOrigen = (l) => l.utm?.utm_source || 'directo';
+const leadOrigenTxt = (l) => [l.utm?.utm_source && l.utm?.utm_medium ? `${l.utm.utm_source} / ${l.utm.utm_medium}` : l.utm?.utm_source, l.utm?.utm_campaign, l.utm?.utm_content].filter(Boolean).join(' · ') || 'Directo';
+// Vínculos: una interesada y una alumna son la misma persona si comparten correo o WhatsApp (sirve también para detectar registros repetidos)
+const llavesDe = (x) => [String(x.email || '').trim().toLowerCase(), waNum(x.whatsapp || x.phone)].filter(Boolean);
+const vinculos = () => {
+  const sig = `${A.leads?.length ?? -1}|${A.students.length}`;
+  if (A._vin?.sig === sig) return A._vin; // se recalcula si cambió la cantidad de interesadas o de alumnas
+  const alumna = new Map(), porLlave = new Map();
+  A.students.forEach((u) => llavesDe(u).forEach((k) => { if (!alumna.has(k)) alumna.set(k, u); }));
+  (A.leads || []).forEach((l) => llavesDe(l).forEach((k) => { if (!porLlave.has(k)) porLlave.set(k, []); porLlave.get(k).push(l); }));
+  return (A._vin = { sig, alumna, porLlave });
+};
+const alumnaDe = (l) => { const v = vinculos(); for (const k of llavesDe(l)) if (v.alumna.has(k)) return v.alumna.get(k); return null; };
+const otrasDe = (l) => { const v = vinculos(), vistos = new Set([l.id]), out = []; for (const k of llavesDe(l)) for (const x of v.porLlave.get(k) || []) if (!vistos.has(x.id)) { vistos.add(x.id); out.push(x); } return out; };
+const leadsDeAlumna = (u) => { const v = vinculos(), vistos = new Set(), out = []; for (const k of llavesDe(u)) for (const x of v.porLlave.get(k) || []) if (!vistos.has(x.id)) { vistos.add(x.id); out.push(x); } return out; };
+const pagoOAbierto = (u) => paying(u) || ownedOf(u).length > 0;
+// Etapa que se muestra: quien ya paga o compró algo figura como Inscrita aunque nadie lo haya marcado (el webhook de Stripe lo guarda de ahora en adelante)
+const leadEtapa = (l) => {
+  const e = LEAD_STATES.some(([k]) => k === l.status) ? l.status : 'nuevo';
+  if (['nuevo', 'contactado', 'clase', 'conversando'].includes(e)) { const u = alumnaDe(l); if (u && pagoOAbierto(u)) return 'inscrita'; }
+  return e;
+};
+const seguimientoHoy = (l) => !!l.followUp && l.followUp <= ymd(hoyCL()) && !['inscrita', 'descartado'].includes(leadEtapa(l));
+const leadsFiltradas = () => {
+  const q = (S.crmQ || '').toLowerCase().trim(), prog = LEAD_PROGS.find((x) => x[0] === S.crmProg);
+  return (A.leads || []).filter((l) => (!prog || prog[2].includes(l.form))
+    && (!S.crmOrigen || leadOrigen(l) === S.crmOrigen)
+    && (!S.crmSeg || seguimientoHoy(l))
+    && (!q || [l.name, l.email, l.whatsapp, l.interest, l.message, l.note].join(' ').toLowerCase().includes(q)));
+};
+const leadContacto = (l) => { const wa = waLink(l.whatsapp); return `${wa ? `<a href="${wa}" data-wa-open="${esc(waNum(l.whatsapp))}" data-wa-name="${esc(l.name)}" title="Escribirle desde el portal">${esc(l.whatsapp)}</a>` : ''}${l.whatsapp && l.email ? ' · ' : ''}${esc(l.email)}${l.country ? ` · ${esc(l.country)}` : ''}`; };
+const alumnaBadge = (l) => { const u = alumnaDe(l), o = otrasDe(l); return `${u ? `<span class="pill ${pagoOAbierto(u) ? 'done' : 'pres'}" title="Ya tiene cuenta en el aula">${pagoOAbierto(u) ? 'Alumna' : 'Con cuenta'}</span>` : ''}${o.length ? `<span class="pill lock" title="${esc(o.map((x) => LEAD_FORMS[x.form] || x.form).join(', '))}">+${o.length} registro${o.length === 1 ? '' : 's'}</span>` : ''}`; };
+const segBadge = (l) => (l.followUp ? `<span class="pill ${seguimientoHoy(l) ? 'bad' : 'lock'}" title="Próximo seguimiento">${seguimientoHoy(l) ? 'Seguimiento hoy' : `Seguir ${fechaLarga(l.followUp)}`}</span>` : '');
+
 V.interesadas = () => {
-  const head = `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>Interesadas</h1><p>Personas que dejaron sus datos en los formularios de la página. Escríbeles por WhatsApp y marca cómo va cada una.</p></div><button class="btn btn-ghost btn-sm" data-leads-reload>Actualizar</button></div>`;
+  const head = `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>CRM · Interesadas</h1><p>Personas que dejaron sus datos en la página. Muévelas por el embudo, escribe notas y fija cuándo volver a escribirles.</p></div><button class="btn btn-ghost btn-sm" data-leads-reload>Actualizar</button></div>`;
   if (!A.leads) return `${head}<div class="card empty">Cargando interesadas…</div>`;
   const sinLink = [['enlacePendulo', 'Péndulo'], ['enlaceTarot', 'Tarot'], ['enlaceTerapias', 'terapias online']].filter(([k]) => !A.clases?.[k]).map(([, n]) => n);
   const aviso = sinLink.length ? `<div class="card" style="padding:12px 14px;font-size:.88rem;border-left:4px solid #b8402f"><b>Falta el enlace de Google Meet de ${sinLink.join(', ')}.</b> Mientras no esté, quienes se registren no ven el botón para entrar. Cárgalo en <button class="link" data-go="ajustes">Ajustes del aula</button>.</div>` : '';
-  const by = (s) => A.leads.filter((l) => l.status === s).length;
-  return `${head}${aviso}
-  <div class="kpis">${LEAD_STATES.map(([k, t]) => `<div><b>${by(k)}</b><span>${t.toLowerCase()}s</span></div>`).join('')}</div>
-  <section class="card panel"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Persona</th><th>Formulario</th><th>Le interesa</th><th>Origen</th><th>Fecha</th><th>Estado</th></tr></thead><tbody>
-  ${A.leads.map((l) => { const wa = waLink(l.whatsapp); return `<tr>
-    <td><b>${esc(l.name)}</b><br><span class="muted" style="font-size:.84rem">${wa ? `<a href="${wa}" data-wa-open="${esc(waNum(l.whatsapp))}" data-wa-name="${esc(l.name)}" title="Escribirle desde el portal">${esc(l.whatsapp)}</a>` : ''}${l.whatsapp && l.email ? ' · ' : ''}${esc(l.email)}${l.country ? ` · ${esc(l.country)}` : ''}</span></td>
-    <td>${esc(LEAD_FORMS[l.form] || l.form)}</td>
-    <td>${esc(l.interest)}${l.message ? `<br><span class="muted" style="font-size:.84rem">${esc(l.message)}</span>` : ''}</td>
-    <td class="muted" style="font-size:.84rem">${esc([l.utm?.utm_source && l.utm?.utm_medium ? `${l.utm.utm_source} / ${l.utm.utm_medium}` : l.utm?.utm_source, l.utm?.utm_campaign, l.utm?.utm_content].filter(Boolean).join(' · ') || 'Directo')}</td>
-    <td class="muted" style="font-size:.84rem">${fdateMs(l.createdAt)}</td>
-    <td><select data-lead-status="${esc(l.id)}" aria-label="Estado">${LEAD_STATES.map(([k, t]) => `<option value="${k}" ${l.status === k ? 'selected' : ''}>${t}</option>`).join('')}</select></td></tr>`; }).join('') || '<tr><td colspan="6" class="muted">Todavía no hay interesadas.</td></tr>'}
-  </tbody></table></div></section>`;
+  const lista = leadsFiltradas(), vista = S.crmVista || 'embudo';
+  const chip = (attr, v, t, on) => `<button class="chip" ${attr}="${esc(v)}" aria-pressed="${on}">${t}</button>`;
+  const origenes = [...new Set(A.leads.map(leadOrigen))].sort();
+  const nSeg = A.leads.filter(seguimientoHoy).length;
+  const controles = `<div class="filters">${chip('data-crm-vista', 'embudo', 'Embudo', vista === 'embudo')}${chip('data-crm-vista', 'tabla', 'Tabla', vista === 'tabla')}
+    <input type="text" id="crm-q" placeholder="Buscar por nombre, correo, WhatsApp o nota" value="${esc(S.crmQ || '')}" style="flex:1;min-width:220px;border-radius:999px">
+    <select id="crm-origen" aria-label="Origen" style="border-radius:999px"><option value="">Todos los orígenes</option>${origenes.map((o) => `<option value="${esc(o)}" ${S.crmOrigen === o ? 'selected' : ''}>${esc(o === 'directo' ? 'Directo' : o)}</option>`).join('')}</select>
+    <button class="chip" data-crm-seg aria-pressed="${!!S.crmSeg}">Seguimiento hoy${nSeg ? ` (${nSeg})` : ''}</button></div>
+    <div class="filters">${chip('data-crm-prog', '', `Todas (${A.leads.length})`, !S.crmProg)}${LEAD_PROGS.map(([k, t, fs]) => chip('data-crm-prog', k, `${t} (${A.leads.filter((l) => fs.includes(l.form)).length})`, S.crmProg === k)).join('')}</div>`;
+
+  if (vista === 'tabla') {
+    const sel = S.leadSel, barra = sel.size ? `<div class="filters" style="padding:0 4px 12px"><b>${sel.size} seleccionada${sel.size === 1 ? '' : 's'}</b><button class="btn btn-ghost btn-sm" style="color:#b8402f" data-leads-del>Eliminar seleccionadas</button><button class="link" data-leads-clear>Quitar selección</button></div>` : '';
+    return `${head}${aviso}${controles}
+    <section class="card panel">${barra}<div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:32px"><input type="checkbox" data-lead-all aria-label="Seleccionar todas" ${lista.length && lista.every((l) => sel.has(l.id)) ? 'checked' : ''}></th><th>Persona</th><th>Programa</th><th>Le interesa</th><th>Origen</th><th>Fecha</th><th>Seguimiento</th><th>Etapa</th></tr></thead><tbody>
+    ${lista.map((l) => `<tr>
+      <td><input type="checkbox" data-lead-sel="${esc(l.id)}" aria-label="Seleccionar a ${esc(l.name)}" ${sel.has(l.id) ? 'checked' : ''}></td>
+      <td><button class="link" data-lead-open="${esc(l.id)}" style="font-weight:700">${esc(l.name)}</button><br><span class="muted" style="font-size:.84rem">${leadContacto(l)}</span></td>
+      <td>${esc(LEAD_FORMS[l.form] || l.form)}</td>
+      <td>${esc(l.interest)}${l.note ? `<br><span class="muted" style="font-size:.84rem">📝 ${esc(l.note.slice(0, 80))}${l.note.length > 80 ? '…' : ''}</span>` : ''}</td>
+      <td class="muted" style="font-size:.84rem">${esc(leadOrigenTxt(l))}</td>
+      <td class="muted" style="font-size:.84rem">${fdateMs(l.createdAt)}</td>
+      <td>${alumnaBadge(l)}${segBadge(l)}</td>
+      <td><select data-lead-status="${esc(l.id)}" aria-label="Etapa">${LEAD_STATES.map(([k, t]) => `<option value="${k}" ${leadEtapa(l) === k ? 'selected' : ''}>${t}</option>`).join('')}</select></td></tr>`).join('') || '<tr><td colspan="8" class="muted">No hay interesadas con estos filtros.</td></tr>'}
+    </tbody></table></div></section>`;
+  }
+
+  // Embudo: una columna por etapa; se arrastran las tarjetas o se cambia la etapa desde su ficha
+  const verDesc = !!S.crmDesc, etapas = LEAD_STATES.filter(([k]) => verDesc || k !== 'descartado');
+  const tarjeta = (l) => `<article class="kb-card" draggable="true" data-lead-card="${esc(l.id)}" data-lead-open="${esc(l.id)}">
+      <b>${esc(l.name)}</b><span class="muted">${esc(LEAD_FORMS[l.form] || l.form)} · ${fdateMs(l.createdAt).split(',')[0]}</span>
+      ${l.interest ? `<small>${esc(l.interest)}</small>` : ''}${l.note ? `<small class="muted">📝 ${esc(l.note.slice(0, 70))}${l.note.length > 70 ? '…' : ''}</small>` : ''}
+      <div class="kb-meta">${alumnaBadge(l)}${segBadge(l)}${l.whatsapp ? `<a class="btn btn-ghost btn-sm" href="${waLink(l.whatsapp)}" data-wa-open="${esc(waNum(l.whatsapp))}" data-wa-name="${esc(l.name)}">WhatsApp</a>` : ''}</div></article>`;
+  return `${head}${aviso}${controles}
+  <div class="filters"><button class="chip" data-crm-desc aria-pressed="${verDesc}">Mostrar descartadas (${lista.filter((l) => leadEtapa(l) === 'descartado').length})</button><span class="muted" style="font-size:.82rem">Arrastra una tarjeta a otra columna para cambiar su etapa. Toca una tarjeta para ver su ficha.</span></div>
+  <div class="kb">${etapas.map(([k, t]) => { const col = lista.filter((l) => leadEtapa(l) === k); return `<section class="kb-col" data-kb-col="${k}"><h4>${t} <span class="count">${col.length}</span></h4>${col.map(tarjeta).join('') || '<p class="muted" style="font-size:.82rem;margin:0">Nadie aquí.</p>'}</section>`; }).join('')}</div>`;
+};
+
+// Ficha de una interesada: datos, etapa, nota y próximo seguimiento
+function leadFicha(id) {
+  const l = (A.leads || []).find((x) => x.id === id); if (!l) return;
+  const k = (t, v) => (v ? `<dt>${t}</dt><dd>${v}</dd>` : '');
+  dialog(`<span class="eyebrow">Interesada</span><h3>${esc(l.name)}</h3>
+  <dl class="kv" style="margin:8px 0 12px">${k('Contacto', leadContacto(l))}${k('Programa', esc(LEAD_FORMS[l.form] || l.form))}${k('Le interesa', esc(l.interest))}${k('Mensaje', esc(l.message))}${k('Clase', l.claseFecha ? esc(fechaLarga(l.claseFecha)) : '')}${k('Origen', esc(leadOrigenTxt(l)))}${k('Registrada', fdateMs(l.createdAt))}</dl>
+  <form id="lead-form" class="cal-form">
+    ${(() => { const u = alumnaDe(l), o = otrasDe(l); return `${u ? `<div class="card full" style="padding:10px 14px;font-size:.86rem;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap"><span><b>Ya tiene cuenta en el aula:</b> ${esc(nameOf(u))} · ${esc(payState(u)[1])}</span><button type="button" class="btn btn-ghost btn-sm" data-lead-alumna="${esc(u.id)}">Ver su ficha</button></div>` : ''}${o.length ? `<div class="card full" style="padding:10px 14px;font-size:.84rem;display:grid;gap:4px"><b>También se registró en:</b>${o.map((x) => `<span>${esc(LEAD_FORMS[x.form] || x.form)} · ${fdateMs(x.createdAt)} · ${esc(LEAD_STATES.find(([k]) => k === leadEtapa(x))?.[1] || '')}</span>`).join('')}</div>` : ''}`; })()}
+    <label><b>Etapa</b><select id="lf-status">${LEAD_STATES.map(([v, t]) => `<option value="${v}" ${leadEtapa(l) === v ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
+    <label><b>Próximo seguimiento</b><input type="date" id="lf-fup" value="${esc(l.followUp || '')}"></label>
+    <label class="full"><b>Nota</b><textarea id="lf-note" maxlength="1000" rows="4" placeholder="Lo que conversaron, qué le interesa, qué le falta decidir…">${esc(l.note || '')}</textarea></label>
+    <div class="full actions"><button class="btn btn-primary btn-sm">Guardar</button>${l.whatsapp ? `<a class="btn btn-ghost btn-sm" href="${waLink(l.whatsapp)}" data-wa-open="${esc(waNum(l.whatsapp))}" data-wa-name="${esc(l.name)}">Escribir por WhatsApp</a>` : ''}${l.email ? `<a class="btn btn-ghost btn-sm" href="mailto:${esc(l.email)}">Correo</a>` : ''}<button type="button" class="btn btn-ghost btn-sm" id="lf-del" style="color:#b8402f;margin-left:auto">Eliminar</button></div>
+  </form>`, true);
+  $('#lead-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const cambios = { status: $('#lf-status').value, followUp: $('#lf-fup').value, note: $('#lf-note').value.trim() };
+    try { await data.leads({ action: 'update', id, ...cambios }); Object.assign(l, cambios); $('#dlg').close(); paintNav(); render(false); toast('Guardado.'); } catch (err) { fail(err); }
+  };
+  $('#lf-del').onclick = async () => {
+    if (!confirm(`¿Eliminar a ${l.name} de tu lista? No se puede deshacer.`)) return;
+    try { await data.leads({ action: 'delete', ids: [id] }); A.leads = A.leads.filter((x) => x.id !== id); S.leadSel.delete(id); $('#dlg').close(); paintNav(); render(false); toast('Eliminada.'); } catch (err) { fail(err); }
+  };
+}
+async function leadMover(id, status) {
+  const l = (A.leads || []).find((x) => x.id === id); if (!l || leadEtapa(l) === status) return;
+  const antes = l.status; l.status = status; paintNav(); render(false);
+  try { await data.leads({ action: 'update', id, status }); } catch (e) { l.status = antes; paintNav(); render(false); fail(e); }
+}
+// ---------- Inicio: lo importante del día a mano ----------
+V.inicio = () => {
+  const hoy = ymd(hoyCL()), nombre = (A.me?.displayName || '').split(' ')[0] || 'Karen';
+  const nuevas = nuevasLeads(), sinLeer = A.wa.chats.reduce((n, c) => n + (c.unread || 0), 0);
+  const clases = (A.cal || []).filter((e) => ['clase-pendulo', 'clase-tarot'].includes(e.type) && e.date >= hoy && !e.tentative)
+    .sort((a, b) => `${a.date} ${a.time || ''}`.localeCompare(`${b.date} ${b.time || ''}`)).slice(0, 5);
+  const atrasadas = A.students.filter((u) => u.paymentStatus === 'overdue');
+  const kpi = (n, t, ir) => `<div data-go="${ir}" role="button" tabindex="0" style="cursor:pointer"><b>${n}</b><span>${t}</span></div>`;
+  const fila = (l) => `<tr><td><b>${esc(l.name)}</b><br><span class="muted" style="font-size:.84rem">${esc(LEAD_FORMS[l.form] || l.form)} · ${fdateMs(l.createdAt)}</span></td><td style="text-align:right">${l.whatsapp ? `<a class="btn btn-ghost btn-sm" href="${waLink(l.whatsapp)}" data-wa-open="${esc(waNum(l.whatsapp))}" data-wa-name="${esc(l.name)}">Escribir</a>` : ''}</td></tr>`;
+  const clase = (e) => { const n = (A.leads || []).filter((l) => l.claseEvento === e.id).length; return `<tr data-go="calendario" style="cursor:pointer"><td><b>${esc(CAL_TYPES[e.type]?.[0] || e.type)}</b><br><span class="muted" style="font-size:.84rem">${e.date === hoy ? 'Hoy' : fechaLarga(e.date)}${e.time ? ` · ${esc(e.time)}` : ''}</span></td><td style="text-align:right"><span class="pill ${n ? 'done' : 'lock'}">${n} inscrita${n === 1 ? '' : 's'}</span></td></tr>`; };
+  return `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>Hola, ${esc(nombre)}</h1><p>Lo que necesita tu atención hoy.</p></div></div>
+  <div class="kpis">${kpi(nuevas.length, 'interesadas nuevas', 'interesadas')}${kpi(sinLeer, 'WhatsApp sin leer', 'whatsapp')}${kpi(A.questions.length, 'preguntas de clase', 'preguntas')}${kpi(A.tickets.length, 'mensajes de ayuda', 'ayuda')}</div>
+  ${(A.leads || []).filter(seguimientoHoy).length ? `<div class="alert"><div><b>${(A.leads || []).filter(seguimientoHoy).length} seguimiento${(A.leads || []).filter(seguimientoHoy).length === 1 ? '' : 's'} para hoy</b><p>Personas a las que quedaste de escribirles.</p></div><button class="btn" data-crm-hoy>Ver</button></div>` : ''}
+  ${atrasadas.length ? `<div class="alert"><div><b>${atrasadas.length} cuota${atrasadas.length === 1 ? '' : 's'} atrasada${atrasadas.length === 1 ? '' : 's'}</b><p>${esc(atrasadas.slice(0, 3).map(nameOf).join(', '))}${atrasadas.length > 3 ? '…' : ''}</p></div><button class="btn" data-go="pagos">Ver pagos</button></div>` : ''}
+  <div class="cols">
+    <section class="card panel"><div class="panel-h"><h3>Interesadas por contactar</h3><button class="link" data-go="interesadas">Ver todas</button></div>
+      ${!A.leads ? '<p class="muted">Cargando…</p>' : nuevas.length ? `<div class="tbl-wrap"><table class="tbl"><tbody>${nuevas.slice(0, 6).map(fila).join('')}</tbody></table></div>` : '<p class="muted">No hay interesadas nuevas. Todo al día.</p>'}</section>
+    <section class="card panel"><div class="panel-h"><h3>Próximas clases gratis</h3><button class="link" data-go="calendario">Calendario</button></div>
+      ${!A.cal ? '<p class="muted">Cargando…</p>' : clases.length ? `<div class="tbl-wrap"><table class="tbl"><tbody>${clases.map(clase).join('')}</tbody></table></div>` : '<p class="muted">No hay clases gratis programadas en el Calendario.</p>'}</section>
+  </div>`;
 };
 // ---------- Chat de WhatsApp Business (número de Karen, src/app/api/whatsapp) ----------
 // Las conversaciones llegan en vivo desde Firestore; enviar y marcar como leído pasa por el servidor, que es quien habla con Meta.
@@ -726,12 +843,15 @@ V.ajustes = () => `<div class="view-head"><div><span class="eyebrow">Portal de l
 
 // Un solo manejador para todos los [data-go]: el menú se vuelve a pintar solo (p. ej. al llegar una alumna nueva) y sus botones siguen funcionando
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-go]'); if (b) go(b.dataset.go); });
+document.addEventListener('click', (e) => { const b = e.target.closest('[data-lead-alumna]'); if (b) { if ($('#dlg').open) $('#dlg').close(); openStudent(b.dataset.leadAlumna); } });
+document.addEventListener('click', (e) => { if (e.target.closest('[data-crm-hoy]')) { S.crmSeg = true; S.crmProg = ''; S.crmQ = ''; S.crmOrigen = ''; go('interesadas'); } });
 document.addEventListener('click', (e) => { const a = e.target.closest('[data-wa-open]'); if (!a) return; e.preventDefault(); if ($('#dlg').open) $('#dlg').close(); waOpen(a.dataset.waOpen, a.dataset.waName); go('whatsapp'); });
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-wa-chat]'); if (b) { waOpen(b.dataset.waChat, ''); waRepaint(); } });
 function paintNav() {
-  $('#nav').innerHTML = NAV.map(([k, n, ic, c]) => { const cnt = c ? c() : 0; return `<button data-go="${k}" ${S.view === k || (S.view === 'ficha' && k === 'alumnas') || (S.view === 'clase' && k === 'formacion') ? 'aria-current="page"' : ''}><svg viewBox="0 0 24 24">${ic}</svg>${n}${cnt ? `<span class="count">${cnt}</span>` : ''}</button>`; }).join('');
+  $('#nav').innerHTML = NAV.map(([k, n, ic, c]) => { if (k === '--') return `<div class="nav-label">${n}</div>`; const cnt = c ? c() : 0; return `<button data-go="${k}" ${S.view === k || (S.view === 'ficha' && k === 'alumnas') || (S.view === 'clase' && k === 'formacion') ? 'aria-current="page"' : ''}><svg viewBox="0 0 24 24">${ic}</svg>${n}${cnt ? `<span class="count">${cnt}</span>` : ''}</button>`; }).join('');
 }
 function render(top = true) {
+  A._vin = null;
   paintNav();
   $('#view').innerHTML = V[S.view]();
   if (top) scrollTo(0, 0);
@@ -763,6 +883,36 @@ function bind() {
   document.querySelectorAll('[data-ans-who]').forEach((b) => (b.onclick = () => { S.ansWho = b.dataset.ansWho; S.ansLv = 0; go('respuestas'); }));
   document.querySelectorAll('[data-ans-reload]').forEach((b) => (b.onclick = () => { b.disabled = true; loadAnswers(true).then(() => render(false)).catch(fail); }));
   if (S.view === 'whatsapp') waBind();
+  document.querySelectorAll('[data-crm-vista]').forEach((b) => (b.onclick = () => { S.crmVista = b.dataset.crmVista; render(false); }));
+  document.querySelectorAll('[data-crm-prog]').forEach((b) => (b.onclick = () => { S.crmProg = b.dataset.crmProg; S.leadSel = new Set(); render(false); }));
+  document.querySelectorAll('[data-crm-seg]').forEach((b) => (b.onclick = () => { S.crmSeg = !S.crmSeg; render(false); }));
+  document.querySelectorAll('[data-crm-desc]').forEach((b) => (b.onclick = () => { S.crmDesc = !S.crmDesc; render(false); }));
+  const co = $('#crm-origen'); if (co) co.onchange = () => { S.crmOrigen = co.value; render(false); };
+  const cq = $('#crm-q'); if (cq) cq.oninput = () => { S.crmQ = cq.value; const p = cq.selectionStart; render(false); const c2 = $('#crm-q'); c2.focus(); c2.setSelectionRange(p, p); };
+  document.querySelectorAll('[data-lead-open]').forEach((b) => (b.onclick = (e) => { if (e.target.closest('a')) return; leadFicha(b.dataset.leadOpen); }));
+  document.querySelectorAll('[data-lead-card]').forEach((c) => (c.ondragstart = (e) => { e.dataTransfer.setData('text/plain', c.dataset.leadCard); e.dataTransfer.effectAllowed = 'move'; }));
+  document.querySelectorAll('[data-kb-col]').forEach((col) => {
+    col.ondragover = (e) => { e.preventDefault(); col.classList.add('over'); };
+    col.ondragleave = () => col.classList.remove('over');
+    col.ondrop = (e) => { e.preventDefault(); col.classList.remove('over'); const id = e.dataTransfer.getData('text/plain'); if (id) leadMover(id, col.dataset.kbCol); };
+  });
+  document.querySelectorAll('[data-lead-sel]').forEach((cb) => (cb.onchange = () => { cb.checked ? S.leadSel.add(cb.dataset.leadSel) : S.leadSel.delete(cb.dataset.leadSel); render(false); }));
+  document.querySelectorAll('[data-lead-all]').forEach((cb) => (cb.onchange = () => { S.leadSel = cb.checked ? new Set(leadsFiltradas().map((l) => l.id)) : new Set(); render(false); }));
+  document.querySelectorAll('[data-leads-clear]').forEach((b) => (b.onclick = () => { S.leadSel = new Set(); render(false); }));
+  document.querySelectorAll('[data-leads-del]').forEach((b) => (b.onclick = async () => {
+    const ids = [...S.leadSel];
+    if (!ids.length || !confirm(`¿Eliminar ${ids.length} interesada${ids.length === 1 ? '' : 's'}? Se borran de tu lista y no se puede deshacer.`)) return;
+    b.disabled = true;
+    try { await data.leads({ action: 'delete', ids }); A.leads = A.leads.filter((l) => !S.leadSel.has(l.id)); S.leadSel = new Set(); paintNav(); render(false); toast(`${ids.length} eliminada${ids.length === 1 ? '' : 's'}.`); } catch (e) { fail(e); b.disabled = false; }
+  }));
+  document.querySelectorAll('[data-del-student]').forEach((b) => (b.onclick = async () => {
+    const u = student(b.dataset.delStudent); if (!u) return;
+    const conPago = paying(u) || ownedOf(u).length > 0;
+    const t = prompt(`Vas a eliminar a ${nameOf(u)} y todo su avance, preguntas y pagos registrados. No se puede deshacer.${conPago ? '\n\nATENCIÓN: tiene pagos o niveles comprados.' : ''}\n\nEscribe ELIMINAR para confirmar:`);
+    if (t?.trim() !== 'ELIMINAR') return;
+    b.disabled = true;
+    try { await api({ action: 'deleteStudent', uid: u.id, force: conPago }); A.students = A.students.filter((x) => x.id !== u.id); S.open = null; go('alumnas'); toast('Alumna eliminada.'); } catch (e) { fail(e); b.disabled = false; }
+  }));
   document.querySelectorAll('[data-leads-reload]').forEach((b) => (b.onclick = () => { b.disabled = true; data.leads().then(() => render(false)).catch(fail); }));
   document.querySelectorAll('[data-cal-add]').forEach((b) => (b.onclick = () => calForm()));
   document.querySelectorAll('[data-cal-ev]').forEach((b) => (b.onclick = () => calForm(A.cal.find((e) => e.id === b.dataset.calEv))));
@@ -936,7 +1086,8 @@ async function enter(u, auto = false) {
     watchStudents();
     waWatch();
     loadAnswers().then(paintNav).catch((e) => console.warn('respuestas', e.message));
-    data.leads().then(paintNav).catch((e) => console.warn('interesadas', e.message));
+    data.leads().then(() => { paintNav(); if (S.view === 'inicio') render(false); }).catch((e) => console.warn('interesadas', e.message));
+    data.cal().then(() => { if (S.view === 'inicio') render(false); }).catch((e) => console.warn('calendario', e.message));
     const p = (await getDoc(doc(db, 'users', u.uid))).data() || {};
     start({ id: u.uid, ...p, displayName: p.displayName || 'Maestra Holística' });
   } catch (e) { console.error(e); say(e.message || 'No pudimos abrir el portal. Inténtalo de nuevo.'); }
