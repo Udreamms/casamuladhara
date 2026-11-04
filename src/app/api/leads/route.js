@@ -22,6 +22,7 @@ const out = (d) => ({ id: d.id, ...d.data(), createdAt: d.data().createdAt?.toMi
 
 export async function POST(request) {
   const body = await request.json().catch(() => ({}));
+  const delPortal = ['all', 'status', 'update', 'delete'].includes(body.action); // acciones de la Maestra: su error no es el de una landing
   try {
     if (body.action === 'save') {
       // Campo trampa: las personas no lo ven, los bots lo llenan. Se responde ok para no darles pistas.
@@ -88,7 +89,10 @@ export async function POST(request) {
           cambios.followUp = body.followUp;
         }
         if (!Object.keys(cambios).length) return json({ error: 'No hay cambios.' }, 400);
-        await db().doc(`leads/${body.id}`).update({ ...cambios, updatedAt: FieldValue.serverTimestamp() });
+        try { await db().doc(`leads/${body.id}`).update({ ...cambios, updatedAt: FieldValue.serverTimestamp() }); } catch (e) {
+          if (e.code === 5 || /NOT_FOUND/.test(String(e.message))) return json({ error: 'Esa interesada ya no existe. Actualiza la lista.' }, 404);
+          throw e;
+        }
         return json({ ok: true });
       }
       if (body.action === 'status') {
@@ -103,6 +107,7 @@ export async function POST(request) {
     return json({ error: 'Acción desconocida.' }, 400);
   } catch (e) {
     console.error('leads', e);
+    if (delPortal) return json({ error: 'No se pudo completar la acción. Inténtalo de nuevo.' }, 500);
     return json({ error: 'No pudimos guardar tus datos. Escríbenos por WhatsApp y te ayudamos.' }, 500);
   }
 }

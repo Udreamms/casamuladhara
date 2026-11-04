@@ -367,11 +367,12 @@ const leadOrigenTxt = (l) => [l.utm?.utm_source && l.utm?.utm_medium ? `${l.utm.
 // Vínculos: una interesada y una alumna son la misma persona si comparten correo o WhatsApp (sirve también para detectar registros repetidos)
 const llavesDe = (x) => [String(x.email || '').trim().toLowerCase(), waNum(x.whatsapp || x.phone)].filter(Boolean);
 const vinculos = () => {
-  if (A._vin) return A._vin;
+  const sig = `${A.leads?.length ?? -1}|${A.students.length}`;
+  if (A._vin?.sig === sig) return A._vin; // se recalcula si cambió la cantidad de interesadas o de alumnas
   const alumna = new Map(), porLlave = new Map();
   A.students.forEach((u) => llavesDe(u).forEach((k) => { if (!alumna.has(k)) alumna.set(k, u); }));
   (A.leads || []).forEach((l) => llavesDe(l).forEach((k) => { if (!porLlave.has(k)) porLlave.set(k, []); porLlave.get(k).push(l); }));
-  return (A._vin = { alumna, porLlave });
+  return (A._vin = { sig, alumna, porLlave });
 };
 const alumnaDe = (l) => { const v = vinculos(); for (const k of llavesDe(l)) if (v.alumna.has(k)) return v.alumna.get(k); return null; };
 const otrasDe = (l) => { const v = vinculos(), vistos = new Set([l.id]), out = []; for (const k of llavesDe(l)) for (const x of v.porLlave.get(k) || []) if (!vistos.has(x.id)) { vistos.add(x.id); out.push(x); } return out; };
