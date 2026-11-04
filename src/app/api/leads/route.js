@@ -3,6 +3,7 @@
 // Se guardan en leads/{id} desde el servidor: el navegador no escribe en Firestore y las reglas siguen denegando todo lo demás.
 //   action 'save' -> { form, name, email, whatsapp, country, interest, message, utm, page, web }   sin sesión, desde cualquier landing
 //   action 'all'  -> { leads: [{ id, form, name, ..., createdAt }] }   solo la Maestra (Authorization: Bearer <token>)
+//   action 'update' -> { id, status?, note?, followUp? }   la Maestra cambia la etapa, escribe una nota o fija la fecha de seguimiento (AAAA-MM-DD; vacío la quita)
 //   action 'delete' -> { ids: [..] }   la Maestra elimina interesadas (hasta 100 a la vez); no se puede deshacer
 import { FieldValue } from 'firebase-admin/firestore';
 import { auth, db, json } from '@/lib/server/services.js';
@@ -13,6 +14,7 @@ const FORMS = ['pendulo', 'clase-pendulo', 'tarot', 'clase-tarot', 'formacion', 
 const ENLACE = { 'clase-pendulo': 'enlacePendulo', 'clase-tarot': 'enlaceTarot' };
 const FECHA = /^\d{4}-\d{2}-\d{2}$/;
 const HTTPS = /^https:\/\/[^\s"'<>]+$/i;
+const ETAPAS = ['nuevo', 'contactado', 'clase', 'conversando', 'inscrita', 'descartado'];
 const UTM = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'fbclid', 'gclid'];
 const str = (v, max) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -60,7 +62,7 @@ export async function POST(request) {
       }
       return json({ ok: true, id: ref.id, ...(enlace ? { enlace } : {}) });
     }
-    if (body.action === 'all' || body.action === 'status' || body.action === 'delete') {
+    if (body.action === 'all' || body.action === 'status' || body.action === 'update' || body.action === 'delete') {
       let user;
       try {
         user = await auth().verifyIdToken((request.headers.get('authorization') || '').replace(/^Bearer\s+/i, ''));
@@ -76,8 +78,21 @@ export async function POST(request) {
         await lote.commit();
         return json({ ok: true, eliminadas: ids.length });
       }
+      if (body.action === 'update') {
+        if (typeof body.id !== 'string' || !/^[A-Za-z0-9]{1,40}$/.test(body.id)) return json({ error: 'Datos no válidos.' }, 400);
+        const cambios = {};
+        if ('status' in body) { if (!ETAPAS.includes(body.status)) return json({ error: 'Etapa no válida.' }, 400); cambios.status = body.status; }
+        if ('note' in body) { if (typeof body.note !== 'string') return json({ error: 'Nota no válida.' }, 400); cambios.note = body.note.trim().slice(0, 1000); }
+        if ('followUp' in body) {
+          if (body.followUp !== '' && !FECHA.test(String(body.followUp))) return json({ error: 'Fecha no válida.' }, 400);
+          cambios.followUp = body.followUp;
+        }
+        if (!Object.keys(cambios).length) return json({ error: 'No hay cambios.' }, 400);
+        await db().doc(`leads/${body.id}`).update({ ...cambios, updatedAt: FieldValue.serverTimestamp() });
+        return json({ ok: true });
+      }
       if (body.action === 'status') {
-        const status = ['nuevo', 'contactado', 'inscrita', 'descartado'].includes(body.status) ? body.status : null;
+        const status = ETAPAS.includes(body.status) ? body.status : null;
         if (!status || typeof body.id !== 'string' || !/^[A-Za-z0-9]{1,40}$/.test(body.id)) return json({ error: 'Datos no válidos.' }, 400);
         await db().doc(`leads/${body.id}`).update({ status });
         return json({ ok: true });

@@ -177,7 +177,7 @@ const data = {
 };
 
 // ---------- Vista ----------
-const S = { view: 'inicio', leadSel: new Set(), q: '', open: null, filter: 'todas', lvOpen: {}, fq: '', cls: null, ansWho: '', ansLv: 0 };
+const S = { view: 'inicio', leadSel: new Set(), crmVista: 'embudo', crmProg: '', crmQ: '', crmOrigen: '', crmSeg: false, crmDesc: false, q: '', open: null, filter: 'todas', lvOpen: {}, fq: '', cls: null, ansWho: '', ansLv: 0 };
 const NAV = [
   ['inicio', 'Inicio', '<path d="M4 11 12 4l8 7v9H4z"/><path d="M10 20v-6h4v6"/>', () => nuevasLeads().length + A.questions.length + A.tickets.length],
   ['--', 'CRM'],
@@ -354,30 +354,96 @@ V.clase = () => {
   <iframe class="aula-frame" src="${src}&embed=1" title="Clase: ${esc(l.t)}"></iframe>`;
 };
 const LEAD_FORMS = { pendulo: 'Péndulo Hebreo', 'clase-pendulo': 'Clase gratis Péndulo', tarot: 'Tarot Terapéutico', 'clase-tarot': 'Clase gratis Tarot', formacion: 'Formación', sala: 'Sala Abierta', terapias: 'Terapias', meditacion: 'Meditación', regalo: 'Portada · Sala Abierta' };
-const LEAD_STATES = [['nuevo', 'Nueva'], ['contactado', 'Contactada'], ['inscrita', 'Inscrita'], ['descartado', 'Descartada']];
+const LEAD_STATES = [['nuevo', 'Nueva'], ['contactado', 'Contactada'], ['clase', 'Tomó la clase'], ['conversando', 'En conversación'], ['inscrita', 'Inscrita'], ['descartado', 'Descartada']];
+// Programas para filtrar: las dos clases gratis, los dos cursos, la formación completa y el resto de formularios
+const LEAD_PROGS = [['clase-pendulo', 'Clase gratis Péndulo', ['clase-pendulo']], ['clase-tarot', 'Clase gratis Tarot', ['clase-tarot']], ['pendulo', 'Curso Péndulo', ['pendulo']],
+  ['tarot', 'Tarot Terapéutico', ['tarot']], ['formacion', 'Formación completa', ['formacion']], ['otros', 'Otros', ['sala', 'terapias', 'meditacion', 'regalo']]];
 // Mismo criterio que src/lib/server/whatsapp.js: solo dígitos con código de país (un celular chileno de 9 dígitos que empieza en 9 se toma como +56)
 const waNum = (n) => { let d = String(n || '').replace(/\D/g, '').replace(/^00/, ''); if (d.length === 9 && d[0] === '9') d = `56${d}`; return d.length >= 8 && d.length <= 15 ? d : ''; };
 const waLink = (n) => { const d = String(n || '').replace(/\D/g, ''); return d ? `https://wa.me/${d}` : ''; };
+const leadOrigen = (l) => l.utm?.utm_source || 'directo';
+const leadOrigenTxt = (l) => [l.utm?.utm_source && l.utm?.utm_medium ? `${l.utm.utm_source} / ${l.utm.utm_medium}` : l.utm?.utm_source, l.utm?.utm_campaign, l.utm?.utm_content].filter(Boolean).join(' · ') || 'Directo';
+const leadEtapa = (l) => (LEAD_STATES.some(([k]) => k === l.status) ? l.status : 'nuevo');
+const seguimientoHoy = (l) => !!l.followUp && l.followUp <= ymd(hoyCL()) && !['inscrita', 'descartado'].includes(leadEtapa(l));
+const leadsFiltradas = () => {
+  const q = (S.crmQ || '').toLowerCase().trim(), prog = LEAD_PROGS.find((x) => x[0] === S.crmProg);
+  return (A.leads || []).filter((l) => (!prog || prog[2].includes(l.form))
+    && (!S.crmOrigen || leadOrigen(l) === S.crmOrigen)
+    && (!S.crmSeg || seguimientoHoy(l))
+    && (!q || [l.name, l.email, l.whatsapp, l.interest, l.message, l.note].join(' ').toLowerCase().includes(q)));
+};
+const leadContacto = (l) => { const wa = waLink(l.whatsapp); return `${wa ? `<a href="${wa}" data-wa-open="${esc(waNum(l.whatsapp))}" data-wa-name="${esc(l.name)}" title="Escribirle desde el portal">${esc(l.whatsapp)}</a>` : ''}${l.whatsapp && l.email ? ' · ' : ''}${esc(l.email)}${l.country ? ` · ${esc(l.country)}` : ''}`; };
+const segBadge = (l) => (l.followUp ? `<span class="pill ${seguimientoHoy(l) ? 'bad' : 'lock'}" title="Próximo seguimiento">${seguimientoHoy(l) ? 'Seguimiento hoy' : `Seguir ${fechaLarga(l.followUp)}`}</span>` : '');
+
 V.interesadas = () => {
-  const head = `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>Interesadas</h1><p>Personas que dejaron sus datos en los formularios de la página. Escríbeles por WhatsApp y marca cómo va cada una.</p></div><button class="btn btn-ghost btn-sm" data-leads-reload>Actualizar</button></div>`;
+  const head = `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>CRM · Interesadas</h1><p>Personas que dejaron sus datos en la página. Muévelas por el embudo, escribe notas y fija cuándo volver a escribirles.</p></div><button class="btn btn-ghost btn-sm" data-leads-reload>Actualizar</button></div>`;
   if (!A.leads) return `${head}<div class="card empty">Cargando interesadas…</div>`;
   const sinLink = [['enlacePendulo', 'Péndulo'], ['enlaceTarot', 'Tarot'], ['enlaceTerapias', 'terapias online']].filter(([k]) => !A.clases?.[k]).map(([, n]) => n);
   const aviso = sinLink.length ? `<div class="card" style="padding:12px 14px;font-size:.88rem;border-left:4px solid #b8402f"><b>Falta el enlace de Google Meet de ${sinLink.join(', ')}.</b> Mientras no esté, quienes se registren no ven el botón para entrar. Cárgalo en <button class="link" data-go="ajustes">Ajustes del aula</button>.</div>` : '';
-  const by = (s) => A.leads.filter((l) => l.status === s).length;
-  const sel = S.leadSel, barra = sel.size ? `<div class="filters" style="padding:0 4px 12px"><b>${sel.size} seleccionada${sel.size === 1 ? '' : 's'}</b><button class="btn btn-ghost btn-sm" style="color:#b8402f" data-leads-del>Eliminar seleccionadas</button><button class="link" data-leads-clear>Quitar selección</button></div>` : '';
-  return `${head}${aviso}
-  <div class="kpis">${LEAD_STATES.map(([k, t]) => `<div><b>${by(k)}</b><span>${t.toLowerCase()}s</span></div>`).join('')}</div>
-  <section class="card panel">${barra}<div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:32px"><input type="checkbox" data-lead-all aria-label="Seleccionar todas" ${A.leads.length && sel.size === A.leads.length ? 'checked' : ''}></th><th>Persona</th><th>Formulario</th><th>Le interesa</th><th>Origen</th><th>Fecha</th><th>Estado</th></tr></thead><tbody>
-  ${A.leads.map((l) => { const wa = waLink(l.whatsapp); return `<tr>
-    <td><input type="checkbox" data-lead-sel="${esc(l.id)}" aria-label="Seleccionar a ${esc(l.name)}" ${sel.has(l.id) ? 'checked' : ''}></td>
-    <td><b>${esc(l.name)}</b><br><span class="muted" style="font-size:.84rem">${wa ? `<a href="${wa}" data-wa-open="${esc(waNum(l.whatsapp))}" data-wa-name="${esc(l.name)}" title="Escribirle desde el portal">${esc(l.whatsapp)}</a>` : ''}${l.whatsapp && l.email ? ' · ' : ''}${esc(l.email)}${l.country ? ` · ${esc(l.country)}` : ''}</span></td>
-    <td>${esc(LEAD_FORMS[l.form] || l.form)}</td>
-    <td>${esc(l.interest)}${l.message ? `<br><span class="muted" style="font-size:.84rem">${esc(l.message)}</span>` : ''}</td>
-    <td class="muted" style="font-size:.84rem">${esc([l.utm?.utm_source && l.utm?.utm_medium ? `${l.utm.utm_source} / ${l.utm.utm_medium}` : l.utm?.utm_source, l.utm?.utm_campaign, l.utm?.utm_content].filter(Boolean).join(' · ') || 'Directo')}</td>
-    <td class="muted" style="font-size:.84rem">${fdateMs(l.createdAt)}</td>
-    <td><select data-lead-status="${esc(l.id)}" aria-label="Estado">${LEAD_STATES.map(([k, t]) => `<option value="${k}" ${l.status === k ? 'selected' : ''}>${t}</option>`).join('')}</select></td></tr>`; }).join('') || '<tr><td colspan="7" class="muted">Todavía no hay interesadas.</td></tr>'}
-  </tbody></table></div></section>`;
+  const lista = leadsFiltradas(), vista = S.crmVista || 'embudo';
+  const chip = (attr, v, t, on) => `<button class="chip" ${attr}="${esc(v)}" aria-pressed="${on}">${t}</button>`;
+  const origenes = [...new Set(A.leads.map(leadOrigen))].sort();
+  const nSeg = A.leads.filter(seguimientoHoy).length;
+  const controles = `<div class="filters">${chip('data-crm-vista', 'embudo', 'Embudo', vista === 'embudo')}${chip('data-crm-vista', 'tabla', 'Tabla', vista === 'tabla')}
+    <input type="text" id="crm-q" placeholder="Buscar por nombre, correo, WhatsApp o nota" value="${esc(S.crmQ || '')}" style="flex:1;min-width:220px;border-radius:999px">
+    <select id="crm-origen" aria-label="Origen" style="border-radius:999px"><option value="">Todos los orígenes</option>${origenes.map((o) => `<option value="${esc(o)}" ${S.crmOrigen === o ? 'selected' : ''}>${esc(o === 'directo' ? 'Directo' : o)}</option>`).join('')}</select>
+    <button class="chip" data-crm-seg aria-pressed="${!!S.crmSeg}">Seguimiento hoy${nSeg ? ` (${nSeg})` : ''}</button></div>
+    <div class="filters">${chip('data-crm-prog', '', `Todas (${A.leads.length})`, !S.crmProg)}${LEAD_PROGS.map(([k, t, fs]) => chip('data-crm-prog', k, `${t} (${A.leads.filter((l) => fs.includes(l.form)).length})`, S.crmProg === k)).join('')}</div>`;
+
+  if (vista === 'tabla') {
+    const sel = S.leadSel, barra = sel.size ? `<div class="filters" style="padding:0 4px 12px"><b>${sel.size} seleccionada${sel.size === 1 ? '' : 's'}</b><button class="btn btn-ghost btn-sm" style="color:#b8402f" data-leads-del>Eliminar seleccionadas</button><button class="link" data-leads-clear>Quitar selección</button></div>` : '';
+    return `${head}${aviso}${controles}
+    <section class="card panel">${barra}<div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:32px"><input type="checkbox" data-lead-all aria-label="Seleccionar todas" ${lista.length && lista.every((l) => sel.has(l.id)) ? 'checked' : ''}></th><th>Persona</th><th>Programa</th><th>Le interesa</th><th>Origen</th><th>Fecha</th><th>Seguimiento</th><th>Etapa</th></tr></thead><tbody>
+    ${lista.map((l) => `<tr>
+      <td><input type="checkbox" data-lead-sel="${esc(l.id)}" aria-label="Seleccionar a ${esc(l.name)}" ${sel.has(l.id) ? 'checked' : ''}></td>
+      <td><button class="link" data-lead-open="${esc(l.id)}" style="font-weight:700">${esc(l.name)}</button><br><span class="muted" style="font-size:.84rem">${leadContacto(l)}</span></td>
+      <td>${esc(LEAD_FORMS[l.form] || l.form)}</td>
+      <td>${esc(l.interest)}${l.note ? `<br><span class="muted" style="font-size:.84rem">📝 ${esc(l.note.slice(0, 80))}${l.note.length > 80 ? '…' : ''}</span>` : ''}</td>
+      <td class="muted" style="font-size:.84rem">${esc(leadOrigenTxt(l))}</td>
+      <td class="muted" style="font-size:.84rem">${fdateMs(l.createdAt)}</td>
+      <td>${segBadge(l)}</td>
+      <td><select data-lead-status="${esc(l.id)}" aria-label="Etapa">${LEAD_STATES.map(([k, t]) => `<option value="${k}" ${leadEtapa(l) === k ? 'selected' : ''}>${t}</option>`).join('')}</select></td></tr>`).join('') || '<tr><td colspan="8" class="muted">No hay interesadas con estos filtros.</td></tr>'}
+    </tbody></table></div></section>`;
+  }
+
+  // Embudo: una columna por etapa; se arrastran las tarjetas o se cambia la etapa desde su ficha
+  const verDesc = !!S.crmDesc, etapas = LEAD_STATES.filter(([k]) => verDesc || k !== 'descartado');
+  const tarjeta = (l) => `<article class="kb-card" draggable="true" data-lead-card="${esc(l.id)}" data-lead-open="${esc(l.id)}">
+      <b>${esc(l.name)}</b><span class="muted">${esc(LEAD_FORMS[l.form] || l.form)} · ${fdateMs(l.createdAt).split(',')[0]}</span>
+      ${l.interest ? `<small>${esc(l.interest)}</small>` : ''}${l.note ? `<small class="muted">📝 ${esc(l.note.slice(0, 70))}${l.note.length > 70 ? '…' : ''}</small>` : ''}
+      <div class="kb-meta">${segBadge(l)}${l.whatsapp ? `<a class="btn btn-ghost btn-sm" href="${waLink(l.whatsapp)}" data-wa-open="${esc(waNum(l.whatsapp))}" data-wa-name="${esc(l.name)}">WhatsApp</a>` : ''}</div></article>`;
+  return `${head}${aviso}${controles}
+  <div class="filters"><button class="chip" data-crm-desc aria-pressed="${verDesc}">Mostrar descartadas (${lista.filter((l) => leadEtapa(l) === 'descartado').length})</button><span class="muted" style="font-size:.82rem">Arrastra una tarjeta a otra columna para cambiar su etapa. Toca una tarjeta para ver su ficha.</span></div>
+  <div class="kb">${etapas.map(([k, t]) => { const col = lista.filter((l) => leadEtapa(l) === k); return `<section class="kb-col" data-kb-col="${k}"><h4>${t} <span class="count">${col.length}</span></h4>${col.map(tarjeta).join('') || '<p class="muted" style="font-size:.82rem;margin:0">Nadie aquí.</p>'}</section>`; }).join('')}</div>`;
 };
+
+// Ficha de una interesada: datos, etapa, nota y próximo seguimiento
+function leadFicha(id) {
+  const l = (A.leads || []).find((x) => x.id === id); if (!l) return;
+  const k = (t, v) => (v ? `<dt>${t}</dt><dd>${v}</dd>` : '');
+  dialog(`<span class="eyebrow">Interesada</span><h3>${esc(l.name)}</h3>
+  <dl class="kv" style="margin:8px 0 12px">${k('Contacto', leadContacto(l))}${k('Programa', esc(LEAD_FORMS[l.form] || l.form))}${k('Le interesa', esc(l.interest))}${k('Mensaje', esc(l.message))}${k('Clase', l.claseFecha ? esc(fechaLarga(l.claseFecha)) : '')}${k('Origen', esc(leadOrigenTxt(l)))}${k('Registrada', fdateMs(l.createdAt))}</dl>
+  <form id="lead-form" class="cal-form">
+    <label><b>Etapa</b><select id="lf-status">${LEAD_STATES.map(([v, t]) => `<option value="${v}" ${leadEtapa(l) === v ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
+    <label><b>Próximo seguimiento</b><input type="date" id="lf-fup" value="${esc(l.followUp || '')}"></label>
+    <label class="full"><b>Nota</b><textarea id="lf-note" maxlength="1000" rows="4" placeholder="Lo que conversaron, qué le interesa, qué le falta decidir…">${esc(l.note || '')}</textarea></label>
+    <div class="full actions"><button class="btn btn-primary btn-sm">Guardar</button>${l.whatsapp ? `<a class="btn btn-ghost btn-sm" href="${waLink(l.whatsapp)}" data-wa-open="${esc(waNum(l.whatsapp))}" data-wa-name="${esc(l.name)}">Escribir por WhatsApp</a>` : ''}${l.email ? `<a class="btn btn-ghost btn-sm" href="mailto:${esc(l.email)}">Correo</a>` : ''}<button type="button" class="btn btn-ghost btn-sm" id="lf-del" style="color:#b8402f;margin-left:auto">Eliminar</button></div>
+  </form>`, true);
+  $('#lead-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const cambios = { status: $('#lf-status').value, followUp: $('#lf-fup').value, note: $('#lf-note').value.trim() };
+    try { await data.leads({ action: 'update', id, ...cambios }); Object.assign(l, cambios); $('#dlg').close(); paintNav(); render(false); toast('Guardado.'); } catch (err) { fail(err); }
+  };
+  $('#lf-del').onclick = async () => {
+    if (!confirm(`¿Eliminar a ${l.name} de tu lista? No se puede deshacer.`)) return;
+    try { await data.leads({ action: 'delete', ids: [id] }); A.leads = A.leads.filter((x) => x.id !== id); S.leadSel.delete(id); $('#dlg').close(); paintNav(); render(false); toast('Eliminada.'); } catch (err) { fail(err); }
+  };
+}
+async function leadMover(id, status) {
+  const l = (A.leads || []).find((x) => x.id === id); if (!l || leadEtapa(l) === status) return;
+  const antes = l.status; l.status = status; paintNav(); render(false);
+  try { await data.leads({ action: 'update', id, status }); } catch (e) { l.status = antes; paintNav(); render(false); fail(e); }
+}
 // ---------- Inicio: lo importante del día a mano ----------
 V.inicio = () => {
   const hoy = ymd(hoyCL()), nombre = (A.me?.displayName || '').split(' ')[0] || 'Karen';
@@ -390,6 +456,7 @@ V.inicio = () => {
   const clase = (e) => { const n = (A.leads || []).filter((l) => l.claseEvento === e.id).length; return `<tr data-go="calendario" style="cursor:pointer"><td><b>${esc(CAL_TYPES[e.type]?.[0] || e.type)}</b><br><span class="muted" style="font-size:.84rem">${e.date === hoy ? 'Hoy' : fechaLarga(e.date)}${e.time ? ` · ${esc(e.time)}` : ''}</span></td><td style="text-align:right"><span class="pill ${n ? 'done' : 'lock'}">${n} inscrita${n === 1 ? '' : 's'}</span></td></tr>`; };
   return `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>Hola, ${esc(nombre)}</h1><p>Lo que necesita tu atención hoy.</p></div></div>
   <div class="kpis">${kpi(nuevas.length, 'interesadas nuevas', 'interesadas')}${kpi(sinLeer, 'WhatsApp sin leer', 'whatsapp')}${kpi(A.questions.length, 'preguntas de clase', 'preguntas')}${kpi(A.tickets.length, 'mensajes de ayuda', 'ayuda')}</div>
+  ${(A.leads || []).filter(seguimientoHoy).length ? `<div class="alert"><div><b>${(A.leads || []).filter(seguimientoHoy).length} seguimiento${(A.leads || []).filter(seguimientoHoy).length === 1 ? '' : 's'} para hoy</b><p>Personas a las que quedaste de escribirles.</p></div><button class="btn" data-crm-hoy>Ver</button></div>` : ''}
   ${atrasadas.length ? `<div class="alert"><div><b>${atrasadas.length} cuota${atrasadas.length === 1 ? '' : 's'} atrasada${atrasadas.length === 1 ? '' : 's'}</b><p>${esc(atrasadas.slice(0, 3).map(nameOf).join(', '))}${atrasadas.length > 3 ? '…' : ''}</p></div><button class="btn" data-go="pagos">Ver pagos</button></div>` : ''}
   <div class="cols">
     <section class="card panel"><div class="panel-h"><h3>Interesadas por contactar</h3><button class="link" data-go="interesadas">Ver todas</button></div>
@@ -754,6 +821,7 @@ V.ajustes = () => `<div class="view-head"><div><span class="eyebrow">Portal de l
 
 // Un solo manejador para todos los [data-go]: el menú se vuelve a pintar solo (p. ej. al llegar una alumna nueva) y sus botones siguen funcionando
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-go]'); if (b) go(b.dataset.go); });
+document.addEventListener('click', (e) => { if (e.target.closest('[data-crm-hoy]')) { S.crmSeg = true; S.crmProg = ''; S.crmQ = ''; S.crmOrigen = ''; go('interesadas'); } });
 document.addEventListener('click', (e) => { const a = e.target.closest('[data-wa-open]'); if (!a) return; e.preventDefault(); if ($('#dlg').open) $('#dlg').close(); waOpen(a.dataset.waOpen, a.dataset.waName); go('whatsapp'); });
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-wa-chat]'); if (b) { waOpen(b.dataset.waChat, ''); waRepaint(); } });
 function paintNav() {
@@ -791,8 +859,21 @@ function bind() {
   document.querySelectorAll('[data-ans-who]').forEach((b) => (b.onclick = () => { S.ansWho = b.dataset.ansWho; S.ansLv = 0; go('respuestas'); }));
   document.querySelectorAll('[data-ans-reload]').forEach((b) => (b.onclick = () => { b.disabled = true; loadAnswers(true).then(() => render(false)).catch(fail); }));
   if (S.view === 'whatsapp') waBind();
+  document.querySelectorAll('[data-crm-vista]').forEach((b) => (b.onclick = () => { S.crmVista = b.dataset.crmVista; render(false); }));
+  document.querySelectorAll('[data-crm-prog]').forEach((b) => (b.onclick = () => { S.crmProg = b.dataset.crmProg; S.leadSel = new Set(); render(false); }));
+  document.querySelectorAll('[data-crm-seg]').forEach((b) => (b.onclick = () => { S.crmSeg = !S.crmSeg; render(false); }));
+  document.querySelectorAll('[data-crm-desc]').forEach((b) => (b.onclick = () => { S.crmDesc = !S.crmDesc; render(false); }));
+  const co = $('#crm-origen'); if (co) co.onchange = () => { S.crmOrigen = co.value; render(false); };
+  const cq = $('#crm-q'); if (cq) cq.oninput = () => { S.crmQ = cq.value; const p = cq.selectionStart; render(false); const c2 = $('#crm-q'); c2.focus(); c2.setSelectionRange(p, p); };
+  document.querySelectorAll('[data-lead-open]').forEach((b) => (b.onclick = (e) => { if (e.target.closest('a')) return; leadFicha(b.dataset.leadOpen); }));
+  document.querySelectorAll('[data-lead-card]').forEach((c) => (c.ondragstart = (e) => { e.dataTransfer.setData('text/plain', c.dataset.leadCard); e.dataTransfer.effectAllowed = 'move'; }));
+  document.querySelectorAll('[data-kb-col]').forEach((col) => {
+    col.ondragover = (e) => { e.preventDefault(); col.classList.add('over'); };
+    col.ondragleave = () => col.classList.remove('over');
+    col.ondrop = (e) => { e.preventDefault(); col.classList.remove('over'); const id = e.dataTransfer.getData('text/plain'); if (id) leadMover(id, col.dataset.kbCol); };
+  });
   document.querySelectorAll('[data-lead-sel]').forEach((cb) => (cb.onchange = () => { cb.checked ? S.leadSel.add(cb.dataset.leadSel) : S.leadSel.delete(cb.dataset.leadSel); render(false); }));
-  document.querySelectorAll('[data-lead-all]').forEach((cb) => (cb.onchange = () => { S.leadSel = cb.checked ? new Set((A.leads || []).map((l) => l.id)) : new Set(); render(false); }));
+  document.querySelectorAll('[data-lead-all]').forEach((cb) => (cb.onchange = () => { S.leadSel = cb.checked ? new Set(leadsFiltradas().map((l) => l.id)) : new Set(); render(false); }));
   document.querySelectorAll('[data-leads-clear]').forEach((b) => (b.onclick = () => { S.leadSel = new Set(); render(false); }));
   document.querySelectorAll('[data-leads-del]').forEach((b) => (b.onclick = async () => {
     const ids = [...S.leadSel];
