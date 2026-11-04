@@ -77,7 +77,7 @@
       g.search = new URLSearchParams({ action: 'TEMPLATE', text: titulo, dates: `${utc(ini)}/${utc(fin)}`, details: detalle, location: enlace }).toString();
       acciones.append(cal, el('a', { className: 'gcal', href: g.toString(), target: '_blank', rel: 'noopener' }, 'Google Calendar'));
     }
-    nodos.push(acciones, el('small', {}, 'También te lo enviamos por WhatsApp con un recordatorio 1 hora antes.'));
+    nodos.push(acciones, el('small', {}, 'Agrégala a tu calendario para que te avise 1 hora antes. Karen también te escribirá por WhatsApp.'));
     return nodos;
   }
 
@@ -100,7 +100,7 @@
       const body = {
         action: 'save', form: f.dataset.lead,
         name: val('name'), email: val('email'), whatsapp, country: val('country') || pais,
-        interest: val('interest'), message: val('message'), web: val('web'),
+        interest: val('interest'), date: f.elements.interest?.selectedOptions?.[0]?.dataset.date || '', message: val('message'), web: val('web'),
         page: location.pathname, utm: origen(),
         eventId: crypto.randomUUID?.() || String(Date.now()) + Math.random().toString(36).slice(2, 10), // mismo id en el Píxel y en la API de conversiones
       };

@@ -206,5 +206,15 @@ service cloud.firestore {
     match /calendario/{id} {
       allow read, write: if isAdmin();
     }
+
+    // ---------- Chat de WhatsApp Business (lo escribe solo el servidor, src/app/api/whatsapp). Solo la Maestra lo lee ----------
+    match /wa_chats/{numero} {
+      allow read: if isAdmin();
+      allow write: if false;
+      match /messages/{id} {
+        allow read: if isAdmin();
+        allow write: if false;
+      }
+    }
   }
 }

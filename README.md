@@ -90,3 +90,15 @@ node scripts/calendario-inicial.mjs # carga una vez las fechas iniciales del Cal
 node scripts/calendario-horarios.mjs # revisa los horarios de clases gratis, cursos, Tarot y formación (hora de Chile) y los choques; con --aplicar respalda el calendario, reemplaza lo de la carga inicial y carga las fechas
 node scripts/auth-domains.mjs mi-dominio.vercel.app   # autoriza un dominio para el login
 ```
+
+## WhatsApp Business en el portal (chat con las interesadas)
+En **Interesadas**, el número de WhatsApp de cada persona abre una conversación dentro del portal (menú **WhatsApp**), con el número de Karen (+56 9 4004 4528) y no con el WhatsApp del computador. Usa la API oficial de Meta (Cloud API): `src/app/api/whatsapp` recibe y envía, `src/lib/server/whatsapp.js` habla con Meta y las conversaciones quedan en `wa_chats/{número}` (solo la Maestra las lee, ver `firebase/firestore.rules`).
+
+Puesta en marcha (una sola vez):
+1. En [developers.facebook.com](https://developers.facebook.com) crea una app tipo *Business* con el producto **WhatsApp**, dentro del Business Manager de Casa Muladhara.
+2. Agrega el número **+56 9 4004 4528**. Para seguir usando la app de WhatsApp Business en el teléfono a la vez, elige el modo **coexistencia** (conectar una cuenta existente de la app WhatsApp Business). Sin coexistencia, el número deja de funcionar en la app.
+3. En Vercel agrega: `WHATSAPP_TOKEN` (token permanente de un usuario del sistema con permiso `whatsapp_business_messaging`), `WHATSAPP_PHONE_ID` (identificador del número), `WHATSAPP_APP_SECRET` (clave secreta de la app) y `WHATSAPP_VERIFY_TOKEN` (una frase que inventes).
+4. En WhatsApp → Configuración → Webhook: URL `https://TU-DOMINIO/api/whatsapp`, el mismo `WHATSAPP_VERIFY_TOKEN`, y suscribe `messages` (y `smb_message_echoes` si usas coexistencia).
+5. Publica las reglas: `firebase deploy --only firestore:rules`.
+
+Reglas de WhatsApp: solo se puede escribir con texto libre dentro de las 24 h desde el último mensaje de la persona. Para empezar la conversación se envía una **plantilla aprobada** (por defecto `hello_world`; crea una propia en español en el administrador de WhatsApp y configura `WHATSAPP_TEMPLATE_NAME`, `WHATSAPP_TEMPLATE_LANG` y, si lleva `{{1}}` con el nombre, `WHATSAPP_TEMPLATE_VARS=1`). Las imágenes y audios que lleguen se ven como aviso en el portal; se abren en la app de WhatsApp.
