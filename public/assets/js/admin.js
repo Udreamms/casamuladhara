@@ -179,7 +179,7 @@ const data = {
 // ---------- Vista ----------
 const S = { view: 'inicio', leadSel: new Set(), crmVista: 'embudo', crmProg: '', crmQ: '', crmOrigen: '', crmSeg: false, crmDesc: false, q: '', open: null, filter: 'todas', lvOpen: {}, fq: '', cls: null, ansWho: '', ansLv: 0 };
 const NAV = [
-  ['inicio', 'Inicio', '<path d="M4 11 12 4l8 7v9H4z"/><path d="M10 20v-6h4v6"/>', () => leadsSinVer().length + A.questions.length + A.tickets.length],
+  ['inicio', 'Inicio', '<path d="M4 11 12 4l8 7v9H4z"/><path d="M10 20v-6h4v6"/>'],
   ['--', 'CRM'],
   ['interesadas', 'Interesadas', '<path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/>', () => leadsSinVer().length],
   ['whatsapp', 'WhatsApp', '<path d="M12 21a9 9 0 1 0-9-9c0 1.6.4 3.1 1.2 4.4L3 21l4.6-1.2A9 9 0 0 0 12 21z"/><path d="M9 8.5c.3 3 3 5.7 6.500 6.500"/>', () => A.wa.chats.reduce((n, c) => n + (c.unread || 0), 0)],
