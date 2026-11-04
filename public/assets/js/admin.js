@@ -196,7 +196,7 @@ const NAV = [
   ['mensajes', 'Avisos a alumnas', '<path d="M4 5h16v11H9l-5 4z"/>'],
   ['ajustes', 'Ajustes del aula', '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'],
 ];
-const nuevasLeads = () => (A.leads || []).filter((l) => l.status === 'nuevo');
+const nuevasLeads = () => (A.leads || []).filter((l) => leadEtapa(l) === 'nuevo');
 const nameOf = (u) => u?.displayName || u?.email || 'Alumna';
 const photoCss = (u) => (typeof u === 'string' && /^https:\/\/[^\s"'()\\]+$/.test(u) ? `background-image:url('${u}')` : '');
 const av = (u) => { const ph = photoCss(u?.photoURL); return `<span class="av sm${ph ? ' ph' : ''}" style="--c:${colorFor(u?.id || nameOf(u))};${ph}">${ph ? '' : esc(initials(nameOf(u)))}</span>`; };
@@ -249,6 +249,7 @@ V.ficha = () => {
       <form data-msg-one="${u.id}" style="display:grid;gap:10px"><textarea maxlength="1900" placeholder="Hola ${esc(nameOf(u).split(' ')[0])}, …" aria-label="Mensaje"></textarea><button class="btn btn-primary btn-sm" style="justify-self:start">Enviar mensaje</button></form>
     </section>
   </div>
+  ${(() => { const ls = leadsDeAlumna(u); return ls.length ? `<section class="card panel"><h3>Cómo llegó</h3><p class="muted" style="font-size:.86rem;margin:0">Sus registros en los formularios de la página, antes o después de crear su cuenta.</p><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Fecha</th><th>Formulario</th><th>Le interesaba</th><th>Origen</th></tr></thead><tbody>${ls.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0)).map((l) => `<tr><td>${fdateMs(l.createdAt)}</td><td>${esc(LEAD_FORMS[l.form] || l.form)}</td><td>${esc(l.interest)}</td><td class="muted">${esc(leadOrigenTxt(l))}</td></tr>`).join('')}</tbody></table></div></section>` : ''; })()}
   <section class="card panel"><h3>Historial de pagos</h3><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Fecha</th><th>Detalle</th><th>Monto</th><th>Estado</th></tr></thead><tbody>
     ${!pays ? '<tr><td colspan="4" class="muted">Cargando…</td></tr>' : pays.map((p) => `<tr><td>${fdate(p.paidAt) || fdate(p.createdAt)}</td><td>${esc(p.concept || 'Pago')}</td><td>${esc(p.amount ?? 0)} USD</td><td><span class="pill ${p.status === 'failed' ? 'bad' : 'done'}">${p.status === 'failed' ? 'Rechazado' : 'Pagado'}</span></td></tr>`).join('') || '<tr><td colspan="4" class="muted">Aún no tiene pagos registrados.</td></tr>'}
   </tbody></table></div></section>
@@ -363,7 +364,25 @@ const waNum = (n) => { let d = String(n || '').replace(/\D/g, '').replace(/^00/,
 const waLink = (n) => { const d = String(n || '').replace(/\D/g, ''); return d ? `https://wa.me/${d}` : ''; };
 const leadOrigen = (l) => l.utm?.utm_source || 'directo';
 const leadOrigenTxt = (l) => [l.utm?.utm_source && l.utm?.utm_medium ? `${l.utm.utm_source} / ${l.utm.utm_medium}` : l.utm?.utm_source, l.utm?.utm_campaign, l.utm?.utm_content].filter(Boolean).join(' · ') || 'Directo';
-const leadEtapa = (l) => (LEAD_STATES.some(([k]) => k === l.status) ? l.status : 'nuevo');
+// Vínculos: una interesada y una alumna son la misma persona si comparten correo o WhatsApp (sirve también para detectar registros repetidos)
+const llavesDe = (x) => [String(x.email || '').trim().toLowerCase(), waNum(x.whatsapp || x.phone)].filter(Boolean);
+const vinculos = () => {
+  if (A._vin) return A._vin;
+  const alumna = new Map(), porLlave = new Map();
+  A.students.forEach((u) => llavesDe(u).forEach((k) => { if (!alumna.has(k)) alumna.set(k, u); }));
+  (A.leads || []).forEach((l) => llavesDe(l).forEach((k) => { if (!porLlave.has(k)) porLlave.set(k, []); porLlave.get(k).push(l); }));
+  return (A._vin = { alumna, porLlave });
+};
+const alumnaDe = (l) => { const v = vinculos(); for (const k of llavesDe(l)) if (v.alumna.has(k)) return v.alumna.get(k); return null; };
+const otrasDe = (l) => { const v = vinculos(), vistos = new Set([l.id]), out = []; for (const k of llavesDe(l)) for (const x of v.porLlave.get(k) || []) if (!vistos.has(x.id)) { vistos.add(x.id); out.push(x); } return out; };
+const leadsDeAlumna = (u) => { const v = vinculos(), vistos = new Set(), out = []; for (const k of llavesDe(u)) for (const x of v.porLlave.get(k) || []) if (!vistos.has(x.id)) { vistos.add(x.id); out.push(x); } return out; };
+const pagoOAbierto = (u) => paying(u) || ownedOf(u).length > 0;
+// Etapa que se muestra: quien ya paga o compró algo figura como Inscrita aunque nadie lo haya marcado (el webhook de Stripe lo guarda de ahora en adelante)
+const leadEtapa = (l) => {
+  const e = LEAD_STATES.some(([k]) => k === l.status) ? l.status : 'nuevo';
+  if (['nuevo', 'contactado', 'clase', 'conversando'].includes(e)) { const u = alumnaDe(l); if (u && pagoOAbierto(u)) return 'inscrita'; }
+  return e;
+};
 const seguimientoHoy = (l) => !!l.followUp && l.followUp <= ymd(hoyCL()) && !['inscrita', 'descartado'].includes(leadEtapa(l));
 const leadsFiltradas = () => {
   const q = (S.crmQ || '').toLowerCase().trim(), prog = LEAD_PROGS.find((x) => x[0] === S.crmProg);
@@ -373,6 +392,7 @@ const leadsFiltradas = () => {
     && (!q || [l.name, l.email, l.whatsapp, l.interest, l.message, l.note].join(' ').toLowerCase().includes(q)));
 };
 const leadContacto = (l) => { const wa = waLink(l.whatsapp); return `${wa ? `<a href="${wa}" data-wa-open="${esc(waNum(l.whatsapp))}" data-wa-name="${esc(l.name)}" title="Escribirle desde el portal">${esc(l.whatsapp)}</a>` : ''}${l.whatsapp && l.email ? ' · ' : ''}${esc(l.email)}${l.country ? ` · ${esc(l.country)}` : ''}`; };
+const alumnaBadge = (l) => { const u = alumnaDe(l), o = otrasDe(l); return `${u ? `<span class="pill ${pagoOAbierto(u) ? 'done' : 'pres'}" title="Ya tiene cuenta en el aula">${pagoOAbierto(u) ? 'Alumna' : 'Con cuenta'}</span>` : ''}${o.length ? `<span class="pill lock" title="${esc(o.map((x) => LEAD_FORMS[x.form] || x.form).join(', '))}">+${o.length} registro${o.length === 1 ? '' : 's'}</span>` : ''}`; };
 const segBadge = (l) => (l.followUp ? `<span class="pill ${seguimientoHoy(l) ? 'bad' : 'lock'}" title="Próximo seguimiento">${seguimientoHoy(l) ? 'Seguimiento hoy' : `Seguir ${fechaLarga(l.followUp)}`}</span>` : '');
 
 V.interesadas = () => {
@@ -401,7 +421,7 @@ V.interesadas = () => {
       <td>${esc(l.interest)}${l.note ? `<br><span class="muted" style="font-size:.84rem">📝 ${esc(l.note.slice(0, 80))}${l.note.length > 80 ? '…' : ''}</span>` : ''}</td>
       <td class="muted" style="font-size:.84rem">${esc(leadOrigenTxt(l))}</td>
       <td class="muted" style="font-size:.84rem">${fdateMs(l.createdAt)}</td>
-      <td>${segBadge(l)}</td>
+      <td>${alumnaBadge(l)}${segBadge(l)}</td>
       <td><select data-lead-status="${esc(l.id)}" aria-label="Etapa">${LEAD_STATES.map(([k, t]) => `<option value="${k}" ${leadEtapa(l) === k ? 'selected' : ''}>${t}</option>`).join('')}</select></td></tr>`).join('') || '<tr><td colspan="8" class="muted">No hay interesadas con estos filtros.</td></tr>'}
     </tbody></table></div></section>`;
   }
@@ -411,7 +431,7 @@ V.interesadas = () => {
   const tarjeta = (l) => `<article class="kb-card" draggable="true" data-lead-card="${esc(l.id)}" data-lead-open="${esc(l.id)}">
       <b>${esc(l.name)}</b><span class="muted">${esc(LEAD_FORMS[l.form] || l.form)} · ${fdateMs(l.createdAt).split(',')[0]}</span>
       ${l.interest ? `<small>${esc(l.interest)}</small>` : ''}${l.note ? `<small class="muted">📝 ${esc(l.note.slice(0, 70))}${l.note.length > 70 ? '…' : ''}</small>` : ''}
-      <div class="kb-meta">${segBadge(l)}${l.whatsapp ? `<a class="btn btn-ghost btn-sm" href="${waLink(l.whatsapp)}" data-wa-open="${esc(waNum(l.whatsapp))}" data-wa-name="${esc(l.name)}">WhatsApp</a>` : ''}</div></article>`;
+      <div class="kb-meta">${alumnaBadge(l)}${segBadge(l)}${l.whatsapp ? `<a class="btn btn-ghost btn-sm" href="${waLink(l.whatsapp)}" data-wa-open="${esc(waNum(l.whatsapp))}" data-wa-name="${esc(l.name)}">WhatsApp</a>` : ''}</div></article>`;
   return `${head}${aviso}${controles}
   <div class="filters"><button class="chip" data-crm-desc aria-pressed="${verDesc}">Mostrar descartadas (${lista.filter((l) => leadEtapa(l) === 'descartado').length})</button><span class="muted" style="font-size:.82rem">Arrastra una tarjeta a otra columna para cambiar su etapa. Toca una tarjeta para ver su ficha.</span></div>
   <div class="kb">${etapas.map(([k, t]) => { const col = lista.filter((l) => leadEtapa(l) === k); return `<section class="kb-col" data-kb-col="${k}"><h4>${t} <span class="count">${col.length}</span></h4>${col.map(tarjeta).join('') || '<p class="muted" style="font-size:.82rem;margin:0">Nadie aquí.</p>'}</section>`; }).join('')}</div>`;
@@ -424,6 +444,7 @@ function leadFicha(id) {
   dialog(`<span class="eyebrow">Interesada</span><h3>${esc(l.name)}</h3>
   <dl class="kv" style="margin:8px 0 12px">${k('Contacto', leadContacto(l))}${k('Programa', esc(LEAD_FORMS[l.form] || l.form))}${k('Le interesa', esc(l.interest))}${k('Mensaje', esc(l.message))}${k('Clase', l.claseFecha ? esc(fechaLarga(l.claseFecha)) : '')}${k('Origen', esc(leadOrigenTxt(l)))}${k('Registrada', fdateMs(l.createdAt))}</dl>
   <form id="lead-form" class="cal-form">
+    ${(() => { const u = alumnaDe(l), o = otrasDe(l); return `${u ? `<div class="card full" style="padding:10px 14px;font-size:.86rem;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap"><span><b>Ya tiene cuenta en el aula:</b> ${esc(nameOf(u))} · ${esc(payState(u)[1])}</span><button type="button" class="btn btn-ghost btn-sm" data-lead-alumna="${esc(u.id)}">Ver su ficha</button></div>` : ''}${o.length ? `<div class="card full" style="padding:10px 14px;font-size:.84rem;display:grid;gap:4px"><b>También se registró en:</b>${o.map((x) => `<span>${esc(LEAD_FORMS[x.form] || x.form)} · ${fdateMs(x.createdAt)} · ${esc(LEAD_STATES.find(([k]) => k === leadEtapa(x))?.[1] || '')}</span>`).join('')}</div>` : ''}`; })()}
     <label><b>Etapa</b><select id="lf-status">${LEAD_STATES.map(([v, t]) => `<option value="${v}" ${leadEtapa(l) === v ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
     <label><b>Próximo seguimiento</b><input type="date" id="lf-fup" value="${esc(l.followUp || '')}"></label>
     <label class="full"><b>Nota</b><textarea id="lf-note" maxlength="1000" rows="4" placeholder="Lo que conversaron, qué le interesa, qué le falta decidir…">${esc(l.note || '')}</textarea></label>
@@ -821,6 +842,7 @@ V.ajustes = () => `<div class="view-head"><div><span class="eyebrow">Portal de l
 
 // Un solo manejador para todos los [data-go]: el menú se vuelve a pintar solo (p. ej. al llegar una alumna nueva) y sus botones siguen funcionando
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-go]'); if (b) go(b.dataset.go); });
+document.addEventListener('click', (e) => { const b = e.target.closest('[data-lead-alumna]'); if (b) { if ($('#dlg').open) $('#dlg').close(); openStudent(b.dataset.leadAlumna); } });
 document.addEventListener('click', (e) => { if (e.target.closest('[data-crm-hoy]')) { S.crmSeg = true; S.crmProg = ''; S.crmQ = ''; S.crmOrigen = ''; go('interesadas'); } });
 document.addEventListener('click', (e) => { const a = e.target.closest('[data-wa-open]'); if (!a) return; e.preventDefault(); if ($('#dlg').open) $('#dlg').close(); waOpen(a.dataset.waOpen, a.dataset.waName); go('whatsapp'); });
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-wa-chat]'); if (b) { waOpen(b.dataset.waChat, ''); waRepaint(); } });
@@ -828,6 +850,7 @@ function paintNav() {
   $('#nav').innerHTML = NAV.map(([k, n, ic, c]) => { if (k === '--') return `<div class="nav-label">${n}</div>`; const cnt = c ? c() : 0; return `<button data-go="${k}" ${S.view === k || (S.view === 'ficha' && k === 'alumnas') || (S.view === 'clase' && k === 'formacion') ? 'aria-current="page"' : ''}><svg viewBox="0 0 24 24">${ic}</svg>${n}${cnt ? `<span class="count">${cnt}</span>` : ''}</button>`; }).join('');
 }
 function render(top = true) {
+  A._vin = null;
   paintNav();
   $('#view').innerHTML = V[S.view]();
   if (top) scrollTo(0, 0);
