@@ -17,6 +17,8 @@ export const LEVELS = 5;
 export const SUBLEVELS = [41, 42, 43, 44];
 export const ALL_LEVELS = [1, 2, 3, ...SUBLEVELS, 5];
 export const INSTALLMENTS = 9;
+// Niveles que se abren solos al empezar a pagar la formación; el resto los abre la Maestra
+export const START_LEVELS = [1, 2];
 // Nivel al que pertenece un curso: 41 -> 4
 export const mainLevel = (n) => (n > 10 ? Math.floor(n / 10) : n);
 

@@ -7,7 +7,7 @@
 // Después aplica la regla de acceso (src/lib/server/access.js): rol en Firestore y nivel en el token.
 // Cada pago queda en users/{uid}/payments.
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
-import { INSTALLMENTS } from '@/lib/server/access.js';
+import { cleanLevels, INSTALLMENTS, START_LEVELS, unlockedOf } from '@/lib/server/access.js';
 import { applyAccess } from '@/lib/server/apply.js';
 import { db, json, stripe, webhookSecret } from '@/lib/server/services.js';
 import { enviarDespues, usuario } from '@/lib/server/meta.js';
@@ -25,6 +25,12 @@ async function uidFor(customerId, hint) {
   return c.deleted ? null : c.metadata?.uid || null;
 }
 
+// Al empezar a pagar la formación se abren los niveles de inicio, una sola vez: después solo la Maestra los cambia
+const startLevels = (profile) => (profile.startOpened ? {} : {
+  unlockedLevels: cleanLevels([...unlockedOf(profile), ...START_LEVELS]),
+  startOpened: true,
+});
+
 async function cancelQuietly(subscriptionId) {
   try {
     await stripe().subscriptions.cancel(subscriptionId);
@@ -33,7 +39,7 @@ async function cancelQuietly(subscriptionId) {
   }
 }
 
-async function syncSubscription(subscriptionId, hint) {
+async function syncSubscription(subscriptionId, hint, first = false) {
   // Siempre se lee el estado actual desde Stripe: los eventos pueden llegar desordenados
   const sub = await stripe().subscriptions.retrieve(subscriptionId);
   const customer = idOf(sub.customer);
@@ -60,6 +66,7 @@ async function syncSubscription(subscriptionId, hint) {
       plan: active || overdue ? 'mensual' : 'none',
       paymentStatus: active ? 'ok' : overdue ? 'overdue' : 'none',
     }),
+    ...(first && active ? startLevels(profile) : {}),
   }, { merge: true });
   await applyAccess(uid);
 }
@@ -108,6 +115,7 @@ async function paidInFull(session) {
   const uid = await uidFor(idOf(session.customer), session.metadata?.uid || session.client_reference_id);
   if (!uid) return;
   const ref = db().doc(`users/${uid}`);
+  const profile = (await ref.get()).data() || {};
   await ref.collection('payments').doc(session.id).set({
     amount: session.amount_total / 100,
     currency: session.currency,
@@ -117,7 +125,7 @@ async function paidInFull(session) {
     paidAt: Timestamp.fromMillis(session.created * 1000),
     createdAt: Timestamp.fromMillis(session.created * 1000),
   }, { merge: true });
-  await ref.set({ plan: 'completo', paymentStatus: 'ok', currentPeriodEnd: null, stripeCustomerId: idOf(session.customer) }, { merge: true });
+  await ref.set({ plan: 'completo', paymentStatus: 'ok', currentPeriodEnd: null, stripeCustomerId: idOf(session.customer), ...startLevels(profile) }, { merge: true });
   if (session.metadata?.subscription) await cancelQuietly(session.metadata.subscription);
   await applyAccess(uid);
 }
@@ -142,7 +150,7 @@ export async function POST(request) {
     const o = event.data.object;
     switch (event.type) {
       case 'checkout.session.completed':
-        if (o.mode === 'subscription' && o.subscription) await syncSubscription(idOf(o.subscription), o.client_reference_id);
+        if (o.mode === 'subscription' && o.subscription) await syncSubscription(idOf(o.subscription), o.client_reference_id, true);
         else if (o.mode === 'payment' && o.payment_status === 'paid' && o.metadata?.kind === 'completo') {
           await paidInFull(o);
           compraMeta({ id: o.id, email: o.customer_details?.email || o.customer_email, valor: o.amount_total / 100, moneda: o.currency, creado: o.created, uid: o.metadata?.uid || o.client_reference_id });
