@@ -392,7 +392,8 @@ const leadEtapa = (l) => {
 const seguimientoHoy = (l) => !!l.followUp && l.followUp <= ymd(hoyCL()) && !['inscrita', 'descartado'].includes(leadEtapa(l));
 // Repetidas: la misma persona (correo o WhatsApp) en el mismo formulario con menos de 24 horas entre un envío y otro (doble envío por accidente).
 // De cada grupo se conserva la que está más avanzada en el embudo (o tiene nota) y, si empatan, la primera.
-const RANGO = Object.fromEntries(LEAD_STATES.map(([k], i) => [k, i]));
+// Cuál se conserva: la más avanzada. Descartada va al final: si una de dos fue descartada a mano para esconder la repetida, se queda la otra.
+const RANGO = { descartado: 0, nuevo: 1, contactado: 2, clase: 3, conversando: 4, inscrita: 5 };
 const repetidasPorLimpiar = () => {
   const porForm = new Map();
   [...(A.leads || [])].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0)).forEach((l) => { if (!porForm.has(l.form)) porForm.set(l.form, []); porForm.get(l.form).push(l); });
