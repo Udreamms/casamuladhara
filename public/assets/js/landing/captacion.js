@@ -108,7 +108,7 @@
         const r = await fetch('/api/leads', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
         const out = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(out.error || 'No pudimos enviar tus datos.');
-        fbq('track', 'Lead', {}, { eventID: body.eventId });
+        if (!out.repetida) fbq('track', 'Lead', {}, { eventID: body.eventId }); // quien repite el formulario no cuenta otro Lead en las campañas
         f.querySelectorAll(out.enlace && f.dataset.clase ? 'label, button, small, .wa-alt' : 'label, button, small').forEach((el) => (el.hidden = true));
         // Clase gratis con enlace de Google Meet guardado: el gracias trae el botón para entrar y el calendario
         if (ok && out.enlace && f.dataset.clase) ok.replaceChildren(...graciasClase(f, out.enlace));
