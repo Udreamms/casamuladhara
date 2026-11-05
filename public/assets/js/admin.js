@@ -58,7 +58,7 @@ const payState = (u) => (u.plan === 'completo' ? ['done', 'Pagó completo']
     : ownedOf(u).length ? ['done', `Compró el Nivel ${ownedOf(u).map(lvName).join(', ')}`] : ['lock', 'Sin pago']);
 
 // ---------- Datos ----------
-const A = { students: [], questions: [], tickets: [], posts: [], config: {}, payments: {}, me: null, answers: null };
+const A = { wa: { chats: [], msgs: [], on: null }, students: [], questions: [], tickets: [], posts: [], config: {}, payments: {}, me: null, answers: null };
 let api = null; // llama a /api/admin con el token de la Maestra
 
 async function loadAll() {
@@ -177,20 +177,31 @@ const data = {
 };
 
 // ---------- Vista ----------
-const S = { view: 'alumnas', q: '', open: null, filter: 'todas', lvOpen: {}, fq: '', cls: null, ansWho: '', ansLv: 0 };
+const S = { view: 'inicio', leadSel: new Set(), crmVista: 'embudo', crmProg: '', crmQ: '', crmOrigen: '', crmSeg: false, crmDesc: false, q: '', open: null, filter: 'todas', lvOpen: {}, fq: '', cls: null, ansWho: '', ansLv: 0 };
 const NAV = [
-  ['alumnas', 'Alumnas', '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5a6.5 6.5 0 0 1 3.5 5.5"/>', () => A.students.filter(isNew).length],
-  ['interesadas', 'Interesadas', '<path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/>', () => (A.leads || []).filter((l) => l.status === 'nuevo').length],
+  ['inicio', 'Inicio', '<path d="M4 11 12 4l8 7v9H4z"/><path d="M10 20v-6h4v6"/>'],
+  ['--', 'CRM'],
+  ['interesadas', 'Interesadas', '<path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/>', () => leadsSinVer().length],
+  ['whatsapp', 'WhatsApp', '<path d="M12 21a9 9 0 1 0-9-9c0 1.6.4 3.1 1.2 4.4L3 21l4.6-1.2A9 9 0 0 0 12 21z"/><path d="M9 8.5c.3 3 3 5.7 6.500 6.500"/>', () => A.wa.chats.reduce((n, c) => n + (c.unread || 0), 0)],
   ['calendario', 'Calendario', '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'],
-  ['formacion', 'Formación completa', '<path d="M3 8 12 4l9 4-9 4z"/><path d="M7 10v5c3 2 7 2 10 0v-5"/>'],
+  ['--', 'Alumnas'],
+  ['alumnas', 'Alumnas', '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5a6.5 6.5 0 0 1 3.5 5.5"/>', () => alumnasSinVer().length],
   ['pagos', 'Pagos', '<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h4"/>'],
-  ['mensajes', 'Mensajes', '<path d="M4 5h16v11H9l-5 4z"/>'],
-  ['respuestas', 'Respuestas de clase', '<path d="M5 4h14v16H5z"/><path d="M8 9h8M8 13h8M8 17h5"/>', () => newAnswers().length],
   ['preguntas', 'Preguntas de clase', '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5V14M12 17.5v.01"/>', () => A.questions.length],
+  ['respuestas', 'Respuestas de clase', '<path d="M5 4h14v16H5z"/><path d="M8 9h8M8 13h8M8 17h5"/>', () => newAnswers().length],
   ['ayuda', 'Mensajes de ayuda', '<path d="M12 21a9 9 0 1 0-9-9c0 1.6.4 3.1 1.2 4.4L3 21l4.6-1.2A9 9 0 0 0 12 21z"/>', () => A.tickets.length],
+  ['--', 'Contenido'],
+  ['formacion', 'Formación completa', '<path d="M3 8 12 4l9 4-9 4z"/><path d="M7 10v5c3 2 7 2 10 0v-5"/>'],
   ['comunidad', 'Comunidad', '<path d="M7 10h10M7 14h6"/><path d="M4 4h16v13H8l-4 3z"/>'],
+  ['mensajes', 'Avisos a alumnas', '<path d="M4 5h16v11H9l-5 4z"/>'],
   ['ajustes', 'Ajustes del aula', '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'],
 ];
+const nuevasLeads = () => (A.leads || []).filter((l) => leadEtapa(l) === 'nuevo');
+// Burbujas del menú: se quitan al entrar a la sección y vuelven solo con lo que llega después de esa visita (se guarda en este navegador)
+const vistoAt = (k) => { try { return Number(localStorage.getItem(`cm-visto-${k}`)) || 0; } catch { return 0; } };
+const marcarVisto = (k, hasta) => { try { localStorage.setItem(`cm-visto-${k}`, String(Math.max(Date.now(), hasta || 0))); } catch { /* sin almacenamiento */ } };
+const leadsSinVer = () => nuevasLeads().filter((l) => (l.createdAt || 0) > vistoAt('interesadas'));
+const alumnasSinVer = () => A.students.filter((u) => isNew(u) && u.createdAt.toMillis() > vistoAt('alumnas'));
 const nameOf = (u) => u?.displayName || u?.email || 'Alumna';
 const photoCss = (u) => (typeof u === 'string' && /^https:\/\/[^\s"'()\\]+$/.test(u) ? `background-image:url('${u}')` : '');
 const av = (u) => { const ph = photoCss(u?.photoURL); return `<span class="av sm${ph ? ' ph' : ''}" style="--c:${colorFor(u?.id || nameOf(u))};${ph}">${ph ? '' : esc(initials(nameOf(u)))}</span>`; };
@@ -243,11 +254,13 @@ V.ficha = () => {
       <form data-msg-one="${u.id}" style="display:grid;gap:10px"><textarea maxlength="1900" placeholder="Hola ${esc(nameOf(u).split(' ')[0])}, …" aria-label="Mensaje"></textarea><button class="btn btn-primary btn-sm" style="justify-self:start">Enviar mensaje</button></form>
     </section>
   </div>
+  ${(() => { const ls = leadsDeAlumna(u); return ls.length ? `<section class="card panel"><h3>Cómo llegó</h3><p class="muted" style="font-size:.86rem;margin:0">Sus registros en los formularios de la página, antes o después de crear su cuenta.</p><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Fecha</th><th>Formulario</th><th>Le interesaba</th><th>Origen</th></tr></thead><tbody>${ls.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0)).map((l) => `<tr><td>${fdateMs(l.createdAt)}</td><td>${esc(LEAD_FORMS[l.form] || l.form)}</td><td>${esc(l.interest)}</td><td class="muted">${esc(leadOrigenTxt(l))}</td></tr>`).join('')}</tbody></table></div></section>` : ''; })()}
   <section class="card panel"><h3>Historial de pagos</h3><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Fecha</th><th>Detalle</th><th>Monto</th><th>Estado</th></tr></thead><tbody>
     ${!pays ? '<tr><td colspan="4" class="muted">Cargando…</td></tr>' : pays.map((p) => `<tr><td>${fdate(p.paidAt) || fdate(p.createdAt)}</td><td>${esc(p.concept || 'Pago')}</td><td>${esc(p.amount ?? 0)} USD</td><td><span class="pill ${p.status === 'failed' ? 'bad' : 'done'}">${p.status === 'failed' ? 'Rechazado' : 'Pagado'}</span></td></tr>`).join('') || '<tr><td colspan="4" class="muted">Aún no tiene pagos registrados.</td></tr>'}
   </tbody></table></div></section>
   <section class="card panel"><div class="panel-h"><h3>Respuestas en las clases</h3><button class="link" data-ans-who="${u.id}">Ver en Respuestas de clase</button></div>
-    ${answersHTML(A.answers && A.course ? A.answers.filter((a) => a.uid === u.id) : null, false)}</section>`;
+    ${answersHTML(A.answers && A.course ? A.answers.filter((a) => a.uid === u.id) : null, false)}</section>
+  <section class="card panel" style="border-color:#e3b8ae"><h3>Eliminar alumna</h3><p class="muted" style="font-size:.86rem;margin:0">Para cuentas de prueba o repetidas. Borra su cuenta y todo lo que cuelga de ella (avance, preguntas, pagos registrados). No se puede deshacer. Si tiene suscripción en Stripe, cancélala allá aparte. Para solo cerrarle el acceso, usa Bloquear.</p><button class="btn btn-ghost btn-sm" style="justify-self:start;color:#b8402f" data-del-student="${u.id}">Eliminar a ${esc(nameOf(u).split(' ')[0])}</button></section>`;
 };
 // La formación tal como la ven las alumnas, toda abierta para la Maestra: niveles, módulos y clases
 const lessonsOf = (lv) => lv.modules.flatMap((m) => m.lessons);
@@ -347,24 +360,244 @@ V.clase = () => {
   <iframe class="aula-frame" src="${src}&embed=1" title="Clase: ${esc(l.t)}"></iframe>`;
 };
 const LEAD_FORMS = { pendulo: 'Péndulo Hebreo', 'clase-pendulo': 'Clase gratis Péndulo', tarot: 'Tarot Terapéutico', 'clase-tarot': 'Clase gratis Tarot', formacion: 'Formación', sala: 'Sala Abierta', terapias: 'Terapias', meditacion: 'Meditación', regalo: 'Portada · Sala Abierta' };
-const LEAD_STATES = [['nuevo', 'Nueva'], ['contactado', 'Contactada'], ['inscrita', 'Inscrita'], ['descartado', 'Descartada']];
+const LEAD_STATES = [['nuevo', 'Nueva'], ['contactado', 'Contactada'], ['clase', 'Tomó la clase'], ['conversando', 'En conversación'], ['inscrita', 'Inscrita'], ['descartado', 'Descartada']];
+// Programas para filtrar: las dos clases gratis, los dos cursos, la formación completa y el resto de formularios
+const LEAD_PROGS = [['clase-pendulo', 'Clase gratis Péndulo', ['clase-pendulo']], ['clase-tarot', 'Clase gratis Tarot', ['clase-tarot']], ['pendulo', 'Curso Péndulo', ['pendulo']],
+  ['tarot', 'Tarot Terapéutico', ['tarot']], ['formacion', 'Formación completa', ['formacion']], ['otros', 'Otros', ['sala', 'terapias', 'meditacion', 'regalo']]];
+// Mismo criterio que src/lib/server/whatsapp.js: solo dígitos con código de país (un celular chileno de 9 dígitos que empieza en 9 se toma como +56)
+const waNum = (n) => { let d = String(n || '').replace(/\D/g, '').replace(/^00/, ''); if (d.length === 9 && d[0] === '9') d = `56${d}`; return d.length >= 8 && d.length <= 15 ? d : ''; };
 const waLink = (n) => { const d = String(n || '').replace(/\D/g, ''); return d ? `https://wa.me/${d}` : ''; };
-V.interesadas = () => {
-  const head = `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>Interesadas</h1><p>Personas que dejaron sus datos en los formularios de la página. Escríbeles por WhatsApp y marca cómo va cada una.</p></div><button class="btn btn-ghost btn-sm" data-leads-reload>Actualizar</button></div>`;
-  if (!A.leads) return `${head}<div class="card empty">Cargando interesadas…</div>`;
-  const by = (s) => A.leads.filter((l) => l.status === s).length;
-  return `${head}
-  <div class="kpis">${LEAD_STATES.map(([k, t]) => `<div><b>${by(k)}</b><span>${t.toLowerCase()}s</span></div>`).join('')}</div>
-  <section class="card panel"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Persona</th><th>Formulario</th><th>Le interesa</th><th>Origen</th><th>Fecha</th><th>Estado</th></tr></thead><tbody>
-  ${A.leads.map((l) => { const wa = waLink(l.whatsapp); return `<tr>
-    <td><b>${esc(l.name)}</b><br><span class="muted" style="font-size:.84rem">${wa ? `<a href="${wa}" target="_blank" rel="noopener">${esc(l.whatsapp)}</a>` : ''}${l.whatsapp && l.email ? ' · ' : ''}${esc(l.email)}${l.country ? ` · ${esc(l.country)}` : ''}</span></td>
-    <td>${esc(LEAD_FORMS[l.form] || l.form)}</td>
-    <td>${esc(l.interest)}${l.message ? `<br><span class="muted" style="font-size:.84rem">${esc(l.message)}</span>` : ''}</td>
-    <td class="muted" style="font-size:.84rem">${esc([l.utm?.utm_source, l.utm?.utm_campaign, l.utm?.utm_content].filter(Boolean).join(' · ') || 'Directo')}</td>
-    <td class="muted" style="font-size:.84rem">${fdateMs(l.createdAt)}</td>
-    <td><select data-lead-status="${esc(l.id)}" aria-label="Estado">${LEAD_STATES.map(([k, t]) => `<option value="${k}" ${l.status === k ? 'selected' : ''}>${t}</option>`).join('')}</select></td></tr>`; }).join('') || '<tr><td colspan="6" class="muted">Todavía no hay interesadas.</td></tr>'}
-  </tbody></table></div></section>`;
+const leadOrigen = (l) => l.utm?.utm_source || 'directo';
+const leadOrigenTxt = (l) => [l.utm?.utm_source && l.utm?.utm_medium ? `${l.utm.utm_source} / ${l.utm.utm_medium}` : l.utm?.utm_source, l.utm?.utm_campaign, l.utm?.utm_content].filter(Boolean).join(' · ') || 'Directo';
+// Vínculos: una interesada y una alumna son la misma persona si comparten correo o WhatsApp (sirve también para detectar registros repetidos)
+const llavesDe = (x) => [String(x.email || '').trim().toLowerCase(), waNum(x.whatsapp || x.phone)].filter(Boolean);
+const vinculos = () => {
+  const sig = `${A.leads?.length ?? -1}|${A.students.length}`;
+  if (A._vin?.sig === sig) return A._vin; // se recalcula si cambió la cantidad de interesadas o de alumnas
+  const alumna = new Map(), porLlave = new Map();
+  A.students.forEach((u) => llavesDe(u).forEach((k) => { if (!alumna.has(k)) alumna.set(k, u); }));
+  (A.leads || []).forEach((l) => llavesDe(l).forEach((k) => { if (!porLlave.has(k)) porLlave.set(k, []); porLlave.get(k).push(l); }));
+  return (A._vin = { sig, alumna, porLlave });
 };
+const alumnaDe = (l) => { const v = vinculos(); for (const k of llavesDe(l)) if (v.alumna.has(k)) return v.alumna.get(k); return null; };
+const otrasDe = (l) => { const v = vinculos(), vistos = new Set([l.id]), out = []; for (const k of llavesDe(l)) for (const x of v.porLlave.get(k) || []) if (!vistos.has(x.id)) { vistos.add(x.id); out.push(x); } return out; };
+const leadsDeAlumna = (u) => { const v = vinculos(), vistos = new Set(), out = []; for (const k of llavesDe(u)) for (const x of v.porLlave.get(k) || []) if (!vistos.has(x.id)) { vistos.add(x.id); out.push(x); } return out; };
+const pagoOAbierto = (u) => paying(u) || ownedOf(u).length > 0;
+// Etapa que se muestra: quien ya paga o compró algo figura como Inscrita aunque nadie lo haya marcado (el webhook de Stripe lo guarda de ahora en adelante)
+const leadEtapa = (l) => {
+  const e = LEAD_STATES.some(([k]) => k === l.status) ? l.status : 'nuevo';
+  if (['nuevo', 'contactado', 'clase', 'conversando'].includes(e)) { const u = alumnaDe(l); if (u && pagoOAbierto(u)) return 'inscrita'; }
+  return e;
+};
+const seguimientoHoy = (l) => !!l.followUp && l.followUp <= ymd(hoyCL()) && !['inscrita', 'descartado'].includes(leadEtapa(l));
+// Repetidas: la misma persona (correo o WhatsApp) en el mismo formulario con menos de 24 horas entre un envío y otro (doble envío por accidente).
+// De cada grupo se conserva la que está más avanzada en el embudo (o tiene nota) y, si empatan, la primera.
+// Cuál se conserva: la más avanzada. Descartada va al final: si una de dos fue descartada a mano para esconder la repetida, se queda la otra.
+const RANGO = { descartado: 0, nuevo: 1, contactado: 2, clase: 3, conversando: 4, inscrita: 5 };
+const repetidasPorLimpiar = () => {
+  const porForm = new Map();
+  [...(A.leads || [])].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0)).forEach((l) => { if (!porForm.has(l.form)) porForm.set(l.form, []); porForm.get(l.form).push(l); });
+  const borrar = [];
+  for (const lista of porForm.values()) {
+    const grupos = [];
+    for (const l of lista) {
+      const llaves = llavesDe(l);
+      const g = grupos.find((x) => (l.createdAt || 0) - x.ultimo < 864e5 && x.llaves.some((k) => llaves.includes(k)));
+      if (g) { g.items.push(l); g.llaves.push(...llaves); g.ultimo = l.createdAt || 0; } else grupos.push({ items: [l], llaves: [...llaves], ultimo: l.createdAt || 0 });
+    }
+    for (const g of grupos) {
+      if (g.items.length < 2) continue;
+      const mejor = [...g.items].sort((a, b) => (RANGO[b.status] ?? 0) - (RANGO[a.status] ?? 0) || (b.note ? 1 : 0) - (a.note ? 1 : 0) || (a.createdAt || 0) - (b.createdAt || 0))[0];
+      g.items.forEach((x) => { if (x !== mejor) borrar.push(x); });
+    }
+  }
+  return borrar;
+};
+const leadsFiltradas = () => {
+  const q = (S.crmQ || '').toLowerCase().trim(), prog = LEAD_PROGS.find((x) => x[0] === S.crmProg);
+  return (A.leads || []).filter((l) => (!prog || prog[2].includes(l.form))
+    && (!S.crmOrigen || leadOrigen(l) === S.crmOrigen)
+    && (!S.crmSeg || seguimientoHoy(l))
+    && (!q || [l.name, l.email, l.whatsapp, l.interest, l.message, l.note].join(' ').toLowerCase().includes(q)));
+};
+const leadContacto = (l) => { const wa = waLink(l.whatsapp); return `${wa ? `<a href="${wa}" data-wa-open="${esc(waNum(l.whatsapp))}" data-wa-name="${esc(l.name)}" title="Escribirle desde el portal">${esc(l.whatsapp)}</a>` : ''}${l.whatsapp && l.email ? ' · ' : ''}${esc(l.email)}${l.country ? ` · ${esc(l.country)}` : ''}`; };
+const alumnaBadge = (l) => { const u = alumnaDe(l), o = otrasDe(l); return `${u ? `<span class="pill ${pagoOAbierto(u) ? 'done' : 'pres'}" title="Ya tiene cuenta en el aula">${pagoOAbierto(u) ? 'Alumna' : 'Con cuenta'}</span>` : ''}${o.length ? `<span class="pill lock" title="${esc(o.map((x) => LEAD_FORMS[x.form] || x.form).join(', '))}">+${o.length} registro${o.length === 1 ? '' : 's'}</span>` : ''}`; };
+const segBadge = (l) => (l.followUp ? `<span class="pill ${seguimientoHoy(l) ? 'bad' : 'lock'}" title="Próximo seguimiento">${seguimientoHoy(l) ? 'Seguimiento hoy' : `Seguir ${fechaLarga(l.followUp)}`}</span>` : '');
+
+V.interesadas = () => {
+  const head = `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>CRM · Interesadas</h1><p>Personas que dejaron sus datos en la página. Muévelas por el embudo, escribe notas y fija cuándo volver a escribirles.</p></div><span style="display:flex;gap:8px;flex-wrap:wrap">${A.leads && repetidasPorLimpiar().length ? `<button class="btn btn-ghost btn-sm" data-leads-dedup>Limpiar repetidas (${repetidasPorLimpiar().length})</button>` : ''}<button class="btn btn-ghost btn-sm" data-leads-reload>Actualizar</button></span></div>`;
+  if (!A.leads) return `${head}<div class="card empty">Cargando interesadas…</div>`;
+  const sinLink = [['enlacePendulo', 'Péndulo'], ['enlaceTarot', 'Tarot'], ['enlaceTerapias', 'terapias online']].filter(([k]) => !A.clases?.[k]).map(([, n]) => n);
+  const aviso = sinLink.length ? `<div class="card" style="padding:12px 14px;font-size:.88rem;border-left:4px solid #b8402f"><b>Falta el enlace de Google Meet de ${sinLink.join(', ')}.</b> Mientras no esté, quienes se registren no ven el botón para entrar. Cárgalo en <button class="link" data-go="ajustes">Ajustes del aula</button>.</div>` : '';
+  const lista = leadsFiltradas(), vista = S.crmVista || 'embudo';
+  const chip = (attr, v, t, on) => `<button class="chip" ${attr}="${esc(v)}" aria-pressed="${on}">${t}</button>`;
+  const origenes = [...new Set(A.leads.map(leadOrigen))].sort();
+  const nSeg = A.leads.filter(seguimientoHoy).length;
+  const controles = `<div class="filters">${chip('data-crm-vista', 'embudo', 'Embudo', vista === 'embudo')}${chip('data-crm-vista', 'tabla', 'Tabla', vista === 'tabla')}
+    <input type="text" id="crm-q" placeholder="Buscar por nombre, correo, WhatsApp o nota" value="${esc(S.crmQ || '')}" style="flex:1;min-width:220px;border-radius:999px">
+    <select id="crm-origen" aria-label="Origen" style="border-radius:999px"><option value="">Todos los orígenes</option>${origenes.map((o) => `<option value="${esc(o)}" ${S.crmOrigen === o ? 'selected' : ''}>${esc(o === 'directo' ? 'Directo' : o)}</option>`).join('')}</select>
+    <button class="chip" data-crm-seg aria-pressed="${!!S.crmSeg}">Seguimiento hoy${nSeg ? ` (${nSeg})` : ''}</button></div>
+    <div class="filters">${chip('data-crm-prog', '', `Todas (${A.leads.length})`, !S.crmProg)}${LEAD_PROGS.map(([k, t, fs]) => chip('data-crm-prog', k, `${t} (${A.leads.filter((l) => fs.includes(l.form)).length})`, S.crmProg === k)).join('')}</div>`;
+
+  if (vista === 'tabla') {
+    const sel = S.leadSel, barra = sel.size ? `<div class="filters" style="padding:0 4px 12px"><b>${sel.size} seleccionada${sel.size === 1 ? '' : 's'}</b><button class="btn btn-ghost btn-sm" style="color:#b8402f" data-leads-del>Eliminar seleccionadas</button><button class="link" data-leads-clear>Quitar selección</button></div>` : '';
+    return `${head}${aviso}${controles}
+    <section class="card panel">${barra}<div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:32px"><input type="checkbox" data-lead-all aria-label="Seleccionar todas" ${lista.length && lista.every((l) => sel.has(l.id)) ? 'checked' : ''}></th><th>Persona</th><th>Programa</th><th>Le interesa</th><th>Origen</th><th>Fecha</th><th>Seguimiento</th><th>Etapa</th></tr></thead><tbody>
+    ${lista.map((l) => `<tr>
+      <td><input type="checkbox" data-lead-sel="${esc(l.id)}" aria-label="Seleccionar a ${esc(l.name)}" ${sel.has(l.id) ? 'checked' : ''}></td>
+      <td><button class="link" data-lead-open="${esc(l.id)}" style="font-weight:700">${esc(l.name)}</button><br><span class="muted" style="font-size:.84rem">${leadContacto(l)}</span></td>
+      <td>${esc(LEAD_FORMS[l.form] || l.form)}</td>
+      <td>${esc(l.interest)}${l.note ? `<br><span class="muted" style="font-size:.84rem">📝 ${esc(l.note.slice(0, 80))}${l.note.length > 80 ? '…' : ''}</span>` : ''}</td>
+      <td class="muted" style="font-size:.84rem">${esc(leadOrigenTxt(l))}</td>
+      <td class="muted" style="font-size:.84rem">${fdateMs(l.createdAt)}</td>
+      <td>${alumnaBadge(l)}${segBadge(l)}</td>
+      <td><select data-lead-status="${esc(l.id)}" aria-label="Etapa">${LEAD_STATES.map(([k, t]) => `<option value="${k}" ${leadEtapa(l) === k ? 'selected' : ''}>${t}</option>`).join('')}</select></td></tr>`).join('') || '<tr><td colspan="8" class="muted">No hay interesadas con estos filtros.</td></tr>'}
+    </tbody></table></div></section>`;
+  }
+
+  // Embudo: una columna por etapa; se arrastran las tarjetas o se cambia la etapa desde su ficha
+  const verDesc = !!S.crmDesc, etapas = LEAD_STATES.filter(([k]) => verDesc || k !== 'descartado');
+  const tarjeta = (l) => `<article class="kb-card" draggable="true" data-lead-card="${esc(l.id)}" data-lead-open="${esc(l.id)}">
+      <b>${esc(l.name)}</b><span class="muted">${esc(LEAD_FORMS[l.form] || l.form)} · ${fdateMs(l.createdAt).split(',')[0]}</span>
+      ${l.interest ? `<small>${esc(l.interest)}</small>` : ''}${l.note ? `<small class="muted">📝 ${esc(l.note.slice(0, 70))}${l.note.length > 70 ? '…' : ''}</small>` : ''}
+      <div class="kb-meta">${alumnaBadge(l)}${segBadge(l)}${l.whatsapp ? `<a class="btn btn-ghost btn-sm" href="${waLink(l.whatsapp)}" data-wa-open="${esc(waNum(l.whatsapp))}" data-wa-name="${esc(l.name)}">WhatsApp</a>` : ''}</div></article>`;
+  return `${head}${aviso}${controles}
+  <div class="filters"><button class="chip" data-crm-desc aria-pressed="${verDesc}">Mostrar descartadas (${lista.filter((l) => leadEtapa(l) === 'descartado').length})</button><span class="muted" style="font-size:.82rem">Arrastra una tarjeta a otra columna para cambiar su etapa. Toca una tarjeta para ver su ficha.</span></div>
+  <div class="kb">${etapas.map(([k, t]) => { const col = lista.filter((l) => leadEtapa(l) === k); return `<section class="kb-col" data-kb-col="${k}"><h4>${t} <span class="count">${col.length}</span></h4>${col.map(tarjeta).join('') || '<p class="muted" style="font-size:.82rem;margin:0">Nadie aquí.</p>'}</section>`; }).join('')}</div>`;
+};
+
+// Ficha de una interesada: datos, etapa, nota y próximo seguimiento
+function leadFicha(id) {
+  const l = (A.leads || []).find((x) => x.id === id); if (!l) return;
+  const k = (t, v) => (v ? `<dt>${t}</dt><dd>${v}</dd>` : '');
+  dialog(`<span class="eyebrow">Interesada</span><h3>${esc(l.name)}</h3>
+  <dl class="kv" style="margin:8px 0 12px">${k('Contacto', leadContacto(l))}${k('Programa', esc(LEAD_FORMS[l.form] || l.form))}${k('Le interesa', esc(l.interest))}${k('Mensaje', esc(l.message))}${k('Clase', l.claseFecha ? esc(fechaLarga(l.claseFecha)) : '')}${k('Origen', esc(leadOrigenTxt(l)))}${k('Registrada', fdateMs(l.createdAt))}</dl>
+  <form id="lead-form" class="cal-form">
+    ${(() => { const u = alumnaDe(l), o = otrasDe(l); return `${u ? `<div class="card full" style="padding:10px 14px;font-size:.86rem;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap"><span><b>Ya tiene cuenta en el aula:</b> ${esc(nameOf(u))} · ${esc(payState(u)[1])}</span><button type="button" class="btn btn-ghost btn-sm" data-lead-alumna="${esc(u.id)}">Ver su ficha</button></div>` : ''}${o.length ? `<div class="card full" style="padding:10px 14px;font-size:.84rem;display:grid;gap:4px"><b>También se registró en:</b>${o.map((x) => `<span>${esc(LEAD_FORMS[x.form] || x.form)} · ${fdateMs(x.createdAt)} · ${esc(LEAD_STATES.find(([k]) => k === leadEtapa(x))?.[1] || '')}</span>`).join('')}</div>` : ''}`; })()}
+    <label><b>Etapa</b><select id="lf-status">${LEAD_STATES.map(([v, t]) => `<option value="${v}" ${leadEtapa(l) === v ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
+    <label><b>Próximo seguimiento</b><input type="date" id="lf-fup" value="${esc(l.followUp || '')}"></label>
+    <label class="full"><b>Nota</b><textarea id="lf-note" maxlength="1000" rows="4" placeholder="Lo que conversaron, qué le interesa, qué le falta decidir…">${esc(l.note || '')}</textarea></label>
+    <div class="full actions"><button class="btn btn-primary btn-sm">Guardar</button>${l.whatsapp ? `<a class="btn btn-ghost btn-sm" href="${waLink(l.whatsapp)}" data-wa-open="${esc(waNum(l.whatsapp))}" data-wa-name="${esc(l.name)}">Escribir por WhatsApp</a>` : ''}${l.email ? `<a class="btn btn-ghost btn-sm" href="mailto:${esc(l.email)}">Correo</a>` : ''}<button type="button" class="btn btn-ghost btn-sm" id="lf-del" style="color:#b8402f;margin-left:auto">Eliminar</button></div>
+  </form>`, true);
+  $('#lead-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const cambios = { status: $('#lf-status').value, followUp: $('#lf-fup').value, note: $('#lf-note').value.trim() };
+    try { await data.leads({ action: 'update', id, ...cambios }); Object.assign(l, cambios); $('#dlg').close(); paintNav(); render(false); toast('Guardado.'); } catch (err) { fail(err); }
+  };
+  $('#lf-del').onclick = async () => {
+    if (!confirm(`¿Eliminar a ${l.name} de tu lista? No se puede deshacer.`)) return;
+    try { await data.leads({ action: 'delete', ids: [id] }); A.leads = A.leads.filter((x) => x.id !== id); S.leadSel.delete(id); $('#dlg').close(); paintNav(); render(false); toast('Eliminada.'); } catch (err) { fail(err); }
+  };
+}
+async function leadMover(id, status) {
+  const l = (A.leads || []).find((x) => x.id === id); if (!l || leadEtapa(l) === status) return;
+  const antes = l.status; l.status = status; paintNav(); render(false);
+  try { await data.leads({ action: 'update', id, status }); } catch (e) { l.status = antes; paintNav(); render(false); fail(e); }
+}
+// ---------- Inicio: lo importante del día a mano ----------
+V.inicio = () => {
+  const hoy = ymd(hoyCL()), nombre = (A.me?.displayName || '').split(' ')[0] || 'Karen';
+  const nuevas = nuevasLeads(), sinLeer = A.wa.chats.reduce((n, c) => n + (c.unread || 0), 0);
+  const clases = (A.cal || []).filter((e) => ['clase-pendulo', 'clase-tarot'].includes(e.type) && e.date >= hoy && !e.tentative)
+    .sort((a, b) => `${a.date} ${a.time || ''}`.localeCompare(`${b.date} ${b.time || ''}`)).slice(0, 5);
+  const atrasadas = A.students.filter((u) => u.paymentStatus === 'overdue');
+  const kpi = (n, t, ir) => `<div data-go="${ir}" role="button" tabindex="0" style="cursor:pointer"><b>${n}</b><span>${t}</span></div>`;
+  const fila = (l) => `<tr><td><b>${esc(l.name)}</b><br><span class="muted" style="font-size:.84rem">${esc(LEAD_FORMS[l.form] || l.form)} · ${fdateMs(l.createdAt)}</span></td><td style="text-align:right">${l.whatsapp ? `<a class="btn btn-ghost btn-sm" href="${waLink(l.whatsapp)}" data-wa-open="${esc(waNum(l.whatsapp))}" data-wa-name="${esc(l.name)}">Escribir</a>` : ''}</td></tr>`;
+  const clase = (e) => { const n = (A.leads || []).filter((l) => l.claseEvento === e.id).length; return `<tr data-go="calendario" style="cursor:pointer"><td><b>${esc(CAL_TYPES[e.type]?.[0] || e.type)}</b><br><span class="muted" style="font-size:.84rem">${e.date === hoy ? 'Hoy' : fechaLarga(e.date)}${e.time ? ` · ${esc(e.time)}` : ''}</span></td><td style="text-align:right"><span class="pill ${n ? 'done' : 'lock'}">${n} inscrita${n === 1 ? '' : 's'}</span></td></tr>`; };
+  return `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>Hola, ${esc(nombre)}</h1><p>Lo que necesita tu atención hoy.</p></div></div>
+  <div class="kpis">${kpi(nuevas.length, 'interesadas nuevas', 'interesadas')}${kpi(sinLeer, 'WhatsApp sin leer', 'whatsapp')}${kpi(A.questions.length, 'preguntas de clase', 'preguntas')}${kpi(A.tickets.length, 'mensajes de ayuda', 'ayuda')}</div>
+  ${(A.leads || []).filter(seguimientoHoy).length ? `<div class="alert"><div><b>${(A.leads || []).filter(seguimientoHoy).length} seguimiento${(A.leads || []).filter(seguimientoHoy).length === 1 ? '' : 's'} para hoy</b><p>Personas a las que quedaste de escribirles.</p></div><button class="btn" data-crm-hoy>Ver</button></div>` : ''}
+  ${atrasadas.length ? `<div class="alert"><div><b>${atrasadas.length} cuota${atrasadas.length === 1 ? '' : 's'} atrasada${atrasadas.length === 1 ? '' : 's'}</b><p>${esc(atrasadas.slice(0, 3).map(nameOf).join(', '))}${atrasadas.length > 3 ? '…' : ''}</p></div><button class="btn" data-go="pagos">Ver pagos</button></div>` : ''}
+  <div class="cols">
+    <section class="card panel"><div class="panel-h"><h3>Interesadas por contactar</h3><button class="link" data-go="interesadas">Ver todas</button></div>
+      ${!A.leads ? '<p class="muted">Cargando…</p>' : nuevas.length ? `<div class="tbl-wrap"><table class="tbl"><tbody>${nuevas.slice(0, 6).map(fila).join('')}</tbody></table></div>` : '<p class="muted">No hay interesadas nuevas. Todo al día.</p>'}</section>
+    <section class="card panel"><div class="panel-h"><h3>Próximas clases gratis</h3><button class="link" data-go="calendario">Calendario</button></div>
+      ${!A.cal ? '<p class="muted">Cargando…</p>' : clases.length ? `<div class="tbl-wrap"><table class="tbl"><tbody>${clases.map(clase).join('')}</tbody></table></div>` : '<p class="muted">No hay clases gratis programadas en el Calendario.</p>'}</section>
+  </div>`;
+};
+// ---------- Chat de WhatsApp Business (número de Karen, src/app/api/whatsapp) ----------
+// Las conversaciones llegan en vivo desde Firestore; enviar y marcar como leído pasa por el servidor, que es quien habla con Meta.
+const waApi = async (body) => {
+  const r = await fetch('/api/whatsapp', {
+    method: 'POST', headers: { Authorization: `Bearer ${await auth.currentUser.getIdToken()}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const out = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(out.error || 'No se pudo enviar por WhatsApp.');
+  return out;
+};
+const waNameOf = (n, chat) => chat?.name || A.leads?.find((l) => waNum(l.whatsapp) === n)?.name || A.students.find((u) => waNum(u.phone) === n)?.displayName || `+${n}`;
+const waHora = (ms) => { const d = new Date(ms); return d.toDateString() === new Date().toDateString() ? d.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' }) : d.toLocaleDateString('es', { day: 'numeric', month: 'short' }); };
+const waChats = () => {
+  const l = [...A.wa.chats];
+  if (S.waOpen && !l.some((c) => c.id === S.waOpen)) l.unshift({ id: S.waOpen, number: S.waOpen, name: S.waName, lastText: 'Conversación nueva', lastAt: null });
+  return l;
+};
+const waListHTML = () => waChats().map((c) => `<button class="wa-item" data-wa-chat="${esc(c.id)}" aria-current="${S.waOpen === c.id}"><b><span>${esc(waNameOf(c.id, c))}</span>${c.unread ? `<span class="count">${c.unread}</span>` : ''}</b><small>${esc(c.lastDir === 'out' ? 'Tú: ' : '')}${esc(c.lastText || '')}${c.lastAt?.toMillis ? ` · ${waHora(c.lastAt.toMillis())}` : ''}</small></button>`).join('') || '<div class="wa-empty">Todavía no hay conversaciones. Abre una desde Interesadas, tocando el número de WhatsApp de la persona.</div>';
+const waLibre = (c) => Date.now() - (c?.lastInboundAt?.toMillis?.() || 0) < 864e5;
+const waChatHTML = () => {
+  const n = S.waOpen;
+  if (!n) return '<div class="wa-empty">Elige una conversación para verla y responder desde aquí.</div>';
+  const c = A.wa.chats.find((x) => x.id === n), libre = waLibre(c);
+  const estado = (m) => (m.dir !== 'out' ? '' : { read: ' ✓✓ leído', delivered: ' ✓✓', failed: ' · no se pudo entregar' }[m.status] || ' ✓');
+  return `<div class="wa-chat"><div class="wa-top"><div><b>${esc(waNameOf(n, c))}</b><br><span class="muted" style="font-size:.84rem">+${esc(n)}</span></div></div>
+    <div class="wa-msgs" id="wa-msgs">${A.wa.msgs.map((m) => `<div class="wa-m ${m.dir === 'out' ? 'out' : ''}">${esc(m.text)}<small class="${m.status === 'failed' ? 'bad' : ''}">${m.ts?.toMillis ? waHora(m.ts.toMillis()) : ''}${estado(m)}</small></div>`).join('') || '<div class="wa-empty">Aún no hay mensajes. Empieza con la plantilla.</div>'}</div>
+    ${libre ? '<form class="wa-send" id="wa-form"><textarea id="wa-text" rows="1" placeholder="Escribe un mensaje…" aria-label="Mensaje"></textarea><button class="btn btn-primary btn-sm">Enviar</button></form>'
+    : `<div class="wa-note"><span>${c?.lastInboundAt ? 'Pasaron más de 24 horas desde su último mensaje.' : 'Esta persona aún no te ha escrito.'} WhatsApp solo permite empezar con un mensaje de plantilla; cuando responda podrás escribirle libremente.</span><button class="btn btn-primary btn-sm" data-wa-plantilla>Enviar plantilla</button></div>`}</div>`;
+};
+V.whatsapp = () => `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>WhatsApp</h1><p>Conversaciones desde el WhatsApp Business de Karen (+56 9 4004 4528). Lo que escribas aquí sale con ese número.</p></div></div>
+  ${A.wa.on === false ? '<div class="card empty">WhatsApp todavía no está conectado: faltan las llaves de Meta en Vercel (WHATSAPP_TOKEN y WHATSAPP_PHONE_ID). Los pasos están en el README.</div>' : ''}
+  <section class="card wa"><div class="wa-list" id="wa-list">${waListHTML()}</div><div id="wa-pane" style="display:grid;min-width:0;min-height:0">${waChatHTML()}</div></section>`;
+let waMsgsOff = null, waChatsOff = null;
+function waRepaint(soloMensajes = false) {
+  if (S.view !== 'whatsapp') return paintNav();
+  const l = $('#wa-list'); if (l && !soloMensajes) l.innerHTML = waListHTML();
+  const p = $('#wa-pane'); if (!p) return;
+  const t = $('#wa-text'), borrador = t?.value || '', foco = document.activeElement === t;
+  const m0 = $('#wa-msgs'), abajo = !m0 || m0.scrollHeight - m0.scrollTop - m0.clientHeight < 80;
+  p.innerHTML = waChatHTML(); waBind();
+  const t2 = $('#wa-text'); if (t2) { t2.value = borrador; if (foco) t2.focus(); }
+  const m = $('#wa-msgs'); if (m && abajo) m.scrollTop = m.scrollHeight;
+}
+function waWatch() {
+  waChatsOff?.();
+  waChatsOff = onSnapshot(query(collection(db, 'wa_chats'), orderBy('lastAt', 'desc'), limit(200)), (snap) => {
+    A.wa.chats = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    paintNav();
+    if (S.view === 'whatsapp') waRepaint();
+    // Si está leyendo esta conversación, lo que llega queda como leído
+    const c = A.wa.chats.find((x) => x.id === S.waOpen);
+    if (S.view === 'whatsapp' && c?.unread) waApi({ action: 'leido', to: c.id }).catch(() => {});
+  }, (e) => console.warn('whatsapp', e.code));
+}
+function waOpen(n, nombre) {
+  S.waOpen = n; S.waName = nombre || ''; A.wa.msgs = [];
+  waMsgsOff?.();
+  waMsgsOff = onSnapshot(query(collection(db, 'wa_chats', n, 'messages'), orderBy('ts', 'asc'), limit(300)), (snap) => {
+    A.wa.msgs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    waRepaint(true);
+  }, (e) => console.warn('whatsapp mensajes', e.code));
+  if (A.wa.chats.find((x) => x.id === n)?.unread) waApi({ action: 'leido', to: n }).catch(() => {});
+}
+function waBind() {
+  const form = $('#wa-form');
+  if (form) {
+    const t = $('#wa-text');
+    t.onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } };
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const text = t.value.trim(); if (!text) return;
+      const b = form.querySelector('button'); b.disabled = true;
+      try { await waApi({ action: 'enviar', to: S.waOpen, text, name: S.waName }); t.value = ''; } catch (err) { fail(err); }
+      b.disabled = false;
+    };
+  }
+  const pl = $('[data-wa-plantilla]');
+  if (pl) pl.onclick = async () => {
+    pl.disabled = true;
+    try { await waApi({ action: 'plantilla', to: S.waOpen, name: S.waName || waNameOf(S.waOpen) }); toast('Plantilla enviada. Cuando responda podrás escribirle aquí.'); } catch (err) { fail(err); pl.disabled = false; }
+  };
+}
 // ---------- Calendario de la Maestra ----------
 // Fechas como texto AAAA-MM-DD (día de Chile), sin horas de por medio: así no hay corrimientos por zona horaria.
 const CAL_TYPES = {
@@ -425,56 +658,138 @@ const calChip = (e) => {
   const aviso = [e.tentative ? 'Por confirmar' : '', sinHora(e) ? AVISO_SIN_HORA : ''].filter(Boolean).join(' · ');
   return `<button class="cal-ev${e.tentative ? ' tent' : ''}" style="--c:${c}" data-cal-ev="${esc(e.id)}" title="${esc(aviso ? `${n} · ${aviso}` : n)}">${sinHora(e) ? '<span aria-hidden="true">⚠ </span>' : ''}${e.time ? `<b>${esc(e.time)}${fin ? `–${esc(fin)}` : ''}</b> ` : ''}${esc(e.title || n)}${e.tentative ? ' <i class="tent-tag">por confirmar</i>' : ''}</button>`;
 };
+// ---------- Vistas del calendario: día, semana, mes y año (como Google Calendar) ----------
+const HORA_PX = 44; // alto de una hora en la grilla de día y semana
+const DIA_LARGO = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+const lunesDe = (t) => t - ((new Date(t).getUTCDay() + 6) % 7) * 864e5;
+const minDe = (h) => (/^\d{2}:\d{2}$/.test(h || '') ? Number(h.slice(0, 2)) * 60 + Number(h.slice(3)) : null);
+const calTitulo = (v, ref) => {
+  const d = new Date(ref);
+  if (v === 'dia') return `${DIA_LARGO[d.getUTCDay()]} ${d.getUTCDate()} de ${MES_N[d.getUTCMonth()]} de ${d.getUTCFullYear()}`;
+  if (v === 'mes') return `${MES_N[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+  if (v === 'anio') return String(d.getUTCFullYear());
+  const a = new Date(lunesDe(ref)), b = new Date(lunesDe(ref) + 6 * 864e5);
+  return a.getUTCMonth() === b.getUTCMonth() ? `${a.getUTCDate()} al ${b.getUTCDate()} de ${MES_N[b.getUTCMonth()]} de ${b.getUTCFullYear()}` : `${a.getUTCDate()} de ${MES_N[a.getUTCMonth()]} al ${b.getUTCDate()} de ${MES_N[b.getUTCMonth()]} de ${b.getUTCFullYear()}`;
+};
+const horaAhoraCL = () => { const p = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: 'America/Santiago', hour: 'numeric', minute: 'numeric', hourCycle: 'h23' }).formatToParts(new Date()).map((x) => [x.type, x.value])); return (+p.hour % 24) * 60 + +p.minute; };
+// Grilla de horas para uno o siete días: lo que no tiene hora va arriba ("todo el día"); lo demás se posiciona según su hora
+function calGrilla(dias, porDia) {
+  const hoy = hoyCL(), claves = dias.map(ymd);
+  let desde = 7 * 60, hasta = 23 * 60;
+  for (const k of claves) for (const e of porDia[k] || []) { const a = minDe(e.time); if (a === null) continue; const b = minDe(finDe(e)) ?? a + 60; desde = Math.min(desde, Math.floor(a / 60) * 60); hasta = Math.max(hasta, Math.min(24 * 60, Math.ceil(b / 60) * 60)); }
+  const filas = (hasta - desde) / 60, px = (m) => ((m - desde) * HORA_PX) / 60;
+  const horas = Array.from({ length: filas }, (_, i) => `<span style="top:${i * HORA_PX}px">${String(desde / 60 + i).padStart(2, '0')}:00</span>`).join('');
+  const cab = dias.map((t, i) => { const d = new Date(t), l = porDia[claves[i]] || []; return `<button class="tg-dia${t === hoy ? ' hoy' : ''}${choque(l) ? ' clash' : ''}" data-cal-dia="${claves[i]}" title="${choque(l) ? 'Choque: Karen no disponible' : 'Ver este día'}"><small>${DIA_N[d.getUTCDay()]}</small><b>${d.getUTCDate()}</b></button>`; }).join('');
+  const todoDia = claves.map((k) => `<div class="tg-ad">${(porDia[k] || []).filter((e) => minDe(e.time) === null).map(calChip).join('')}</div>`).join('');
+  const ahora = horaAhoraCL();
+  const cols = claves.map((k, i) => {
+    const evs = (porDia[k] || []).filter((e) => minDe(e.time) !== null)
+      .map((e) => { const a = minDe(e.time); return { e, a, b: Math.max(minDe(finDe(e)) ?? a + 60, a + 25) }; }).sort((x, y) => x.a - y.a || y.b - x.b);
+    // Eventos que se pisan se reparten en carriles lado a lado
+    let grupo = [], fines = [], finMax = -1;
+    const cerrar = () => { grupo.forEach((x) => (x.n = fines.length)); grupo = []; fines = []; finMax = -1; };
+    for (const x of evs) {
+      if (grupo.length && x.a >= finMax) cerrar();
+      let c = fines.findIndex((f) => f <= x.a); if (c < 0) { c = fines.length; fines.push(0); }
+      fines[c] = x.b; x.c = c; grupo.push(x); finMax = Math.max(finMax, x.b);
+    }
+    cerrar();
+    const bloques = evs.map(({ e, a, b, c, n }) => {
+      const [nom, col] = CAL_TYPES[e.type] || ['Fecha', '#5d6b63'], fin = finDe(e);
+      return `<button class="tg-ev${e.tentative ? ' tent' : ''}" style="--c:${col};top:${px(a)}px;height:${Math.max(px(b) - px(a) - 2, 20)}px;left:calc(${(c / n) * 100}% + 1px);width:calc(${100 / n}% - 3px)" data-cal-ev="${esc(e.id)}" title="${esc(`${nom}${e.tentative ? ' · Por confirmar' : ''}`)}"><b>${esc(e.time)}${fin ? `–${esc(fin)}` : ''}</b> ${esc(e.title || nom)}${e.tentative ? ' <i class="tent-tag">por confirmar</i>' : ''}</button>`;
+    }).join('');
+    const linea = dias[i] === hoy && ahora >= desde && ahora <= hasta ? `<div class="tg-now" style="top:${px(ahora)}px"></div>` : '';
+    return `<div class="tg-col${dias[i] === hoy ? ' hoy' : ''}">${bloques}${linea}</div>`;
+  }).join('');
+  return `<div class="tg" style="--n:${dias.length};--hp:${HORA_PX}px"><div class="tg-in">
+    <div class="tg-row"><i></i>${cab}</div>
+    <div class="tg-row tg-allday"><i>todo el día</i>${todoDia}</div>
+    <div class="tg-body" style="height:${filas * HORA_PX}px"><div class="tg-hours">${horas}</div>${cols}</div>
+  </div></div>`;
+}
+// Año: doce mini meses; los días con algo en el calendario se marcan y al tocarlos se abre ese día
+function calAnio(anio, porDia) {
+  const hoy = hoyCL();
+  return `<div class="yr">${MES_N.map((nom, m) => {
+    const off = (new Date(Date.UTC(anio, m, 1)).getUTCDay() + 6) % 7, n = new Date(Date.UTC(anio, m + 1, 0)).getUTCDate();
+    const dias = Array.from({ length: n }, (_, i) => {
+      const t = Date.UTC(anio, m, i + 1), k = ymd(t), l = porDia[k] || [];
+      const cls = [l.length ? 'has' : '', l.some((e) => LIBRE_NO.includes(e.type)) ? 'blk' : '', t === hoy ? 'hoy' : ''].filter(Boolean).join(' ');
+      return `<button class="${cls}" data-cal-dia="${k}" title="${esc(l.slice(0, 4).map((e) => e.title || '').join(' · '))}">${i + 1}</button>`;
+    });
+    return `<section class="yr-m"><button class="yr-t" data-cal-mes-ir="${anio}-${String(m + 1).padStart(2, '0')}-01">${nom}</button><div class="yr-g">${['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d) => `<b>${d}</b>`).join('')}${'<i></i>'.repeat(off)}${dias.join('')}</div></section>`;
+  }).join('')}</div>`;
+}
+// Terapias que alguien agendó desde la web: siempre a la vista, con los botones para recordarle por WhatsApp o correo
+function calTerapias(hoy) {
+  const hoyK = ymd(hoy), manK = ymd(hoy + 864e5);
+  const lista = (A.cal || []).filter((e) => e.type === 'terapia' && e.date >= hoyK).sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
+  const fila = (e) => { const fin = finDe(e), cuando = e.date === hoyK ? 'Hoy' : e.date === manK ? 'Mañana' : fechaLarga(e.date); return `<div class="cal-row"><b>${cuando}${e.time ? ` · ${esc(e.time)}${fin ? `–${esc(fin)}` : ''}` : ''}</b><div><button class="cal-ev" style="--c:#d1568b" data-cal-ev="${esc(e.id)}">${esc(e.terapia || 'Terapia')} · ${esc(e.name || '')} <i class="tent-tag">${e.modalidad === 'online' ? 'online' : 'presencial'}</i></button><div class="rec">${botonesRec(e) || '<span class="muted">Sin datos de contacto</span>'}</div></div></div>`; };
+  return `<section class="card panel"><h3>Terapias agendadas y recordatorios</h3>
+    <p class="muted" style="margin:0;font-size:.88rem">Cuando alguien agenda una terapia desde la web aparece aquí. Los botones <b>WhatsApp</b> y <b>Correo</b> abren el recordatorio ya escrito (día, hora en su zona, enlace de Meet o dirección): solo pulsas enviar.</p>
+    ${lista.length ? lista.map(fila).join('') : '<p class="muted" style="margin:0"><b>Aún no hay terapias agendadas.</b> La primera que se reserve aparecerá en esta lista.</p>'}
+  </section>`;
+}
 V.calendario = () => {
   const head = `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>Calendario</h1><p>Clases gratis, cursos, formación y los momentos en que no estás disponible (citas, trámites, vacaciones). Solo tú lo ves.</p></div><button class="btn btn-primary btn-sm" data-cal-add>Agregar fecha</button></div>`;
   if (!A.cal) return `${head}<div class="card empty">Cargando calendario…</div>`;
-  const hoy = hoyCL(), dias = calPorDia();
-  const base = S.calMes || (() => { const d = new Date(hoy); return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1); })();
-  const b = new Date(base), y = b.getUTCFullYear(), mo = b.getUTCMonth();
-  const desfase = (b.getUTCDay() + 6) % 7; // la grilla parte el lunes
-  const enMes = new Date(Date.UTC(y, mo + 1, 0)).getUTCDate();
-  const celdas = [];
-  for (let i = 0; i < desfase; i++) celdas.push('<div class="cal-day out"></div>');
-  for (let d = 1; d <= enMes; d++) {
-    const k = ymd(Date.UTC(y, mo, d)), l = dias[k] || [];
-    celdas.push(`<div class="cal-day${tOf(k) === hoy ? ' today' : ''}${choque(l) ? ' clash' : ''}"><span class="cal-n">${d}</span>${choque(l) ? '<span class="cal-clash">Choque: Karen no disponible</span>' : ''}${l.map(calChip).join('')}</div>`);
+  const hoy = hoyCL(), porDia = calPorDia();
+  S.calVista ||= innerWidth < 760 ? 'dia' : 'semana';
+  S.calRef ||= hoy;
+  const v = S.calVista, ref = S.calRef, r = new Date(ref);
+  let cuerpo;
+  if (v === 'dia') cuerpo = calGrilla([ref], porDia);
+  else if (v === 'semana') cuerpo = calGrilla(Array.from({ length: 7 }, (_, i) => lunesDe(ref) + i * 864e5), porDia);
+  else if (v === 'anio') cuerpo = calAnio(r.getUTCFullYear(), porDia);
+  else {
+    const y = r.getUTCFullYear(), mo = r.getUTCMonth(), desfase = (new Date(Date.UTC(y, mo, 1)).getUTCDay() + 6) % 7, enMes = new Date(Date.UTC(y, mo + 1, 0)).getUTCDate(), celdas = [];
+    for (let i = 0; i < desfase; i++) celdas.push('<div class="cal-day out"></div>');
+    for (let d = 1; d <= enMes; d++) {
+      const k = ymd(Date.UTC(y, mo, d)), l = porDia[k] || [];
+      celdas.push(`<div class="cal-day${tOf(k) === hoy ? ' today' : ''}${choque(l) ? ' clash' : ''}"><button class="cal-n" data-cal-dia="${k}" title="Ver este día">${d}</button>${choque(l) ? '<span class="cal-clash">Choque: Karen no disponible</span>' : ''}${l.map(calChip).join('')}</div>`);
+    }
+    cuerpo = `<div class="cal-scroll"><div class="cal-grid">${['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((d) => `<div class="cal-wd">${d}</div>`).join('')}${celdas.join('')}</div></div>`;
   }
-  // Próximos 30 días (lo único que se ve en el celular)
-  const prox = [];
-  for (let t = hoy, n = 0; n < 30; t += 864e5, n++) { const k = ymd(t); if (dias[k]) prox.push([k, dias[k]]); }
-  // Sesiones de terapia de hoy y mañana, con los botones para recordárselas a la persona
-  const claveHoy = ymd(hoy), claveMan = ymd(hoy + 864e5);
-  const porRecordar = (A.cal || []).filter((e) => e.type === 'terapia' && (e.date === claveHoy || e.date === claveMan)).sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
-  const recordar = porRecordar.length ? `<section class="card panel"><h3>Por recordar: hoy y mañana</h3>${porRecordar.map((e) => `<div class="cal-row"><b>${e.date === claveHoy ? 'Hoy' : 'Mañana'} · ${esc(e.time || '')}</b><div>${calChip(e)}<div style="display:flex;gap:6px;flex-wrap:wrap">${botonesRec(e)}</div></div></div>`).join('')}</section>` : '';
   return `${head}
+  ${calTerapias(hoy)}
   <div class="cal-legend">${Object.entries(CAL_TYPES).map(([, [n, c]]) => `<span style="--c:${c}">${esc(n)}</span>`).join('')}<span class="tent-leg">Borde punteado: por confirmar</span></div>
-  <section class="card panel cal-month">
-    <div class="panel-h"><button class="btn btn-ghost btn-sm" data-cal-mes="-1" aria-label="Mes anterior">←</button><h3 style="text-transform:capitalize">${MES_N[mo]} ${y}</h3><button class="btn btn-ghost btn-sm" data-cal-mes="1" aria-label="Mes siguiente">→</button></div>
-    <div class="cal-grid">${['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((d) => `<div class="cal-wd">${d}</div>`).join('')}${celdas.join('')}</div>
-  </section>
-  ${recordar}
-  <section class="card panel"><h3>Próximos 30 días</h3>
-    ${prox.length ? prox.map(([k, l]) => `<div class="cal-row${choque(l) ? ' clash' : ''}"><b>${fechaLarga(k)}</b>${choque(l) ? '<span class="cal-clash">Choque: Karen no disponible</span>' : ''}<div>${l.map(calChip).join('')}</div></div>`).join('') : '<p class="muted" style="margin:0">No hay fechas en los próximos 30 días.</p>'}
+  <section class="card panel cal-main">
+    <div class="cal-bar">
+      <div class="cal-nav"><button class="btn btn-ghost btn-sm" data-cal-hoy>Hoy</button><button class="btn btn-ghost btn-sm" data-cal-nav="-1" aria-label="Anterior">←</button><button class="btn btn-ghost btn-sm" data-cal-nav="1" aria-label="Siguiente">→</button><h3 class="cal-title">${esc(calTitulo(v, ref))}</h3></div>
+      <div class="seg" role="group" aria-label="Vista del calendario">${[['dia', 'Día'], ['semana', 'Semana'], ['mes', 'Mes'], ['anio', 'Año']].map(([k, n]) => `<button class="${v === k ? 'on' : ''}" data-cal-vista="${k}" aria-pressed="${v === k}">${n}</button>`).join('')}</div>
+    </div>
+    ${cuerpo}
   </section>`;
 };
 // Formulario para agregar o editar una fecha (en la ventana del portal)
+// Clases gratis: quiénes se registraron para esa fecha (src/app/api/leads las asocia a la clase del Calendario)
+const claseInscritas = (v) => {
+  if (!v.id || !['clase-pendulo', 'clase-tarot'].includes(v.type)) return '';
+  const lista = (A.leads || []).filter((l) => l.claseEvento === v.id);
+  const enlace = A.clases?.[v.type === 'clase-pendulo' ? 'enlacePendulo' : 'enlaceTarot'] || '';
+  const texto = (l) => `Hola ${String(l.name || '').split(' ')[0]}, te recuerdo tu clase gratis de ${v.type === 'clase-pendulo' ? 'Péndulo Hebreo' : 'Tarot Terapéutico'}: ${fechaLarga(v.date)}${v.time ? ` a las ${v.time} (hora de Chile)` : ''}. ${enlace ? `Entra por Google Meet: ${enlace}` : ''} ¡Te espero!`;
+  const fila = (l) => `<tr><td><b>${esc(l.name)}</b>${l.country ? `<br><span class="muted">${esc(l.country)}</span>` : ''}</td><td>${l.whatsapp ? `<a href="${waLink(l.whatsapp)}" data-wa-open="${esc(waNum(l.whatsapp))}" data-wa-name="${esc(l.name)}">${esc(l.whatsapp)}</a>` : ''}</td><td>${l.email ? `<a href="mailto:${esc(l.email)}?subject=${encodeURIComponent('Tu clase gratis · Casa Muladhara')}&body=${encodeURIComponent(texto(l))}">${esc(l.email)}</a>` : ''}</td><td style="text-align:right"><button type="button" class="link" style="color:#b8402f" data-insc-del="${esc(l.id)}">Eliminar</button></td></tr>`;
+  return `<div class="card full" style="padding:12px 14px;display:grid;gap:8px;font-size:.84rem"><b>Inscritas a esta clase: ${lista.length}</b>${lista.length ? `<div class="tbl-wrap"><table class="tbl"><tbody>${lista.map(fila).join('')}</tbody></table></div>` : '<span class="muted">Todavía nadie se registró para esta fecha.</span>'}${enlace ? '' : '<span style="color:#b8402f;font-weight:700">Falta el enlace de Google Meet de esta clase en Ajustes del aula.</span>'}</div>`;
+};
 function calForm(e) {
-  const v = e || { type: 'bloqueado', date: ymd(hoyCL()) };
+  const v = e || { type: 'bloqueado', date: ymd(S.calRef || hoyCL()) };
   dialog(`<span class="eyebrow">Calendario</span><h3>${e ? 'Editar fecha' : 'Agregar fecha'}</h3>
-  <form id="cal-form" style="display:grid;gap:10px;margin-top:12px">
-    <label style="display:grid;gap:6px;font-size:.84rem"><b>Tipo</b><select id="cf-type">${Object.entries(CAL_TYPES).map(([k, [n]]) => `<option value="${k}" ${v.type === k ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select></label>
-    <label style="display:grid;gap:6px;font-size:.84rem"><b>Título</b><input id="cf-title" maxlength="120" value="${esc(v.title || '')}" placeholder="Si lo dejas vacío, se usa el tipo"></label>
-    <div style="display:flex;gap:8px;flex-wrap:wrap"><label style="display:grid;gap:6px;font-size:.84rem;flex:1"><b>Fecha</b><input type="date" id="cf-date" required value="${esc(v.date || '')}"></label><label style="display:grid;gap:6px;font-size:.84rem"><b>Hora de inicio</b><input type="time" id="cf-time" value="${esc(v.time || '')}"></label></div>
-    <label id="cf-allday-row" style="display:flex;gap:8px;align-items:center;font-size:.84rem" hidden><input type="checkbox" id="cf-allday" ${v.type === 'bloqueado' && e && !e.time ? 'checked' : ''}> Todo el día</label>
-    <label style="display:grid;gap:6px;font-size:.84rem"><b>Hasta el día (opcional, si son varios días seguidos)</b><input type="date" id="cf-end" value="${esc(v.endDate || '')}"></label>
-    <label style="display:grid;gap:6px;font-size:.84rem"><b>Hora de término</b><input type="time" id="cf-endtime" value="${esc(finDe(v))}"><span class="muted" id="cf-help" style="font-size:.76rem">El evento bloquea solo desde la hora de inicio hasta la de término. Si dura menos, cambia la hora de término y esa hora vuelve a quedar libre en la web.</span></label>
-    <p id="cf-warn" role="alert" style="margin:0;font-size:.82rem;font-weight:700;color:#b8402f" hidden>${AVISO_SIN_HORA}.</p>
-    <label style="display:flex;gap:8px;align-items:center;font-size:.84rem"><input type="checkbox" id="cf-tent" ${v.tentative ? 'checked' : ''}> Por confirmar (se ve con borde punteado y no se muestra en las landings)</label>
-    ${v.type === 'terapia' && (v.whatsapp || v.email) ? `<div class="card" style="padding:12px 14px;display:grid;gap:6px;font-size:.84rem"><b>${esc(v.name || '')}</b><span>${esc(v.modalidad === 'online' ? 'Online' : v.direccion ? `Presencial · ${v.direccion}` : 'Presencial')}${v.clientTz ? ` · Zona: ${esc(v.clientTz)}` : ''}</span><span>${esc(v.whatsapp || '')} · ${esc(v.email || '')}</span><div style="display:flex;gap:6px;flex-wrap:wrap">${botonesRec(v)}</div></div>` : ''}
-    <label style="display:grid;gap:6px;font-size:.84rem"><b>Nota</b><textarea id="cf-note" maxlength="500" rows="2">${esc(v.note || '')}</textarea></label>
-    ${e ? '' : '<label style="display:flex;gap:8px;align-items:center;font-size:.84rem"><input type="checkbox" id="cf-rep"> Repetir cada semana hasta <input type="date" id="cf-until"></label>'}
-    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between"><button class="btn btn-primary btn-sm">Guardar</button>${e ? '<button type="button" class="btn btn-ghost btn-sm" id="cf-del">Borrar</button>' : ''}</div>
-  </form>`);
+  <form id="cal-form" class="cal-form">
+    <label><b>Tipo</b><select id="cf-type">${Object.entries(CAL_TYPES).map(([k, [n]]) => `<option value="${k}" ${v.type === k ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select></label>
+    <label><b>Título</b><input id="cf-title" maxlength="120" value="${esc(v.title || '')}" placeholder="Si lo dejas vacío, se usa el tipo"></label>
+    <label><b>Fecha</b><input type="date" id="cf-date" required value="${esc(v.date || '')}"></label>
+    <label><b>Hasta el día (opcional, varios días seguidos)</b><input type="date" id="cf-end" value="${esc(v.endDate || '')}"></label>
+    <label><b>Hora de inicio</b><input type="time" id="cf-time" value="${esc(v.time || '')}"></label>
+    <label><b>Hora de término</b><input type="time" id="cf-endtime" value="${esc(finDe(v))}"></label>
+    <div class="full chks"><label id="cf-allday-row" hidden><input type="checkbox" id="cf-allday" ${v.type === 'bloqueado' && e && !e.time ? 'checked' : ''}> Todo el día</label><label><input type="checkbox" id="cf-tent" ${v.tentative ? 'checked' : ''}> Por confirmar (borde punteado; no se muestra en las landings)</label></div>
+    <p class="full muted" style="margin:-4px 0 0;font-size:.78rem">El evento bloquea solo desde la hora de inicio hasta la de término. Si dura menos, cambia la hora de término y esa hora vuelve a quedar libre en la web.</p>
+    <p id="cf-warn" class="full" role="alert" style="margin:0;font-size:.82rem;font-weight:700;color:#b8402f" hidden>${AVISO_SIN_HORA}.</p>
+    ${v.type === 'terapia' && (v.whatsapp || v.email) ? `<div class="card full" style="padding:12px 14px;display:grid;gap:6px;font-size:.84rem"><b>${esc(v.name || '')}</b><span>${esc(v.modalidad === 'online' ? 'Online' : v.direccion ? `Presencial · ${v.direccion}` : 'Presencial')}${v.clientTz ? ` · Zona: ${esc(v.clientTz)}` : ''}</span><span>${esc(v.whatsapp || '')} · ${esc(v.email || '')}</span><div style="display:flex;gap:6px;flex-wrap:wrap">${botonesRec(v)}</div></div>` : ''}
+    ${claseInscritas(v)}
+    <label class="full"><b>Nota</b><textarea id="cf-note" maxlength="500" rows="2">${esc(v.note || '')}</textarea></label>
+    ${e ? '' : '<label class="full rep"><input type="checkbox" id="cf-rep"> Repetir cada semana hasta <input type="date" id="cf-until"></label>'}
+    <div class="full actions"><button class="btn btn-primary btn-sm">Guardar</button>${e ? '<button type="button" class="btn btn-ghost btn-sm" id="cf-del">Borrar</button>' : ''}</div>
+  </form>`, true);
   // Aviso en vivo: un evento sin hora bloquea el día completo
   const avisar = () => {
     const bloq = $('#cf-type').value === 'bloqueado', todo = bloq && $('#cf-allday').checked;
@@ -556,10 +871,30 @@ V.ajustes = () => `<div class="view-head"><div><span class="eyebrow">Portal de l
 
 // Un solo manejador para todos los [data-go]: el menú se vuelve a pintar solo (p. ej. al llegar una alumna nueva) y sus botones siguen funcionando
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-go]'); if (b) go(b.dataset.go); });
+document.addEventListener('click', async (e) => {
+  const b = e.target.closest('[data-insc-del]'); if (!b) return;
+  const l = (A.leads || []).find((x) => x.id === b.dataset.inscDel); if (!l) return;
+  if (!confirm(`¿Eliminar a ${l.name} de esta clase? También se borra de Interesadas y no se puede deshacer.`)) return;
+  b.disabled = true;
+  try {
+    await data.leads({ action: 'delete', ids: [l.id] });
+    A.leads = A.leads.filter((x) => x.id !== l.id); S.leadSel.delete(l.id); paintNav(); render(false);
+    const ev = (A.cal || []).find((x) => x.id === l.claseEvento); if (ev && $('#dlg').open) calForm(ev);
+    toast('Eliminada.');
+  } catch (err) { fail(err); b.disabled = false; }
+});
+document.addEventListener('click', (e) => { const b = e.target.closest('[data-lead-alumna]'); if (b) { if ($('#dlg').open) $('#dlg').close(); openStudent(b.dataset.leadAlumna); } });
+document.addEventListener('click', (e) => { if (e.target.closest('[data-crm-hoy]')) { S.crmSeg = true; S.crmProg = ''; S.crmQ = ''; S.crmOrigen = ''; go('interesadas'); } });
+document.addEventListener('click', (e) => { const a = e.target.closest('[data-wa-open]'); if (!a) return; e.preventDefault(); if ($('#dlg').open) $('#dlg').close(); waOpen(a.dataset.waOpen, a.dataset.waName); go('whatsapp'); });
+document.addEventListener('click', (e) => { const b = e.target.closest('[data-wa-chat]'); if (b) { waOpen(b.dataset.waChat, ''); waRepaint(); } });
 function paintNav() {
-  $('#nav').innerHTML = NAV.map(([k, n, ic, c]) => { const cnt = c ? c() : 0; return `<button data-go="${k}" ${S.view === k || (S.view === 'ficha' && k === 'alumnas') || (S.view === 'clase' && k === 'formacion') ? 'aria-current="page"' : ''}><svg viewBox="0 0 24 24">${ic}</svg>${n}${cnt ? `<span class="count">${cnt}</span>` : ''}</button>`; }).join('');
+  // Estando en la sección, lo que llegue mientras la miras cuenta como visto
+  if (S.view === 'interesadas') marcarVisto('interesadas', Math.max(0, ...(A.leads || []).map((l) => l.createdAt || 0)));
+  if (S.view === 'alumnas' || S.view === 'ficha') marcarVisto('alumnas', Math.max(0, ...A.students.map((u) => u.createdAt?.toMillis?.() || 0)));
+  $('#nav').innerHTML = NAV.map(([k, n, ic, c]) => { if (k === '--') return `<div class="nav-label">${n}</div>`; const cnt = c ? c() : 0; return `<button data-go="${k}" ${S.view === k || (S.view === 'ficha' && k === 'alumnas') || (S.view === 'clase' && k === 'formacion') ? 'aria-current="page"' : ''}><svg viewBox="0 0 24 24">${ic}</svg>${n}${cnt ? `<span class="count">${cnt}</span>` : ''}</button>`; }).join('');
 }
 function render(top = true) {
+  A._vin = null;
   paintNav();
   $('#view').innerHTML = V[S.view]();
   if (top) scrollTo(0, 0);
@@ -574,6 +909,10 @@ function go(v) {
     loadAnswers(true).then(() => { if (S.view === 'respuestas') render(false); }).catch(fail);
   }
   if (v === 'interesadas') data.leads().then(() => { if (S.view === 'interesadas') render(false); }).catch(fail);
+  if (v === 'whatsapp') {
+    if (A.wa.on === null) waApi({ action: 'estado' }).then((r) => { A.wa.on = r.configurado; if (!r.configurado && S.view === 'whatsapp') render(false); }).catch(() => {});
+    if (S.waOpen) { const m = $('#wa-msgs'); if (m) m.scrollTop = m.scrollHeight; }
+  }
   if (v === 'calendario') data.cal().then(() => { if (S.view === 'calendario') render(false); }).catch(fail);
 }
 async function openStudent(uid) {
@@ -586,13 +925,61 @@ function bind() {
   document.querySelectorAll('[data-ans-lv]').forEach((b) => (b.onclick = () => { S.ansLv = Number(b.dataset.ansLv); render(false); }));
   document.querySelectorAll('[data-ans-who]').forEach((b) => (b.onclick = () => { S.ansWho = b.dataset.ansWho; S.ansLv = 0; go('respuestas'); }));
   document.querySelectorAll('[data-ans-reload]').forEach((b) => (b.onclick = () => { b.disabled = true; loadAnswers(true).then(() => render(false)).catch(fail); }));
+  if (S.view === 'whatsapp') waBind();
+  document.querySelectorAll('[data-crm-vista]').forEach((b) => (b.onclick = () => { S.crmVista = b.dataset.crmVista; render(false); }));
+  document.querySelectorAll('[data-crm-prog]').forEach((b) => (b.onclick = () => { S.crmProg = b.dataset.crmProg; S.leadSel = new Set(); render(false); }));
+  document.querySelectorAll('[data-crm-seg]').forEach((b) => (b.onclick = () => { S.crmSeg = !S.crmSeg; render(false); }));
+  document.querySelectorAll('[data-crm-desc]').forEach((b) => (b.onclick = () => { S.crmDesc = !S.crmDesc; render(false); }));
+  const co = $('#crm-origen'); if (co) co.onchange = () => { S.crmOrigen = co.value; render(false); };
+  const cq = $('#crm-q'); if (cq) cq.oninput = () => { S.crmQ = cq.value; const p = cq.selectionStart; render(false); const c2 = $('#crm-q'); c2.focus(); c2.setSelectionRange(p, p); };
+  document.querySelectorAll('[data-lead-open]').forEach((b) => (b.onclick = (e) => { if (e.target.closest('a')) return; leadFicha(b.dataset.leadOpen); }));
+  document.querySelectorAll('[data-lead-card]').forEach((c) => (c.ondragstart = (e) => { e.dataTransfer.setData('text/plain', c.dataset.leadCard); e.dataTransfer.effectAllowed = 'move'; }));
+  document.querySelectorAll('[data-kb-col]').forEach((col) => {
+    col.ondragover = (e) => { e.preventDefault(); col.classList.add('over'); };
+    col.ondragleave = () => col.classList.remove('over');
+    col.ondrop = (e) => { e.preventDefault(); col.classList.remove('over'); const id = e.dataTransfer.getData('text/plain'); if (id) leadMover(id, col.dataset.kbCol); };
+  });
+  document.querySelectorAll('[data-lead-sel]').forEach((cb) => (cb.onchange = () => { cb.checked ? S.leadSel.add(cb.dataset.leadSel) : S.leadSel.delete(cb.dataset.leadSel); render(false); }));
+  document.querySelectorAll('[data-lead-all]').forEach((cb) => (cb.onchange = () => { S.leadSel = cb.checked ? new Set(leadsFiltradas().map((l) => l.id)) : new Set(); render(false); }));
+  document.querySelectorAll('[data-leads-clear]').forEach((b) => (b.onclick = () => { S.leadSel = new Set(); render(false); }));
+  document.querySelectorAll('[data-leads-del]').forEach((b) => (b.onclick = async () => {
+    const ids = [...S.leadSel];
+    if (!ids.length || !confirm(`¿Eliminar ${ids.length} interesada${ids.length === 1 ? '' : 's'}? Se borran de tu lista y no se puede deshacer.`)) return;
+    b.disabled = true;
+    try { await data.leads({ action: 'delete', ids }); A.leads = A.leads.filter((l) => !S.leadSel.has(l.id)); S.leadSel = new Set(); paintNav(); render(false); toast(`${ids.length} eliminada${ids.length === 1 ? '' : 's'}.`); } catch (e) { fail(e); b.disabled = false; }
+  }));
+  document.querySelectorAll('[data-del-student]').forEach((b) => (b.onclick = async () => {
+    const u = student(b.dataset.delStudent); if (!u) return;
+    const conPago = paying(u) || ownedOf(u).length > 0;
+    const t = prompt(`Vas a eliminar a ${nameOf(u)} y todo su avance, preguntas y pagos registrados. No se puede deshacer.${conPago ? '\n\nATENCIÓN: tiene pagos o niveles comprados.' : ''}\n\nEscribe ELIMINAR para confirmar:`);
+    if (t?.trim() !== 'ELIMINAR') return;
+    b.disabled = true;
+    try { await api({ action: 'deleteStudent', uid: u.id, force: conPago }); A.students = A.students.filter((x) => x.id !== u.id); S.open = null; go('alumnas'); toast('Alumna eliminada.'); } catch (e) { fail(e); b.disabled = false; }
+  }));
+  document.querySelectorAll('[data-leads-dedup]').forEach((b) => (b.onclick = async () => {
+    const sobran = repetidasPorLimpiar();
+    if (!sobran.length) return;
+    const ej = sobran.slice(0, 5).map((l) => `• ${l.name} (${LEAD_FORMS[l.form] || l.form})`).join('\n');
+    if (!confirm(`Hay ${sobran.length} registro${sobran.length === 1 ? '' : 's'} repetido${sobran.length === 1 ? '' : 's'}: la misma persona en el mismo formulario con menos de 24 horas de diferencia.\n\nSe conserva el más avanzado de cada persona y se eliminan los demás. No se puede deshacer.\n\n${ej}${sobran.length > 5 ? '\n…' : ''}\n\n¿Eliminarlos?`)) return;
+    b.disabled = true;
+    try {
+      const ids = sobran.map((l) => l.id);
+      for (let i = 0; i < ids.length; i += 100) await data.leads({ action: 'delete', ids: ids.slice(i, i + 100) });
+      A.leads = A.leads.filter((l) => !ids.includes(l.id)); S.leadSel = new Set(); paintNav(); render(false); toast(`${ids.length} repetida${ids.length === 1 ? '' : 's'} eliminada${ids.length === 1 ? '' : 's'}.`);
+    } catch (e) { fail(e); b.disabled = false; }
+  }));
   document.querySelectorAll('[data-leads-reload]').forEach((b) => (b.onclick = () => { b.disabled = true; data.leads().then(() => render(false)).catch(fail); }));
   document.querySelectorAll('[data-cal-add]').forEach((b) => (b.onclick = () => calForm()));
   document.querySelectorAll('[data-cal-ev]').forEach((b) => (b.onclick = () => calForm(A.cal.find((e) => e.id === b.dataset.calEv))));
-  document.querySelectorAll('[data-cal-mes]').forEach((b) => (b.onclick = () => {
-    const d = new Date(S.calMes || (() => { const h = new Date(hoyCL()); return Date.UTC(h.getUTCFullYear(), h.getUTCMonth(), 1); })());
-    S.calMes = Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + Number(b.dataset.calMes), 1); render(false);
+  document.querySelectorAll('[data-cal-vista]').forEach((b) => (b.onclick = () => { S.calVista = b.dataset.calVista; render(false); }));
+  document.querySelectorAll('[data-cal-hoy]').forEach((b) => (b.onclick = () => { S.calRef = hoyCL(); render(false); }));
+  document.querySelectorAll('[data-cal-nav]').forEach((b) => (b.onclick = () => {
+    const n = Number(b.dataset.calNav), d = new Date(S.calRef || hoyCL()), v = S.calVista;
+    S.calRef = v === 'dia' ? d.getTime() + n * 864e5 : v === 'semana' ? d.getTime() + n * 7 * 864e5 : v === 'mes' ? Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + n, 1) : Date.UTC(d.getUTCFullYear() + n, d.getUTCMonth(), 1);
+    render(false);
   }));
+  document.querySelectorAll('[data-cal-dia]').forEach((b) => (b.onclick = () => { S.calRef = tOf(b.dataset.calDia); S.calVista = 'dia'; render(false); }));
+  document.querySelectorAll('[data-cal-mes-ir]').forEach((b) => (b.onclick = () => { S.calRef = tOf(b.dataset.calMesIr); S.calVista = 'mes'; render(false); }));
   document.querySelectorAll('[data-lead-status]').forEach((s) => (s.onchange = async () => {
     const l = A.leads.find((x) => x.id === s.dataset.leadStatus);
     try { await data.leads({ action: 'status', id: l.id, status: s.value }); l.status = s.value; paintNav(); toast('Estado guardado.'); } catch (e) { fail(e); s.value = l.status; }
@@ -676,7 +1063,7 @@ function bind() {
   };
 }
 const papi = (uid) => profileApi(uid);
-function dialog(html) { $('#dlg-body').innerHTML = html; const d = $('#dlg'); if (!d.open) d.showModal(); }
+function dialog(html, ancha = false) { $('#dlg-body').innerHTML = html; const d = $('#dlg'); d.classList.toggle('wide', ancha); if (!d.open) d.showModal(); }
 $('#dlg-x').onclick = () => $('#dlg').close();
 $('#dlg').addEventListener('click', (e) => { if (e.target.id === 'dlg') $('#dlg').close(); });
 function paintMe() {
@@ -752,8 +1139,10 @@ async function enter(u, auto = false) {
     await u.getIdToken(true);
     await loadAll();
     watchStudents();
+    waWatch();
     loadAnswers().then(paintNav).catch((e) => console.warn('respuestas', e.message));
-    data.leads().then(paintNav).catch((e) => console.warn('interesadas', e.message));
+    data.leads().then(() => { paintNav(); if (S.view === 'inicio') render(false); }).catch((e) => console.warn('interesadas', e.message));
+    data.cal().then(() => { if (S.view === 'inicio') render(false); }).catch((e) => console.warn('calendario', e.message));
     const p = (await getDoc(doc(db, 'users', u.uid))).data() || {};
     start({ id: u.uid, ...p, displayName: p.displayName || 'Maestra Holística' });
   } catch (e) { console.error(e); say(e.message || 'No pudimos abrir el portal. Inténtalo de nuevo.'); }

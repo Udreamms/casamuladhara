@@ -2,8 +2,8 @@
 // Todo se calcula en hora de Chile (America/Santiago, con su cambio de horario); al navegador se le entregan instantes (ms UTC).
 export const TZ = 'America/Santiago';
 export const TERAPIAS = [
-  'Reiki', 'Radiestesia y Sanación del Alma', 'Péndulo Hebreo', 'Registros Akáshicos', 'Vidas Pasadas',
-  'Sanando Niño Interior', 'Terapia Transgeneracional', 'Tarot Terapéutico y Evolutivo', 'Limpieza energética de espacios',
+  'Reiki', 'Radiestesia', 'Péndulo Hebreo', 'Registros Akáshicos', 'Vidas Pasadas',
+  'Niño Interior', 'Terapia Transgeneracional', 'Tarot Terapéutico y Evolutivo', 'Limpieza energética de espacios',
 ];
 export const LIMPIEZA = 'Limpieza energética de espacios';
 export const HORA_INICIO = 9; // atiende de 9:00 a 18:00 (Chile)

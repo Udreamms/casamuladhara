@@ -6,6 +6,7 @@
 //   última cuota pagada o pago al contado -> plan 'completo' y la suscripción se detiene sola
 // Después aplica la regla de acceso (src/lib/server/access.js): rol en Firestore y nivel en el token.
 // Cada pago queda en users/{uid}/payments.
+// Al empezar a pagar (primera cuota o pago al contado), sus registros en Interesadas (mismo correo) pasan a la etapa Inscrita.
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { cleanLevels, INSTALLMENTS, START_LEVELS, unlockedOf } from '@/lib/server/access.js';
 import { applyAccess } from '@/lib/server/apply.js';
@@ -39,6 +40,19 @@ async function cancelQuietly(subscriptionId) {
   }
 }
 
+// CRM: quien paga deja de ser "interesada". Nunca debe romper el webhook, por eso se atrapa cualquier error.
+async function marcarInscrita(uid) {
+  try {
+    const email = String((await db().doc(`users/${uid}`).get()).data()?.email || '').trim().toLowerCase();
+    if (!email) return;
+    const s = await db().collection('leads').where('email', '==', email).get();
+    const lote = db().batch();
+    let n = 0;
+    s.docs.forEach((d) => { if (!['inscrita', 'descartado'].includes(d.data().status)) { lote.update(d.ref, { status: 'inscrita', updatedAt: FieldValue.serverTimestamp() }); n++; } });
+    if (n) await lote.commit();
+  } catch (e) { console.error('leads inscrita', e); }
+}
+
 async function syncSubscription(subscriptionId, hint, first = false) {
   // Siempre se lee el estado actual desde Stripe: los eventos pueden llegar desordenados
   const sub = await stripe().subscriptions.retrieve(subscriptionId);
@@ -69,6 +83,7 @@ async function syncSubscription(subscriptionId, hint, first = false) {
     ...(first && active ? startLevels(profile) : {}),
   }, { merge: true });
   await applyAccess(uid);
+  if (active) await marcarInscrita(uid);
 }
 
 async function recordInvoice(inv, paid) {
@@ -128,12 +143,13 @@ async function paidInFull(session) {
   await ref.set({ plan: 'completo', paymentStatus: 'ok', currentPeriodEnd: null, stripeCustomerId: idOf(session.customer), ...startLevels(profile) }, { merge: true });
   if (session.metadata?.subscription) await cancelQuietly(session.metadata.subscription);
   await applyAccess(uid);
+  await marcarInscrita(uid);
 }
 
 // API de conversiones de Meta: compra de la formación (pago al contado, o primera cuota). Un fallo aquí no afecta al pago.
 const compraMeta = ({ id, email, valor, moneda, creado, uid }) => enviarDespues({
   nombre: 'Purchase', id: `compra-${id}`, tiempo: creado * 1000,
-  user: usuario({ email, uid }), custom: { value: valor, currency: String(moneda || 'usd').toUpperCase(), content_name: 'Formación Terapeuta Holística Integral' },
+  user: usuario({ email, uid }), custom: { value: valor, currency: String(moneda || 'usd').toUpperCase() },
 });
 
 const subscriptionOf = (inv) => idOf(inv.parent?.subscription_details?.subscription ?? inv.subscription);

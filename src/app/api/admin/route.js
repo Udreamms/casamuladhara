@@ -2,12 +2,14 @@
 // Lo usa el portal de la Maestra (/admin).
 //   action 'me'     -> activa la cuenta de la Maestra la primera vez (correo en ADMIN_EMAILS y ya verificado)
 //                      y devuelve { admin, verified }.
+//   action 'deleteStudent' -> { uid, force? } elimina la cuenta de una alumna y todo lo que cuelga de ella (avance, preguntas, pagos). No se puede deshacer.
+//                      Si tiene pagos o niveles comprados exige force: true. No cancela su suscripción en Stripe.
 //   action 'access' -> { uid, ownedLevels?: [..], unlockedLevels?: [..], completedLevels?: [..], blocked?: bool } cambia los niveles
 //                      de una alumna (ver src/lib/server/access.js) y los aplica al instante (rol en Firestore y claims).
 //                      n4Classes?: { '41': [1, 2] } cambia las clases abiertas de esos cursos del Nivel 4.
 //                      Devuelve también n4Classes completo, porque abrir un curso nuevo lo guarda con sus clases cerradas.
 import { FieldValue } from 'firebase-admin/firestore';
-import { cleanClasses, cleanLevels, ownedOf, SUBLEVELS, unlockedOf } from '@/lib/server/access.js';
+import { cleanClasses, cleanLevels, isPaying, ownedOf, SUBLEVELS, unlockedOf } from '@/lib/server/access.js';
 import { applyAccess } from '@/lib/server/apply.js';
 import { auth, db, json } from '@/lib/server/services.js';
 
@@ -53,6 +55,21 @@ export async function POST(request) {
     }
 
     if (user.admin !== true) return json({ error: 'Esta acción es solo para la Maestra.' }, 403);
+
+    if (body.action === 'deleteStudent') {
+      const { uid } = body;
+      if (typeof uid !== 'string' || !/^[A-Za-z0-9]{10,128}$/.test(uid)) return json({ error: 'Alumna no válida.' }, 400);
+      if (uid === user.uid) return json({ error: 'No puedes eliminar tu propia cuenta.' }, 400);
+      const ref = db().doc(`users/${uid}`);
+      const profile = (await ref.get()).data();
+      if (profile?.role === 'admin') return json({ error: 'No se puede eliminar la cuenta de la Maestra.' }, 400);
+      if (profile && (isPaying(profile) || ownedOf(profile).length) && body.force !== true) {
+        return json({ error: 'Esta alumna tiene pagos o niveles comprados. Confirma que de verdad quieres eliminarla.', needsForce: true }, 409);
+      }
+      try { await auth().deleteUser(uid); } catch (e) { if (e.code !== 'auth/user-not-found') throw e; }
+      await db().recursiveDelete(ref);
+      return json({ ok: true });
+    }
 
     if (body.action === 'access') {
       const { uid } = body;

@@ -5,26 +5,31 @@
   const PIXEL = '716765743270935'; // Píxel Casa Muladhara (Business Casa Muladhara)
 
   /* Píxel de Meta: código base oficial */
-  !function (f, b, e, v, n, t, s) {
-    if (f.fbq) return; n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
-    if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = []; t = b.createElement(e); t.async = !0;
-    t.src = v; s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s);
-  }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
-  fbq('init', PIXEL);
-  fbq('track', 'PageView');
+  // El Píxel solo cuenta visitas del sitio real: no las de pruebas en el computador ni las de vistas previas (localhost, *.vercel.app)
+  if (['casamuladhara.com', 'www.casamuladhara.com'].includes(location.hostname)) {
+    !function (f, b, e, v, n, t, s) {
+      if (f.fbq) return; n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
+      if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = []; t = b.createElement(e); t.async = !0;
+      t.src = v; s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s);
+    }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', PIXEL);
+    fbq('track', 'PageView');
+  } else window.fbq = () => {};
 
   // Origen de la visita: se guarda en la primera página con UTM y acompaña a la persona mientras navega el sitio
   const KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'fbclid', 'gclid'];
   const ORIGEN = 'cm-origen';
   const qs = new URLSearchParams(location.search);
   const desdeUrl = Object.fromEntries(KEYS.map((k) => [k, qs.get(k)]).filter(([, v]) => v));
+  // /links es el enlace de la bio de Instagram: si llega sin UTM, el origen igual es "instagram / bio"
+  if (location.pathname === '/links' && !desdeUrl.utm_source) { desdeUrl.utm_source = 'instagram'; desdeUrl.utm_medium = 'bio'; }
   try { if (Object.keys(desdeUrl).length) sessionStorage.setItem(ORIGEN, JSON.stringify(desdeUrl)); } catch { /* sin almacenamiento */ }
   const origen = () => { try { return JSON.parse(sessionStorage.getItem(ORIGEN)) || desdeUrl; } catch { return desdeUrl; } };
 
   // Botones de WhatsApp: cuentan como contacto para Meta
   document.addEventListener('click', (e) => {
     const a = e.target.closest('a[href*="wa.link"], a[href*="wa.me"], a[href*="api.whatsapp.com"]');
-    if (a) fbq('track', 'Contact', { content_name: location.pathname });
+    if (a) fbq('track', 'Contact');
   });
 
   // Códigos de país del WhatsApp: el HTML trae solo Chile (por si falla el script) y aquí se completa la lista
@@ -63,16 +68,14 @@
       const [y, m, d] = fecha.split('-').map(Number);
       const ini = utcDeChile(y, m, d, 19, 0), fin = new Date(ini.getTime() + 30 * 60000);
       const detalle = `Entra a la clase por Google Meet: ${enlace}`;
-      const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Casa Muladhara//Clases gratis//ES', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'BEGIN:VEVENT',
-        `UID:${fecha}-${f.dataset.lead}@casamuladhara`, `DTSTAMP:${utc(new Date())}`, `DTSTART:${utc(ini)}`, `DTEND:${utc(fin)}`,
-        `SUMMARY:${icsTexto(titulo)}`, `DESCRIPTION:${icsTexto(detalle)}`, `LOCATION:${icsTexto(enlace)}`, `URL:${enlace}`,
-        'BEGIN:VALARM', 'TRIGGER:-PT1H', 'ACTION:DISPLAY', `DESCRIPTION:${icsTexto(titulo)}`, 'END:VALARM', 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
-      const cal = el('a', { className: 'btn btn-cal', href: URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' })), download: `clase-gratis-${fecha}.ics` }, 'Agregar a mi calendario');
       const g = new URL('https://calendar.google.com/calendar/render');
       g.search = new URLSearchParams({ action: 'TEMPLATE', text: titulo, dates: `${utc(ini)}/${utc(fin)}`, details: detalle, location: enlace }).toString();
-      acciones.append(cal, el('a', { className: 'gcal', href: g.toString(), target: '_blank', rel: 'noopener' }, 'Google Calendar'));
+      acciones.append(el('a', { className: 'btn btn-cal', href: g.toString(), target: '_blank', rel: 'noopener' }, 'Agregar a mi calendario'));
     }
-    nodos.push(acciones, el('small', {}, 'También te lo enviamos por WhatsApp con un recordatorio 1 hora antes.'));
+    // Debajo del calendario: dudas por WhatsApp de Karen, con el mensaje ya escrito
+    const duda = `Hola Karen, tengo una pregunta sobre la clase gratis de ${f.dataset.clase}`;
+    acciones.append(el('a', { className: 'btn btn-cal', href: `https://wa.me/56940044528?text=${encodeURIComponent(duda)}`, target: '_blank', rel: 'noopener' }, '¿Tienes preguntas? Escríbenos por WhatsApp'));
+    nodos.push(acciones, el('small', {}, 'Agrégala a tu calendario para que te avise 1 hora antes. Karen también te escribirá por WhatsApp.'));
     return nodos;
   }
 
@@ -95,7 +98,7 @@
       const body = {
         action: 'save', form: f.dataset.lead,
         name: val('name'), email: val('email'), whatsapp, country: val('country') || pais,
-        interest: val('interest'), message: val('message'), web: val('web'),
+        interest: val('interest'), date: f.elements.interest?.selectedOptions?.[0]?.dataset.date || '', message: val('message'), web: val('web'),
         page: location.pathname, utm: origen(),
         eventId: crypto.randomUUID?.() || String(Date.now()) + Math.random().toString(36).slice(2, 10), // mismo id en el Píxel y en la API de conversiones
       };
@@ -105,8 +108,8 @@
         const r = await fetch('/api/leads', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
         const out = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(out.error || 'No pudimos enviar tus datos.');
-        fbq('track', 'Lead', { content_name: f.dataset.lead }, { eventID: body.eventId });
-        f.querySelectorAll('label, button, small').forEach((el) => (el.hidden = true));
+        if (!out.repetida) fbq('track', 'Lead', {}, { eventID: body.eventId }); // quien repite el formulario no cuenta otro Lead en las campañas
+        f.querySelectorAll(out.enlace && f.dataset.clase ? 'label, button, small, .wa-alt' : 'label, button, small').forEach((el) => (el.hidden = true));
         // Clase gratis con enlace de Google Meet guardado: el gracias trae el botón para entrar y el calendario
         if (ok && out.enlace && f.dataset.clase) ok.replaceChildren(...graciasClase(f, out.enlace));
         if (ok) { ok.hidden = false; ok.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }

@@ -487,8 +487,8 @@ export async function startCasona(canvas, state, onProgress = () => {}) {
   box(M.plaster, 4.8, .8, .3, 0, 3.4, -28);
 
   // --- pasillo de las terapias ---
-  const THER = [['Reiki', 0xf2c66d], ['Radiestesia y Sanación del Alma', 0x9fd3b8], ['Péndulo Hebreo', 0xe8bd63], ['Registros Akáshicos', 0xb9c9ef], ['Vidas Pasadas', 0xc9a8e0],
-    ['Sanando Niño Interior', 0xf0b7a4], ['Terapia Transgeneracional', 0xa8e0c8], ['Tarot Terapéutico y Evolutivo', 0xe8735f], ['Limpieza energética de espacios', 0xd9f0c4]];
+  const THER = [['Reiki', 0xf2c66d], ['Radiestesia', 0x9fd3b8], ['Péndulo Hebreo', 0xe8bd63], ['Registros Akáshicos', 0xb9c9ef], ['Vidas Pasadas', 0xc9a8e0],
+    ['Niño Interior', 0xf0b7a4], ['Terapia Transgeneracional', 0xa8e0c8], ['Tarot Terapéutico y Evolutivo', 0xe8735f], ['Limpieza energética de espacios', 0xd9f0c4]];
   const doorZ = i => -31.5 - i * 3;
   const therapyDoors = [];
   {
@@ -540,7 +540,7 @@ export async function startCasona(canvas, state, onProgress = () => {}) {
   box(M.plaster, 4.8, 5.2, .3, 0, 3.4, -58);
 
   // --- escalera de la Escuela (doble altura) ---
-  const STEPS = [['Paso 1 · Inicia', 'Péndulo Hebreo Nivel 1'], ['Paso 2 · Equilibra', 'Limpieza Energética de Casas y Espacios'], ['Paso 3 · Transforma', 'Radiestesia y Sanación del Alma'],
+  const STEPS = [['Paso 1 · Inicia', 'Péndulo Hebreo Nivel 1'], ['Paso 2 · Equilibra', 'Limpieza Energética de Casas y Espacios'], ['Paso 3 · Transforma', 'Radiestesia'],
     ['Paso 4 · Especialízate', 'Especializaciones en Radiestesia'], ['Paso 5 · Integra', 'Tarot Terapéutico: El Camino del Ser']];
   const stepGlow = [];
   {

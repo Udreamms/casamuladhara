@@ -4,7 +4,7 @@
   const CL = 'America/Santiago';
   const CHILE = [CL, 'America/Punta_Arenas', 'Pacific/Easter'];
   const LIMPIEZA = 'Limpieza energética de espacios';
-  const TERAPIAS = ['Reiki', 'Radiestesia y Sanación del Alma', 'Péndulo Hebreo', 'Registros Akáshicos', 'Vidas Pasadas', 'Sanando Niño Interior',
+  const TERAPIAS = ['Reiki', 'Radiestesia', 'Péndulo Hebreo', 'Registros Akáshicos', 'Vidas Pasadas', 'Niño Interior',
     'Terapia Transgeneracional', 'Tarot Terapéutico y Evolutivo', LIMPIEZA];
   const miTz = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || CL; } catch { return CL; } })();
   const enChile = CHILE.includes(miTz);
@@ -73,6 +73,7 @@
       <label>Correo<input name="email" type="email" autocomplete="email" maxlength="160" required></label>
       <label data-dir hidden>Dirección del lugar a limpiar (Chile)<input name="direccion" maxlength="240" placeholder="Calle, número, comuna"></label>
       <div class="ag-hp" aria-hidden="true"><label>Web<input name="web" tabindex="-1" autocomplete="off"></label></div>
+      <p class="ag-note">Las terapias holísticas acompañan tu bienestar y no reemplazan la atención médica ni psicológica.</p>
       <p class="ag-err" data-err role="alert" hidden></p>
       <button class="ag-go" type="submit">Confirmar mi sesión</button>
     </form>
@@ -175,7 +176,7 @@
       const r = await fetch('/api/terapias', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       const d = await r.json().catch(() => ({}));
       if (!r.ok) { if (d.refrescar) await cargar(true); throw new Error(d.error || 'No pudimos agendar tu sesión.'); }
-      if (window.fbq) fbq('track', 'Schedule', { content_name: body.terapia }, { eventID: body.eventId });
+      if (window.fbq) fbq('track', 'Schedule', {}, { eventID: body.eventId });
       gracias(body, d);
     } catch (e) { error(e.message); } finally { go.disabled = false; go.textContent = 'Confirmar mi sesión'; }
   }

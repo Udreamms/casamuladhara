@@ -28,7 +28,9 @@ export async function POST(request) {
   const b = await request.json().catch(() => ({}));
   // Campo trampa para bots
   if (str(b.web, 200)) return json({ ok: true });
-  const terapia = TERAPIAS.includes(b.terapia) ? b.terapia : null;
+  const ANTIGUOS = { 'Sanando Niño Interior': 'Niño Interior', 'Radiestesia y Sanación del Alma': 'Radiestesia' }; // nombres de antes del cambio
+  const nombreTerapia = ANTIGUOS[b.terapia] || b.terapia;
+  const terapia = TERAPIAS.includes(nombreTerapia) ? nombreTerapia : null;
   const modalidad = ['online', 'presencial'].includes(b.modalidad) ? b.modalidad : null;
   const start = Number(b.start);
   const tz = zonaValida(str(b.tz, 60)) ? str(b.tz, 60) : '';
@@ -66,7 +68,7 @@ export async function POST(request) {
     if (cita === 'limite') return json({ error: 'Ya tienes varias sesiones agendadas. Escríbenos por WhatsApp si necesitas otra.' }, 429);
     // API de conversiones de Meta: el mismo Schedule que registra el Píxel, con el mismo id para que no se cuente doble
     const ctx = contexto(request);
-    enviarDespues({ nombre: 'Schedule', id: idValido(b.eventId) || `terapia-${ref.id}`, url: ctx.url, user: usuario({ email, phone: whatsapp, nombre: name }, ctx), custom: { content_name: terapia, modalidad } });
+    enviarDespues({ nombre: 'Schedule', id: idValido(b.eventId) || `terapia-${ref.id}`, url: ctx.url, user: usuario({ email, phone: whatsapp, nombre: name }, ctx) });
     let enlace = '';
     if (modalidad === 'online') {
       const g = ((await firestore.doc('config/clases').get()).data() || {}).enlaceTerapias;
