@@ -390,6 +390,28 @@ const leadEtapa = (l) => {
   return e;
 };
 const seguimientoHoy = (l) => !!l.followUp && l.followUp <= ymd(hoyCL()) && !['inscrita', 'descartado'].includes(leadEtapa(l));
+// Repetidas: la misma persona (correo o WhatsApp) en el mismo formulario con menos de 24 horas entre un envío y otro (doble envío por accidente).
+// De cada grupo se conserva la que está más avanzada en el embudo (o tiene nota) y, si empatan, la primera.
+const RANGO = Object.fromEntries(LEAD_STATES.map(([k], i) => [k, i]));
+const repetidasPorLimpiar = () => {
+  const porForm = new Map();
+  [...(A.leads || [])].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0)).forEach((l) => { if (!porForm.has(l.form)) porForm.set(l.form, []); porForm.get(l.form).push(l); });
+  const borrar = [];
+  for (const lista of porForm.values()) {
+    const grupos = [];
+    for (const l of lista) {
+      const llaves = llavesDe(l);
+      const g = grupos.find((x) => (l.createdAt || 0) - x.ultimo < 864e5 && x.llaves.some((k) => llaves.includes(k)));
+      if (g) { g.items.push(l); g.llaves.push(...llaves); g.ultimo = l.createdAt || 0; } else grupos.push({ items: [l], llaves: [...llaves], ultimo: l.createdAt || 0 });
+    }
+    for (const g of grupos) {
+      if (g.items.length < 2) continue;
+      const mejor = [...g.items].sort((a, b) => (RANGO[b.status] ?? 0) - (RANGO[a.status] ?? 0) || (b.note ? 1 : 0) - (a.note ? 1 : 0) || (a.createdAt || 0) - (b.createdAt || 0))[0];
+      g.items.forEach((x) => { if (x !== mejor) borrar.push(x); });
+    }
+  }
+  return borrar;
+};
 const leadsFiltradas = () => {
   const q = (S.crmQ || '').toLowerCase().trim(), prog = LEAD_PROGS.find((x) => x[0] === S.crmProg);
   return (A.leads || []).filter((l) => (!prog || prog[2].includes(l.form))
@@ -402,7 +424,7 @@ const alumnaBadge = (l) => { const u = alumnaDe(l), o = otrasDe(l); return `${u 
 const segBadge = (l) => (l.followUp ? `<span class="pill ${seguimientoHoy(l) ? 'bad' : 'lock'}" title="Próximo seguimiento">${seguimientoHoy(l) ? 'Seguimiento hoy' : `Seguir ${fechaLarga(l.followUp)}`}</span>` : '');
 
 V.interesadas = () => {
-  const head = `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>CRM · Interesadas</h1><p>Personas que dejaron sus datos en la página. Muévelas por el embudo, escribe notas y fija cuándo volver a escribirles.</p></div><button class="btn btn-ghost btn-sm" data-leads-reload>Actualizar</button></div>`;
+  const head = `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>CRM · Interesadas</h1><p>Personas que dejaron sus datos en la página. Muévelas por el embudo, escribe notas y fija cuándo volver a escribirles.</p></div><span style="display:flex;gap:8px;flex-wrap:wrap">${A.leads && repetidasPorLimpiar().length ? `<button class="btn btn-ghost btn-sm" data-leads-dedup>Limpiar repetidas (${repetidasPorLimpiar().length})</button>` : ''}<button class="btn btn-ghost btn-sm" data-leads-reload>Actualizar</button></span></div>`;
   if (!A.leads) return `${head}<div class="card empty">Cargando interesadas…</div>`;
   const sinLink = [['enlacePendulo', 'Péndulo'], ['enlaceTarot', 'Tarot'], ['enlaceTerapias', 'terapias online']].filter(([k]) => !A.clases?.[k]).map(([, n]) => n);
   const aviso = sinLink.length ? `<div class="card" style="padding:12px 14px;font-size:.88rem;border-left:4px solid #b8402f"><b>Falta el enlace de Google Meet de ${sinLink.join(', ')}.</b> Mientras no esté, quienes se registren no ven el botón para entrar. Cárgalo en <button class="link" data-go="ajustes">Ajustes del aula</button>.</div>` : '';
@@ -932,6 +954,18 @@ function bind() {
     if (t?.trim() !== 'ELIMINAR') return;
     b.disabled = true;
     try { await api({ action: 'deleteStudent', uid: u.id, force: conPago }); A.students = A.students.filter((x) => x.id !== u.id); S.open = null; go('alumnas'); toast('Alumna eliminada.'); } catch (e) { fail(e); b.disabled = false; }
+  }));
+  document.querySelectorAll('[data-leads-dedup]').forEach((b) => (b.onclick = async () => {
+    const sobran = repetidasPorLimpiar();
+    if (!sobran.length) return;
+    const ej = sobran.slice(0, 5).map((l) => `• ${l.name} (${LEAD_FORMS[l.form] || l.form})`).join('\n');
+    if (!confirm(`Hay ${sobran.length} registro${sobran.length === 1 ? '' : 's'} repetido${sobran.length === 1 ? '' : 's'}: la misma persona en el mismo formulario con menos de 24 horas de diferencia.\n\nSe conserva el más avanzado de cada persona y se eliminan los demás. No se puede deshacer.\n\n${ej}${sobran.length > 5 ? '\n…' : ''}\n\n¿Eliminarlos?`)) return;
+    b.disabled = true;
+    try {
+      const ids = sobran.map((l) => l.id);
+      for (let i = 0; i < ids.length; i += 100) await data.leads({ action: 'delete', ids: ids.slice(i, i + 100) });
+      A.leads = A.leads.filter((l) => !ids.includes(l.id)); S.leadSel = new Set(); paintNav(); render(false); toast(`${ids.length} repetida${ids.length === 1 ? '' : 's'} eliminada${ids.length === 1 ? '' : 's'}.`);
+    } catch (e) { fail(e); b.disabled = false; }
   }));
   document.querySelectorAll('[data-leads-reload]').forEach((b) => (b.onclick = () => { b.disabled = true; data.leads().then(() => render(false)).catch(fail); }));
   document.querySelectorAll('[data-cal-add]').forEach((b) => (b.onclick = () => calForm()));

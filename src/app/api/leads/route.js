@@ -2,9 +2,12 @@
 // Personas que dejan sus datos en los formularios de las landings (Péndulo, Formación, Sala Abierta, Terapias, Meditación, portada).
 // Se guardan en leads/{id} desde el servidor: el navegador no escribe en Firestore y las reglas siguen denegando todo lo demás.
 //   action 'save' -> { form, name, email, whatsapp, country, interest, message, utm, page, web }   sin sesión, desde cualquier landing
+//                    Una persona (mismo correo, o mismo WhatsApp si no dejó correo) queda una sola vez por formulario: si vuelve a enviarlo se actualiza
+//                    su registro (nueva fecha de clase, nuevo mensaje) y responde { repetida: true }, en vez de crear otro.
 //   action 'all'  -> { leads: [{ id, form, name, ..., createdAt }] }   solo la Maestra (Authorization: Bearer <token>)
 //   action 'update' -> { id, status?, note?, followUp? }   la Maestra cambia la etapa, escribe una nota o fija la fecha de seguimiento (AAAA-MM-DD; vacío la quita)
 //   action 'delete' -> { ids: [..] }   la Maestra elimina interesadas (hasta 100 a la vez); no se puede deshacer
+import crypto from 'node:crypto';
 import { FieldValue } from 'firebase-admin/firestore';
 import { auth, db, json } from '@/lib/server/services.js';
 import { contexto, enviarDespues, idValido, usuario } from '@/lib/server/meta.js';
@@ -52,16 +55,39 @@ export async function POST(request) {
           if (!s.empty) Object.assign(lead, { claseEvento: s.docs[0].id, claseFecha: str(body.date, 10) });
         } catch (e) { console.error('leads clase', e); } // sin la asociación igual se guarda la interesada
       }
-      const ref = await db().collection('leads').add(lead);
-      // API de conversiones de Meta: el mismo Lead que registra el Píxel, con el mismo id para que no se cuente doble
+      // Misma persona y mismo formulario = mismo registro. El id sale de formulario + correo (o WhatsApp), así que dos envíos
+      // casi a la vez (doble clic, reintento) caen en el mismo documento y la transacción deja solo uno.
+      const firestore = db();
+      const llave = lead.email || lead.whatsapp.replace(/\D/g, '');
+      let ref = llave ? firestore.collection('leads').doc(crypto.createHash('sha1').update(`${form}|${llave}`).digest('hex').slice(0, 20)) : firestore.collection('leads').doc();
+      if (lead.email) { // registros de antes de este cambio (id al azar) con el mismo correo y formulario
+        const previo = await firestore.collection('leads').where('email', '==', lead.email).where('form', '==', form).limit(1).get();
+        if (!previo.empty) ref = previo.docs[0].ref;
+      }
+      let repetida = false;
+      await firestore.runTransaction(async (tx) => {
+        const snap = await tx.get(ref);
+        if (!snap.exists) { repetida = false; tx.set(ref, lead); return; }
+        repetida = true;
+        const { createdAt, utm, status, form: f, ...nuevo } = lead; // se conservan la fecha, el origen de la campaña y la etapa
+        const vacio = (v) => v === '' || v === undefined;
+        tx.update(ref, {
+          ...Object.fromEntries(Object.entries(nuevo).filter(([, v]) => !vacio(v))),
+          ...(snap.data().status === 'descartado' ? { status: 'nuevo' } : {}), // si vuelve a escribir, vuelve a "por contactar"
+          repeticiones: FieldValue.increment(1),
+          updatedAt: FieldValue.serverTimestamp(),
+        });
+      });
+      // API de conversiones de Meta: el mismo Lead que registra el Píxel, con el mismo id para que no se cuente doble.
+      // Quien repite el formulario no se cuenta otra vez como Lead nuevo en las campañas.
       const ctx = contexto(request, lead.utm.fbclid);
-      enviarDespues({ nombre: 'Lead', id: idValido(body.eventId) || `lead-${ref.id}`, url: ctx.url, user: usuario({ email: lead.email, phone: lead.whatsapp, nombre: lead.name }, ctx) });
+      if (!repetida) enviarDespues({ nombre: 'Lead', id: idValido(body.eventId) || `lead-${ref.id}`, url: ctx.url, user: usuario({ email: lead.email, phone: lead.whatsapp, nombre: lead.name }, ctx) });
       let enlace = '';
       if (ENLACE[form]) {
         const guardado = ((await db().doc('config/clases').get()).data() || {})[ENLACE[form]];
         if (typeof guardado === 'string' && HTTPS.test(guardado.trim())) enlace = guardado.trim();
       }
-      return json({ ok: true, id: ref.id, ...(enlace ? { enlace } : {}) });
+      return json({ ok: true, id: ref.id, ...(repetida ? { repetida: true } : {}), ...(enlace ? { enlace } : {}) });
     }
     if (body.action === 'all' || body.action === 'status' || body.action === 'update' || body.action === 'delete') {
       let user;
