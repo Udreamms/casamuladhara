@@ -572,7 +572,7 @@ V.interesadas = () => {
     const linea = trk ? `${esc(PROG_CORTO[trk.form] || trk.form)} · ${fdateMs(trk.createdAt).split(',')[0]}${trk.claseFecha ? ` · clase ${esc(fechaLarga(trk.claseFecha))}` : ''}` : '';
     const otras = prog ? p.leads.filter((l) => !prog[2].includes(l.form)).map((l) => `<span class="pill lock">${esc(PROG_CORTO[l.form] || l.form)}</span>`).join(' ') : '';
     return `<article class="kb-card" ${trk ? `draggable="true" data-lead-card="${esc(trk.id)}"` : ''} data-lead-open="${esc(p.id)}">
-      <b>${esc(p.nombre)}</b>${prog ? `<span class="muted">${linea || 'Formación completa · pagó en la plataforma'}</span>` : `<span style="display:flex;gap:4px;flex-wrap:wrap">${progPills(p)}</span>`}
+      <div class="kb-top"><span class="av sm" style="--c:${colorFor(p.id)}">${esc(initials(p.nombre))}</span><div class="kb-id"><b>${esc(p.nombre)}</b>${prog ? `<span class="muted">${linea || 'Formación completa · pagó en la plataforma'}</span>` : ''}</div></div>${prog ? '' : `<span style="display:flex;gap:4px;flex-wrap:wrap">${progPills(p)}</span>`}
       ${trk?.interest ? `<small>${esc(trk.interest)}</small>` : ''}${p.note ? `<small class="muted">📝 ${esc(p.note.slice(0, 70))}${p.note.length > 70 ? '…' : ''}</small>` : ''}
       <div class="kb-meta">${cuentaBadge(p)}${segBadge(p)}${tagsPills(p)}${otras}${p.whatsapp ? `<a class="btn btn-ghost btn-sm" href="${waLink(p.whatsapp)}" data-wa-open="${esc(waNum(p.whatsapp))}" data-wa-name="${esc(p.nombre)}">WhatsApp</a>` : ''}</div></article>`;
   };
@@ -581,26 +581,29 @@ V.interesadas = () => {
   <div class="kb">${etapas.map(([k]) => { const col = lista.filter((p) => etapaVista(p) === k); return `<section class="kb-col" data-kb-col="${k}"><h4>${esc(etapaTxt(prog?.[0], k))} <span class="count">${col.length}</span></h4>${col.map(tarjeta).join('') || '<p class="muted" style="font-size:.82rem;margin:0">Nadie aquí.</p>'}</section>`; }).join('')}</div>`;
 };
 
-// A qué programa pago se inscribió quien estaba en una clase gratis: se agrega a ese programa en su ficha (sin duplicarla).
-// Devuelve la lista de programas ([] si solo se marca), o null si se cancela.
-function pedirProgramasPago(p) {
+// A qué programa pago pasa una persona de la clase gratis: se agrega a ese programa en su ficha (sin duplicarla).
+// Devuelve { forms, etapa } ([] en forms si solo se marca), o null si se cancela.
+// opciones.etapa: pregunta también si "está en conversación" o "ya se inscribió"; sin eso, queda Inscrita.
+function pedirProgramasPago(p, opciones = {}) {
   return new Promise((resolve) => {
-    const ya = new Set(p.leads.filter((x) => leadEtapa(x) === 'inscrita' && esPago(x.form)).map((x) => x.form));
+    const ya = new Set(p.leads.filter((x) => esPago(x.form)).map((x) => x.form));
     let listo = false;
     const alCerrar = () => fin(null);
     const fin = (v) => { if (listo) return; listo = true; $('#dlg').removeEventListener('close', alCerrar); resolve(v); };
-    dialog(`<span class="eyebrow">Inscrita</span><h3>${esc(p.nombre)}</h3>
-    <p class="muted" style="font-size:.88rem;margin:6px 0 12px">¿A qué programa pago se inscribió? Se agrega a ese programa en su ficha, sin duplicarla. Si fue a más de uno, marca todos.</p>
-    <form id="pp-form" style="display:grid;gap:10px">${PROG_PAGOS.map(([k, t]) => `<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" name="pp" value="${k}" ${ya.has(k) ? 'checked disabled' : ''}> ${esc(t)}${ya.has(k) ? ' <span class="muted">(ya inscrita)</span>' : ''}</label>`).join('')}
-    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary btn-sm">Confirmar</button><button type="button" class="btn btn-ghost btn-sm" id="pp-skip">Marcar sin elegir programa</button><button type="button" class="btn btn-ghost btn-sm" id="pp-no">Cancelar</button></div></form>`);
+    dialog(`<span class="eyebrow">${opciones.etapa ? 'Pasar a un curso' : 'Inscrita'}</span><h3>${esc(p.nombre)}</h3>
+    <p class="muted" style="font-size:.88rem;margin:6px 0 12px">${opciones.etapa ? '¿A qué programa pago pasa?' : '¿A qué programa pago se inscribió?'} Se agrega a ese programa en su ficha y aparece en su pipeline, sin duplicarla. Si son varios, marca todos.</p>
+    <form id="pp-form" style="display:grid;gap:10px">${PROG_PAGOS.map(([k, t]) => `<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" name="pp" value="${k}"> ${esc(t)}${ya.has(k) ? ' <span class="muted">(ya está en este programa)</span>' : ''}</label>`).join('')}
+    ${opciones.etapa ? `<fieldset style="border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:grid;gap:6px"><legend style="font-size:.78rem;color:var(--muted);padding:0 6px">¿En qué etapa queda?</legend><label style="display:flex;gap:8px;align-items:center"><input type="radio" name="pe" value="conversando" checked> Quiere el curso y está en conversación</label><label style="display:flex;gap:8px;align-items:center"><input type="radio" name="pe" value="inscrita"> Ya se inscribió</label></fieldset>` : ''}
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary btn-sm">Confirmar</button>${opciones.etapa ? '' : '<button type="button" class="btn btn-ghost btn-sm" id="pp-skip">Marcar sin elegir programa</button>'}<button type="button" class="btn btn-ghost btn-sm" id="pp-no">Cancelar</button></div></form>`);
     $('#dlg').addEventListener('close', alCerrar);
     $('#pp-form').onsubmit = (e) => {
       e.preventDefault();
-      const v = [...document.querySelectorAll('#pp-form input[name=pp]:checked:not(:disabled)')].map((x) => x.value);
-      if (!v.length) return toast('Elige un programa, o usa «Marcar sin elegir programa».');
-      fin(v); $('#dlg').close();
+      const v = [...document.querySelectorAll('#pp-form input[name=pp]:checked')].map((x) => x.value);
+      if (!v.length) return toast(opciones.etapa ? 'Elige a qué programa pasa.' : 'Elige un programa, o usa «Marcar sin elegir programa».');
+      const et = opciones.etapa ? (document.querySelector('#pp-form input[name=pe]:checked')?.value || 'conversando') : 'inscrita';
+      fin({ forms: v, etapa: et }); $('#dlg').close();
     };
-    $('#pp-skip').onclick = () => { fin([]); $('#dlg').close(); };
+    const skip = $('#pp-skip'); if (skip) skip.onclick = () => { fin({ forms: [], etapa: 'inscrita' }); $('#dlg').close(); };
     $('#pp-no').onclick = () => $('#dlg').close();
   });
 }
@@ -631,9 +634,9 @@ async function leadMover(id, status) {
   const p = personaDe(id);
   let extra = [], motivo = '';
   if (status === 'inscrita' && esClase(l.form)) {
-    const forms = await pedirProgramasPago(p);
-    if (forms === null) { render(false); return false; }
-    extra = forms;
+    const r = await pedirProgramasPago(p);
+    if (r === null) { render(false); return false; }
+    extra = r.forms;
   }
   if (status === 'descartado') {
     const m = await pedirMotivo(p);
@@ -687,39 +690,39 @@ function waFichaMontar(p) {
   if (A.wa.on === null) waApi({ action: 'estado' }).then((r) => { A.wa.on = r.configurado; if (!r.configurado && $('#wf-aviso')) $('#wf-aviso').hidden = false; }).catch(() => {});
 }
 
-// Ficha de una persona, con tres pestañas: Resumen (datos, programas, seguimiento, etiquetas), WhatsApp (chat) e Historial (notas y cambios)
+// Ficha de una persona, al estilo de un CRM: datos de contacto a la izquierda (se editan y se guardan con "Guardar cambios"),
+// al centro la conversación de WhatsApp y el historial, y a la derecha sus programas con la etapa de cada uno.
+// Las etapas, etiquetas y seguimientos se guardan al instante (avisa con "Guardado").
+async function pasarACurso(l) {
+  const p = personaDe(l.id), r = await pedirProgramasPago(p, { etapa: true });
+  if (!r || !r.forms.length) return false;
+  try {
+    for (const form of r.forms) await data.leads({ action: 'addProgram', fromId: l.id, form, status: r.etapa });
+    if (r.etapa === 'inscrita' && l.status !== 'inscrita') await data.leads({ action: 'update', id: l.id, status: 'inscrita' });
+    await data.leads({ action: 'all' }); A._per = null; paintNav(); render(false);
+    toast(`Agregada a ${r.forms.map((f) => PROG_AGREGAR.find(([k]) => k === f)?.[1] || f).join(' y ')}.`);
+    return true;
+  } catch (e) { fail(e); return false; }
+}
+
 function leadFicha(id) {
   const p = personaDe(id) || personas().find((x) => x.id === id); if (!p) return;
-  const tab = S.fichaTab || 'resumen';
+  const tab = S.fichaTab === 'wa' ? 'wa' : 'historial';
   const ids = p.leads.map((l) => l.id), formas = new Set(p.leads.map((l) => l.form));
-  const k = (t, v) => (v ? `<dt>${t}</dt><dd>${v}</dd>` : '');
-  const pestana = (v, t) => `<button type="button" class="chip" data-ficha-tab="${v}" aria-pressed="${tab === v}">${t}</button>`;
   const refrescar = () => { A._per = null; paintNav(); render(false); };
+  const pestana = (v, t) => `<button type="button" class="chip" data-ficha-tab="${v}" aria-pressed="${tab === v}">${t}</button>`;
+  const secc = (t, html) => `<section class="ct-sec"><b>${t}</b>${html}</section>`;
+  const todasTags = [...new Set(personas().flatMap((x) => x.tags))].sort();
 
-  let cuerpo = '';
-  if (tab === 'resumen') {
-    const filaProg = (l) => `<tr><td style="white-space:normal"><b>${esc(LEAD_FORMS[l.form] || l.form)}</b><br><span class="muted" style="font-size:.8rem">${fdateMs(l.createdAt)}${l.claseFecha ? ` · clase ${esc(fechaLarga(l.claseFecha))}` : ''}${l.interest ? ` · ${esc(l.interest)}` : ''}${l.desdeForm ? ' · agregado a mano' : ''}${l.status === 'descartado' && l.motivo ? ` · motivo: ${esc(l.motivo)}` : ''}</span></td>
-      <td><select data-trk-status="${esc(l.id)}" aria-label="Etapa en ${esc(LEAD_FORMS[l.form] || l.form)}">${LEAD_STATES.filter(([x]) => !(esPago(l.form) && x === 'clase' && l.status !== 'clase')).map(([x]) => `<option value="${x}" ${leadEtapa(l) === x ? 'selected' : ''}>${esc(etapaTxt(l.form, x))}</option>`).join('')}</select></td>
-      <td style="text-align:right"><button type="button" class="link" style="color:#b8402f" data-trk-del="${esc(l.id)}">Quitar</button></td></tr>`;
-    const faltan = PROG_AGREGAR.filter(([f]) => !formas.has(f));
-    const cuenta = p.alumna ? `<b>${esc(nameOf(p.alumna))}</b> · ${esc(payState(p.alumna)[1])} <button type="button" class="link" data-lead-alumna="${esc(p.alumna.id)}">Ver su ficha</button>` : `<span style="color:${etapaDe(p) === 'inscrita' ? '#b8402f' : 'inherit'};font-weight:700">Aún no tiene cuenta en el aula.</span> <span class="muted">Si la creó con otro correo, no se unen solas.</span>`;
-    const todasTags = [...new Set(personas().flatMap((x) => x.tags))].sort();
-    cuerpo = `<dl class="kv" style="margin:8px 0 12px">${k('Contacto', contactoDe(p))}${k('Cuenta en el aula', cuenta)}${k('Primer registro', fdateMs(p.leads[0].createdAt))}${k('Origen', esc(leadOrigenTxt(p.leads[0])))}${k('Mensaje', esc(p.leads.map((l) => l.message).filter(Boolean).pop() || ''))}${k('Última nota', p.note ? `${esc(p.note.slice(0, 160))}${p.note.length > 160 ? '…' : ''}` : '')}</dl>
-      <div style="display:grid;gap:8px;margin-bottom:12px"><b style="font-size:.9rem">Programas</b>
-        <div class="tbl-wrap"><table class="tbl"><tbody>${p.leads.map(filaProg).join('')}${formacionPagada(p) && !formas.has('formacion') ? '<tr><td><b>Formación completa</b><br><span class="muted" style="font-size:.8rem">pagó en la plataforma</span></td><td><span class="pill done">Inscrita</span></td><td></td></tr>' : ''}</tbody></table></div>
-        ${faltan.length ? `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><select id="fa-form" aria-label="Programa a agregar">${faltan.map(([f, t]) => `<option value="${f}">${esc(t)}</option>`).join('')}</select><select id="fa-status" aria-label="Etapa inicial">${LEAD_STATES.filter(([x]) => x !== 'clase').map(([x, t]) => `<option value="${x}" ${x === 'conversando' ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select><button type="button" class="btn btn-ghost btn-sm" id="fa-add">Agregar programa</button></div>` : ''}</div>
-      <div style="display:grid;gap:6px;margin-bottom:12px"><b style="font-size:.9rem">Próximo seguimiento</b>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><input type="date" id="sg-fecha" value="${esc(p.followUp || '')}" style="max-width:170px"><button type="button" class="btn btn-ghost btn-sm" data-sg="fecha">Guardar fecha</button><button type="button" class="chip" data-sg="1">Mañana</button><button type="button" class="chip" data-sg="3">En 3 días</button><button type="button" class="chip" data-sg="7">En 1 semana</button>${p.followUp ? '<button type="button" class="link" data-sg="quitar">Quitar</button>' : ''}</div></div>
-      <div style="display:grid;gap:6px;margin-bottom:12px"><b style="font-size:.9rem">Etiquetas</b>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">${p.tags.map((t) => `<span class="pill pres">${esc(t)} <button type="button" class="link" data-tag-del="${esc(t)}" aria-label="Quitar ${esc(t)}" style="padding:0 0 0 4px">×</button></span>`).join('')}<input id="tg-nueva" list="tags-lista" placeholder="Nueva etiqueta" maxlength="30" style="max-width:170px"><datalist id="tags-lista">${todasTags.map((t) => `<option value="${esc(t)}">`).join('')}</datalist><button type="button" class="btn btn-ghost btn-sm" id="tg-add">Agregar</button></div></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">${p.whatsapp ? `<button type="button" class="btn btn-primary btn-sm" data-ficha-tab="wa">Escribir por WhatsApp</button>` : ''}${p.email ? `<a class="btn btn-ghost btn-sm" href="mailto:${esc(p.email)}">Correo</a>` : ''}<button type="button" class="btn btn-ghost btn-sm" id="lf-del" style="color:#b8402f;margin-left:auto">Eliminar persona</button></div>`;
-  } else if (tab === 'wa') {
+  // ----- centro: WhatsApp o Historial
+  let centro = '';
+  if (tab === 'wa') {
     const n = waNum(p.whatsapp), c = A.wa.chats.find((x) => x.id === n), libre = waLibre(c);
-    cuerpo = !n ? '<p class="muted" style="margin-top:12px">Esta persona no dejó WhatsApp.</p>' : `<div class="alert" id="wf-aviso" ${A.wa.on === false ? '' : 'hidden'} style="margin-top:10px"><div><b>WhatsApp todavía no está conectado</b><p>Faltan las llaves de Meta en Vercel. Mientras tanto, el chat aquí no envía ni recibe.</p></div></div>
-      <div class="wa-msgs" id="wf-msgs" style="height:300px;margin-top:10px;border:1px solid var(--line);border-radius:12px"><div class="wa-empty">Cargando conversación…</div></div>
-      ${libre ? `<div style="display:grid;gap:8px;margin-top:10px"><select id="wf-resp" aria-label="Respuestas rápidas"><option value="">Respuestas rápidas…</option>${RESPUESTAS.map(([t], i) => `<option value="${i}">${esc(t)}</option>`).join('')}</select>
+    centro = !n ? '<p class="muted">Esta persona no dejó WhatsApp.</p>' : `<div class="alert" id="wf-aviso" ${A.wa.on === false ? '' : 'hidden'}><div><b>WhatsApp todavía no está conectado</b><p>Faltan las llaves de Meta en Vercel. Mientras tanto, el chat aquí no envía ni recibe.</p></div></div>
+      <div class="wa-msgs" id="wf-msgs" style="flex:1;min-height:260px;border:1px solid var(--line);border-radius:12px"><div class="wa-empty">Cargando conversación…</div></div>
+      ${libre ? `<div style="display:grid;gap:8px"><select id="wf-resp" aria-label="Respuestas rápidas"><option value="">Respuestas rápidas…</option>${RESPUESTAS.map(([t], i) => `<option value="${i}">${esc(t)}</option>`).join('')}</select>
         <form class="wa-send" id="wf-form" style="padding:0;border:0"><textarea id="wf-text" rows="2" placeholder="Escribe un mensaje…" aria-label="Mensaje"></textarea><button class="btn btn-primary btn-sm">Enviar</button></form></div>`
-      : `<div class="wa-note" style="margin-top:10px"><span>${c?.lastInboundAt ? 'Pasaron más de 24 horas desde su último mensaje.' : 'Esta persona aún no te ha escrito.'} WhatsApp solo permite empezar con un mensaje de plantilla (con costo); cuando responda podrás escribirle libremente.</span><button type="button" class="btn btn-primary btn-sm" id="wf-plantilla">Enviar plantilla</button></div>`}`;
+      : `<div class="wa-note"><span>${c?.lastInboundAt ? 'Pasaron más de 24 horas desde su último mensaje.' : 'Esta persona aún no te ha escrito.'} WhatsApp solo permite empezar con un mensaje de plantilla (con costo); cuando responda podrás escribirle libremente.</span><button type="button" class="btn btn-primary btn-sm" id="wf-plantilla">Enviar plantilla</button></div>`}`;
   } else {
     const evs = [];
     p.leads.forEach((l) => {
@@ -727,49 +730,109 @@ function leadFicha(id) {
       (l.eventos || []).forEach((e) => evs.push({ t: e.t, tipo: e.tipo, texto: `${e.texto}${e.tipo === 'etapa' ? ` · ${PROG_CORTO[l.form] || l.form}` : ''}` }));
     });
     evs.sort((a, b) => b.t - a.t);
-    cuerpo = `<form id="nota-form" style="display:grid;gap:8px;margin:10px 0"><textarea id="nt-text" maxlength="1000" rows="3" placeholder="Anota lo que conversaron, qué le interesa, qué falta decidir…" aria-label="Nota"></textarea><button class="btn btn-primary btn-sm" style="justify-self:start">Agregar nota</button></form>
+    centro = `<form id="nota-form" style="display:grid;gap:8px"><textarea id="nt-text" maxlength="1000" rows="3" placeholder="Anota lo que conversaron, qué le interesa, qué falta decidir…" aria-label="Nota"></textarea><button class="btn btn-primary btn-sm" style="justify-self:start">Guardar nota</button></form>
       <ol class="tl">${evs.map((e) => `<li class="tl-${esc(e.tipo)}"><time>${fdateMs(e.t)}</time><span>${esc(e.texto)}</span></li>`).join('')}</ol>`;
   }
 
-  dialog(`<span class="eyebrow">Persona</span><h3>${esc(p.nombre)}</h3>
-  <div class="filters" style="margin:6px 0 10px">${cuentaBadge(p)} ${segBadge(p)} ${p.tags.map((t) => `<span class="pill pres">${esc(t)}</span>`).join(' ')}</div>
-  <div class="filters">${pestana('resumen', 'Resumen')}${pestana('wa', 'WhatsApp')}${pestana('historial', 'Historial')}</div>${cuerpo}`, true);
+  // ----- derecha: cuenta en el aula y programas (cada uno con sus pasos)
+  const pasosDe = (l) => LEAD_STATES.filter(([k]) => k !== 'descartado' && !(esPago(l.form) && k === 'clase'));
+  const tarjetaProg = (l) => {
+    const pasos = pasosDe(l), act = leadEtapa(l), i = pasos.findIndex(([k]) => k === act);
+    return `<div class="pg"><div class="pg-top"><b>${esc(LEAD_FORMS[l.form] || l.form)}</b><button type="button" class="link" style="color:#b8402f;font-size:.78rem" data-trk-del="${esc(l.id)}">Quitar</button></div>
+      <span class="muted" style="font-size:.78rem">${fdateMs(l.createdAt)}${l.claseFecha ? ` · clase ${esc(fechaLarga(l.claseFecha))}` : ''}${l.desdeForm ? ' · agregado a mano' : ''}${act === 'descartado' && l.motivo ? ` · motivo: ${esc(l.motivo)}` : ''}</span>
+      <div class="pasos" role="group" aria-label="Etapa en ${esc(LEAD_FORMS[l.form] || l.form)}">${pasos.map(([k], j) => `<button type="button" class="paso ${act === k ? 'on' : i > j ? 'hecha' : ''}" data-paso="${esc(l.id)}|${k}" aria-pressed="${act === k}">${esc(etapaTxt(l.form, k))}</button>`).join('')}<button type="button" class="paso descartar ${act === 'descartado' ? 'on' : ''}" data-paso="${esc(l.id)}|descartado" aria-pressed="${act === 'descartado'}">Descartada</button></div>
+      ${esClase(l.form) ? `<button type="button" class="btn btn-ghost btn-sm" data-pasar="${esc(l.id)}">Pasar a un curso →</button>` : ''}</div>`;
+  };
+  const faltan = PROG_AGREGAR.filter(([f]) => !formas.has(f));
+  const cuenta = p.alumna
+    ? `<div class="pg"><b>Cuenta en el aula</b><span style="font-size:.88rem">${esc(nameOf(p.alumna))} · ${esc(payState(p.alumna)[1])}</span><button type="button" class="btn btn-ghost btn-sm" data-lead-alumna="${esc(p.alumna.id)}">Ver su ficha</button></div>`
+    : `<div class="pg" style="${etapaDe(p) === 'inscrita' ? 'border-color:#e3b8ae' : ''}"><b>Cuenta en el aula</b><span style="font-size:.86rem;color:${etapaDe(p) === 'inscrita' ? '#b8402f' : 'inherit'}">Aún no tiene cuenta.${etapaDe(p) === 'inscrita' ? ' Ya está inscrita: pídele que la cree.' : ''}</span><span class="muted" style="font-size:.78rem">Si la creó con otro correo, corrígelo a la izquierda para que se unan.</span></div>`;
+  const derecha = `${cuenta}<h4 style="font:600 .62rem/1 var(--f-caps);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:6px 0 0">Programas</h4>
+    ${p.leads.map(tarjetaProg).join('')}${formacionPagada(p) && !formas.has('formacion') ? '<div class="pg"><div class="pg-top"><b>Formación completa</b><span class="pill done">Inscrita</span></div><span class="muted" style="font-size:.78rem">pagó en la plataforma</span></div>' : ''}
+    ${faltan.length ? `<details class="pg pg-add"><summary>+ Agregar programa</summary><div style="display:grid;gap:8px;margin-top:10px"><select id="fa-form" aria-label="Programa a agregar">${faltan.map(([f, t]) => `<option value="${f}">${esc(t)}</option>`).join('')}</select><select id="fa-status" aria-label="Etapa inicial">${LEAD_STATES.filter(([x]) => x !== 'clase').map(([x, t]) => `<option value="${x}" ${x === 'conversando' ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select><button type="button" class="btn btn-primary btn-sm" id="fa-add">Agregar</button></div></details>` : ''}
+    <p class="muted" style="font-size:.78rem;margin:0">Las etapas, el seguimiento y las etiquetas se guardan al instante. Los datos de contacto se guardan con «Guardar cambios».</p>`;
+
+  // ----- izquierda: persona, contacto editable, seguimiento, etiquetas
+  const izquierda = `<div class="ct-cab"><span class="av lg" style="--c:${colorFor(p.id)}">${esc(initials(p.nombre))}</span><div><h3>${esc(p.nombre)}</h3><div class="ct-badges">${cuentaBadge(p)} ${segBadge(p)}<span class="pill lock">${esc(etapaTxt('', etapaDe(p)))}</span></div></div></div>
+    <div class="ct-acc">${p.whatsapp ? '<button type="button" class="btn btn-primary btn-sm" data-ficha-tab="wa">WhatsApp</button>' : ''}${p.email ? `<a class="btn btn-ghost btn-sm" href="mailto:${esc(p.email)}">Correo</a>` : ''}</div>
+    <form class="ct-form" id="ct-form">
+      <label>Nombre<input data-ct="name" value="${esc(p.nombre)}" maxlength="120" autocomplete="off"></label>
+      <label>Correo<input data-ct="email" type="email" value="${esc(p.email)}" maxlength="160" autocomplete="off"></label>
+      <label>WhatsApp<input data-ct="whatsapp" type="tel" value="${esc(p.whatsapp)}" maxlength="40" autocomplete="off"></label>
+      <label>País<input data-ct="country" value="${esc(p.country)}" maxlength="60" autocomplete="off"></label>
+      <div class="ct-guardar"><span class="muted" id="ct-estado" style="font-size:.8rem">Todo guardado</span><button class="btn btn-primary btn-sm" id="ct-save" disabled>Guardar cambios</button></div>
+    </form>
+    ${secc('Próximo seguimiento', `<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><input type="date" id="sg-fecha" value="${esc(p.followUp || '')}" style="max-width:150px"><button type="button" class="btn btn-ghost btn-sm" data-sg="fecha">Guardar</button></div><div style="display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="chip" data-sg="1">Mañana</button><button type="button" class="chip" data-sg="3">En 3 días</button><button type="button" class="chip" data-sg="7">En 1 semana</button>${p.followUp ? '<button type="button" class="link" data-sg="quitar">Quitar</button>' : ''}</div>`)}
+    ${secc('Etiquetas', `<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">${p.tags.map((t) => `<span class="pill pres">${esc(t)} <button type="button" class="link" data-tag-del="${esc(t)}" aria-label="Quitar ${esc(t)}" style="padding:0 0 0 4px">×</button></span>`).join('')}</div><div style="display:flex;gap:6px"><input id="tg-nueva" list="tags-lista" placeholder="Nueva etiqueta" maxlength="30"><datalist id="tags-lista">${todasTags.map((t) => `<option value="${esc(t)}">`).join('')}</datalist><button type="button" class="btn btn-ghost btn-sm" id="tg-add">Agregar</button></div>`)}
+    ${secc('Datos', `<dl class="kv" style="font-size:.84rem;gap:6px 12px"><dt>Origen</dt><dd>${esc(leadOrigenTxt(p.leads[0]))}</dd><dt>Primer registro</dt><dd>${fdateMs(p.leads[0].createdAt)}</dd>${p.leads.map((l) => l.message).filter(Boolean).pop() ? `<dt>Mensaje</dt><dd style="font-weight:400;text-align:left">${esc(p.leads.map((l) => l.message).filter(Boolean).pop())}</dd>` : ''}</dl>`)}
+    <button type="button" class="link" id="lf-del" style="color:#b8402f;justify-self:start">Eliminar persona</button>`;
+
+  dialog(`<div class="ct"><aside class="ct-izq">${izquierda}</aside><main class="ct-centro"><div class="filters">${pestana('historial', 'Historial')}${pestana('wa', 'WhatsApp')}</div>${centro}</main><aside class="ct-der">${derecha}</aside></div>`, true);
+  $('#dlg').classList.add('contacto');
 
   $('#dlg').addEventListener('close', () => { waFichaOff?.(); waFichaOff = null; }, { once: true });
   document.querySelectorAll('#dlg [data-ficha-tab]').forEach((b) => (b.onclick = () => { S.fichaTab = b.dataset.fichaTab; leadFicha(id); }));
-  if (tab === 'resumen') {
-    document.querySelectorAll('#dlg [data-trk-status]').forEach((s) => (s.onchange = async () => { await leadMover(s.dataset.trkStatus, s.value); leadFicha(id); }));
-    document.querySelectorAll('#dlg [data-trk-del]').forEach((b) => (b.onclick = async () => {
-      const l = A.leads.find((x) => x.id === b.dataset.trkDel); if (!l) return;
-      if (!confirm(`¿Quitar a ${p.nombre} de ${LEAD_FORMS[l.form] || l.form}? Se borra ese registro y no se puede deshacer.${p.leads.length === 1 ? '\n\nEs su único programa: la persona se elimina de tu lista.' : ''}`)) return;
-      try {
-        await data.leads({ action: 'delete', ids: [l.id] }); A.leads = A.leads.filter((x) => x.id !== l.id); S.leadSel.delete(p.id); refrescar();
-        if (p.leads.length > 1) leadFicha(p.leads.find((x) => x.id !== l.id).id); else $('#dlg').close();
-        toast('Quitada.');
-      } catch (err) { fail(err); }
-    }));
-    const add = $('#fa-add');
-    if (add) add.onclick = async () => {
-      add.disabled = true;
-      try { await data.leads({ action: 'addProgram', fromId: p.leads[0].id, form: $('#fa-form').value, status: $('#fa-status').value }); await data.leads({ action: 'all' }); refrescar(); leadFicha(id); toast('Programa agregado.'); } catch (err) { fail(err); add.disabled = false; }
-    };
-    document.querySelectorAll('#dlg [data-sg]').forEach((b) => (b.onclick = async () => {
-      const v = b.dataset.sg, fecha = v === 'quitar' ? '' : v === 'fecha' ? $('#sg-fecha').value : ymd(hoyCL() + Number(v) * 864e5);
-      if (v === 'fecha' && !fecha) return toast('Elige una fecha.');
-      try { await data.leads({ action: 'update', ids, followUp: fecha }); p.leads.forEach((l) => { l.followUp = fecha; l.eventos = [...(l.eventos || [])]; }); refrescar(); leadFicha(id); toast(fecha ? 'Seguimiento guardado.' : 'Seguimiento quitado.'); } catch (err) { fail(err); }
-    }));
-    const tagAccion = async (body, aplicar) => { try { await data.leads({ action: 'etiquetas', ids, ...body }); p.leads.forEach(aplicar); refrescar(); leadFicha(id); } catch (err) { fail(err); } };
-    $('#tg-add').onclick = () => { const t = $('#tg-nueva').value.trim(); if (!t) return; tagAccion({ agregar: [t] }, (l) => { l.tags = [...new Set([...(l.tags || []), t])]; }); };
-    $('#tg-nueva').onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); $('#tg-add').click(); } };
-    document.querySelectorAll('#dlg [data-tag-del]').forEach((b) => (b.onclick = () => { const t = b.dataset.tagDel; tagAccion({ quitar: [t] }, (l) => { l.tags = (l.tags || []).filter((x) => x !== t); }); }));
-    $('#lf-del').onclick = async () => {
-      if (!confirm(`¿Eliminar a ${p.nombre} de tu lista${p.leads.length > 1 ? ` (${p.leads.length} programas)` : ''}? No se puede deshacer.`)) return;
-      try { await data.leads({ action: 'delete', ids }); A.leads = A.leads.filter((x) => !ids.includes(x.id)); S.leadSel.delete(p.id); $('#dlg').close(); refrescar(); toast('Eliminada.'); } catch (err) { fail(err); }
-    };
-  } else if (tab === 'wa') {
+
+  // Datos de contacto: el botón se activa al cambiar algo
+  const campos = [...document.querySelectorAll('#dlg [data-ct]')], orig = { name: p.nombre, email: p.email, whatsapp: p.whatsapp, country: p.country };
+  const sucio = () => campos.some((c) => c.value.trim() !== (orig[c.dataset.ct] || ''));
+  const marcar = () => { $('#ct-save').disabled = !sucio(); $('#ct-estado').textContent = sucio() ? 'Hay cambios sin guardar' : 'Todo guardado'; };
+  campos.forEach((c) => (c.oninput = marcar));
+  $('#ct-form').onsubmit = async (e) => {
+    e.preventDefault();
+    if (!sucio()) return;
+    const contacto = Object.fromEntries(campos.map((c) => [c.dataset.ct, c.value.trim()]));
+    const b = $('#ct-save'); b.disabled = true;
+    try {
+      await data.leads({ action: 'update', ids, contacto });
+      p.leads.forEach((l) => Object.assign(l, contacto, { email: contacto.email.toLowerCase() }));
+      refrescar(); leadFicha(id); toast('Cambios guardados.');
+    } catch (err) { fail(err); b.disabled = false; }
+  };
+
+  // Programas
+  document.querySelectorAll('#dlg [data-paso]').forEach((b) => (b.onclick = async () => {
+    const [tid, etapa] = b.dataset.paso.split('|');
+    const cambio = await leadMover(tid, etapa);
+    if (cambio) toast('Guardado.');
+    leadFicha(id);
+  }));
+  document.querySelectorAll('#dlg [data-pasar]').forEach((b) => (b.onclick = async () => { const l = A.leads.find((x) => x.id === b.dataset.pasar); if (l) await pasarACurso(l); leadFicha(id); }));
+  document.querySelectorAll('#dlg [data-trk-del]').forEach((b) => (b.onclick = async () => {
+    const l = A.leads.find((x) => x.id === b.dataset.trkDel); if (!l) return;
+    if (!confirm(`¿Quitar a ${p.nombre} de ${LEAD_FORMS[l.form] || l.form}? Se borra ese registro y no se puede deshacer.${p.leads.length === 1 ? '\n\nEs su único programa: la persona se elimina de tu lista.' : ''}`)) return;
+    try {
+      await data.leads({ action: 'delete', ids: [l.id] }); A.leads = A.leads.filter((x) => x.id !== l.id); S.leadSel.delete(p.id); refrescar();
+      if (p.leads.length > 1) leadFicha(p.leads.find((x) => x.id !== l.id).id); else $('#dlg').close();
+      toast('Quitada.');
+    } catch (err) { fail(err); }
+  }));
+  const add = $('#fa-add');
+  if (add) add.onclick = async () => {
+    add.disabled = true;
+    try { await data.leads({ action: 'addProgram', fromId: p.leads[0].id, form: $('#fa-form').value, status: $('#fa-status').value }); await data.leads({ action: 'all' }); refrescar(); leadFicha(id); toast('Programa agregado.'); } catch (err) { fail(err); add.disabled = false; }
+  };
+
+  // Seguimiento, etiquetas y eliminar
+  document.querySelectorAll('#dlg [data-sg]').forEach((b) => (b.onclick = async () => {
+    const v = b.dataset.sg, fecha = v === 'quitar' ? '' : v === 'fecha' ? $('#sg-fecha').value : ymd(hoyCL() + Number(v) * 864e5);
+    if (v === 'fecha' && !fecha) return toast('Elige una fecha.');
+    try { await data.leads({ action: 'update', ids, followUp: fecha }); p.leads.forEach((l) => { l.followUp = fecha; }); refrescar(); leadFicha(id); toast(fecha ? 'Seguimiento guardado.' : 'Seguimiento quitado.'); } catch (err) { fail(err); }
+  }));
+  const tagAccion = async (body, aplicar) => { try { await data.leads({ action: 'etiquetas', ids, ...body }); p.leads.forEach(aplicar); refrescar(); leadFicha(id); toast('Guardado.'); } catch (err) { fail(err); } };
+  $('#tg-add').onclick = () => { const t = $('#tg-nueva').value.trim(); if (!t) return; tagAccion({ agregar: [t] }, (l) => { l.tags = [...new Set([...(l.tags || []), t])]; }); };
+  $('#tg-nueva').onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); $('#tg-add').click(); } };
+  document.querySelectorAll('#dlg [data-tag-del]').forEach((b) => (b.onclick = () => { const t = b.dataset.tagDel; tagAccion({ quitar: [t] }, (l) => { l.tags = (l.tags || []).filter((x) => x !== t); }); }));
+  $('#lf-del').onclick = async () => {
+    if (!confirm(`¿Eliminar a ${p.nombre} de tu lista${p.leads.length > 1 ? ` (${p.leads.length} programas)` : ''}? No se puede deshacer.`)) return;
+    try { await data.leads({ action: 'delete', ids }); A.leads = A.leads.filter((x) => !ids.includes(x.id)); S.leadSel.delete(p.id); $('#dlg').close(); refrescar(); toast('Eliminada.'); } catch (err) { fail(err); }
+  };
+
+  // Centro
+  if (tab === 'wa') {
     waFichaMontar(p);
-    const n = waNum(p.whatsapp), t = $('#wf-text'), form = $('#wf-form');
-    const resp = $('#wf-resp'); if (resp) resp.onchange = () => { if (resp.value === '') return; t.value = RESPUESTAS[Number(resp.value)][1](ctxRespuesta(p)); resp.value = ''; t.focus(); };
+    const n = waNum(p.whatsapp), t = $('#wf-text'), form = $('#wf-form'), resp = $('#wf-resp');
+    if (resp) resp.onchange = () => { if (resp.value === '') return; t.value = RESPUESTAS[Number(resp.value)][1](ctxRespuesta(p)); resp.value = ''; t.focus(); };
     if (form) {
       t.onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } };
       form.onsubmit = async (e) => {
@@ -785,11 +848,11 @@ function leadFicha(id) {
   } else {
     $('#nota-form').onsubmit = async (e) => {
       e.preventDefault();
-      const texto = $('#nt-text').value.trim(); if (!texto) return;
+      const texto = $('#nt-text').value.trim(); if (!texto) return toast('Escribe la nota.');
       try {
         await data.leads({ action: 'nota', ids, texto });
         p.leads.forEach((l) => { l.note = texto; }); p.leads[0].eventos = [...(p.leads[0].eventos || []), { t: Date.now(), tipo: 'nota', texto }];
-        refrescar(); leadFicha(id); toast('Nota agregada.');
+        refrescar(); leadFicha(id); toast('Nota guardada.');
       } catch (err) { fail(err); }
     };
   }
@@ -1415,7 +1478,7 @@ function bind() {
   };
 }
 const papi = (uid) => profileApi(uid);
-function dialog(html, ancha = false) { $('#dlg-body').innerHTML = html; const d = $('#dlg'); d.classList.toggle('wide', ancha); if (!d.open) d.showModal(); }
+function dialog(html, ancha = false) { $('#dlg-body').innerHTML = html; const d = $('#dlg'); d.classList.toggle('wide', ancha); d.classList.remove('contacto'); if (!d.open) d.showModal(); }
 $('#dlg-x').onclick = () => $('#dlg').close();
 $('#dlg').addEventListener('click', (e) => { if (e.target.id === 'dlg') $('#dlg').close(); });
 function paintMe() {

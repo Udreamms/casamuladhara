@@ -10,7 +10,7 @@
 //   action 'estado' -> { ids: [..], status, followUp? }   la Maestra cambia la etapa de varias a la vez (hasta 200), p. ej. quienes tomaron la clase (y les fija el seguimiento)
 //   action 'nota' -> { ids: [..], texto }   agrega una nota al historial de una persona (queda en todos sus programas como última nota)
 //   action 'etiquetas' -> { ids: [..], agregar?: [..], quitar?: [..] }   etiquetas de una o varias personas (hasta 200 registros)
-//   update también acepta motivo (por qué se descartó). Cada cambio de etapa, seguimiento o nota queda en el historial (eventos) del registro.
+//   update también acepta motivo (por qué se descartó) y contacto { name, email, whatsapp, country } (corrige los datos de la persona en todos sus programas). Cada cambio de etapa, seguimiento o nota queda en el historial (eventos) del registro.
 //   action 'addProgram' -> { fromId, form, status }   la Maestra suma otro programa a una persona que ya está (p. ej. de la clase gratis al curso): crea o actualiza
 //                      su registro en ese formulario con los mismos datos de contacto, sin duplicarla
 //   action 'delete' -> { ids: [..] }   la Maestra elimina interesadas (hasta 100 a la vez); no se puede deshacer
@@ -199,8 +199,17 @@ export async function POST(request) {
           if (typeof body.motivo !== 'string' || (body.motivo && !MOTIVOS.includes(body.motivo))) return json({ error: 'Motivo no válido.' }, 400);
           cambios.motivo = body.motivo;
         }
+        if ('contacto' in body) {
+          const c = body.contacto && typeof body.contacto === 'object' ? body.contacto : {};
+          const name = str(c.name, 120), email = str(c.email, 160).toLowerCase(), whatsapp = str(c.whatsapp, 40), country = str(c.country, 60);
+          if (name.length < 2) return json({ error: 'Escribe el nombre.' }, 400);
+          if (!email && !whatsapp.replace(/\D/g, '')) return json({ error: 'Deja un correo o un WhatsApp para poder contactarla.' }, 400);
+          if (email && !EMAIL.test(email)) return json({ error: 'Revisa el correo.' }, 400);
+          Object.assign(cambios, { name, email, whatsapp, country });
+        }
         if (!Object.keys(cambios).length) return json({ error: 'No hay cambios.' }, 400);
         const eventos = [
+          ...('contacto' in body ? [ev('contacto', 'Datos de contacto actualizados')] : []),
           ...(cambios.status ? [ev('etapa', `Etapa: ${ETAPA_TXT[cambios.status]}${cambios.motivo ? ` (${cambios.motivo})` : ''}`)] : []),
           ...('followUp' in cambios ? [ev('seguimiento', cambios.followUp ? `Seguimiento para el ${cambios.followUp}` : 'Seguimiento quitado')] : []),
         ];
