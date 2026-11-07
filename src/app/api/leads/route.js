@@ -6,6 +6,10 @@
 //                    su registro (nueva fecha de clase, nuevo mensaje) y responde { repetida: true }, en vez de crear otro.
 //   action 'all'  -> { leads: [{ id, form, name, ..., createdAt }] }   solo la Maestra (Authorization: Bearer <token>)
 //   action 'update' -> { id, status?, note?, followUp? }   la Maestra cambia la etapa, escribe una nota o fija la fecha de seguimiento (AAAA-MM-DD; vacío la quita)
+//                      con ids: [..] (hasta 30) la nota y el seguimiento se guardan en todos los programas de una misma persona
+//   action 'estado' -> { ids: [..], status }   la Maestra cambia la etapa de varias a la vez (hasta 200), p. ej. quienes tomaron la clase
+//   action 'addProgram' -> { fromId, form, status }   la Maestra suma otro programa a una persona que ya está (p. ej. de la clase gratis al curso): crea o actualiza
+//                      su registro en ese formulario con los mismos datos de contacto, sin duplicarla
 //   action 'delete' -> { ids: [..] }   la Maestra elimina interesadas (hasta 100 a la vez); no se puede deshacer
 import crypto from 'node:crypto';
 import { FieldValue } from 'firebase-admin/firestore';
@@ -21,11 +25,23 @@ const ETAPAS = ['nuevo', 'contactado', 'clase', 'conversando', 'inscrita', 'desc
 const UTM = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'fbclid', 'gclid'];
 const str = (v, max) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const out = (d) => ({ id: d.id, ...d.data(), createdAt: d.data().createdAt?.toMillis?.() || 0 });
+const out = (d) => ({ id: d.id, ...d.data(), createdAt: d.data().createdAt?.toMillis?.() || 0, updatedAt: d.data().updatedAt?.toMillis?.() || 0 });
+const ID = /^[A-Za-z0-9]{1,40}$/;
+// Registro de una persona en un formulario: el id sale de formulario + correo (o WhatsApp), así un doble envío cae en el mismo documento.
+// Si ya hay uno de antes (id al azar) con ese correo y formulario, se usa ese.
+async function refDe(firestore, form, email, whatsapp) {
+  const llave = email || String(whatsapp || '').replace(/\D/g, '');
+  let ref = llave ? firestore.collection('leads').doc(crypto.createHash('sha1').update(`${form}|${llave}`).digest('hex').slice(0, 20)) : firestore.collection('leads').doc();
+  if (email) {
+    const previo = await firestore.collection('leads').where('email', '==', email).where('form', '==', form).limit(1).get();
+    if (!previo.empty) ref = previo.docs[0].ref;
+  }
+  return ref;
+}
 
 export async function POST(request) {
   const body = await request.json().catch(() => ({}));
-  const delPortal = ['all', 'status', 'update', 'delete'].includes(body.action); // acciones de la Maestra: su error no es el de una landing
+  const delPortal = ['all', 'status', 'update', 'delete', 'estado', 'addProgram'].includes(body.action); // acciones de la Maestra: su error no es el de una landing
   try {
     if (body.action === 'save') {
       // Campo trampa: las personas no lo ven, los bots lo llenan. Se responde ok para no darles pistas.
@@ -55,15 +71,10 @@ export async function POST(request) {
           if (!s.empty) Object.assign(lead, { claseEvento: s.docs[0].id, claseFecha: str(body.date, 10) });
         } catch (e) { console.error('leads clase', e); } // sin la asociación igual se guarda la interesada
       }
-      // Misma persona y mismo formulario = mismo registro. El id sale de formulario + correo (o WhatsApp), así que dos envíos
-      // casi a la vez (doble clic, reintento) caen en el mismo documento y la transacción deja solo uno.
+      // Misma persona y mismo formulario = mismo registro. Dos envíos casi a la vez (doble clic, reintento) caen en el mismo
+      // documento y la transacción deja solo uno.
       const firestore = db();
-      const llave = lead.email || lead.whatsapp.replace(/\D/g, '');
-      let ref = llave ? firestore.collection('leads').doc(crypto.createHash('sha1').update(`${form}|${llave}`).digest('hex').slice(0, 20)) : firestore.collection('leads').doc();
-      if (lead.email) { // registros de antes de este cambio (id al azar) con el mismo correo y formulario
-        const previo = await firestore.collection('leads').where('email', '==', lead.email).where('form', '==', form).limit(1).get();
-        if (!previo.empty) ref = previo.docs[0].ref;
-      }
+      const ref = await refDe(firestore, form, lead.email, lead.whatsapp);
       let repetida = false;
       await firestore.runTransaction(async (tx) => {
         const snap = await tx.get(ref);
@@ -89,7 +100,7 @@ export async function POST(request) {
       }
       return json({ ok: true, id: ref.id, ...(repetida ? { repetida: true } : {}), ...(enlace ? { enlace } : {}) });
     }
-    if (body.action === 'all' || body.action === 'status' || body.action === 'update' || body.action === 'delete') {
+    if (body.action === 'all' || body.action === 'status' || body.action === 'update' || body.action === 'delete' || body.action === 'estado' || body.action === 'addProgram') {
       let user;
       try {
         user = await auth().verifyIdToken((request.headers.get('authorization') || '').replace(/^Bearer\s+/i, ''));
@@ -97,6 +108,36 @@ export async function POST(request) {
         return json({ error: 'Tu sesión expiró. Vuelve a entrar al portal.' }, 401);
       }
       if (user.admin !== true) return json({ error: 'Esta acción es solo para la Maestra.' }, 403);
+      if (body.action === 'estado') {
+        const ids = Array.isArray(body.ids) ? [...new Set(body.ids)] : [];
+        if (!ETAPAS.includes(body.status) || !ids.length || ids.length > 200 || ids.some((id) => typeof id !== 'string' || !ID.test(id))) return json({ error: 'Datos no válidos.' }, 400);
+        const lote = db().batch();
+        ids.forEach((id) => lote.update(db().doc(`leads/${id}`), { status: body.status, updatedAt: FieldValue.serverTimestamp() }));
+        try { await lote.commit(); } catch (e) {
+          if (e.code === 5 || /NOT_FOUND/.test(String(e.message))) return json({ error: 'Alguna ya no existe. Actualiza la lista.' }, 404);
+          throw e;
+        }
+        return json({ ok: true, cambiadas: ids.length });
+      }
+      if (body.action === 'addProgram') {
+        if (typeof body.fromId !== 'string' || !ID.test(body.fromId) || !FORMS.includes(body.form) || !ETAPAS.includes(body.status)) return json({ error: 'Datos no válidos.' }, 400);
+        const firestore = db();
+        const origen = await firestore.doc(`leads/${body.fromId}`).get();
+        if (!origen.exists) return json({ error: 'Esa persona ya no existe. Actualiza la lista.' }, 404);
+        const o = origen.data();
+        const ref = await refDe(firestore, body.form, o.email || '', o.whatsapp || '');
+        await firestore.runTransaction(async (tx) => {
+          const snap = await tx.get(ref);
+          if (snap.exists) { tx.update(ref, { status: body.status, updatedAt: FieldValue.serverTimestamp() }); return; }
+          tx.set(ref, {
+            form: body.form, name: o.name || '', email: o.email || '', whatsapp: o.whatsapp || '', country: o.country || '',
+            interest: '', message: '', page: 'crm', utm: {}, status: body.status, desdeForm: o.form || '',
+            ...(o.note ? { note: o.note } : {}), ...(o.followUp ? { followUp: o.followUp } : {}),
+            createdAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp(),
+          });
+        });
+        return json({ ok: true, id: ref.id });
+      }
       if (body.action === 'delete') {
         const ids = Array.isArray(body.ids) ? [...new Set(body.ids)] : [];
         if (!ids.length || ids.length > 100 || ids.some((id) => typeof id !== 'string' || !/^[A-Za-z0-9]{1,40}$/.test(id))) return json({ error: 'Datos no válidos.' }, 400);
@@ -106,7 +147,8 @@ export async function POST(request) {
         return json({ ok: true, eliminadas: ids.length });
       }
       if (body.action === 'update') {
-        if (typeof body.id !== 'string' || !/^[A-Za-z0-9]{1,40}$/.test(body.id)) return json({ error: 'Datos no válidos.' }, 400);
+        const objetivos = Array.isArray(body.ids) ? [...new Set(body.ids)] : [body.id];
+        if (!objetivos.length || objetivos.length > 30 || objetivos.some((id) => typeof id !== 'string' || !ID.test(id))) return json({ error: 'Datos no válidos.' }, 400);
         const cambios = {};
         if ('status' in body) { if (!ETAPAS.includes(body.status)) return json({ error: 'Etapa no válida.' }, 400); cambios.status = body.status; }
         if ('note' in body) { if (typeof body.note !== 'string') return json({ error: 'Nota no válida.' }, 400); cambios.note = body.note.trim().slice(0, 1000); }
@@ -115,7 +157,9 @@ export async function POST(request) {
           cambios.followUp = body.followUp;
         }
         if (!Object.keys(cambios).length) return json({ error: 'No hay cambios.' }, 400);
-        try { await db().doc(`leads/${body.id}`).update({ ...cambios, updatedAt: FieldValue.serverTimestamp() }); } catch (e) {
+        const lote = db().batch();
+        objetivos.forEach((id) => lote.update(db().doc(`leads/${id}`), { ...cambios, updatedAt: FieldValue.serverTimestamp() }));
+        try { await lote.commit(); } catch (e) {
           if (e.code === 5 || /NOT_FOUND/.test(String(e.message))) return json({ error: 'Esa interesada ya no existe. Actualiza la lista.' }, 404);
           throw e;
         }
