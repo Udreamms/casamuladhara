@@ -177,7 +177,7 @@ const data = {
 };
 
 // ---------- Vista ----------
-const S = { view: 'inicio', leadSel: new Set(), crmVista: 'embudo', crmProg: '', crmQ: '', crmOrigen: '', crmSeg: false, crmDesc: false, crmSinCuenta: false, crmEtapa: '', q: '', open: null, filter: 'todas', lvOpen: {}, fq: '', cls: null, ansWho: '', ansLv: 0 };
+const S = { view: 'inicio', leadSel: new Set(), crmVista: 'embudo', crmProg: '', crmQ: '', crmOrigen: '', crmSeg: false, crmDesc: false, crmSinCuenta: false, crmEtapa: '', crmTag: '', crmRango: '', crmMetrica: 'origen', fichaTab: 'resumen', q: '', open: null, filter: 'todas', lvOpen: {}, fq: '', cls: null, ansWho: '', ansLv: 0 };
 const NAV = [
   ['inicio', 'Inicio', '<path d="M4 11 12 4l8 7v9H4z"/><path d="M10 20v-6h4v6"/>'],
   ['--', 'CRM'],
@@ -416,7 +416,7 @@ const personas = () => {
     const porAct = [...ls].sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0) || (b.createdAt || 0) - (a.createdAt || 0));
     return {
       id: ls[0].id, leads: ls, nombre: ultimo.name, email: rev.find((x) => x.email)?.email || '', whatsapp: rev.find((x) => x.whatsapp)?.whatsapp || '', country: rev.find((x) => x.country)?.country || '',
-      alumna: ls.map(alumnaDe).find(Boolean) || null, note: porAct.find((x) => x.note)?.note || '', followUp: porAct.find((x) => x.followUp)?.followUp || '',
+      tags: [...new Set(ls.flatMap((x) => x.tags || []))], alumna: ls.map(alumnaDe).find(Boolean) || null, note: porAct.find((x) => x.note)?.note || '', followUp: porAct.find((x) => x.followUp)?.followUp || '',
     };
   });
   A._per = { sig, lista };
@@ -464,6 +464,7 @@ const personasFiltradas = () => {
     && (!S.crmOrigen || p.leads.some((l) => leadOrigen(l) === S.crmOrigen))
     && (!S.crmSeg || seguimientoHoyP(p))
     && (!S.crmSinCuenta || !p.alumna)
+    && (!S.crmTag || p.tags.includes(S.crmTag))
     && (!S.crmEtapa || etapaVista(p) === S.crmEtapa)
     && (!q || [p.nombre, p.email, p.whatsapp, p.note, ...p.leads.map((l) => `${l.interest} ${l.message}`)].join(' ').toLowerCase().includes(q)))
     .sort((a, b) => ultimaActividad(b) - ultimaActividad(a));
@@ -478,32 +479,85 @@ const cuentaBadge = (p) => {
 const segBadge = (p) => (p.followUp ? `<span class="pill ${seguimientoHoyP(p) ? 'bad' : 'lock'}" title="Próximo seguimiento">${seguimientoHoyP(p) ? 'Seguimiento hoy' : `Seguir ${fechaLarga(p.followUp)}`}</span>` : '');
 const progPills = (p) => `${p.leads.map((l) => `<span class="pill lock" title="${esc(LEAD_FORMS[l.form] || l.form)}">${esc(PROG_CORTO[l.form] || l.form)} · ${esc(etapaTxt(l.form, leadEtapa(l)))}</span>`).join(' ')}${formacionPagada(p) && !p.leads.some((l) => l.form === 'formacion') ? ' <span class="pill done">Formación · Inscrita</span>' : ''}`;
 
+// Resumen por origen de campaña, por programa y por motivo de descarte (se calcula con las personas, desde su primer registro)
+const metricasHTML = () => {
+  const dias = Number(S.crmRango) || 0, desde = dias ? Date.now() - dias * 864e5 : 0;
+  const ps = personas().filter((p) => (p.leads[0].createdAt || 0) >= desde);
+  const por = S.crmMetrica || 'origen';
+  const clave = { origen: (l) => l.utm?.utm_source || 'directo', campania: (l) => l.utm?.utm_campaign || '(sin campaña)', anuncio: (l) => l.utm?.utm_content || '(sin anuncio)' }[por];
+  const R = { nuevo: 0, contactado: 1, clase: 2, conversando: 3, inscrita: 4 };
+  const alcanzo = (p, n) => { const e = etapaDe(p); return e !== 'descartado' && R[e] >= n; };
+  const grupos = new Map();
+  ps.forEach((p) => { const k = clave(p.leads[0]); const g = grupos.get(k) || { k, n: 0, c: 0, a: 0, v: 0, i: 0 }; g.n++; if (alcanzo(p, 1)) g.c++; if (alcanzo(p, 2)) g.a++; if (alcanzo(p, 3)) g.v++; if (alcanzo(p, 4)) g.i++; grupos.set(k, g); });
+  const filas = [...grupos.values()].sort((a, b) => b.n - a.n);
+  const pct = (a, b) => (b ? `${Math.round((a / b) * 100)}%` : '—');
+  const tot = filas.reduce((t, g) => ({ n: t.n + g.n, c: t.c + g.c, a: t.a + g.a, v: t.v + g.v, i: t.i + g.i }), { n: 0, c: 0, a: 0, v: 0, i: 0 });
+  const celda = (n, base) => `<td>${n} <span class="muted" style="font-size:.78rem">${pct(n, base)}</span></td>`;
+  const motivos = new Map();
+  ps.forEach((p) => p.leads.forEach((l) => { if (l.status === 'descartado') { const m = l.motivo || '(sin motivo)'; motivos.set(m, (motivos.get(m) || 0) + 1); } }));
+  const chip = (attr, v, t, on) => `<button class="chip" ${attr}="${esc(v)}" aria-pressed="${on}">${t}</button>`;
+  const porProg = LEAD_PROGS.map(([k, t, fs]) => { const prog = [k, t, fs], mias = ps.filter((p) => tieneProg(p, prog)); const cuenta = (e) => mias.filter((p) => etapaEn(p, prog) === e).length; return `<tr><td><b>${esc(t)}</b></td><td>${mias.length}</td>${LEAD_STATES.map(([e]) => `<td>${cuenta(e)}</td>`).join('')}</tr>`; }).join('');
+  return `<div class="filters">${chip('data-crm-metrica', 'origen', 'Por origen', por === 'origen')}${chip('data-crm-metrica', 'campania', 'Por campaña', por === 'campania')}${chip('data-crm-metrica', 'anuncio', 'Por anuncio', por === 'anuncio')}
+    <select id="crm-rango" aria-label="Periodo" style="border-radius:999px"><option value="">Todo el tiempo</option><option value="30" ${S.crmRango === '30' ? 'selected' : ''}>Últimos 30 días</option><option value="7" ${S.crmRango === '7' ? 'selected' : ''}>Últimos 7 días</option></select></div>
+  <section class="card panel"><h3>De dónde llegan y hasta dónde avanzan</h3><p class="muted" style="font-size:.84rem;margin:0">Cuenta personas según su primer registro y la etapa más avanzada que alcanzaron. Las descartadas solo cuentan como registradas.</p>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>${por === 'origen' ? 'Origen' : por === 'campania' ? 'Campaña' : 'Anuncio'}</th><th>Registradas</th><th>Contactadas</th><th>Tomaron la clase</th><th>En conversación</th><th>Inscritas</th></tr></thead><tbody>
+    ${filas.map((g) => `<tr><td><b>${esc(g.k)}</b></td><td>${g.n}</td>${celda(g.c, g.n)}${celda(g.a, g.n)}${celda(g.v, g.n)}${celda(g.i, g.n)}</tr>`).join('') || '<tr><td colspan="6" class="muted">Todavía no hay datos en este periodo.</td></tr>'}
+    ${filas.length > 1 ? `<tr><td><b>Total</b></td><td><b>${tot.n}</b></td>${celda(tot.c, tot.n)}${celda(tot.a, tot.n)}${celda(tot.v, tot.n)}${celda(tot.i, tot.n)}</tr>` : ''}</tbody></table></div></section>
+  <section class="card panel"><h3>Por programa</h3><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Programa</th><th>Personas</th>${LEAD_STATES.map(([e, t]) => `<th>${esc(t)}</th>`).join('')}</tr></thead><tbody>${porProg}</tbody></table></div></section>
+  <section class="card panel"><h3>Por qué se descartan</h3>${motivos.size ? `<div class="tbl-wrap"><table class="tbl"><tbody>${[...motivos.entries()].sort((a, b) => b[1] - a[1]).map(([m, n]) => `<tr><td>${esc(m)}</td><td style="text-align:right"><b>${n}</b></td></tr>`).join('')}</tbody></table></div>` : '<p class="muted">Todavía no hay descartadas. Al descartar a alguien, el portal te pregunta el motivo.</p>'}</section>`;
+};
+
+// Exporta a Excel (CSV) las personas que se ven con los filtros actuales. Sirve también como respaldo.
+function exportarCsv() {
+  const lista = personasFiltradas();
+  const cab = ['Nombre', 'Correo', 'WhatsApp', 'País', 'Programas y etapa', 'Etapa más avanzada', 'Origen', 'Campaña', 'Cuenta en el aula', 'Etiquetas', 'Seguimiento', 'Última nota', 'Primer registro'];
+  const fila = (p) => [p.nombre, p.email, p.whatsapp, p.country, p.leads.map((l) => `${PROG_CORTO[l.form] || l.form}: ${etapaTxt(l.form, leadEtapa(l))}`).join(' | '), etapaTxt('', etapaDe(p)),
+    p.leads[0].utm?.utm_source || 'directo', p.leads[0].utm?.utm_campaign || '', p.alumna ? 'Sí' : 'No', p.tags.join(' | '), p.followUp, p.note, ymd(p.leads[0].createdAt || Date.now())];
+  // Una celda que empieza como fórmula (=, @, o + / - seguido de otra cosa que un número) se neutraliza para que Excel no la ejecute
+  const celda = (v) => { let t = String(v ?? ''); if (/^[=@]|^[+\-](?![\d\s])/.test(t)) t = `'${t}`; return `"${t.replace(/"/g, '""')}"`; };
+  const csv = `﻿${[cab, ...lista.map(fila)].map((r) => r.map(celda).join(',')).join('\r\n')}`;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = `interesadas-${ymd(Date.now())}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+  toast(`Exportadas ${lista.length} personas.`);
+}
+
 V.interesadas = () => {
-  const head = `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>CRM · Interesadas</h1><p>Cada persona es una sola tarjeta, aunque se haya registrado en varias páginas. Muévela por el embudo de cada programa, escribe notas y fija cuándo volver a escribirle.</p></div><span style="display:flex;gap:8px;flex-wrap:wrap">${A.leads && repetidasPorLimpiar().length ? `<button class="btn btn-ghost btn-sm" data-leads-dedup>Limpiar repetidas (${repetidasPorLimpiar().length})</button>` : ''}<button class="btn btn-ghost btn-sm" data-leads-reload>Actualizar</button></span></div>`;
+  const head = `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>CRM · Interesadas</h1><p>Cada persona es una sola tarjeta, aunque se haya registrado en varias páginas. Muévela por el embudo de cada programa, escribe notas y fija cuándo volver a escribirle.</p></div><span style="display:flex;gap:8px;flex-wrap:wrap">${A.leads && repetidasPorLimpiar().length ? `<button class="btn btn-ghost btn-sm" data-leads-dedup>Limpiar repetidas (${repetidasPorLimpiar().length})</button>` : ''}<button class="btn btn-ghost btn-sm" data-crm-csv>Exportar a Excel</button><button class="btn btn-ghost btn-sm" data-leads-reload>Actualizar</button></span></div>`;
   if (!A.leads) return `${head}<div class="card empty">Cargando interesadas…</div>`;
   const sinLink = [['enlacePendulo', 'Péndulo'], ['enlaceTarot', 'Tarot'], ['enlaceTerapias', 'terapias online']].filter(([k]) => !A.clases?.[k]).map(([, n]) => n);
   const aviso = sinLink.length ? `<div class="card" style="padding:12px 14px;font-size:.88rem;border-left:4px solid #b8402f"><b>Falta el enlace de Google Meet de ${sinLink.join(', ')}.</b> Mientras no esté, quienes se registren no ven el botón para entrar. Cárgalo en <button class="link" data-go="ajustes">Ajustes del aula</button>.</div>` : '';
   const prog = progDe(S.crmProg), lista = personasFiltradas(), vista = S.crmVista || 'embudo', todas = personas();
   const chip = (attr, v, t, on) => `<button class="chip" ${attr}="${esc(v)}" aria-pressed="${on}">${t}</button>`;
-  const origenes = [...new Set(A.leads.map(leadOrigen))].sort();
+  const vistas = `${chip('data-crm-vista', 'embudo', 'Embudo', vista === 'embudo')}${chip('data-crm-vista', 'tabla', 'Tabla', vista === 'tabla')}${chip('data-crm-vista', 'metricas', 'Métricas', vista === 'metricas')}`;
+  if (vista === 'metricas') return `${head}${aviso}<div class="filters">${vistas}</div>${metricasHTML()}`;
+  const origenes = [...new Set(A.leads.map(leadOrigen))].sort(), tags = [...new Set(todas.flatMap((p) => p.tags))].sort();
   const nSeg = todas.filter(seguimientoHoyP).length, nSin = todas.filter((p) => !p.alumna).length;
   const etapasProg = LEAD_STATES.filter(([k]) => !(prog && esPago(prog[0]) && k === 'clase'));
-  const controles = `<div class="filters">${chip('data-crm-vista', 'embudo', 'Embudo', vista === 'embudo')}${chip('data-crm-vista', 'tabla', 'Tabla', vista === 'tabla')}
+  const controles = `<div class="filters">${vistas}
     <input type="text" id="crm-q" placeholder="Buscar por nombre, correo, WhatsApp o nota" value="${esc(S.crmQ || '')}" style="flex:1;min-width:220px;border-radius:999px">
     <select id="crm-origen" aria-label="Origen" style="border-radius:999px"><option value="">Todos los orígenes</option>${origenes.map((o) => `<option value="${esc(o)}" ${S.crmOrigen === o ? 'selected' : ''}>${esc(o === 'directo' ? 'Directo' : o)}</option>`).join('')}</select>
     <select id="crm-etapa" aria-label="Etapa" style="border-radius:999px"><option value="">Todas las etapas</option>${etapasProg.map(([k]) => `<option value="${k}" ${S.crmEtapa === k ? 'selected' : ''}>${esc(etapaTxt(prog?.[0], k))}</option>`).join('')}</select>
+    ${tags.length ? `<select id="crm-tag" aria-label="Etiqueta" style="border-radius:999px"><option value="">Todas las etiquetas</option>${tags.map((t) => `<option ${S.crmTag === t ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select>` : ''}
     <button class="chip" data-crm-seg aria-pressed="${!!S.crmSeg}">Seguimiento hoy${nSeg ? ` (${nSeg})` : ''}</button>
     <button class="chip" data-crm-sincuenta aria-pressed="${!!S.crmSinCuenta}" title="Personas que aún no tienen cuenta en el aula">Sin cuenta en el aula (${nSin})</button></div>
-    <div class="filters">${chip('data-crm-prog', '', `Todos los programas (${todas.length} personas)`, !S.crmProg)}${LEAD_PROGS.map(([k, t]) => chip('data-crm-prog', k, `${t} (${todas.filter((p) => tieneProg(p, [k, t, LEAD_PROGS.find((x) => x[0] === k)[2]])).length})`, S.crmProg === k)).join('')}</div>`;
+    <div class="filters">${chip('data-crm-prog', '', `Todos los programas (${todas.length} personas)`, !S.crmProg)}${LEAD_PROGS.map(([k, t, fs]) => chip('data-crm-prog', k, `${t} (${todas.filter((p) => tieneProg(p, [k, t, fs])).length})`, S.crmProg === k)).join('')}</div>`;
+  const tagsPills = (p) => p.tags.map((t) => `<span class="pill pres">${esc(t)}</span>`).join(' ');
 
   if (vista === 'tabla') {
-    const sel = S.leadSel, barra = sel.size ? `<div class="filters" style="padding:0 4px 12px"><b>${sel.size} persona${sel.size === 1 ? '' : 's'} seleccionada${sel.size === 1 ? '' : 's'}</b><button class="btn btn-ghost btn-sm" style="color:#b8402f" data-leads-del>Eliminar seleccionadas</button><button class="link" data-leads-clear>Quitar selección</button></div>` : '';
+    const sel = S.leadSel, n = sel.size;
+    const barra = n ? `<div class="filters" style="padding:0 4px 12px"><b>${n} persona${n === 1 ? '' : 's'} seleccionada${n === 1 ? '' : 's'}</b>
+      ${prog ? `<select id="bulk-etapa" aria-label="Mover a" style="border-radius:999px"><option value="">Mover a…</option>${etapasProg.map(([k]) => `<option value="${k}">${esc(etapaTxt(prog[0], k))}</option>`).join('')}</select>` : ''}
+      <input id="bulk-tag" list="tags-lista" placeholder="Etiqueta" maxlength="30" style="border-radius:999px;max-width:160px"><datalist id="tags-lista">${tags.map((t) => `<option value="${esc(t)}">`).join('')}</datalist><button class="btn btn-ghost btn-sm" data-bulk-tag>Etiquetar</button>
+      <button class="btn btn-ghost btn-sm" style="color:#b8402f" data-leads-del>Eliminar seleccionadas</button><button class="link" data-leads-clear>Quitar selección</button></div>` : '';
     return `${head}${aviso}${controles}
     <section class="card panel">${barra}<div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:32px"><input type="checkbox" data-lead-all aria-label="Seleccionar todas" ${lista.length && lista.every((p) => sel.has(p.id)) ? 'checked' : ''}></th><th>Persona</th><th>Programas</th><th>Origen</th><th>Registro</th><th>Cuenta y seguimiento</th><th>Etapa${prog ? ` en ${esc(prog[1])}` : ''}</th></tr></thead><tbody>
     ${lista.map((p) => { const trk = prog ? tracksEn(p, prog)[0] : null; return `<tr>
       <td><input type="checkbox" data-lead-sel="${esc(p.id)}" aria-label="Seleccionar a ${esc(p.nombre)}" ${sel.has(p.id) ? 'checked' : ''}></td>
       <td><button class="link" data-lead-open="${esc(p.id)}" style="font-weight:700">${esc(p.nombre)}</button><br><span class="muted" style="font-size:.84rem">${contactoDe(p)}</span>${p.note ? `<br><span class="muted" style="font-size:.84rem">📝 ${esc(p.note.slice(0, 80))}${p.note.length > 80 ? '…' : ''}</span>` : ''}</td>
-      <td style="white-space:normal">${progPills(p)}</td>
+      <td style="white-space:normal">${progPills(p)} ${tagsPills(p)}</td>
       <td class="muted" style="font-size:.84rem">${esc(leadOrigenTxt(p.leads[0]))}</td>
       <td class="muted" style="font-size:.84rem">${fdateMs(p.leads[0].createdAt)}</td>
       <td>${cuentaBadge(p)} ${segBadge(p)}</td>
@@ -520,7 +574,7 @@ V.interesadas = () => {
     return `<article class="kb-card" ${trk ? `draggable="true" data-lead-card="${esc(trk.id)}"` : ''} data-lead-open="${esc(p.id)}">
       <b>${esc(p.nombre)}</b>${prog ? `<span class="muted">${linea || 'Formación completa · pagó en la plataforma'}</span>` : `<span style="display:flex;gap:4px;flex-wrap:wrap">${progPills(p)}</span>`}
       ${trk?.interest ? `<small>${esc(trk.interest)}</small>` : ''}${p.note ? `<small class="muted">📝 ${esc(p.note.slice(0, 70))}${p.note.length > 70 ? '…' : ''}</small>` : ''}
-      <div class="kb-meta">${cuentaBadge(p)}${segBadge(p)}${otras}${p.whatsapp ? `<a class="btn btn-ghost btn-sm" href="${waLink(p.whatsapp)}" data-wa-open="${esc(waNum(p.whatsapp))}" data-wa-name="${esc(p.nombre)}">WhatsApp</a>` : ''}</div></article>`;
+      <div class="kb-meta">${cuentaBadge(p)}${segBadge(p)}${tagsPills(p)}${otras}${p.whatsapp ? `<a class="btn btn-ghost btn-sm" href="${waLink(p.whatsapp)}" data-wa-open="${esc(waNum(p.whatsapp))}" data-wa-name="${esc(p.nombre)}">WhatsApp</a>` : ''}</div></article>`;
   };
   return `${head}${aviso}${controles}
   <div class="filters"><button class="chip" data-crm-desc aria-pressed="${verDesc}">Mostrar descartadas (${lista.filter((p) => etapaVista(p) === 'descartado').length})</button><span class="muted" style="font-size:.82rem">${prog ? 'Arrastra una tarjeta a otra columna para cambiar su etapa en este programa. Toca una tarjeta para ver su ficha.' : 'Aquí cada persona aparece en su etapa más avanzada. Elige un programa arriba para mover las tarjetas, o abre una ficha para ver todos sus programas.'}</span></div>
@@ -550,76 +604,195 @@ function pedirProgramasPago(p) {
     $('#pp-no').onclick = () => $('#dlg').close();
   });
 }
+// Por qué se descartó a alguien (ayuda a ver, con el tiempo, dónde se pierde la gente)
+const MOTIVOS = ['No responde', 'Precio', 'No es el momento', 'No le interesa', 'Compró en otro lugar', 'Registro repetido o de prueba', 'Otro'];
+function pedirMotivo(p) {
+  return new Promise((resolve) => {
+    let listo = false;
+    const alCerrar = () => fin(null);
+    const fin = (v) => { if (listo) return; listo = true; $('#dlg').removeEventListener('close', alCerrar); resolve(v); };
+    dialog(`<span class="eyebrow">Descartar</span><h3>${esc(p.nombre)}</h3>
+    <p class="muted" style="font-size:.88rem;margin:6px 0 12px">¿Por qué se descarta? Queda anotado y se resume en Métricas.</p>
+    <form id="mo-form" style="display:grid;gap:10px"><select id="mo-motivo" aria-label="Motivo">${MOTIVOS.map((m) => `<option>${esc(m)}</option>`).join('')}</select>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary btn-sm">Descartar</button><button type="button" class="btn btn-ghost btn-sm" id="mo-no">Cancelar</button></div></form>`);
+    $('#dlg').addEventListener('close', alCerrar);
+    $('#mo-form').onsubmit = (e) => { e.preventDefault(); fin($('#mo-motivo').value); $('#dlg').close(); };
+    $('#mo-no').onclick = () => $('#dlg').close();
+  });
+}
+// Después de que alguien toma la clase queda una tarea para el día siguiente (ofrecerle el curso), si no tenía un seguimiento pendiente
+const seguimientoAuto = (p) => (!p.followUp || p.followUp < ymd(hoyCL()) ? ymd(hoyCL() + 864e5) : null);
+const etapaNombre = (k) => LEAD_STATES.find(([x]) => x === k)?.[1] || k;
+
 // Cambia la etapa de una persona en un programa (un registro). Devuelve true si cambió.
 async function leadMover(id, status) {
   const l = (A.leads || []).find((x) => x.id === id); if (!l) return false;
   if (l.status === status && leadEtapa(l) === status) return false;
-  let extra = [];
+  const p = personaDe(id);
+  let extra = [], motivo = '';
   if (status === 'inscrita' && esClase(l.form)) {
-    const forms = await pedirProgramasPago(personaDe(id));
+    const forms = await pedirProgramasPago(p);
     if (forms === null) { render(false); return false; }
     extra = forms;
   }
-  const antes = l.status; l.status = status; A._per = null; paintNav(); render(false);
+  if (status === 'descartado') {
+    const m = await pedirMotivo(p);
+    if (m === null) { render(false); return false; }
+    motivo = m;
+  }
+  const antes = { status: l.status, motivo: l.motivo, eventos: l.eventos };
+  l.status = status; if (motivo) l.motivo = motivo;
+  l.eventos = [...(l.eventos || []), { t: Date.now(), tipo: 'etapa', texto: `Etapa: ${etapaNombre(status)}${motivo ? ` (${motivo})` : ''}` }];
+  A._per = null; paintNav(); render(false);
   try {
-    await data.leads({ action: 'update', id, status });
+    await data.leads({ action: 'update', id, status, ...(motivo ? { motivo } : {}) });
+    const fup = status === 'clase' ? seguimientoAuto(p) : null;
+    if (fup) { await data.leads({ action: 'update', ids: p.leads.map((x) => x.id), followUp: fup }); p.leads.forEach((x) => (x.followUp = fup)); toast('Quedó un seguimiento para mañana: ofrecerle el curso.'); }
     for (const form of extra) await data.leads({ action: 'addProgram', fromId: id, form, status: 'inscrita' });
-    if (extra.length) { await data.leads({ action: 'all' }); A._per = null; paintNav(); render(false); }
+    if (extra.length) await data.leads({ action: 'all' });
+    A._per = null; paintNav(); render(false);
     return true;
-  } catch (e) { l.status = antes; A._per = null; paintNav(); render(false); fail(e); return false; }
+  } catch (e) { Object.assign(l, antes); A._per = null; paintNav(); render(false); fail(e); return false; }
 }
 
-// Ficha de una persona: sus datos, cuenta en el aula, todos sus programas (con su etapa en cada uno), nota y próximo seguimiento
+// Respuestas rápidas del chat: se escriben en el cuadro para que Karen las ajuste antes de enviar
+const RESPUESTAS = [
+  ['Link de la clase', (c) => `Hola ${c.nombre}, te dejo el link de tu clase gratis de ${c.programa}${c.fecha ? ` (${c.fecha})` : ''}: ${c.link || '[falta el link]'}. ¡Te espero!`],
+  ['Recordatorio de la clase', (c) => `Hola ${c.nombre}, te recuerdo tu clase gratis de ${c.programa}${c.fecha ? `: ${c.fecha}` : ''}. Entra por aquí: ${c.link || '[falta el link]'}`],
+  ['Después de la clase', (c) => `Hola ${c.nombre}, ¿cómo te fue en la clase de ${c.programa}? Me encantaría saber qué te pareció y resolver tus dudas.`],
+  ['Contarle del curso', (c) => `Hola ${c.nombre}, si te gustó la clase, puedo contarte cómo funciona el curso y cómo inscribirte. ¿Te parece?`],
+];
+const ctxRespuesta = (p) => {
+  const trk = p.leads.find((l) => esClase(l.form)) || p.leads[0];
+  const evt = trk?.claseEvento ? (A.cal || []).find((x) => x.id === trk.claseEvento) : null;
+  return {
+    nombre: String(p.nombre || '').split(' ')[0],
+    programa: (LEAD_FORMS[trk?.form] || 'Casa Muladhara').replace('Clase gratis ', ''),
+    fecha: trk?.claseFecha ? `${fechaLarga(trk.claseFecha)}${evt?.time ? ` a las ${evt.time} (hora de Chile)` : ''}` : '',
+    link: trk && esClase(trk.form) ? A.clases?.[trk.form === 'clase-pendulo' ? 'enlacePendulo' : 'enlaceTarot'] || '' : '',
+  };
+};
+
+// Conversación de WhatsApp dentro de la ficha: se lee en vivo de wa_chats/{número}; enviar pasa por el servidor (src/app/api/whatsapp)
+let waFichaOff = null;
+function waFichaMontar(p) {
+  waFichaOff?.(); waFichaOff = null;
+  const n = waNum(p.whatsapp), box = $('#wf-msgs'); if (!n || !box) return;
+  const pintar = (msgs) => { box.innerHTML = msgs.map((m) => `<div class="wa-m ${m.dir === 'out' ? 'out' : ''}">${esc(m.text)}<small>${m.ts?.toMillis ? waHora(m.ts.toMillis()) : ''}</small></div>`).join('') || '<div class="wa-empty">Todavía no hay mensajes con esta persona.</div>'; box.scrollTop = box.scrollHeight; };
+  try {
+    waFichaOff = onSnapshot(query(collection(db, 'wa_chats', n, 'messages'), orderBy('ts', 'asc'), limit(200)), (snap) => pintar(snap.docs.map((d) => d.data())),
+      () => { box.innerHTML = '<div class="wa-empty">Todavía no se puede leer la conversación: falta conectar WhatsApp y publicar las reglas de Firestore.</div>'; });
+  } catch { /* sin conexión */ }
+  if (A.wa.chats.find((x) => x.id === n)?.unread) waApi({ action: 'leido', to: n }).catch(() => {});
+  if (A.wa.on === null) waApi({ action: 'estado' }).then((r) => { A.wa.on = r.configurado; if (!r.configurado && $('#wf-aviso')) $('#wf-aviso').hidden = false; }).catch(() => {});
+}
+
+// Ficha de una persona, con tres pestañas: Resumen (datos, programas, seguimiento, etiquetas), WhatsApp (chat) e Historial (notas y cambios)
 function leadFicha(id) {
   const p = personaDe(id) || personas().find((x) => x.id === id); if (!p) return;
+  const tab = S.fichaTab || 'resumen';
   const ids = p.leads.map((l) => l.id), formas = new Set(p.leads.map((l) => l.form));
   const k = (t, v) => (v ? `<dt>${t}</dt><dd>${v}</dd>` : '');
-  const filaProg = (l) => `<tr><td style="white-space:normal"><b>${esc(LEAD_FORMS[l.form] || l.form)}</b><br><span class="muted" style="font-size:.8rem">${fdateMs(l.createdAt)}${l.claseFecha ? ` · clase ${esc(fechaLarga(l.claseFecha))}` : ''}${l.interest ? ` · ${esc(l.interest)}` : ''}${l.desdeForm ? ' · agregado a mano' : ''}</span></td>
-    <td><select data-trk-status="${esc(l.id)}" aria-label="Etapa en ${esc(LEAD_FORMS[l.form] || l.form)}">${LEAD_STATES.filter(([x]) => !(esPago(l.form) && x === 'clase' && l.status !== 'clase')).map(([x]) => `<option value="${x}" ${leadEtapa(l) === x ? 'selected' : ''}>${esc(etapaTxt(l.form, x))}</option>`).join('')}</select></td>
-    <td style="text-align:right"><button type="button" class="link" style="color:#b8402f" data-trk-del="${esc(l.id)}">Quitar</button></td></tr>`;
-  const faltan = PROG_AGREGAR.filter(([f]) => !formas.has(f));
-  const cuenta = p.alumna ? `<b>${esc(nameOf(p.alumna))}</b> · ${esc(payState(p.alumna)[1])} <button type="button" class="link" data-lead-alumna="${esc(p.alumna.id)}">Ver su ficha</button>` : `<span style="color:${etapaDe(p) === 'inscrita' ? '#b8402f' : 'inherit'};font-weight:700">Aún no tiene cuenta en el aula.</span> <span class="muted">Si la creó con otro correo, no se unen solas.</span>`;
+  const pestana = (v, t) => `<button type="button" class="chip" data-ficha-tab="${v}" aria-pressed="${tab === v}">${t}</button>`;
+  const refrescar = () => { A._per = null; paintNav(); render(false); };
+
+  let cuerpo = '';
+  if (tab === 'resumen') {
+    const filaProg = (l) => `<tr><td style="white-space:normal"><b>${esc(LEAD_FORMS[l.form] || l.form)}</b><br><span class="muted" style="font-size:.8rem">${fdateMs(l.createdAt)}${l.claseFecha ? ` · clase ${esc(fechaLarga(l.claseFecha))}` : ''}${l.interest ? ` · ${esc(l.interest)}` : ''}${l.desdeForm ? ' · agregado a mano' : ''}${l.status === 'descartado' && l.motivo ? ` · motivo: ${esc(l.motivo)}` : ''}</span></td>
+      <td><select data-trk-status="${esc(l.id)}" aria-label="Etapa en ${esc(LEAD_FORMS[l.form] || l.form)}">${LEAD_STATES.filter(([x]) => !(esPago(l.form) && x === 'clase' && l.status !== 'clase')).map(([x]) => `<option value="${x}" ${leadEtapa(l) === x ? 'selected' : ''}>${esc(etapaTxt(l.form, x))}</option>`).join('')}</select></td>
+      <td style="text-align:right"><button type="button" class="link" style="color:#b8402f" data-trk-del="${esc(l.id)}">Quitar</button></td></tr>`;
+    const faltan = PROG_AGREGAR.filter(([f]) => !formas.has(f));
+    const cuenta = p.alumna ? `<b>${esc(nameOf(p.alumna))}</b> · ${esc(payState(p.alumna)[1])} <button type="button" class="link" data-lead-alumna="${esc(p.alumna.id)}">Ver su ficha</button>` : `<span style="color:${etapaDe(p) === 'inscrita' ? '#b8402f' : 'inherit'};font-weight:700">Aún no tiene cuenta en el aula.</span> <span class="muted">Si la creó con otro correo, no se unen solas.</span>`;
+    const todasTags = [...new Set(personas().flatMap((x) => x.tags))].sort();
+    cuerpo = `<dl class="kv" style="margin:8px 0 12px">${k('Contacto', contactoDe(p))}${k('Cuenta en el aula', cuenta)}${k('Primer registro', fdateMs(p.leads[0].createdAt))}${k('Origen', esc(leadOrigenTxt(p.leads[0])))}${k('Mensaje', esc(p.leads.map((l) => l.message).filter(Boolean).pop() || ''))}${k('Última nota', p.note ? `${esc(p.note.slice(0, 160))}${p.note.length > 160 ? '…' : ''}` : '')}</dl>
+      <div style="display:grid;gap:8px;margin-bottom:12px"><b style="font-size:.9rem">Programas</b>
+        <div class="tbl-wrap"><table class="tbl"><tbody>${p.leads.map(filaProg).join('')}${formacionPagada(p) && !formas.has('formacion') ? '<tr><td><b>Formación completa</b><br><span class="muted" style="font-size:.8rem">pagó en la plataforma</span></td><td><span class="pill done">Inscrita</span></td><td></td></tr>' : ''}</tbody></table></div>
+        ${faltan.length ? `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><select id="fa-form" aria-label="Programa a agregar">${faltan.map(([f, t]) => `<option value="${f}">${esc(t)}</option>`).join('')}</select><select id="fa-status" aria-label="Etapa inicial">${LEAD_STATES.filter(([x]) => x !== 'clase').map(([x, t]) => `<option value="${x}" ${x === 'conversando' ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select><button type="button" class="btn btn-ghost btn-sm" id="fa-add">Agregar programa</button></div>` : ''}</div>
+      <div style="display:grid;gap:6px;margin-bottom:12px"><b style="font-size:.9rem">Próximo seguimiento</b>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><input type="date" id="sg-fecha" value="${esc(p.followUp || '')}" style="max-width:170px"><button type="button" class="btn btn-ghost btn-sm" data-sg="fecha">Guardar fecha</button><button type="button" class="chip" data-sg="1">Mañana</button><button type="button" class="chip" data-sg="3">En 3 días</button><button type="button" class="chip" data-sg="7">En 1 semana</button>${p.followUp ? '<button type="button" class="link" data-sg="quitar">Quitar</button>' : ''}</div></div>
+      <div style="display:grid;gap:6px;margin-bottom:12px"><b style="font-size:.9rem">Etiquetas</b>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">${p.tags.map((t) => `<span class="pill pres">${esc(t)} <button type="button" class="link" data-tag-del="${esc(t)}" aria-label="Quitar ${esc(t)}" style="padding:0 0 0 4px">×</button></span>`).join('')}<input id="tg-nueva" list="tags-lista" placeholder="Nueva etiqueta" maxlength="30" style="max-width:170px"><datalist id="tags-lista">${todasTags.map((t) => `<option value="${esc(t)}">`).join('')}</datalist><button type="button" class="btn btn-ghost btn-sm" id="tg-add">Agregar</button></div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">${p.whatsapp ? `<button type="button" class="btn btn-primary btn-sm" data-ficha-tab="wa">Escribir por WhatsApp</button>` : ''}${p.email ? `<a class="btn btn-ghost btn-sm" href="mailto:${esc(p.email)}">Correo</a>` : ''}<button type="button" class="btn btn-ghost btn-sm" id="lf-del" style="color:#b8402f;margin-left:auto">Eliminar persona</button></div>`;
+  } else if (tab === 'wa') {
+    const n = waNum(p.whatsapp), c = A.wa.chats.find((x) => x.id === n), libre = waLibre(c);
+    cuerpo = !n ? '<p class="muted" style="margin-top:12px">Esta persona no dejó WhatsApp.</p>' : `<div class="alert" id="wf-aviso" ${A.wa.on === false ? '' : 'hidden'} style="margin-top:10px"><div><b>WhatsApp todavía no está conectado</b><p>Faltan las llaves de Meta en Vercel. Mientras tanto, el chat aquí no envía ni recibe.</p></div></div>
+      <div class="wa-msgs" id="wf-msgs" style="height:300px;margin-top:10px;border:1px solid var(--line);border-radius:12px"><div class="wa-empty">Cargando conversación…</div></div>
+      ${libre ? `<div style="display:grid;gap:8px;margin-top:10px"><select id="wf-resp" aria-label="Respuestas rápidas"><option value="">Respuestas rápidas…</option>${RESPUESTAS.map(([t], i) => `<option value="${i}">${esc(t)}</option>`).join('')}</select>
+        <form class="wa-send" id="wf-form" style="padding:0;border:0"><textarea id="wf-text" rows="2" placeholder="Escribe un mensaje…" aria-label="Mensaje"></textarea><button class="btn btn-primary btn-sm">Enviar</button></form></div>`
+      : `<div class="wa-note" style="margin-top:10px"><span>${c?.lastInboundAt ? 'Pasaron más de 24 horas desde su último mensaje.' : 'Esta persona aún no te ha escrito.'} WhatsApp solo permite empezar con un mensaje de plantilla (con costo); cuando responda podrás escribirle libremente.</span><button type="button" class="btn btn-primary btn-sm" id="wf-plantilla">Enviar plantilla</button></div>`}`;
+  } else {
+    const evs = [];
+    p.leads.forEach((l) => {
+      evs.push({ t: l.createdAt || 0, tipo: 'registro', texto: `${l.desdeForm ? 'Agregada a mano a' : 'Se registró en'} ${LEAD_FORMS[l.form] || l.form}${l.claseFecha ? ` · clase ${fechaLarga(l.claseFecha)}` : ''}${l.desdeForm ? '' : ` · ${leadOrigenTxt(l)}`}` });
+      (l.eventos || []).forEach((e) => evs.push({ t: e.t, tipo: e.tipo, texto: `${e.texto}${e.tipo === 'etapa' ? ` · ${PROG_CORTO[l.form] || l.form}` : ''}` }));
+    });
+    evs.sort((a, b) => b.t - a.t);
+    cuerpo = `<form id="nota-form" style="display:grid;gap:8px;margin:10px 0"><textarea id="nt-text" maxlength="1000" rows="3" placeholder="Anota lo que conversaron, qué le interesa, qué falta decidir…" aria-label="Nota"></textarea><button class="btn btn-primary btn-sm" style="justify-self:start">Agregar nota</button></form>
+      <ol class="tl">${evs.map((e) => `<li class="tl-${esc(e.tipo)}"><time>${fdateMs(e.t)}</time><span>${esc(e.texto)}</span></li>`).join('')}</ol>`;
+  }
+
   dialog(`<span class="eyebrow">Persona</span><h3>${esc(p.nombre)}</h3>
-  <dl class="kv" style="margin:8px 0 12px">${k('Contacto', contactoDe(p))}${k('Cuenta en el aula', cuenta)}${k('Primer registro', fdateMs(p.leads[0].createdAt))}${k('Origen', esc(leadOrigenTxt(p.leads[0])))}${k('Mensaje', esc(p.leads.map((l) => l.message).filter(Boolean).pop() || ''))}</dl>
-  <div style="display:grid;gap:8px;margin-bottom:12px"><b style="font-size:.9rem">Programas</b>
-    <div class="tbl-wrap"><table class="tbl"><tbody>${p.leads.map(filaProg).join('')}${formacionPagada(p) && !formas.has('formacion') ? '<tr><td><b>Formación completa</b><br><span class="muted" style="font-size:.8rem">pagó en la plataforma</span></td><td><span class="pill done">Inscrita</span></td><td></td></tr>' : ''}</tbody></table></div>
-    ${faltan.length ? `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><select id="fa-form" aria-label="Programa a agregar">${faltan.map(([f, t]) => `<option value="${f}">${esc(t)}</option>`).join('')}</select><select id="fa-status" aria-label="Etapa inicial">${LEAD_STATES.filter(([x]) => x !== 'clase').map(([x, t]) => `<option value="${x}" ${x === 'conversando' ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select><button type="button" class="btn btn-ghost btn-sm" id="fa-add">Agregar programa</button></div>` : ''}</div>
-  <form id="lead-form" class="cal-form">
-    <label><b>Próximo seguimiento</b><input type="date" id="lf-fup" value="${esc(p.followUp || '')}"></label>
-    <span></span>
-    <label class="full"><b>Nota</b><textarea id="lf-note" maxlength="1000" rows="4" placeholder="Lo que conversaron, qué le interesa, qué le falta decidir…">${esc(p.note || '')}</textarea></label>
-    <div class="full actions"><button class="btn btn-primary btn-sm">Guardar nota y seguimiento</button>${p.whatsapp ? `<a class="btn btn-ghost btn-sm" href="${waLink(p.whatsapp)}" data-wa-open="${esc(waNum(p.whatsapp))}" data-wa-name="${esc(p.nombre)}">Escribir por WhatsApp</a>` : ''}${p.email ? `<a class="btn btn-ghost btn-sm" href="mailto:${esc(p.email)}">Correo</a>` : ''}<button type="button" class="btn btn-ghost btn-sm" id="lf-del" style="color:#b8402f;margin-left:auto">Eliminar persona</button></div>
-  </form>`, true);
-  document.querySelectorAll('#dlg [data-trk-status]').forEach((s) => (s.onchange = async () => { await leadMover(s.dataset.trkStatus, s.value); leadFicha(id); }));
-  document.querySelectorAll('#dlg [data-trk-del]').forEach((b) => (b.onclick = async () => {
-    const l = A.leads.find((x) => x.id === b.dataset.trkDel); if (!l) return;
-    if (!confirm(`¿Quitar a ${p.nombre} de ${LEAD_FORMS[l.form] || l.form}? Se borra ese registro y no se puede deshacer.${p.leads.length === 1 ? '\n\nEs su único programa: la persona se elimina de tu lista.' : ''}`)) return;
-    try {
-      await data.leads({ action: 'delete', ids: [l.id] }); A.leads = A.leads.filter((x) => x.id !== l.id); A._per = null; S.leadSel.delete(p.id); paintNav(); render(false);
-      if (p.leads.length > 1) leadFicha(p.leads.find((x) => x.id !== l.id).id); else $('#dlg').close();
-      toast('Quitada.');
-    } catch (err) { fail(err); }
-  }));
-  const add = $('#fa-add');
-  if (add) add.onclick = async () => {
-    add.disabled = true;
-    try {
-      await data.leads({ action: 'addProgram', fromId: p.leads[0].id, form: $('#fa-form').value, status: $('#fa-status').value });
-      await data.leads({ action: 'all' }); A._per = null; paintNav(); render(false); leadFicha(id); toast('Programa agregado.');
-    } catch (err) { fail(err); add.disabled = false; }
-  };
-  $('#lead-form').onsubmit = async (e) => {
-    e.preventDefault();
-    const cambios = { followUp: $('#lf-fup').value, note: $('#lf-note').value.trim() };
-    try {
-      await data.leads({ action: 'update', ids, ...cambios }); p.leads.forEach((l) => Object.assign(l, cambios, { updatedAt: Date.now() })); A._per = null;
-      $('#dlg').close(); paintNav(); render(false); toast('Guardado.');
-    } catch (err) { fail(err); }
-  };
-  $('#lf-del').onclick = async () => {
-    if (!confirm(`¿Eliminar a ${p.nombre} de tu lista${p.leads.length > 1 ? ` (${p.leads.length} programas)` : ''}? No se puede deshacer.`)) return;
-    try { await data.leads({ action: 'delete', ids }); A.leads = A.leads.filter((x) => !ids.includes(x.id)); A._per = null; S.leadSel.delete(p.id); $('#dlg').close(); paintNav(); render(false); toast('Eliminada.'); } catch (err) { fail(err); }
-  };
+  <div class="filters" style="margin:6px 0 10px">${cuentaBadge(p)} ${segBadge(p)} ${p.tags.map((t) => `<span class="pill pres">${esc(t)}</span>`).join(' ')}</div>
+  <div class="filters">${pestana('resumen', 'Resumen')}${pestana('wa', 'WhatsApp')}${pestana('historial', 'Historial')}</div>${cuerpo}`, true);
+
+  $('#dlg').addEventListener('close', () => { waFichaOff?.(); waFichaOff = null; }, { once: true });
+  document.querySelectorAll('#dlg [data-ficha-tab]').forEach((b) => (b.onclick = () => { S.fichaTab = b.dataset.fichaTab; leadFicha(id); }));
+  if (tab === 'resumen') {
+    document.querySelectorAll('#dlg [data-trk-status]').forEach((s) => (s.onchange = async () => { await leadMover(s.dataset.trkStatus, s.value); leadFicha(id); }));
+    document.querySelectorAll('#dlg [data-trk-del]').forEach((b) => (b.onclick = async () => {
+      const l = A.leads.find((x) => x.id === b.dataset.trkDel); if (!l) return;
+      if (!confirm(`¿Quitar a ${p.nombre} de ${LEAD_FORMS[l.form] || l.form}? Se borra ese registro y no se puede deshacer.${p.leads.length === 1 ? '\n\nEs su único programa: la persona se elimina de tu lista.' : ''}`)) return;
+      try {
+        await data.leads({ action: 'delete', ids: [l.id] }); A.leads = A.leads.filter((x) => x.id !== l.id); S.leadSel.delete(p.id); refrescar();
+        if (p.leads.length > 1) leadFicha(p.leads.find((x) => x.id !== l.id).id); else $('#dlg').close();
+        toast('Quitada.');
+      } catch (err) { fail(err); }
+    }));
+    const add = $('#fa-add');
+    if (add) add.onclick = async () => {
+      add.disabled = true;
+      try { await data.leads({ action: 'addProgram', fromId: p.leads[0].id, form: $('#fa-form').value, status: $('#fa-status').value }); await data.leads({ action: 'all' }); refrescar(); leadFicha(id); toast('Programa agregado.'); } catch (err) { fail(err); add.disabled = false; }
+    };
+    document.querySelectorAll('#dlg [data-sg]').forEach((b) => (b.onclick = async () => {
+      const v = b.dataset.sg, fecha = v === 'quitar' ? '' : v === 'fecha' ? $('#sg-fecha').value : ymd(hoyCL() + Number(v) * 864e5);
+      if (v === 'fecha' && !fecha) return toast('Elige una fecha.');
+      try { await data.leads({ action: 'update', ids, followUp: fecha }); p.leads.forEach((l) => { l.followUp = fecha; l.eventos = [...(l.eventos || [])]; }); refrescar(); leadFicha(id); toast(fecha ? 'Seguimiento guardado.' : 'Seguimiento quitado.'); } catch (err) { fail(err); }
+    }));
+    const tagAccion = async (body, aplicar) => { try { await data.leads({ action: 'etiquetas', ids, ...body }); p.leads.forEach(aplicar); refrescar(); leadFicha(id); } catch (err) { fail(err); } };
+    $('#tg-add').onclick = () => { const t = $('#tg-nueva').value.trim(); if (!t) return; tagAccion({ agregar: [t] }, (l) => { l.tags = [...new Set([...(l.tags || []), t])]; }); };
+    $('#tg-nueva').onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); $('#tg-add').click(); } };
+    document.querySelectorAll('#dlg [data-tag-del]').forEach((b) => (b.onclick = () => { const t = b.dataset.tagDel; tagAccion({ quitar: [t] }, (l) => { l.tags = (l.tags || []).filter((x) => x !== t); }); }));
+    $('#lf-del').onclick = async () => {
+      if (!confirm(`¿Eliminar a ${p.nombre} de tu lista${p.leads.length > 1 ? ` (${p.leads.length} programas)` : ''}? No se puede deshacer.`)) return;
+      try { await data.leads({ action: 'delete', ids }); A.leads = A.leads.filter((x) => !ids.includes(x.id)); S.leadSel.delete(p.id); $('#dlg').close(); refrescar(); toast('Eliminada.'); } catch (err) { fail(err); }
+    };
+  } else if (tab === 'wa') {
+    waFichaMontar(p);
+    const n = waNum(p.whatsapp), t = $('#wf-text'), form = $('#wf-form');
+    const resp = $('#wf-resp'); if (resp) resp.onchange = () => { if (resp.value === '') return; t.value = RESPUESTAS[Number(resp.value)][1](ctxRespuesta(p)); resp.value = ''; t.focus(); };
+    if (form) {
+      t.onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } };
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        const text = t.value.trim(); if (!text) return;
+        const b = form.querySelector('button'); b.disabled = true;
+        try { await waApi({ action: 'enviar', to: n, text, name: p.nombre }); t.value = ''; } catch (err) { fail(err); }
+        b.disabled = false;
+      };
+    }
+    const pl = $('#wf-plantilla');
+    if (pl) pl.onclick = async () => { pl.disabled = true; try { await waApi({ action: 'plantilla', to: n, name: p.nombre }); toast('Plantilla enviada. Cuando responda podrás escribirle aquí.'); } catch (err) { fail(err); pl.disabled = false; } };
+  } else {
+    $('#nota-form').onsubmit = async (e) => {
+      e.preventDefault();
+      const texto = $('#nt-text').value.trim(); if (!texto) return;
+      try {
+        await data.leads({ action: 'nota', ids, texto });
+        p.leads.forEach((l) => { l.note = texto; }); p.leads[0].eventos = [...(p.leads[0].eventos || []), { t: Date.now(), tipo: 'nota', texto }];
+        refrescar(); leadFicha(id); toast('Nota agregada.');
+      } catch (err) { fail(err); }
+    };
+  }
 }
 // ---------- Inicio: lo importante del día a mano ----------
 V.inicio = () => {
@@ -633,7 +806,7 @@ V.inicio = () => {
   const clase = (e) => { const n = (A.leads || []).filter((l) => l.claseEvento === e.id).length; return `<tr data-go="calendario" style="cursor:pointer"><td><b>${esc(CAL_TYPES[e.type]?.[0] || e.type)}</b><br><span class="muted" style="font-size:.84rem">${e.date === hoy ? 'Hoy' : fechaLarga(e.date)}${e.time ? ` · ${esc(e.time)}` : ''}</span></td><td style="text-align:right"><span class="pill ${n ? 'done' : 'lock'}">${n} inscrita${n === 1 ? '' : 's'}</span></td></tr>`; };
   return `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>Hola, ${esc(nombre)}</h1><p>Lo que necesita tu atención hoy.</p></div></div>
   <div class="kpis">${kpi(nuevas.length, 'interesadas nuevas', 'interesadas')}${kpi(sinLeer, 'WhatsApp sin leer', 'whatsapp')}${kpi(A.questions.length, 'preguntas de clase', 'preguntas')}${kpi(A.tickets.length, 'mensajes de ayuda', 'ayuda')}</div>
-  ${personas().filter(seguimientoHoyP).length ? `<div class="alert"><div><b>${personas().filter(seguimientoHoyP).length} seguimiento${personas().filter(seguimientoHoyP).length === 1 ? '' : 's'} para hoy</b><p>Personas a las que quedaste de escribirles.</p></div><button class="btn" data-crm-hoy>Ver</button></div>` : ''}
+  ${(() => { const t = personas().filter(seguimientoHoyP).sort((a, b) => a.followUp.localeCompare(b.followUp)), hoyS = ymd(hoyCL()); return t.length ? `<section class="card panel"><div class="panel-h"><h3>Para hoy (${t.length})</h3><button class="link" data-crm-hoy>Ver en el CRM</button></div><div class="tbl-wrap"><table class="tbl"><tbody>${t.slice(0, 8).map((q) => `<tr><td><button class="link" data-lead-open="${esc(q.id)}" style="font-weight:700">${esc(q.nombre)}</button><br><span class="muted" style="font-size:.84rem">${q.followUp < hoyS ? `Vencido el ${esc(fechaLarga(q.followUp))}` : 'Hoy'} · ${esc(q.leads.map((l) => PROG_CORTO[l.form] || l.form).join(', '))}</span></td><td style="text-align:right">${q.whatsapp ? `<a class="btn btn-ghost btn-sm" href="${waLink(q.whatsapp)}" data-wa-open="${esc(waNum(q.whatsapp))}" data-wa-name="${esc(q.nombre)}">WhatsApp</a>` : ''}</td></tr>`).join('')}</tbody></table></div>${t.length > 8 ? `<p class="muted" style="font-size:.84rem;margin:0">Y ${t.length - 8} más en el CRM.</p>` : ''}</section>` : ''; })()}
   ${personas().filter((p) => etapaDe(p) === 'inscrita' && !p.alumna).length ? `<div class="alert"><div><b>${personas().filter((p) => etapaDe(p) === 'inscrita' && !p.alumna).length} inscrita${personas().filter((p) => etapaDe(p) === 'inscrita' && !p.alumna).length === 1 ? '' : 's'} sin cuenta en el aula</b><p>Ya están inscritas pero no crearon su cuenta. Escríbeles para que la creen con su correo.</p></div><button class="btn" data-crm-sincuenta-ya>Ver</button></div>` : ''}
   ${atrasadas.length ? `<div class="alert"><div><b>${atrasadas.length} cuota${atrasadas.length === 1 ? '' : 's'} atrasada${atrasadas.length === 1 ? '' : 's'}</b><p>${esc(atrasadas.slice(0, 3).map(nameOf).join(', '))}${atrasadas.length > 3 ? '…' : ''}</p></div><button class="btn" data-go="pagos">Ver pagos</button></div>` : ''}
   <div class="cols">
@@ -1012,8 +1185,8 @@ document.addEventListener('click', async (e) => {
   } catch (err) { fail(err); b.disabled = false; }
 });
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-lead-alumna]'); if (b) { if ($('#dlg').open) $('#dlg').close(); openStudent(b.dataset.leadAlumna); } });
-document.addEventListener('click', (e) => { if (e.target.closest('[data-crm-hoy]')) { Object.assign(S, { crmSeg: true, crmProg: '', crmQ: '', crmOrigen: '', crmSinCuenta: false, crmEtapa: '' }); go('interesadas'); } });
-document.addEventListener('click', (e) => { if (e.target.closest('[data-crm-sincuenta-ya]')) { Object.assign(S, { crmSeg: false, crmProg: '', crmQ: '', crmOrigen: '', crmSinCuenta: true, crmEtapa: 'inscrita', crmVista: 'tabla' }); go('interesadas'); } });
+document.addEventListener('click', (e) => { if (e.target.closest('[data-crm-hoy]')) { Object.assign(S, { crmSeg: true, crmProg: '', crmQ: '', crmOrigen: '', crmSinCuenta: false, crmEtapa: '', crmTag: '', crmVista: 'embudo' }); go('interesadas'); } });
+document.addEventListener('click', (e) => { if (e.target.closest('[data-crm-sincuenta-ya]')) { Object.assign(S, { crmSeg: false, crmProg: '', crmQ: '', crmOrigen: '', crmSinCuenta: true, crmEtapa: 'inscrita', crmTag: '', crmVista: 'tabla' }); go('interesadas'); } });
 // Asistencia a una clase gratis: se marcan quienes entraron y pasan juntas a "Tomó la clase"
 document.addEventListener('change', (e) => { const t = e.target.closest('[data-asist-all]'); if (t) document.querySelectorAll('#dlg [data-asist]').forEach((c) => (c.checked = t.checked)); });
 document.addEventListener('click', async (e) => {
@@ -1025,8 +1198,13 @@ document.addEventListener('click', async (e) => {
   if (!ids.length) return toast('Todas esas ya estaban más adelante en el embudo.');
   b.disabled = true;
   try {
-    await data.leads({ action: 'estado', ids, status: 'clase' });
-    A.leads.forEach((l) => { if (ids.includes(l.id)) l.status = 'clase'; }); A._per = null; paintNav(); render(false);
+    const manana = ymd(hoyCL() + 864e5), hoy = ymd(hoyCL());
+    const pide = (id) => { const q = personaDe(id); return !!q && (!q.followUp || q.followUp < hoy); }; // solo a quien no tiene ya un seguimiento pendiente
+    const conSeg = ids.filter(pide), sinSeg = ids.filter((id) => !pide(id));
+    if (sinSeg.length) await data.leads({ action: 'estado', ids: sinSeg, status: 'clase' });
+    if (conSeg.length) await data.leads({ action: 'estado', ids: conSeg, status: 'clase', followUp: manana });
+    A.leads.forEach((l) => { if (ids.includes(l.id)) { l.status = 'clase'; l.eventos = [...(l.eventos || []), { t: Date.now(), tipo: 'etapa', texto: `Etapa: ${etapaNombre('clase')}` }]; if (conSeg.includes(l.id)) l.followUp = manana; } });
+    A._per = null; paintNav(); render(false);
     if (ev && $('#dlg').open) calForm(ev);
     toast(`${ids.length} persona${ids.length === 1 ? '' : 's'} marcada${ids.length === 1 ? '' : 's'} como que tomó la clase.`);
   } catch (err) { fail(err); b.disabled = false; }
@@ -1074,13 +1252,39 @@ function bind() {
   if (S.view === 'whatsapp') waBind();
   document.querySelectorAll('[data-crm-vista]').forEach((b) => (b.onclick = () => { S.crmVista = b.dataset.crmVista; render(false); }));
   document.querySelectorAll('[data-crm-prog]').forEach((b) => (b.onclick = () => { S.crmProg = b.dataset.crmProg; S.leadSel = new Set(); render(false); }));
+  document.querySelectorAll('[data-crm-metrica]').forEach((b) => (b.onclick = () => { S.crmMetrica = b.dataset.crmMetrica; render(false); }));
+  document.querySelectorAll('[data-crm-csv]').forEach((b) => (b.onclick = () => exportarCsv()));
+  const cr = $('#crm-rango'); if (cr) cr.onchange = () => { S.crmRango = cr.value; render(false); };
+  const ct = $('#crm-tag'); if (ct) ct.onchange = () => { S.crmTag = ct.value; render(false); };
+  const be = $('#bulk-etapa');
+  if (be) be.onchange = async () => {
+    const prog = progDe(S.crmProg), status = be.value; if (!status || !prog) return;
+    const ids = personas().filter((q) => S.leadSel.has(q.id)).map((q) => tracksEn(q, prog)[0]?.id).filter(Boolean);
+    if (!ids.length) { be.value = ''; return toast('Esas personas no tienen registro en este programa.'); }
+    if (!confirm(`¿Mover ${ids.length} persona${ids.length === 1 ? '' : 's'} a «${etapaTxt(prog[0], status)}» en ${prog[1]}?`)) { be.value = ''; return; }
+    try {
+      for (let i = 0; i < ids.length; i += 200) await data.leads({ action: 'estado', ids: ids.slice(i, i + 200), status });
+      A.leads.forEach((l) => { if (ids.includes(l.id)) { l.status = status; l.eventos = [...(l.eventos || []), { t: Date.now(), tipo: 'etapa', texto: `Etapa: ${etapaNombre(status)}` }]; } });
+      S.leadSel = new Set(); A._per = null; paintNav(); render(false); toast(`${ids.length} movida${ids.length === 1 ? '' : 's'}.`);
+    } catch (e) { fail(e); be.value = ''; }
+  };
+  document.querySelectorAll('[data-bulk-tag]').forEach((b) => (b.onclick = async () => {
+    const t = ($('#bulk-tag').value || '').trim(); if (!t) return toast('Escribe la etiqueta.');
+    const ids = personas().filter((q) => S.leadSel.has(q.id)).flatMap((q) => q.leads.map((l) => l.id));
+    b.disabled = true;
+    try {
+      for (let i = 0; i < ids.length; i += 200) await data.leads({ action: 'etiquetas', ids: ids.slice(i, i + 200), agregar: [t] });
+      A.leads.forEach((l) => { if (ids.includes(l.id)) l.tags = [...new Set([...(l.tags || []), t])]; });
+      A._per = null; render(false); toast(`Etiqueta «${t}» agregada.`);
+    } catch (e) { fail(e); b.disabled = false; }
+  }));
   document.querySelectorAll('[data-crm-sincuenta]').forEach((b) => (b.onclick = () => { S.crmSinCuenta = !S.crmSinCuenta; render(false); }));
   const ce = $('#crm-etapa'); if (ce) ce.onchange = () => { S.crmEtapa = ce.value; render(false); };
   document.querySelectorAll('[data-crm-seg]').forEach((b) => (b.onclick = () => { S.crmSeg = !S.crmSeg; render(false); }));
   document.querySelectorAll('[data-crm-desc]').forEach((b) => (b.onclick = () => { S.crmDesc = !S.crmDesc; render(false); }));
   const co = $('#crm-origen'); if (co) co.onchange = () => { S.crmOrigen = co.value; render(false); };
   const cq = $('#crm-q'); if (cq) cq.oninput = () => { S.crmQ = cq.value; const p = cq.selectionStart; render(false); const c2 = $('#crm-q'); c2.focus(); c2.setSelectionRange(p, p); };
-  document.querySelectorAll('[data-lead-open]').forEach((b) => (b.onclick = (e) => { if (e.target.closest('a')) return; leadFicha(b.dataset.leadOpen); }));
+  document.querySelectorAll('[data-lead-open]').forEach((b) => (b.onclick = (e) => { if (e.target.closest('a')) return; S.fichaTab = 'resumen'; leadFicha(b.dataset.leadOpen); }));
   document.querySelectorAll('[data-lead-card]').forEach((c) => (c.ondragstart = (e) => { e.dataTransfer.setData('text/plain', c.dataset.leadCard); e.dataTransfer.effectAllowed = 'move'; }));
   document.querySelectorAll('[data-kb-col]').forEach((col) => {
     col.ondragover = (e) => { e.preventDefault(); col.classList.add('over'); };

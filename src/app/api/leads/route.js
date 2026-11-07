@@ -7,7 +7,10 @@
 //   action 'all'  -> { leads: [{ id, form, name, ..., createdAt }] }   solo la Maestra (Authorization: Bearer <token>)
 //   action 'update' -> { id, status?, note?, followUp? }   la Maestra cambia la etapa, escribe una nota o fija la fecha de seguimiento (AAAA-MM-DD; vacío la quita)
 //                      con ids: [..] (hasta 30) la nota y el seguimiento se guardan en todos los programas de una misma persona
-//   action 'estado' -> { ids: [..], status }   la Maestra cambia la etapa de varias a la vez (hasta 200), p. ej. quienes tomaron la clase
+//   action 'estado' -> { ids: [..], status, followUp? }   la Maestra cambia la etapa de varias a la vez (hasta 200), p. ej. quienes tomaron la clase (y les fija el seguimiento)
+//   action 'nota' -> { ids: [..], texto }   agrega una nota al historial de una persona (queda en todos sus programas como última nota)
+//   action 'etiquetas' -> { ids: [..], agregar?: [..], quitar?: [..] }   etiquetas de una o varias personas (hasta 200 registros)
+//   update también acepta motivo (por qué se descartó). Cada cambio de etapa, seguimiento o nota queda en el historial (eventos) del registro.
 //   action 'addProgram' -> { fromId, form, status }   la Maestra suma otro programa a una persona que ya está (p. ej. de la clase gratis al curso): crea o actualiza
 //                      su registro en ese formulario con los mismos datos de contacto, sin duplicarla
 //   action 'delete' -> { ids: [..] }   la Maestra elimina interesadas (hasta 100 a la vez); no se puede deshacer
@@ -27,6 +30,11 @@ const str = (v, max) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const out = (d) => ({ id: d.id, ...d.data(), createdAt: d.data().createdAt?.toMillis?.() || 0, updatedAt: d.data().updatedAt?.toMillis?.() || 0 });
 const ID = /^[A-Za-z0-9]{1,40}$/;
+const MOTIVOS = ['No responde', 'Precio', 'No es el momento', 'No le interesa', 'Compró en otro lugar', 'Registro repetido o de prueba', 'Otro'];
+const ETAPA_TXT = { nuevo: 'Nueva', contactado: 'Contactada', clase: 'Tomó la clase', conversando: 'En conversación', inscrita: 'Inscrita', descartado: 'Descartada' };
+// Historial de cada registro: arreglo de { t (ms), tipo, texto }. arrayUnion no admite serverTimestamp, por eso la hora va en milisegundos.
+const ev = (tipo, texto) => ({ t: Date.now(), tipo, texto: String(texto).slice(0, 1000) });
+const etiquetasOk = (v) => (Array.isArray(v) ? [...new Set(v.map((x) => String(x ?? '').trim()))].filter(Boolean) : []);
 // Registro de una persona en un formulario: el id sale de formulario + correo (o WhatsApp), así un doble envío cae en el mismo documento.
 // Si ya hay uno de antes (id al azar) con ese correo y formulario, se usa ese.
 async function refDe(firestore, form, email, whatsapp) {
@@ -41,7 +49,7 @@ async function refDe(firestore, form, email, whatsapp) {
 
 export async function POST(request) {
   const body = await request.json().catch(() => ({}));
-  const delPortal = ['all', 'status', 'update', 'delete', 'estado', 'addProgram'].includes(body.action); // acciones de la Maestra: su error no es el de una landing
+  const delPortal = ['all', 'status', 'update', 'delete', 'estado', 'addProgram', 'nota', 'etiquetas'].includes(body.action); // acciones de la Maestra: su error no es el de una landing
   try {
     if (body.action === 'save') {
       // Campo trampa: las personas no lo ven, los bots lo llenan. Se responde ok para no darles pistas.
@@ -100,7 +108,7 @@ export async function POST(request) {
       }
       return json({ ok: true, id: ref.id, ...(repetida ? { repetida: true } : {}), ...(enlace ? { enlace } : {}) });
     }
-    if (body.action === 'all' || body.action === 'status' || body.action === 'update' || body.action === 'delete' || body.action === 'estado' || body.action === 'addProgram') {
+    if (body.action === 'all' || body.action === 'status' || body.action === 'update' || body.action === 'delete' || body.action === 'estado' || body.action === 'addProgram' || body.action === 'nota' || body.action === 'etiquetas') {
       let user;
       try {
         user = await auth().verifyIdToken((request.headers.get('authorization') || '').replace(/^Bearer\s+/i, ''));
@@ -108,11 +116,41 @@ export async function POST(request) {
         return json({ error: 'Tu sesión expiró. Vuelve a entrar al portal.' }, 401);
       }
       if (user.admin !== true) return json({ error: 'Esta acción es solo para la Maestra.' }, 403);
+      if (body.action === 'nota') {
+        const ids = Array.isArray(body.ids) ? [...new Set(body.ids)] : [];
+        const texto = typeof body.texto === 'string' ? body.texto.trim().slice(0, 1000) : '';
+        if (!texto || !ids.length || ids.length > 30 || ids.some((id) => typeof id !== 'string' || !ID.test(id))) return json({ error: 'Escribe la nota.' }, 400);
+        const lote = db().batch();
+        ids.forEach((id, i) => lote.update(db().doc(`leads/${id}`), { note: texto, ...(i === 0 ? { eventos: FieldValue.arrayUnion(ev('nota', texto)) } : {}), updatedAt: FieldValue.serverTimestamp() }));
+        try { await lote.commit(); } catch (e) {
+          if (e.code === 5 || /NOT_FOUND/.test(String(e.message))) return json({ error: 'Esa persona ya no existe. Actualiza la lista.' }, 404);
+          throw e;
+        }
+        return json({ ok: true });
+      }
+      if (body.action === 'etiquetas') {
+        const ids = Array.isArray(body.ids) ? [...new Set(body.ids)] : [];
+        const agregar = etiquetasOk(body.agregar), quitar = etiquetasOk(body.quitar);
+        if (!ids.length || ids.length > 200 || ids.some((id) => typeof id !== 'string' || !ID.test(id)) || (!agregar.length && !quitar.length)
+          || [...agregar, ...quitar].some((t) => t.length > 30) || agregar.length > 10 || quitar.length > 10 || (agregar.length && quitar.length)) return json({ error: 'Etiqueta no válida (hasta 30 letras).' }, 400);
+        const lote = db().batch();
+        ids.forEach((id) => lote.update(db().doc(`leads/${id}`), { tags: agregar.length ? FieldValue.arrayUnion(...agregar) : FieldValue.arrayRemove(...quitar), updatedAt: FieldValue.serverTimestamp() }));
+        try { await lote.commit(); } catch (e) {
+          if (e.code === 5 || /NOT_FOUND/.test(String(e.message))) return json({ error: 'Alguna ya no existe. Actualiza la lista.' }, 404);
+          throw e;
+        }
+        return json({ ok: true });
+      }
       if (body.action === 'estado') {
         const ids = Array.isArray(body.ids) ? [...new Set(body.ids)] : [];
         if (!ETAPAS.includes(body.status) || !ids.length || ids.length > 200 || ids.some((id) => typeof id !== 'string' || !ID.test(id))) return json({ error: 'Datos no válidos.' }, 400);
+        if ('followUp' in body && body.followUp !== '' && !FECHA.test(String(body.followUp))) return json({ error: 'Fecha no válida.' }, 400);
         const lote = db().batch();
-        ids.forEach((id) => lote.update(db().doc(`leads/${id}`), { status: body.status, updatedAt: FieldValue.serverTimestamp() }));
+        ids.forEach((id) => lote.update(db().doc(`leads/${id}`), {
+          status: body.status, ...('followUp' in body ? { followUp: body.followUp } : {}),
+          eventos: FieldValue.arrayUnion(ev('etapa', `Etapa: ${ETAPA_TXT[body.status]}`), ...('followUp' in body && body.followUp ? [ev('seguimiento', `Seguimiento para el ${body.followUp}`)] : [])),
+          updatedAt: FieldValue.serverTimestamp(),
+        }));
         try { await lote.commit(); } catch (e) {
           if (e.code === 5 || /NOT_FOUND/.test(String(e.message))) return json({ error: 'Alguna ya no existe. Actualiza la lista.' }, 404);
           throw e;
@@ -132,7 +170,8 @@ export async function POST(request) {
           tx.set(ref, {
             form: body.form, name: o.name || '', email: o.email || '', whatsapp: o.whatsapp || '', country: o.country || '',
             interest: '', message: '', page: 'crm', utm: {}, status: body.status, desdeForm: o.form || '',
-            ...(o.note ? { note: o.note } : {}), ...(o.followUp ? { followUp: o.followUp } : {}),
+            ...(o.note ? { note: o.note } : {}), ...(o.followUp ? { followUp: o.followUp } : {}), ...(Array.isArray(o.tags) && o.tags.length ? { tags: o.tags } : {}),
+            eventos: [ev('programa', `Agregada a mano: etapa ${ETAPA_TXT[body.status]}`)],
             createdAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp(),
           });
         });
@@ -156,9 +195,17 @@ export async function POST(request) {
           if (body.followUp !== '' && !FECHA.test(String(body.followUp))) return json({ error: 'Fecha no válida.' }, 400);
           cambios.followUp = body.followUp;
         }
+        if ('motivo' in body) {
+          if (typeof body.motivo !== 'string' || (body.motivo && !MOTIVOS.includes(body.motivo))) return json({ error: 'Motivo no válido.' }, 400);
+          cambios.motivo = body.motivo;
+        }
         if (!Object.keys(cambios).length) return json({ error: 'No hay cambios.' }, 400);
+        const eventos = [
+          ...(cambios.status ? [ev('etapa', `Etapa: ${ETAPA_TXT[cambios.status]}${cambios.motivo ? ` (${cambios.motivo})` : ''}`)] : []),
+          ...('followUp' in cambios ? [ev('seguimiento', cambios.followUp ? `Seguimiento para el ${cambios.followUp}` : 'Seguimiento quitado')] : []),
+        ];
         const lote = db().batch();
-        objetivos.forEach((id) => lote.update(db().doc(`leads/${id}`), { ...cambios, updatedAt: FieldValue.serverTimestamp() }));
+        objetivos.forEach((id, i) => lote.update(db().doc(`leads/${id}`), { ...cambios, ...(i === 0 && eventos.length ? { eventos: FieldValue.arrayUnion(...eventos) } : {}), updatedAt: FieldValue.serverTimestamp() }));
         try { await lote.commit(); } catch (e) {
           if (e.code === 5 || /NOT_FOUND/.test(String(e.message))) return json({ error: 'Esa interesada ya no existe. Actualiza la lista.' }, 404);
           throw e;
