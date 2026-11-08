@@ -198,6 +198,7 @@ const NAV = [
   ['interesadas', 'Interesadas', '<path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/>', () => leadsSinVer().length],
   ['whatsapp', 'WhatsApp', '<path d="M12 21a9 9 0 1 0-9-9c0 1.6.4 3.1 1.2 4.4L3 21l4.6-1.2A9 9 0 0 0 12 21z"/><path d="M9 8.5c.3 3 3 5.7 6.500 6.500"/>', () => A.wa.chats.reduce((n, c) => n + (c.unread || 0), 0)],
   ['calendario', 'Calendario', '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'],
+  ['envios', 'Envíos', '<path d="M4 12 20 4l-4 16-4-7z"/><path d="M12 13l8-9"/>'],
   ['--', 'Alumnas'],
   ['alumnas', 'Alumnas', '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5a6.5 6.5 0 0 1 3.5 5.5"/>', () => alumnasSinVer().length],
   ['pagos', 'Pagos', '<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h4"/>'],
@@ -405,7 +406,7 @@ const waLink = (n) => { const d = String(n || '').replace(/\D/g, ''); return d ?
 const leadOrigen = (l) => l.utm?.utm_source || 'directo';
 const leadOrigenTxt = (l) => [l.utm?.utm_source && l.utm?.utm_medium ? `${l.utm.utm_source} / ${l.utm.utm_medium}` : l.utm?.utm_source, l.utm?.utm_campaign, l.utm?.utm_content].filter(Boolean).join(' · ') || 'Directo';
 // Vínculos: una interesada y una alumna son la misma persona si comparten correo o WhatsApp
-const llavesDe = (x) => [String(x.email || '').trim().toLowerCase(), waNum(x.whatsapp || x.phone)].filter(Boolean);
+const llavesDe = (x) => [String(x.email || '').trim().toLowerCase(), ...(x.emailsExtra || []).map((e) => String(e).trim().toLowerCase()), waNum(x.whatsapp || x.phone)].filter(Boolean);
 const vinculos = () => {
   const sig = `${A.leads?.length ?? -1}|${A.students.length}`;
   if (A._vin?.sig === sig) return A._vin; // se recalcula si cambió la cantidad de interesadas o de alumnas
@@ -557,7 +558,7 @@ function exportarCsv() {
 }
 
 V.interesadas = () => {
-  const head = `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>CRM · Interesadas</h1><p>Cada persona es una sola tarjeta, aunque se haya registrado en varias páginas. Muévela por el embudo de cada programa, escribe notas y fija cuándo volver a escribirle.</p></div><span style="display:flex;gap:8px;flex-wrap:wrap">${A.leads && repetidasPorLimpiar().length ? `<button class="btn btn-ghost btn-sm" data-leads-dedup>Limpiar repetidas (${repetidasPorLimpiar().length})</button>` : ''}<button class="btn btn-ghost btn-sm" data-crm-csv>Exportar a Excel</button><button class="btn btn-ghost btn-sm" data-leads-reload>Actualizar</button></span></div>`;
+  const head = `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>CRM · Interesadas</h1><p>Cada persona es una sola tarjeta, aunque se haya registrado en varias páginas. Muévela por el embudo de cada programa, escribe notas y fija cuándo volver a escribirle.</p></div><span style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" data-crm-preparar title="Crea el código personal y los enlaces de cada contacto">Preparar contactos</button><button class="btn btn-ghost btn-sm" data-crm-clasificar>Clasificar una clase</button><button class="btn btn-primary btn-sm" data-go="envios">Envíos</button>${A.leads && repetidasPorLimpiar().length ? `<button class="btn btn-ghost btn-sm" data-leads-dedup>Limpiar repetidas (${repetidasPorLimpiar().length})</button>` : ''}<button class="btn btn-ghost btn-sm" data-crm-csv>Exportar a Excel</button><button class="btn btn-ghost btn-sm" data-leads-reload>Actualizar</button></span></div>`;
   if (!A.leads) return `${head}<div class="card empty">Cargando interesadas…</div>`;
   const sinLink = [['enlacePendulo', 'Péndulo'], ['enlaceTarot', 'Tarot'], ['enlaceTerapias', 'terapias online']].filter(([k]) => !A.clases?.[k]).map(([, n]) => n);
   const aviso = sinLink.length ? `<div class="card" style="padding:12px 14px;font-size:.88rem;border-left:4px solid #b8402f"><b>Falta el enlace de Google Meet de ${sinLink.join(', ')}.</b> Mientras no esté, quienes se registren no ven el botón para entrar. Cárgalo en <button class="link" data-go="ajustes">Ajustes del aula</button>.</div>` : '';
@@ -639,7 +640,7 @@ function pedirProgramasPago(p, opciones = {}) {
   });
 }
 // Etiquetas que se ofrecen con un clic (Karen puede crear las suyas)
-const ETIQUETAS_SUGERIDAS = ['Pidió descuento', 'Quiere pagar en cuotas', 'Pidió más información', 'Sin respuesta', 'Cliente de terapias', 'Recomendada por alguien'];
+const ETIQUETAS_SUGERIDAS = ['No contactar', 'Pidió descuento', 'Quiere pagar en cuotas', 'Pidió más información', 'Sin respuesta', 'Cliente de terapias', 'Recomendada por alguien'];
 // Por qué se descartó a alguien (ayuda a ver, con el tiempo, dónde se pierde la gente)
 const MOTIVOS = ['No responde', 'Precio', 'No es el momento', 'No le interesa', 'Compró en otro lugar', 'Registro repetido o de prueba', 'Otro'];
 function pedirMotivo(p) {
@@ -795,7 +796,7 @@ function leadFicha(id) {
     <p class="muted" style="font-size:.78rem;margin:0">Las etapas, el seguimiento y las etiquetas se guardan al instante. Los datos de contacto se guardan con «Guardar cambios».</p>`;
 
   // ----- izquierda: persona, contacto editable, seguimiento, etiquetas
-  const izquierda = `<div class="ct-cab"><span class="av lg" style="--c:${colorFor(p.id)}">${esc(initials(p.nombre))}</span><div><h3>${esc(p.nombre)}</h3><div class="ct-badges">${cuentaBadge(p)} ${segBadge(p)}<span class="pill lock">${esc(etapaTxt('', etapaDe(p)))}</span></div></div></div>
+  const izquierda = `<div class="ct-cab"><span class="av lg" style="--c:${colorFor(p.id)}">${esc(initials(p.nombre))}</span><div><h3>${esc(p.nombre)}</h3><div class="ct-badges">${cuentaBadge(p)} ${asistPersona(p)} ${segBadge(p)}<span class="pill lock">${esc(etapaTxt('', etapaDe(p)))}</span></div></div></div>
     <div class="ct-acc">${p.whatsapp ? '<button type="button" class="btn btn-primary btn-sm" data-ficha-tab="wa">WhatsApp</button>' : ''}${p.email ? `<a class="btn btn-ghost btn-sm" href="mailto:${esc(p.email)}">Correo</a>` : ''}</div>
     <form class="ct-form" id="ct-form">
       <label>Nombre<input data-ct="name" value="${esc(p.nombre)}" maxlength="120" autocomplete="off"></label>
@@ -807,6 +808,7 @@ function leadFicha(id) {
     ${secc('Próximo seguimiento', `<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><input type="date" id="sg-fecha" value="${esc(p.followUp || '')}" style="max-width:150px"><button type="button" class="btn btn-ghost btn-sm" data-sg="fecha">Guardar</button></div><div style="display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="chip" data-sg="1">Mañana</button><button type="button" class="chip" data-sg="3">En 3 días</button><button type="button" class="chip" data-sg="7">En 1 semana</button>${p.followUp ? '<button type="button" class="link" data-sg="quitar">Quitar</button>' : ''}</div>`)}
     ${secc('Etiquetas', `<span class="muted" style="font-size:.78rem">Marcas para agrupar personas (por ejemplo «Pidió descuento»). Luego puedes filtrar la lista por ellas.</span>${p.tags.length ? `<div style="display:flex;gap:6px;flex-wrap:wrap">${p.tags.map((t) => `<span class="pill pres">${esc(t)} <button type="button" class="link" data-tag-del="${esc(t)}" aria-label="Quitar ${esc(t)}" style="padding:0 0 0 4px">×</button></span>`).join('')}</div>` : ''}${sugeridas.length ? `<div style="display:flex;gap:6px;flex-wrap:wrap">${sugeridas.map((t) => `<button type="button" class="chip" data-tag-sug="${esc(t)}">+ ${esc(t)}</button>`).join('')}</div>` : ''}<div style="display:flex;gap:6px"><input id="tg-nueva" list="tags-lista" placeholder="Crear etiqueta propia" maxlength="30"><datalist id="tags-lista">${todasTags.map((t) => `<option value="${esc(t)}">`).join('')}</datalist><button type="button" class="btn btn-ghost btn-sm" id="tg-add">Agregar</button></div>`)}
     ${secc('Datos', `<dl class="kv" style="font-size:.84rem;gap:6px 12px"><dt>Origen</dt><dd>${esc(leadOrigenTxt(p.leads[0]))}</dd><dt>Primer registro</dt><dd>${fdateMs(p.leads[0].createdAt)}</dd>${p.leads.map((l) => l.message).filter(Boolean).pop() ? `<dt>Mensaje</dt><dd style="font-weight:400;text-align:left">${esc(p.leads.map((l) => l.message).filter(Boolean).pop())}</dd>` : ''}</dl>`)}
+    ${secc('Enlaces personales', enlacesPersonales(p))}
     <button type="button" class="link" id="lf-del" style="color:#b8402f;justify-self:start">Eliminar persona</button>`;
 
   dialog(`<div class="ct"><aside class="ct-izq">${izquierda}</aside><main class="ct-centro"><div class="filters">${pestana('historial', 'Historial')}${pestana('wa', 'WhatsApp')}</div>${centro}</main><aside class="ct-der">${derecha}</aside></div>`, true);
@@ -872,6 +874,16 @@ function leadFicha(id) {
     try { await data.leads({ action: 'delete', ids }); A.leads = A.leads.filter((x) => !ids.includes(x.id)); S.leadSel.delete(p.id); $('#dlg').close(); refrescar(); toast('Eliminada.'); } catch (err) { fail(err); }
   };
 
+  document.querySelectorAll('#dlg [data-codigo]').forEach((b) => (b.onclick = async () => {
+    const [tid, accion] = b.dataset.codigo.split('|'), l = A.leads.find((x) => x.id === tid); if (!l) return;
+    if (!confirm(accion === 'revocar' ? 'Si lo revocas, los enlaces de esta persona dejan de funcionar. ¿Revocar el código?' : 'Se crea un código nuevo y los enlaces anteriores dejan de funcionar. ¿Regenerar?')) return;
+    try {
+      await data.leads({ action: 'codigo', id: tid, accion });
+      if (accion === 'revocar') l.codigoRevocado = true; else await data.leads({ action: 'all' });
+      refrescar(); leadFicha(id); toast(accion === 'revocar' ? 'Código revocado.' : 'Código regenerado.');
+    } catch (err) { fail(err); }
+  }));
+
   // Centro
   if (tab === 'wa') {
     waFichaMontar(p);
@@ -901,6 +913,152 @@ function leadFicha(id) {
     };
   }
 }
+// ---------- Herramientas del embudo de clases gratis ----------
+// Oferta de cada línea (hora de Chile; la misma que usa el servidor en src/lib/server/embudo.js)
+const OFERTA_UI = { pendulo: { cierre: ['2026-11-18', '17:00'], nombre: 'Péndulo Hebreo' }, tarot: { cierre: ['2026-11-26', '17:00'], nombre: 'Tarot Terapéutico' } };
+const DIAS_L = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+const MESES_L = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+const fechaLimite = (clase) => { const o = OFERTA_UI[clase]; if (!o) return ''; const d = new Date(`${o.cierre[0]}T00:00:00Z`); return `${DIAS_L[d.getUTCDay()]} ${d.getUTCDate()} de ${MESES_L[d.getUTCMonth()]} a las ${o.cierre[1]} (hora de Chile)`; };
+const horaChile = () => Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'America/Santiago', hour: '2-digit', hourCycle: 'h23' }).format(new Date()));
+const diaChile = (ms) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Santiago' }).format(new Date(ms));
+
+// Segmentos para los mensajes: quienes asistieron (entraron o confirmaron), quienes no, y quienes dicen que estuvieron pero no se pudo identificar
+const SEGMENTOS = [['asistieron', 'Asistieron'], ['no_asistieron', 'No asistieron'], ['no_identificadas', 'No identificadas'], ['todas', 'Todas (menos matriculadas)']];
+const asistioL = (l) => !!(l.asistencia?.entro || l.asistencia?.confirmada) || ['entro', 'asistio_confirmado'].includes(leadEtapa(l));
+const segmentoDe = (l) => (asistioL(l) ? 'asistieron' : leadEtapa(l) === 'no_identificada' || l.asistencia?.autodeclarada === 'si' ? 'no_identificadas' : 'no_asistieron');
+// Quién no debe recibir mensajes de venta: ya compró, se descartó, pidió que no le escribamos, o rechazó el consentimiento
+const excluidaDeEnvio = (l, p) => (['matriculada', 'descartado', 'lista_espera'].includes(leadEtapa(l)) ? 'Ya compró o está fuera'
+  : l.secuenciasVenta === false ? 'Ya compró' : (p?.tags || []).includes('No contactar') ? 'Pidió que no le escribamos' : l.consentimiento?.whatsapp?.aceptado === false ? 'No aceptó que le escribamos' : '');
+// Variables que se reemplazan en los textos con los datos de cada persona
+const variablesDe = (l) => {
+  const base = l.enlace_entrada ? new URL(l.enlace_entrada).origin : '';
+  return {
+    nombre: String(l.name || '').trim().split(/\s+/)[0], clase: OFERTA_UI[l.clase]?.nombre || '', fecha_limite: fechaLimite(l.clase),
+    enlace_entrada: l.enlace_entrada || '', enlace_replay: l.enlace_replay || '',
+    enlace_si: base && l.codigo ? `${base}/confirmar?l=${l.codigo}&r=si` : '', enlace_no: base && l.codigo ? `${base}/confirmar?l=${l.codigo}&r=no` : '',
+    enlace_asistencia: base && l.codigo ? `${base}/asistencia?l=${l.codigo}` : '',
+  };
+};
+const rellenar = (texto, l) => { const v = variablesDe(l); return String(texto || '').replace(/\{\{\s*(\w+)\s*\}\}/g, (m, k) => (k in v ? v[k] : m)); };
+
+V.envios = () => {
+  const head = `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>Envíos de la clase</h1><p>Escribe el texto una vez y envíalo persona por persona, con su enlace personal ya puesto. Cada envío queda anotado en su historial.</p></div></div>`;
+  if (!A.leads || !A.plantillas) return `${head}<div class="card empty">Cargando…</div>`;
+  const clase = S.envClase || 'pendulo', seg = S.envSeg || 'asistieron', clave = `${clase}_${seg}`;
+  const texto = A.plantillas[clave] || '';
+  const chip = (attr, v, t, on) => `<button class="chip" ${attr}="${esc(v)}" aria-pressed="${on}">${t}</button>`;
+  const todos = A.leads.filter((l) => l.form === `clase-${clase}`), porId = new Map(personas().flatMap((p) => p.leads.map((l) => [l.id, p])));
+  const enSeg = todos.filter((l) => seg === 'todas' || segmentoDe(l) === seg);
+  const filas = enSeg.map((l) => ({ l, motivo: excluidaDeEnvio(l, porId.get(l.id)) }));
+  const aEnviar = filas.filter((f) => !f.motivo), excl = filas.filter((f) => f.motivo);
+  const hoy = diaChile(Date.now()), enviadoHoy = (l, canal) => !!l.ultimoEnvio?.[canal] && diaChile(l.ultimoEnvio[canal]) === hoy;
+  const fuera = horaChile() < 8 || horaChile() >= 22;
+  const aviso = fuera ? '<div class="card" style="padding:12px 14px;font-size:.88rem;border-left:4px solid #b8402f"><b>Es de noche en Chile.</b> No se envía entre las 22:00 y las 8:00: espera a la mañana.</div>' : '';
+  const sinCodigo = aEnviar.filter((f) => !f.l.codigo).length;
+  const fila = ({ l }) => { const msg = rellenar(texto, l), n = waNum(l.whatsapp);
+    return `<tr><td><b>${esc(l.name)}</b><br><span class="muted" style="font-size:.8rem">${esc(l.email || '')}${l.email && l.whatsapp ? ' · ' : ''}${esc(l.whatsapp || '')}</span></td>
+      <td>${asistBadges(l) || '<span class="muted" style="font-size:.8rem">—</span>'}${l.consentimiento ? '' : ' <span class="pill lock" title="No hay registro de que haya aceptado recibir mensajes">sin consentimiento registrado</span>'}</td>
+      <td style="white-space:normal">${enviadoHoy(l, 'whatsapp') ? '<span class="pill done">WhatsApp enviado hoy</span> ' : ''}${enviadoHoy(l, 'email') ? '<span class="pill done">Correo enviado hoy</span>' : ''}</td>
+      <td style="text-align:right;white-space:nowrap">${n && texto ? `<a class="btn btn-ghost btn-sm" href="https://wa.me/${n}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener" data-env-wa="${esc(l.id)}">WhatsApp</a>` : ''}
+        ${l.email && texto ? `<a class="btn btn-ghost btn-sm" href="mailto:${esc(l.email)}?subject=${encodeURIComponent(`${OFERTA_UI[clase].nombre}: tu clase y tu lugar`)}&body=${encodeURIComponent(msg)}" data-env-mail="${esc(l.id)}">Correo</a>` : ''}
+        ${texto ? `<button type="button" class="btn btn-ghost btn-sm" data-env-copy="${esc(l.id)}">Copiar</button>` : ''}</td></tr>`; };
+  const ejemplo = aEnviar[0] ? rellenar(texto, aEnviar[0].l) : '';
+  return `${head}${aviso}
+  <div class="filters">${chip('data-env-clase', 'pendulo', 'Péndulo Hebreo', clase === 'pendulo')}${chip('data-env-clase', 'tarot', 'Tarot Terapéutico', clase === 'tarot')}</div>
+  <div class="filters">${SEGMENTOS.map(([k, t]) => chip('data-env-seg', k, `${t} (${todos.filter((l) => (k === 'todas' || segmentoDe(l) === k) && !excluidaDeEnvio(l, porId.get(l.id))).length})`, seg === k)).join('')}</div>
+  <section class="card panel"><h3>Texto para: ${esc(SEGMENTOS.find(([k]) => k === seg)[1].toLowerCase())}</h3>
+    <p class="muted" style="font-size:.84rem;margin:0">Variables: <code>{{nombre}}</code> <code>{{clase}}</code> <code>{{enlace_entrada}}</code> <code>{{enlace_replay}}</code> <code>{{enlace_si}}</code> <code>{{enlace_no}}</code> <code>{{enlace_asistencia}}</code> <code>{{fecha_limite}}</code>. Cada una se reemplaza con los datos de la persona.</p>
+    <textarea id="env-texto" rows="7" maxlength="3000" placeholder="Hola {{nombre}}, te dejo el replay de la clase: {{enlace_replay}}&#10;&#10;La inscripción cierra el {{fecha_limite}}.&#10;¿Estuviste en la clase? Sí: {{enlace_si}} · No pude entrar: {{enlace_no}}" aria-label="Texto del mensaje">${esc(texto)}</textarea>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn btn-primary btn-sm" data-env-guardar>Guardar texto</button><span class="muted" style="font-size:.8rem">Se guarda para esta clase y este grupo.</span></div>
+    ${ejemplo ? `<div class="card" style="padding:12px 14px;font-size:.86rem;white-space:pre-wrap"><b style="display:block;margin-bottom:4px">Así le llegaría a ${esc(aEnviar[0].l.name.split(' ')[0])}:</b>${esc(ejemplo)}</div>` : ''}</section>
+  <section class="card panel"><div class="panel-h"><h3>${aEnviar.length} persona${aEnviar.length === 1 ? '' : 's'} para escribir</h3><button class="btn btn-ghost btn-sm" data-env-csv>Exportar para correo masivo</button></div>
+    ${sinCodigo ? `<p style="font-size:.84rem;color:#b8402f;margin:0"><b>${sinCodigo}</b> no tienen código personal todavía: usa «Preparar contactos» en Interesadas.</p>` : ''}
+    <p class="muted" style="font-size:.8rem;margin:0">Máximo un mensaje por canal por persona al día: si ya le escribiste hoy, te lo avisa antes de abrir de nuevo. ${excl.length ? `Se dejan fuera ${excl.length} (ya compraron, pidieron no recibir mensajes o no aceptaron).` : ''}</p>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Persona</th><th>Asistencia</th><th>Hoy</th><th></th></tr></thead><tbody>${aEnviar.map(fila).join('') || '<tr><td colspan="4" class="muted">No hay personas en este grupo.</td></tr>'}</tbody></table></div></section>`;
+};
+// Las plantillas viven en config/plantillas (solo la Maestra las escribe, ver firestore.rules)
+data.plantillas = async () => { A.plantillas = (await getDoc(doc(db, 'config', 'plantillas'))).data() || {}; return A.plantillas; };
+async function envioMarcar(l, canal) {
+  const clave = `${S.envClase || 'pendulo'}_${S.envSeg || 'asistieron'}`;
+  try {
+    await data.leads({ action: 'enviado', ids: [l.id], canal, plantilla: clave });
+    l.ultimoEnvio = { ...(l.ultimoEnvio || {}), [canal]: Date.now() };
+    l.eventos = [...(l.eventos || []), { t: Date.now(), tipo: 'envio', texto: `Mensaje por ${canal}: ${clave}` }];
+    render(false);
+  } catch (e) { fail(e); }
+}
+function exportarEnvioCsv() {
+  const clase = S.envClase || 'pendulo', seg = S.envSeg || 'asistieron', texto = (A.plantillas || {})[`${clase}_${seg}`] || '';
+  const porId = new Map(personas().flatMap((p) => p.leads.map((l) => [l.id, p])));
+  const lista = A.leads.filter((l) => l.form === `clase-${clase}` && (seg === 'todas' || segmentoDe(l) === seg) && !excluidaDeEnvio(l, porId.get(l.id)));
+  const cab = ['Nombre', 'Correo', 'WhatsApp', 'nombre', 'enlace_entrada', 'enlace_replay', 'enlace_si', 'enlace_no', 'enlace_asistencia', 'fecha_limite', 'Mensaje'];
+  const fila = (l) => { const v = variablesDe(l); return [l.name, l.email, l.whatsapp, v.nombre, v.enlace_entrada, v.enlace_replay, v.enlace_si, v.enlace_no, v.enlace_asistencia, v.fecha_limite, rellenar(texto, l)]; };
+  const celda = (x) => { let t = String(x ?? ''); if (/^[=@]|^[+\-](?![\d\s])/.test(t)) t = `'${t}`; return `"${t.replace(/"/g, '""')}"`; };
+  const csv = `﻿${[cab, ...lista.map(fila)].map((r) => r.map(celda).join(',')).join('\r\n')}`;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' })); a.download = `envio-${clase}-${seg}-${ymd(Date.now())}.csv`;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+  toast(`Exportadas ${lista.length} personas.`);
+}
+
+// Clasificar una clase con el informe de Meet: quienes están en la lista quedan "Asistió confirmado" (o "Entró"); el resto, "No asistió",
+// salvo quienes dicen que estuvieron: "No identificada". Primero muestra cómo quedaría; recién con "Aplicar" se guarda.
+function clasificarClase() {
+  const sesiones = (A.cal || []).filter((e) => ['clase-pendulo', 'clase-tarot'].includes(e.type) && e.date && e.time && !e.tentative).sort((a, b) => b.date.localeCompare(a.date));
+  if (!sesiones.length) return toast('Primero agrega la clase en el Calendario (tipo «Clase gratis»).');
+  const hoy = ymd(hoyCL()), sugerida = sesiones.find((e) => e.date <= hoy) || sesiones[0];
+  dialog(`<span class="eyebrow">Clase gratis</span><h3>Clasificar una clase</h3>
+  <p class="muted" style="font-size:.86rem;margin:6px 0 12px">Pega a quienes entraron (informe de asistencia de Google Meet): una persona por línea, con su correo, su teléfono o su nombre. Antes de guardar, ves cómo quedaría cada una.</p>
+  <form id="cc-form" style="display:grid;gap:10px">
+    <label style="display:grid;gap:4px;font-size:.84rem"><b>Clase</b><select id="cc-sesion">${sesiones.map((e) => `<option value="${esc(e.id)}" ${e.id === sugerida.id ? 'selected' : ''}>${esc(CAL_TYPES[e.type][0])} · ${esc(fechaLarga(e.date))} · ${esc(e.time)}</option>`).join('')}</select></label>
+    <label style="display:grid;gap:4px;font-size:.84rem"><b>A quienes están en la lista se les marca</b><select id="cc-nivel"><option value="asistio_confirmado">Asistió confirmado (10 minutos o más en la clase)</option><option value="entro">Entró (solo entró, sin confirmar el tiempo)</option></select></label>
+    <label style="display:grid;gap:4px;font-size:.84rem"><b>Lista de quienes entraron</b><textarea id="cc-lista" rows="9" placeholder="ana@correo.com&#10;+56 9 1234 5678&#10;María González"></textarea></label>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary btn-sm">Ver cómo quedaría</button></div>
+    <div id="cc-informe"></div></form>`, true);
+  const llamar = async (aplicar) => data.leads({ action: 'clasificar', sesion: $('#cc-sesion').value, nivel: $('#cc-nivel').value, lista: $('#cc-lista').value, aplicar }).then(() => A._ultimo);
+  const nombres = (arr) => (arr.length ? `<span style="font-size:.84rem">${arr.slice(0, 40).map((x) => esc(x.nombre)).join(', ')}${arr.length > 40 ? ` y ${arr.length - 40} más` : ''}</span>` : '<span class="muted">Nadie</span>');
+  $('#cc-form').onsubmit = async (e) => {
+    e.preventDefault();
+    if (!$('#cc-lista').value.trim()) return toast('Pega la lista de quienes entraron.');
+    try {
+      const r = await llamar(false);
+      $('#cc-informe').innerHTML = `<div class="card" style="padding:12px 14px;display:grid;gap:8px;font-size:.88rem"><b>Inscritas a esta clase: ${r.total}</b>
+        <div><b style="color:#3f7d5c">${r.marcadas.length} marcadas como «${esc(ETAPA_NOMBRE[$('#cc-nivel').value])}»</b><br>${nombres(r.marcadas)}</div>
+        <div><b>${r.noAsistio.length} quedan «No asistió»</b><br>${nombres(r.noAsistio)}</div>
+        <div><b>${r.noIdentificada.length} quedan «No identificada»</b> <span class="muted">(dijeron que estuvieron, pero no están en la lista)</span><br>${nombres(r.noIdentificada)}</div>
+        ${r.sinMatch.length ? `<div><b style="color:#b8402f">${r.sinMatch.length} de tu lista no coinciden con nadie inscrito</b><br><span style="font-size:.84rem">${r.sinMatch.map((x) => esc(x)).join(' · ')}</span><br><span class="muted">Revísalas: pueden haber entrado con otro nombre. Puedes marcarlas a mano desde su ficha.</span></div>` : ''}
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn btn-primary btn-sm" id="cc-aplicar">Aplicar y guardar</button><button type="button" class="btn btn-ghost btn-sm" id="cc-no">Cancelar</button></div></div>`;
+      $('#cc-no').onclick = () => $('#dlg').close();
+      $('#cc-aplicar').onclick = async () => {
+        if (!confirm(`Se cambiará la etapa de ${r.marcadas.length + r.noAsistio.length + r.noIdentificada.length} personas. ¿Aplicar?`)) return;
+        $('#cc-aplicar').disabled = true;
+        try { await llamar(true); await data.leads({ action: 'all' }); A._per = null; paintNav(); render(false); $('#dlg').close(); toast('Clase clasificada.'); } catch (err) { fail(err); $('#cc-aplicar').disabled = false; }
+      };
+    } catch (err) { fail(err); }
+  };
+}
+// Deja a cada contacto con su clase, clave de WhatsApp, código personal y enlaces (a los que ya tienen no se les cambia nada)
+async function prepararContactos() {
+  if (!confirm('Esto les crea a todas las personas su código personal y sus enlaces (entrada y replay). A quienes ya los tienen no se les cambia nada. ¿Seguir?')) return;
+  try {
+    await data.leads({ action: 'preparar' }); const r = A._ultimo;
+    await data.leads({ action: 'all' }); A._per = null; paintNav(); render(false);
+    toast(r.actualizadas ? `Listo: ${r.actualizadas} contactos preparados.` : 'Todos los contactos ya estaban preparados.');
+  } catch (e) { fail(e); }
+}
+// Enlaces personales de una persona (para copiar), con revocar y regenerar
+const enlacesPersonales = (p) => {
+  const ls = p.leads.filter((l) => l.codigo);
+  if (!ls.length) return '<span class="muted" style="font-size:.78rem">Aún no tiene código personal. Usa «Preparar contactos» en la lista de Interesadas.</span>';
+  return ls.map((l) => {
+    const base = l.enlace_entrada ? new URL(l.enlace_entrada).origin : '';
+    const filas = [['Entrada a la clase', l.enlace_entrada], ['Replay', l.enlace_replay], ['Botón «Sí estuve»', base && `${base}/confirmar?l=${l.codigo}&r=si`], ['Botón «No pude entrar»', base && `${base}/confirmar?l=${l.codigo}&r=no`], ['Código de asistencia', base && `${base}/asistencia?l=${l.codigo}`]].filter(([, u]) => u);
+    return `<div class="pg" style="gap:6px"><b style="font-size:.8rem">${esc(LEAD_FORMS[l.form] || l.form)}</b>${l.codigoRevocado ? '<span class="pill bad">Código revocado</span>' : ''}
+      <span class="muted" style="font-size:.74rem">Código <code>${esc(l.codigo)}</code>${l.codigoVence ? ` · vence ${esc(fechaLarga(ymd(l.codigoVence)))}` : ''}</span>
+      <div style="display:flex;gap:4px;flex-wrap:wrap">${filas.map(([t, u]) => `<button type="button" class="chip" data-copiar="${esc(u)}" title="${esc(u)}">Copiar: ${esc(t)}</button>`).join('')}</div>
+      <div style="display:flex;gap:10px"><button type="button" class="link" style="color:#b8402f;font-size:.78rem" data-codigo="${esc(l.id)}|revocar">Revocar código</button><button type="button" class="link" style="font-size:.78rem" data-codigo="${esc(l.id)}|regenerar">Regenerar</button></div></div>`;
+  }).join('');
+};
 // ---------- Inicio: lo importante del día a mano ----------
 V.inicio = () => {
   const hoy = ymd(hoyCL()), nombre = (A.me?.displayName || '').split(' ')[0] || 'Karen';
@@ -1194,6 +1352,7 @@ function calForm(e) {
     <p id="cf-warn" class="full" role="alert" style="margin:0;font-size:.82rem;font-weight:700;color:#b8402f" hidden>${AVISO_SIN_HORA}.</p>
     ${v.type === 'terapia' && (v.whatsapp || v.email) ? `<div class="card full" style="padding:12px 14px;display:grid;gap:6px;font-size:.84rem"><b>${esc(v.name || '')}</b><span>${esc(v.modalidad === 'online' ? 'Online' : v.direccion ? `Presencial · ${v.direccion}` : 'Presencial')}${v.clientTz ? ` · Zona: ${esc(v.clientTz)}` : ''}</span><span>${esc(v.whatsapp || '')} · ${esc(v.email || '')}</span><div style="display:flex;gap:6px;flex-wrap:wrap">${botonesRec(v)}</div></div>` : ''}
     ${claseInscritas(v)}
+    <label class="full" id="cf-palabra-fila" ${['clase-pendulo', 'clase-tarot'].includes(v.type) ? '' : 'hidden'}><b>Palabra de asistencia</b><input id="cf-palabra" maxlength="40" value="${esc(v.codigoAsistencia || '')}" placeholder="Una palabra que dirás en la clase"><span class="muted" style="font-size:.78rem;font-weight:400">Quien la escribe en /asistencia durante la clase (de 10 minutos antes a 30 después) queda «Asistió confirmado». Cada clase tiene su propia palabra: al repetir cada semana, las demás quedan vacías.</span></label>
     <label class="full"><b>Nota</b><textarea id="cf-note" maxlength="500" rows="2">${esc(v.note || '')}</textarea></label>
     ${e ? '' : '<label class="full rep"><input type="checkbox" id="cf-rep"> Repetir cada semana hasta <input type="date" id="cf-until"></label>'}
     <div class="full actions"><button class="btn btn-primary btn-sm">Guardar</button>${e ? '<button type="button" class="btn btn-ghost btn-sm" id="cf-del">Borrar</button>' : ''}</div>
@@ -1207,6 +1366,7 @@ function calForm(e) {
     $('#cf-title').placeholder = bloq ? 'Ej.: Médico, trámite, vacaciones (vacío: Karen no disponible)' : 'Si lo dejas vacío, se usa el tipo';
     $('#cf-warn').hidden = !!$('#cf-time').value || SIN_HORA_OK.includes($('#cf-type').value);
   };
+  $('#cf-type').addEventListener('change', () => { $('#cf-palabra-fila').hidden = !['clase-pendulo', 'clase-tarot'].includes($('#cf-type').value); });
   $('#cf-type').onchange = avisar; $('#cf-time').oninput = avisar; $('#cf-allday').onchange = avisar; avisar();
   $('#cal-form').onsubmit = async (ev) => {
     ev.preventDefault();
@@ -1215,7 +1375,7 @@ function calForm(e) {
     if (bloq && !todo && (!time || !endTime)) return toast('Elige la hora de inicio y de término, o marca "Todo el día".');
     if (endTime && endTime <= time) return toast('La hora de término debe ser después de la de inicio.');
     const duration = endTime ? (Number(endTime.slice(0, 2)) * 60 + Number(endTime.slice(3))) - (Number(time.slice(0, 2)) * 60 + Number(time.slice(3))) : 0;
-    const d = { type: $('#cf-type').value, title: $('#cf-title').value.trim(), date: $('#cf-date').value, time, endTime, duration, endDate: $('#cf-end').value, note: $('#cf-note').value.trim(), tentative: $('#cf-tent').checked };
+    const d = { type: $('#cf-type').value, title: $('#cf-title').value.trim(), date: $('#cf-date').value, time, endTime, duration, endDate: $('#cf-end').value, note: $('#cf-note').value.trim(), tentative: $('#cf-tent').checked, ...(['clase-pendulo', 'clase-tarot'].includes($('#cf-type').value) ? { codigoAsistencia: $('#cf-palabra').value.trim() } : {}) };
     if (!d.date) return toast('Elige la fecha.');
     if (d.endDate && d.endDate < d.date) return toast('La fecha de término no puede ser antes de la fecha.');
     try {
@@ -1223,7 +1383,7 @@ function calForm(e) {
       if (!e && rep) {
         if (!hasta || hasta < d.date) return toast('Elige hasta qué fecha se repite.');
         const lista = [], largo = d.endDate ? tOf(d.endDate) - tOf(d.date) : 0;
-        for (let t = tOf(d.date); t <= tOf(hasta) && lista.length < 104; t += 7 * 864e5) lista.push({ ...d, date: ymd(t), endDate: d.endDate ? ymd(t + largo) : '' });
+        for (let t = tOf(d.date); t <= tOf(hasta) && lista.length < 104; t += 7 * 864e5) lista.push({ ...d, date: ymd(t), endDate: d.endDate ? ymd(t + largo) : '', ...('codigoAsistencia' in d && lista.length ? { codigoAsistencia: '' } : {}) });
         await data.calAddMany(lista);
         toast(`${lista.length} fechas agregadas`);
       } else {
@@ -1273,7 +1433,7 @@ V.ajustes = () => `<div class="view-head"><div><span class="eyebrow">Portal de l
     <form id="wv-form" style="display:flex;gap:8px;flex-wrap:wrap"><input type="url" id="wv-url" placeholder="https://" value="${esc(A.config.welcomeVideo || '')}" style="flex:1;min-width:220px"><button class="btn btn-primary btn-sm">Guardar</button></form></section>
   <section class="card panel"><h3>Formación: próximo grupo</h3><p class="muted" style="margin:0;font-size:.88rem">La portada y la página /formacion muestran la fecha más cercana de tipo "Inicio de un grupo de formación" que tengas en el Calendario, con "cupos limitados". Cuando la fecha pasa, dejan de mostrarla solas.</p><button class="btn btn-ghost btn-sm" style="justify-self:start" data-go="calendario">Abrir el calendario</button></section>
   <section class="card panel"><h3>Google Meet: clases gratis y terapias online</h3><p class="muted" style="margin:0;font-size:.88rem">Al reservar su lugar, la persona ve un botón para entrar a la clase con este enlace. Déjalo vacío para mostrar "Te enviamos el enlace por WhatsApp".</p>
-    <form id="cl-form" style="display:grid;gap:10px"><label style="display:grid;gap:6px;font-size:.84rem"><b>Enlace de Google Meet · clase de Péndulo (sábados)</b><input type="url" id="cl-pendulo" placeholder="https://meet.google.com/abc-defg-hij" value="${esc(A.clases?.enlacePendulo || '')}"></label><label style="display:grid;gap:6px;font-size:.84rem"><b>Enlace de Google Meet · clase de Tarot (martes)</b><input type="url" id="cl-tarot" placeholder="https://meet.google.com/abc-defg-hij" value="${esc(A.clases?.enlaceTarot || '')}"></label><label style="display:grid;gap:6px;font-size:.84rem"><b>Enlace de Google Meet · terapias online</b><input type="url" id="cl-terapias" placeholder="https://meet.google.com/abc-defg-hij" value="${esc(A.clases?.enlaceTerapias || '')}"></label><button class="btn btn-primary btn-sm" style="justify-self:start">Guardar</button></form></section>
+    <form id="cl-form" style="display:grid;gap:10px"><label style="display:grid;gap:6px;font-size:.84rem"><b>Enlace de Google Meet · clase de Péndulo (sábados)</b><input type="url" id="cl-pendulo" placeholder="https://meet.google.com/abc-defg-hij" value="${esc(A.clases?.enlacePendulo || '')}"></label><label style="display:grid;gap:6px;font-size:.84rem"><b>Enlace de Google Meet · clase de Tarot (martes)</b><input type="url" id="cl-tarot" placeholder="https://meet.google.com/abc-defg-hij" value="${esc(A.clases?.enlaceTarot || '')}"></label><label style="display:grid;gap:6px;font-size:.84rem"><b>Enlace de Google Meet · terapias online</b><input type="url" id="cl-terapias" placeholder="https://meet.google.com/abc-defg-hij" value="${esc(A.clases?.enlaceTerapias || '')}"></label><label style="display:grid;gap:6px;font-size:.84rem"><b>Replay de la clase de Péndulo (YouTube, Vimeo o video)</b><input type="url" id="cl-replay-pendulo" placeholder="https://youtu.be/…" value="${esc(A.clases?.replayPendulo || '')}"></label><label style="display:grid;gap:6px;font-size:.84rem"><b>Replay de la clase de Tarot (YouTube, Vimeo o video)</b><input type="url" id="cl-replay-tarot" placeholder="https://youtu.be/…" value="${esc(A.clases?.replayTarot || '')}"></label><button class="btn btn-primary btn-sm" style="justify-self:start">Guardar</button></form></section>
   <section class="card panel"><h3>Cursos: próximo inicio</h3><p class="muted" style="margin:0;font-size:.88rem">Las páginas /pendulo y /tarot muestran la fecha más cercana que tengas en el Calendario como "Curso Péndulo Hebreo Nivel 1" o "Grupo de Tarot Terapéutico".</p><button class="btn btn-ghost btn-sm" style="justify-self:start" data-go="calendario">Abrir el calendario</button></section>
   <section class="card panel"><h3>Clases en vivo</h3><p class="muted" style="margin:0;font-size:.88rem">Las clases en vivo y sus grabaciones se programan dentro de cada clase del aula, donde ves el contenido.</p><a class="btn btn-ghost btn-sm" style="justify-self:start" href="/aula">Ir al aula</a></section>`;
 
@@ -1291,6 +1451,7 @@ document.addEventListener('click', async (e) => {
     toast('Eliminada.');
   } catch (err) { fail(err); b.disabled = false; }
 });
+document.addEventListener('click', (e) => { const b = e.target.closest('[data-copiar]'); if (b) navigator.clipboard?.writeText(b.dataset.copiar).then(() => toast('Copiado.')).catch(() => toast('No se pudo copiar.')); });
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-lead-alumna]'); if (b) { if ($('#dlg').open) $('#dlg').close(); openStudent(b.dataset.leadAlumna); } });
 document.addEventListener('click', (e) => { if (e.target.closest('[data-crm-hoy]')) { Object.assign(S, { crmSeg: true, crmProg: '', crmQ: '', crmOrigen: '', crmSinCuenta: false, crmEtapa: '', crmTag: '', crmVista: 'embudo' }); go('interesadas'); } });
 document.addEventListener('click', (e) => { if (e.target.closest('[data-crm-sincuenta-ya]')) { Object.assign(S, { crmSeg: false, crmProg: '', crmQ: '', crmOrigen: '', crmSinCuenta: true, crmEtapa: 'inscrita', crmTag: '', crmVista: 'tabla' }); go('interesadas'); } });
@@ -1344,6 +1505,7 @@ function go(v) {
     if (A.wa.on === null) waApi({ action: 'estado' }).then((r) => { A.wa.on = r.configurado; if (!r.configurado && S.view === 'whatsapp') render(false); }).catch(() => {});
     if (S.waOpen) { const m = $('#wa-msgs'); if (m) m.scrollTop = m.scrollHeight; }
   }
+  if (v === 'envios' && !A.plantillas) data.plantillas().then(() => { if (S.view === 'envios') render(false); }).catch(fail);
   if (v === 'calendario') data.cal().then(() => { if (S.view === 'calendario') render(false); }).catch(fail);
 }
 async function openStudent(uid) {
@@ -1384,6 +1546,28 @@ function bind() {
       A.leads.forEach((l) => { if (ids.includes(l.id)) l.tags = [...new Set([...(l.tags || []), t])]; });
       A._per = null; render(false); toast(`Etiqueta «${t}» agregada.`);
     } catch (e) { fail(e); b.disabled = false; }
+  }));
+  document.querySelectorAll('[data-crm-preparar]').forEach((b) => (b.onclick = () => prepararContactos()));
+  document.querySelectorAll('[data-crm-clasificar]').forEach((b) => (b.onclick = () => clasificarClase()));
+  document.querySelectorAll('[data-env-clase]').forEach((b) => (b.onclick = () => { S.envClase = b.dataset.envClase; render(false); }));
+  document.querySelectorAll('[data-env-seg]').forEach((b) => (b.onclick = () => { S.envSeg = b.dataset.envSeg; render(false); }));
+  document.querySelectorAll('[data-env-csv]').forEach((b) => (b.onclick = () => exportarEnvioCsv()));
+  document.querySelectorAll('[data-env-guardar]').forEach((b) => (b.onclick = async () => {
+    const clave = `${S.envClase || 'pendulo'}_${S.envSeg || 'asistieron'}`, texto = $('#env-texto').value.trim();
+    try { await setDoc(doc(db, 'config', 'plantillas'), { [clave]: texto, updatedAt: serverTimestamp() }, { merge: true }); A.plantillas[clave] = texto; render(false); toast('Texto guardado.'); } catch (e) { fail(e); }
+  }));
+  const envCanal = (canal) => (a) => (a.onclick = (e) => {
+    const l = A.leads.find((x) => x.id === a.dataset[canal === 'whatsapp' ? 'envWa' : 'envMail']); if (!l) return;
+    if (horaChile() < 8 || horaChile() >= 22) { e.preventDefault(); return toast('No se envía entre las 22:00 y las 8:00 (hora de Chile).'); }
+    if (l.ultimoEnvio?.[canal] && diaChile(l.ultimoEnvio[canal]) === diaChile(Date.now()) && !confirm(`Ya le escribiste hoy por ${canal === 'whatsapp' ? 'WhatsApp' : 'correo'}. ¿Enviarle otro?`)) { e.preventDefault(); return; }
+    envioMarcar(l, canal);
+  });
+  document.querySelectorAll('[data-env-wa]').forEach(envCanal('whatsapp'));
+  document.querySelectorAll('[data-env-mail]').forEach(envCanal('email'));
+  document.querySelectorAll('[data-env-copy]').forEach((b) => (b.onclick = () => {
+    const l = A.leads.find((x) => x.id === b.dataset.envCopy); if (!l) return;
+    const texto = rellenar((A.plantillas || {})[`${S.envClase || 'pendulo'}_${S.envSeg || 'asistieron'}`], l);
+    navigator.clipboard?.writeText(texto).then(() => toast('Mensaje copiado.')).catch(() => toast('No se pudo copiar.'));
   }));
   document.querySelectorAll('[data-crm-sincuenta]').forEach((b) => (b.onclick = () => { S.crmSinCuenta = !S.crmSinCuenta; render(false); }));
   const ce = $('#crm-etapa'); if (ce) ce.onchange = () => { S.crmEtapa = ce.value; render(false); };
@@ -1517,8 +1701,9 @@ function bind() {
   const cl = $('#cl-form'); if (cl) cl.onsubmit = async (e) => {
     e.preventDefault();
     const enlacePendulo = $('#cl-pendulo').value.trim(), enlaceTarot = $('#cl-tarot').value.trim(), enlaceTerapias = $('#cl-terapias').value.trim();
-    if ([enlacePendulo, enlaceTarot, enlaceTerapias].some((u) => u && !isHttps(u))) return toast('Los enlaces deben empezar con https://');
-    try { await data.saveClases({ enlacePendulo, enlaceTarot, enlaceTerapias }); toast('Enlaces de Google Meet guardados'); } catch (err) { fail(err); }
+    const replayPendulo = $('#cl-replay-pendulo').value.trim(), replayTarot = $('#cl-replay-tarot').value.trim();
+    if ([enlacePendulo, enlaceTarot, enlaceTerapias, replayPendulo, replayTarot].some((u) => u && !isHttps(u))) return toast('Los enlaces deben empezar con https://');
+    try { await data.saveClases({ enlacePendulo, enlaceTarot, enlaceTerapias, replayPendulo, replayTarot }); toast('Enlaces de Google Meet guardados'); } catch (err) { fail(err); }
   };
 }
 const papi = (uid) => profileApi(uid);

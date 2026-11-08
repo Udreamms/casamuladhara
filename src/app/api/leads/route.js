@@ -58,7 +58,7 @@ const consentimientoOk = (c) => (c && typeof c === 'object' ? { aceptado: c.acep
 
 export async function POST(request) {
   const body = await request.json().catch(() => ({}));
-  const delPortal = ['all', 'status', 'update', 'delete', 'estado', 'addProgram', 'nota', 'etiquetas', 'preparar', 'codigo', 'clasificar'].includes(body.action); // acciones de la Maestra: su error no es el de una landing
+  const delPortal = ['all', 'status', 'update', 'delete', 'estado', 'addProgram', 'nota', 'etiquetas', 'preparar', 'codigo', 'clasificar', 'enviado'].includes(body.action); // acciones de la Maestra: su error no es el de una landing
   try {
     if (body.action === 'save') {
       // Campo trampa: las personas no lo ven, los bots lo llenan. Se responde ok para no darles pistas.
@@ -106,11 +106,14 @@ export async function POST(request) {
         if (!snap.exists) { repetida = false; tx.set(ref, lead); return; }
         repetida = true;
         // se conservan la fecha, el origen de la campaña, la etapa y el código personal que ya tenía
-        const { createdAt, utm, status, form: f, clase, codigo, codigoVence, codigoRevocado, enlace_entrada, enlace_replay, ...nuevo } = lead;
+        const { createdAt, utm, status, form: f, clase, codigo, codigoVence, codigoRevocado, enlace_entrada, enlace_replay, email, ...nuevo } = lead;
         if (snap.data().codigo) codigoFinal = snap.data().codigo;
         const vacio = (v) => v === '' || v === undefined;
         tx.update(ref, {
           ...Object.fromEntries(Object.entries(nuevo).filter(([, v]) => !vacio(v))),
+          // Un correo distinto del que ya teníamos no lo pisa: queda como correo adicional (así no se pierde el vínculo con su cuenta)
+          ...(email && !snap.data().email ? { email } : {}),
+          ...(email && snap.data().email && snap.data().email !== email ? { emailsExtra: FieldValue.arrayUnion(email) } : {}),
           ...(!snap.data().codigo && codigo ? { clase, codigo, codigoVence, codigoRevocado, ...(enlace_entrada ? { enlace_entrada, enlace_replay } : {}) } : {}),
           ...(snap.data().status === 'descartado' ? { status: lead.status } : {}), // si vuelve a escribir, vuelve a "por contactar"
           repeticiones: FieldValue.increment(1),
@@ -128,7 +131,7 @@ export async function POST(request) {
       }
       return json({ ok: true, id: ref.id, ...(codigoFinal ? { codigo: codigoFinal } : {}), ...(repetida ? { repetida: true } : {}), ...(enlace ? { enlace } : {}) });
     }
-    if (body.action === 'all' || body.action === 'status' || body.action === 'update' || body.action === 'delete' || body.action === 'estado' || body.action === 'addProgram' || body.action === 'nota' || body.action === 'etiquetas' || body.action === 'preparar' || body.action === 'codigo' || body.action === 'clasificar') {
+    if (body.action === 'all' || body.action === 'status' || body.action === 'update' || body.action === 'delete' || body.action === 'estado' || body.action === 'addProgram' || body.action === 'nota' || body.action === 'etiquetas' || body.action === 'preparar' || body.action === 'codigo' || body.action === 'clasificar' || body.action === 'enviado') {
       let user;
       try {
         user = await auth().verifyIdToken((request.headers.get('authorization') || '').replace(/^Bearer\s+/i, ''));
@@ -136,6 +139,20 @@ export async function POST(request) {
         return json({ error: 'Tu sesión expiró. Vuelve a entrar al portal.' }, 401);
       }
       if (user.admin !== true) return json({ error: 'Esta acción es solo para la Maestra.' }, 403);
+      if (body.action === 'enviado') {
+        // La Maestra anota que le escribió a alguien (queda en su historial; sirve para no escribirle dos veces el mismo día por el mismo canal)
+        const ids = Array.isArray(body.ids) ? [...new Set(body.ids)] : [];
+        const canal = body.canal === 'email' ? 'email' : body.canal === 'whatsapp' ? 'whatsapp' : '';
+        if (!canal || !ids.length || ids.length > 50 || ids.some((id) => typeof id !== 'string' || !ID.test(id))) return json({ error: 'Datos no válidos.' }, 400);
+        const plantilla = str(body.plantilla, 60);
+        const lote = db().batch();
+        ids.forEach((id) => lote.update(db().doc(`leads/${id}`), { [`ultimoEnvio.${canal}`]: Date.now(), eventos: FieldValue.arrayUnion(ev('envio', `Mensaje por ${canal}${plantilla ? `: ${plantilla}` : ''}`)), updatedAt: FieldValue.serverTimestamp() }));
+        try { await lote.commit(); } catch (e) {
+          if (e.code === 5 || /NOT_FOUND/.test(String(e.message))) return json({ error: 'Esa persona ya no existe. Actualiza la lista.' }, 404);
+          throw e;
+        }
+        return json({ ok: true });
+      }
       if (body.action === 'preparar') {
         // Deja a cada contacto con su clase, la clave de WhatsApp, el código personal y sus enlaces (los que ya tienen no se tocan)
         const base = baseSitio(request);

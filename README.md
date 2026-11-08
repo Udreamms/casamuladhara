@@ -102,3 +102,41 @@ Puesta en marcha (una sola vez):
 5. Publica las reglas: `firebase deploy --only firestore:rules`.
 
 Reglas de WhatsApp: solo se puede escribir con texto libre dentro de las 24 h desde el último mensaje de la persona. Para empezar la conversación se envía una **plantilla aprobada** (por defecto `hello_world`; crea una propia en español en el administrador de WhatsApp y configura `WHATSAPP_TEMPLATE_NAME`, `WHATSAPP_TEMPLATE_LANG` y, si lleva `{{1}}` con el nombre, `WHATSAPP_TEMPLATE_VARS=1`). Las imágenes y audios que lleguen se ven como aviso en el portal; se abren en la app de WhatsApp.
+
+## Embudo de las clases gratis (Péndulo, Tarot, Formación) y contrato con la landing
+Cada persona que se inscribe a una clase recibe un **código personal** (12 caracteres al azar, revocable, vence 60 días después del cierre de la oferta) y sus enlaces. El CRM mide quién entró, quién asistió y quién compró. Código en `src/lib/server/embudo.js`.
+
+**Variables en Vercel:** `CRM_API_KEY` (clave secreta entre el sitio y el CRM; invéntala larga y aleatoria) y `APP_URL` (dirección pública del sitio, con `https://`, sin `/` al final; sin ella no se crean los enlaces personales).
+
+### API (clave secreta: `Authorization: Bearer <CRM_API_KEY>`)
+`GET /contacto/validar?codigo=XXXXXXXXXXXX`
+→ `{ "valido": true, "primer_nombre": "Ana", "estado": "registrada", "clase": "pendulo", "sala_url": "https://meet.google.com/..." }`
+→ `{ "valido": false }` si el código no existe, fue revocado o venció. Sin clave: 401 (503 si el servidor no tiene `CRM_API_KEY`).
+
+`POST /eventos` con `{ "codigo": "...", "evento": "...", "fecha_iso": "2026-11-07T19:03:00-03:00", "origen": "whatsapp", "extra": {} }`
+→ `{ "ok": true, "ignorado": false, "estado": "entro" }`. El mismo evento del mismo contacto en menos de 60 segundos responde `{ "ok": true, "ignorado": true }`. Código inválido: 404 `{ "ok": false, "error": "codigo_invalido" }`; evento desconocido: 400 `evento_invalido`.
+
+| evento | efecto |
+|---|---|
+| `clic_entrar` | "Entró" solo si ocurre entre 10 minutos antes y 30 después del inicio de la clase (del Calendario); fuera de ese rango se anota pero no cuenta |
+| `codigo_asistencia_ok` | "Asistió confirmado" |
+| `autodeclara_asistio` | asistencia **autodeclarada: sí** (no cambia la etapa; si figuraba "No asistió" pasa a "No identificada") |
+| `autodeclara_no_asistio` | asistencia autodeclarada: no (etapa "No asistió" si no tenía otra) |
+| `vio_replay` | "Vio el replay" (no baja a quien ya asistió) |
+| `clic_comprar` | "Vio la oferta" + seguimiento para hoy en el CRM (tarea para Karen) |
+| `pago_confirmado` (`extra: { monto, moneda }`) | "Matriculada", sale de las secuencias de venta, se borra la tarea y queda inscrita en el curso |
+
+Estados (`estado`): `registrada, confirmada, entro, asistio_confirmado, vio_oferta, matriculada` y las alternativas `no_asistio, no_identificada, vio_replay, sin_respuesta, lista_espera`. Una etapa solo avanza con los eventos, nunca retrocede. Los tres niveles de asistencia (Entró, Autodeclarada, Asistió confirmado) se guardan por separado y no se mezclan.
+
+### Páginas del sitio (las usa la landing y los mensajes)
+- `/entrar/<codigo>`: anota `clic_entrar` y lleva a la sala de la clase (el enlace de Google Meet de Ajustes).
+- `/confirmar?l=<codigo>&r=si|no`: botones «Sí estuve» / «No pude entrar» (asistencia autodeclarada).
+- `/asistencia?l=<codigo>`: la persona escribe la palabra de la clase. La palabra se define en el Calendario, dentro de cada clase gratis; vale de 10 minutos antes a 30 después; máximo 8 intentos.
+- `/clase-pendulo/replay?l=<codigo>` y `/clase-tarot/replay?l=<codigo>`: anotan `vio_replay`, muestran el video (enlace de Ajustes) y la oferta con su fecha límite.
+- `/comprar?l=<codigo>`: anota `clic_comprar` y lleva a la página del curso.
+
+### Registro (`POST /api/leads`, `action: "save"`)
+Además de lo de siempre acepta `edad` y `consentimiento: { email: { aceptado, fecha, texto, origen }, whatsapp: { ... } }`, y devuelve el `codigo` de la persona. La clave de unicidad es el correo y el WhatsApp (en dígitos con código de país): si ya existe, se actualiza y no se duplica; un correo distinto no pisa al anterior (queda como correo adicional).
+
+### Herramientas en el portal (Interesadas)
+**Preparar contactos** (crea código y enlaces a los registros de antes), **Clasificar una clase** (pega la lista de Meet: ve cómo quedaría y luego aplica) y **Envíos** (textos con variables `{{nombre}} {{enlace_entrada}} {{enlace_replay}} {{enlace_si}} {{enlace_no}} {{enlace_asistencia}} {{fecha_limite}}`, envío persona por persona y exportación para correo masivo).
