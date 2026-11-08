@@ -357,3 +357,7 @@ dialog.contacto .x{position:absolute;top:10px;right:14px;z-index:3}
 .paso.descartar.on{background:var(--live);border-color:var(--live);color:#fff}
 .paso:focus-visible{outline:2px solid var(--brass)}
 @media (max-width:1000px){.ct{grid-template-columns:1fr;height:auto}.ct>*{overflow:visible}.ct-izq,.ct-der{border:0}dialog.contacto{overflow:auto}}
+
+.paso.alt{border-style:dashed;font-size:.7rem}
+.paso.alt.on{border-style:solid}
+.kb{grid-auto-columns:minmax(235px,1fr)}

@@ -211,7 +211,7 @@ const NAV = [
   ['ajustes', 'Ajustes del aula', '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'],
 ];
 // Una por persona (su registro más reciente) y solo si nada de lo suyo está más avanzado que "Nueva"
-const nuevasLeads = () => personas().filter((p) => etapaDe(p) === 'nuevo').map((p) => p.leads[p.leads.length - 1]);
+const nuevasLeads = () => personas().filter((p) => esNueva(etapaDe(p))).map((p) => p.leads[p.leads.length - 1]);
 // Burbujas del menú: se quitan al entrar a la sección y vuelven solo con lo que llega después de esa visita (se guarda en este navegador)
 const vistoAt = (k) => { try { return Number(localStorage.getItem(`cm-visto-${k}`)) || 0; } catch { return 0; } };
 const marcarVisto = (k, hasta) => { try { localStorage.setItem(`cm-visto-${k}`, String(Math.max(Date.now(), hasta || 0))); } catch { /* sin almacenamiento */ } };
@@ -376,6 +376,18 @@ V.clase = () => {
 };
 const LEAD_FORMS = { pendulo: 'Péndulo Hebreo', 'clase-pendulo': 'Clase gratis Péndulo', tarot: 'Tarot Terapéutico', 'clase-tarot': 'Clase gratis Tarot', formacion: 'Formación', sala: 'Sala Abierta', terapias: 'Terapias', meditacion: 'Meditación', regalo: 'Portada · Sala Abierta' };
 const LEAD_STATES = [['nuevo', 'Nueva'], ['contactado', 'Contactada'], ['clase', 'Tomó la clase'], ['conversando', 'En conversación'], ['inscrita', 'Inscrita'], ['descartado', 'Descartada']];
+// Embudo de las clases gratis (las mismas etapas y rangos que el servidor, src/lib/server/embudo.js). Se guardan en el campo status.
+const ETAPAS_CLASE = [['registrada', 'Registrada'], ['confirmada', 'Confirmada'], ['entro', 'Entró'], ['asistio_confirmado', 'Asistió confirmado'], ['vio_oferta', 'Vio la oferta'], ['matriculada', 'Matriculada'],
+  ['no_asistio', 'No asistió'], ['no_identificada', 'No identificada'], ['vio_replay', 'Vio el replay'], ['sin_respuesta', 'Sin respuesta'], ['lista_espera', 'Lista de espera']];
+const PASOS_CLASE = ETAPAS_CLASE.slice(0, 6).map(([k]) => k);
+const ETAPA_NOMBRE = Object.fromEntries([...LEAD_STATES, ...ETAPAS_CLASE]);
+const RANGO_ETAPA = { descartado: -1, nuevo: 0, registrada: 0, lista_espera: 0, contactado: 1, confirmada: 1, sin_respuesta: 1, no_asistio: 1, no_identificada: 1, entro: 2, vio_replay: 2, clase: 3, asistio_confirmado: 3, conversando: 4, vio_oferta: 4, inscrita: 5, matriculada: 5 };
+// En una clase gratis, las etapas de antes se leen como las del embudo nuevo
+const CLASE_ANTIGUA = { nuevo: 'registrada', contactado: 'confirmada', clase: 'asistio_confirmado', conversando: 'vio_oferta', inscrita: 'matriculada' };
+// Vista "Todos los programas": las etapas del embudo de clases se agrupan en las columnas de siempre
+const bucketEtapa = (k) => ({ registrada: 'nuevo', lista_espera: 'nuevo', no_asistio: 'nuevo', no_identificada: 'nuevo', sin_respuesta: 'nuevo', confirmada: 'contactado', entro: 'clase', vio_replay: 'clase', asistio_confirmado: 'clase', vio_oferta: 'conversando', matriculada: 'inscrita' })[k] || k;
+const esNueva = (k) => k === 'nuevo' || k === 'registrada';
+const esInscrita = (k) => k === 'inscrita' || k === 'matriculada';
 // Programas para filtrar: las dos clases gratis, los dos cursos, la formación completa y el resto de formularios
 const LEAD_PROGS = [['clase-pendulo', 'Clase gratis Péndulo', ['clase-pendulo']], ['clase-tarot', 'Clase gratis Tarot', ['clase-tarot']], ['pendulo', 'Curso Péndulo', ['pendulo']],
   ['tarot', 'Tarot Terapéutico', ['tarot']], ['formacion', 'Formación completa', ['formacion']], ['otros', 'Otros', ['sala', 'terapias', 'meditacion', 'regalo']]];
@@ -386,7 +398,7 @@ const PROG_CORTO = { 'clase-pendulo': 'Clase Péndulo', 'clase-tarot': 'Clase Ta
 const esClase = (f) => f === 'clase-pendulo' || f === 'clase-tarot';
 const esPago = (f) => ['pendulo', 'tarot', 'formacion'].includes(f);
 // En un curso pago la primera etapa es "Interesada"; en una clase gratis, "Inscrita" quiere decir inscrita a un curso
-const etapaTxt = (form, k) => (k === 'nuevo' && esPago(form) ? 'Interesada' : k === 'inscrita' && esClase(form) ? 'Inscrita a un curso' : LEAD_STATES.find(([x]) => x === k)?.[1] || k);
+const etapaTxt = (form, k) => (k === 'nuevo' && esPago(form) ? 'Interesada' : ETAPA_NOMBRE[k] || k);
 // Mismo criterio que src/lib/server/whatsapp.js: solo dígitos con código de país (un celular chileno de 9 dígitos que empieza en 9 se toma como +56)
 const waNum = (n) => { let d = String(n || '').replace(/\D/g, '').replace(/^00/, ''); if (d.length === 9 && d[0] === '9') d = `56${d}`; return d.length >= 8 && d.length <= 15 ? d : ''; };
 const waLink = (n) => { const d = String(n || '').replace(/\D/g, ''); return d ? `https://wa.me/${d}` : ''; };
@@ -407,8 +419,9 @@ const leadsDeAlumna = (u) => { const v = vinculos(), vistos = new Set(), out = [
 const pagoOAbierto = (u) => paying(u) || ownedOf(u).length > 0;
 // Etapa de un registro. Solo si nadie la movió ("Nueva") y la persona ya paga o compró algo, figura como Inscrita; si Karen la movió a mano, se respeta.
 const leadEtapa = (l) => {
-  const e = LEAD_STATES.some(([k]) => k === l.status) ? l.status : 'nuevo';
-  if (e === 'nuevo') { const u = alumnaDe(l); if (u && pagoOAbierto(u)) return 'inscrita'; }
+  let e = ETAPA_NOMBRE[l.status] ? l.status : 'nuevo';
+  if (esClase(l.form) && CLASE_ANTIGUA[e]) e = CLASE_ANTIGUA[e];
+  if (esNueva(e)) { const u = alumnaDe(l); if (u && pagoOAbierto(u)) return esClase(l.form) ? 'matriculada' : 'inscrita'; }
   return e;
 };
 
@@ -441,14 +454,13 @@ const progDe = (k) => LEAD_PROGS.find((x) => x[0] === k);
 const tracksEn = (p, prog) => p.leads.filter((l) => prog[2].includes(l.form));
 const formacionPagada = (p) => !!p.alumna && paying(p.alumna);
 const tieneProg = (p, prog) => tracksEn(p, prog).length > 0 || (prog[0] === 'formacion' && formacionPagada(p));
-const ORDEN_MEJOR = ['inscrita', 'conversando', 'clase', 'contactado', 'nuevo'];
-const mejorDe = (es) => ORDEN_MEJOR.find((k) => es.includes(k)) || 'descartado';
+const mejorDe = (es) => { const v = es.filter((k) => k !== 'descartado'); return v.length ? v.reduce((a, b) => ((RANGO_ETAPA[b] ?? 0) > (RANGO_ETAPA[a] ?? 0) ? b : a)) : 'descartado'; };
 const etapaDe = (p) => mejorDe(p.leads.map(leadEtapa));
 // Etapa en un programa; quien ya paga la Formación completa figura Inscrita aunque no tenga registro en ese formulario
 const etapaEn = (p, prog) => (prog[0] === 'formacion' && formacionPagada(p) ? 'inscrita' : mejorDe(tracksEn(p, prog).map(leadEtapa)));
-const etapaVista = (p) => { const prog = progDe(S.crmProg); return prog ? etapaEn(p, prog) : etapaDe(p); };
+const etapaVista = (p) => { const prog = progDe(S.crmProg); if (!prog) return bucketEtapa(etapaDe(p)); const e = etapaEn(p, prog); return esClase(prog[0]) ? e : bucketEtapa(e); };
 const ultimaActividad = (p) => Math.max(...p.leads.map((l) => l.createdAt || 0));
-const seguimientoHoyP = (p) => !!p.followUp && p.followUp <= ymd(hoyCL()) && !['inscrita', 'descartado'].includes(etapaDe(p));
+const seguimientoHoyP = (p) => !!p.followUp && p.followUp <= ymd(hoyCL()) && !esInscrita(etapaDe(p)) && etapaDe(p) !== 'descartado';
 // Repetidas: la misma persona (correo o WhatsApp) en el mismo formulario con menos de 24 horas entre un envío y otro (doble envío por accidente).
 // De cada grupo se conserva la que está más avanzada en el embudo (o tiene nota) y, si empatan, la primera.
 // Descartada va al final: si una de dos fue descartada a mano para esconder la repetida, se queda la otra.
@@ -487,9 +499,15 @@ const contactoDe = (p) => { const wa = waLink(p.whatsapp); return `${wa ? `<a hr
 // Cuenta en el aula: "Sin cuenta" avisa a quién falta pedirle que la cree (en rojo si ya está inscrita)
 const cuentaBadge = (p) => {
   if (p.alumna) return `<span class="pill ${pagoOAbierto(p.alumna) ? 'done' : 'pres'}" title="Ya tiene cuenta en el aula">${pagoOAbierto(p.alumna) ? 'Alumna' : 'Con cuenta'}</span>`;
-  const urgente = etapaDe(p) === 'inscrita';
+  const urgente = esInscrita(etapaDe(p));
   return `<span class="pill ${urgente ? 'bad' : 'lock'}" title="${urgente ? 'Está inscrita y aún no creó su cuenta en el aula' : 'Aún no tiene cuenta en el aula'}">Sin cuenta</span>`;
 };
+// Tres niveles de asistencia, con etiquetas distintas que no se mezclan: Entró (clic en el enlace), Autodeclarada (lo dijo ella) y Asistió confirmado (código o informe de Meet)
+const asistBadges = (l) => { const a = l.asistencia || {}; return [
+  a.confirmada ? '<span class="pill done" title="Escribió el código de asistencia o aparece en el informe de Meet">Asistió confirmado</span>' : '',
+  a.entro ? '<span class="pill pres" title="Hizo clic en el enlace de entrada durante la clase">Entró</span>' : '',
+  a.autodeclarada ? `<span class="pill lock" title="Lo dijo ella en el mensaje; no está verificado">Autodeclarada: ${a.autodeclarada === 'si' ? 'sí' : 'no'}</span>` : ''].filter(Boolean).join(' '); };
+const asistPersona = (p) => p.leads.filter((l) => esClase(l.form)).map(asistBadges).filter(Boolean).join(' ');
 const segBadge = (p) => (p.followUp ? `<span class="pill ${seguimientoHoyP(p) ? 'bad' : 'lock'}" title="Próximo seguimiento">${seguimientoHoyP(p) ? 'Seguimiento hoy' : `Seguir ${fechaLarga(p.followUp)}`}</span>` : '');
 const progPills = (p) => `${p.leads.map((l) => `<span class="pill lock" title="${esc(LEAD_FORMS[l.form] || l.form)}">${esc(PROG_CORTO[l.form] || l.form)} · ${esc(etapaTxt(l.form, leadEtapa(l)))}</span>`).join(' ')}${formacionPagada(p) && !p.leads.some((l) => l.form === 'formacion') ? ' <span class="pill done">Formación · Inscrita</span>' : ''}`;
 
@@ -500,7 +518,7 @@ const metricasHTML = () => {
   const por = S.crmMetrica || 'origen';
   const clave = { origen: (l) => l.utm?.utm_source || 'directo', campania: (l) => l.utm?.utm_campaign || '(sin campaña)', anuncio: (l) => l.utm?.utm_content || '(sin anuncio)' }[por];
   const R = { nuevo: 0, contactado: 1, clase: 2, conversando: 3, inscrita: 4 };
-  const alcanzo = (p, n) => { const e = etapaDe(p); return e !== 'descartado' && R[e] >= n; };
+  const alcanzo = (p, n) => { const e = bucketEtapa(etapaDe(p)); return e !== 'descartado' && R[e] >= n; };
   const grupos = new Map();
   ps.forEach((p) => { const k = clave(p.leads[0]); const g = grupos.get(k) || { k, n: 0, c: 0, a: 0, v: 0, i: 0 }; g.n++; if (alcanzo(p, 1)) g.c++; if (alcanzo(p, 2)) g.a++; if (alcanzo(p, 3)) g.v++; if (alcanzo(p, 4)) g.i++; grupos.set(k, g); });
   const filas = [...grupos.values()].sort((a, b) => b.n - a.n);
@@ -510,7 +528,7 @@ const metricasHTML = () => {
   const motivos = new Map();
   ps.forEach((p) => p.leads.forEach((l) => { if (l.status === 'descartado') { const m = l.motivo || '(sin motivo)'; motivos.set(m, (motivos.get(m) || 0) + 1); } }));
   const chip = (attr, v, t, on) => `<button class="chip" ${attr}="${esc(v)}" aria-pressed="${on}">${t}</button>`;
-  const porProg = LEAD_PROGS.map(([k, t, fs]) => { const prog = [k, t, fs], mias = ps.filter((p) => tieneProg(p, prog)); const cuenta = (e) => mias.filter((p) => etapaEn(p, prog) === e).length; return `<tr><td><b>${esc(t)}</b></td><td>${mias.length}</td>${LEAD_STATES.map(([e]) => `<td>${cuenta(e)}</td>`).join('')}</tr>`; }).join('');
+  const porProg = LEAD_PROGS.map(([k, t, fs]) => { const prog = [k, t, fs], mias = ps.filter((p) => tieneProg(p, prog)); const cuenta = (e) => mias.filter((p) => bucketEtapa(etapaEn(p, prog)) === e).length; return `<tr><td><b>${esc(t)}</b></td><td>${mias.length}</td>${LEAD_STATES.map(([e]) => `<td>${cuenta(e)}</td>`).join('')}</tr>`; }).join('');
   return `<div class="filters">${chip('data-crm-metrica', 'origen', 'Por origen', por === 'origen')}${chip('data-crm-metrica', 'campania', 'Por campaña', por === 'campania')}${chip('data-crm-metrica', 'anuncio', 'Por anuncio', por === 'anuncio')}
     <select id="crm-rango" aria-label="Periodo" style="border-radius:999px"><option value="">Todo el tiempo</option><option value="30" ${S.crmRango === '30' ? 'selected' : ''}>Últimos 30 días</option><option value="7" ${S.crmRango === '7' ? 'selected' : ''}>Últimos 7 días</option></select></div>
   <section class="card panel"><h3>De dónde llegan y hasta dónde avanzan</h3><p class="muted" style="font-size:.84rem;margin:0">Cuenta personas según su primer registro y la etapa más avanzada que alcanzaron. Las descartadas solo cuentan como registradas.</p>
@@ -549,7 +567,7 @@ V.interesadas = () => {
   if (vista === 'metricas') return `${head}${aviso}<div class="filters">${vistas}</div>${metricasHTML()}`;
   const origenes = [...new Set(A.leads.map(leadOrigen))].sort(), tags = [...new Set(todas.flatMap((p) => p.tags))].sort();
   const nSeg = todas.filter(seguimientoHoyP).length, nSin = todas.filter((p) => !p.alumna).length;
-  const etapasProg = LEAD_STATES.filter(([k]) => !(prog && esPago(prog[0]) && k === 'clase'));
+  const etapasProg = prog && esClase(prog[0]) ? [...ETAPAS_CLASE, ['descartado', 'Descartada']] : LEAD_STATES.filter(([k]) => !(prog && esPago(prog[0]) && k === 'clase'));
   const controles = `<div class="filters">${vistas}
     <input type="text" id="crm-q" placeholder="Buscar por nombre, correo, WhatsApp o nota" value="${esc(S.crmQ || '')}" style="flex:1;min-width:220px;border-radius:999px">
     <select id="crm-origen" aria-label="Origen" style="border-radius:999px"><option value="">Todos los orígenes</option>${origenes.map((o) => `<option value="${esc(o)}" ${S.crmOrigen === o ? 'selected' : ''}>${esc(o === 'directo' ? 'Directo' : o)}</option>`).join('')}</select>
@@ -588,7 +606,7 @@ V.interesadas = () => {
     return `<article class="kb-card" ${trk ? `draggable="true" data-lead-card="${esc(trk.id)}"` : ''} data-lead-open="${esc(p.id)}">
       <div class="kb-top"><span class="av sm" style="--c:${colorFor(p.id)}">${esc(initials(p.nombre))}</span><div class="kb-id"><b>${esc(p.nombre)}</b>${prog ? `<span class="muted">${linea || 'Formación completa · pagó en la plataforma'}</span>` : ''}</div></div>${prog ? '' : `<span style="display:flex;gap:4px;flex-wrap:wrap">${progPills(p)}</span>`}
       ${trk?.interest ? `<small>${esc(trk.interest)}</small>` : ''}${p.note ? `<small class="muted">📝 ${esc(p.note.slice(0, 70))}${p.note.length > 70 ? '…' : ''}</small>` : ''}
-      <div class="kb-meta">${cuentaBadge(p)}${segBadge(p)}${tagsPills(p)}${otras}${p.whatsapp ? `<a class="btn btn-ghost btn-sm" href="${waLink(p.whatsapp)}" data-wa-open="${esc(waNum(p.whatsapp))}" data-wa-name="${esc(p.nombre)}">WhatsApp</a>` : ''}</div></article>`;
+      <div class="kb-meta">${cuentaBadge(p)}${asistPersona(p)}${segBadge(p)}${tagsPills(p)}${otras}${p.whatsapp ? `<a class="btn btn-ghost btn-sm" href="${waLink(p.whatsapp)}" data-wa-open="${esc(waNum(p.whatsapp))}" data-wa-name="${esc(p.nombre)}">WhatsApp</a>` : ''}</div></article>`;
   };
   return `${head}${aviso}${controles}
   <div class="filters"><button class="chip" data-crm-desc aria-pressed="${verDesc}">Mostrar descartadas (${lista.filter((p) => etapaVista(p) === 'descartado').length})</button><span class="muted" style="font-size:.82rem">${prog ? 'Arrastra una tarjeta a otra columna para cambiar su etapa en este programa. Toca una tarjeta para ver su ficha.' : 'Aquí cada persona aparece en su etapa más avanzada. Elige un programa arriba para mover las tarjetas, o abre una ficha para ver todos sus programas.'}</span></div>
@@ -648,7 +666,7 @@ async function leadMover(id, status) {
   if (l.status === status && leadEtapa(l) === status) return false;
   const p = personaDe(id);
   let extra = [], motivo = '';
-  if (status === 'inscrita' && esClase(l.form)) {
+  if ((status === 'inscrita' || status === 'matriculada') && esClase(l.form)) {
     const r = await pedirProgramasPago(p);
     if (r === null) { render(false); return false; }
     extra = r.forms;
@@ -664,7 +682,7 @@ async function leadMover(id, status) {
   A._per = null; paintNav(); render(false);
   try {
     await data.leads({ action: 'update', id, status, ...(motivo ? { motivo } : {}) });
-    const fup = status === 'clase' ? seguimientoAuto(p) : null;
+    const fup = status === 'clase' || status === 'asistio_confirmado' ? seguimientoAuto(p) : null;
     if (fup) { await data.leads({ action: 'update', ids: p.leads.map((x) => x.id), followUp: fup }); p.leads.forEach((x) => (x.followUp = fup)); toast('Quedó un seguimiento para mañana: ofrecerle el curso.'); }
     for (const form of extra) await data.leads({ action: 'addProgram', fromId: id, form, status: 'inscrita' });
     if (extra.length) await data.leads({ action: 'all' });
@@ -714,7 +732,7 @@ async function pasarACurso(l) {
   try {
     const creadas = [];
     for (const form of r.forms) { await data.leads({ action: 'addProgram', fromId: l.id, form, status: r.etapa }); if (A._ultimo?.creada) creadas.push(A._ultimo.id); }
-    if (r.etapa === 'inscrita' && l.status !== 'inscrita') await data.leads({ action: 'update', id: l.id, status: 'inscrita' });
+    if (r.etapa === 'inscrita' && !esInscrita(l.status)) await data.leads({ action: 'update', id: l.id, status: esClase(l.form) ? 'matriculada' : 'inscrita' });
     await data.leads({ action: 'all' }); A._per = null; paintNav(); render(false);
     const nombres = r.forms.map((f) => PROG_AGREGAR.find(([k]) => k === f)?.[1] || f).join(' y ');
     toast(`Pasó a ${nombres} como interesada.`, creadas.length ? {
@@ -756,19 +774,21 @@ function leadFicha(id) {
   }
 
   // ----- derecha: cuenta en el aula y programas (cada uno con sus pasos)
-  const pasosDe = (l) => LEAD_STATES.filter(([k]) => k !== 'descartado' && !(esPago(l.form) && k === 'clase'));
+  const pasosDe = (l) => (esClase(l.form) ? ETAPAS_CLASE.filter(([k]) => PASOS_CLASE.includes(k)) : LEAD_STATES.filter(([k]) => k !== 'descartado' && !(esPago(l.form) && k === 'clase')));
+  const alternas = (l) => (esClase(l.form) ? ETAPAS_CLASE.filter(([k]) => !PASOS_CLASE.includes(k)) : []);
   const tarjetaProg = (l) => {
     const pasos = pasosDe(l), act = leadEtapa(l), i = pasos.findIndex(([k]) => k === act);
     return `<div class="pg"><div class="pg-top"><b>${esc(LEAD_FORMS[l.form] || l.form)}</b></div>
       <span class="muted" style="font-size:.78rem">${fdateMs(l.createdAt)}${l.claseFecha ? ` · clase ${esc(fechaLarga(l.claseFecha))}` : ''}${l.desdeForm ? ' · agregado a mano' : ''}${act === 'descartado' && l.motivo ? ` · motivo: ${esc(l.motivo)}` : ''}</span>
-      <div class="pasos" role="group" aria-label="Etapa en ${esc(LEAD_FORMS[l.form] || l.form)}">${pasos.map(([k], j) => `<button type="button" class="paso ${act === k ? 'on' : i > j ? 'hecha' : ''}" data-paso="${esc(l.id)}|${k}" aria-pressed="${act === k}">${esc(etapaTxt(l.form, k))}</button>`).join('')}<button type="button" class="paso descartar ${act === 'descartado' ? 'on' : ''}" data-paso="${esc(l.id)}|descartado" aria-pressed="${act === 'descartado'}">Descartada</button></div>
+      ${esClase(l.form) ? `<div style="display:flex;gap:4px;flex-wrap:wrap">${asistBadges(l)}</div>` : ''}
+      <div class="pasos" role="group" aria-label="Etapa en ${esc(LEAD_FORMS[l.form] || l.form)}">${pasos.map(([k], j) => `<button type="button" class="paso ${act === k ? 'on' : i > j ? 'hecha' : ''}" data-paso="${esc(l.id)}|${k}" aria-pressed="${act === k}">${esc(etapaTxt(l.form, k))}</button>`).join('')}${alternas(l).map(([k, t]) => `<button type="button" class="paso alt ${act === k ? 'on' : ''}" data-paso="${esc(l.id)}|${k}" aria-pressed="${act === k}">${esc(t)}</button>`).join('')}<button type="button" class="paso descartar ${act === 'descartado' ? 'on' : ''}" data-paso="${esc(l.id)}|descartado" aria-pressed="${act === 'descartado'}">Descartada</button></div>
       ${esClase(l.form) ? `<button type="button" class="btn btn-ghost btn-sm" data-pasar="${esc(l.id)}">Pasar a un curso →</button>` : ''}
       <button type="button" class="btn btn-ghost btn-sm" style="color:#b8402f;border-color:#e3b8ae" data-trk-del="${esc(l.id)}" title="Borra solo este programa de la persona">${l.desdeForm ? '↩ Deshacer: no pasó a este programa' : '↩ Quitar de este programa'}</button></div>`;
   };
   const faltan = PROG_AGREGAR.filter(([f]) => !formas.has(f));
   const cuenta = p.alumna
     ? `<div class="pg"><b>Cuenta en el aula</b><span style="font-size:.88rem">${esc(nameOf(p.alumna))} · ${esc(payState(p.alumna)[1])}</span><button type="button" class="btn btn-ghost btn-sm" data-lead-alumna="${esc(p.alumna.id)}">Ver su ficha</button></div>`
-    : `<div class="pg" style="${etapaDe(p) === 'inscrita' ? 'border-color:#e3b8ae' : ''}"><b>Cuenta en el aula</b><span style="font-size:.86rem;color:${etapaDe(p) === 'inscrita' ? '#b8402f' : 'inherit'}">Aún no tiene cuenta.${etapaDe(p) === 'inscrita' ? ' Ya está inscrita: pídele que la cree.' : ''}</span><span class="muted" style="font-size:.78rem">Si la creó con otro correo, corrígelo a la izquierda para que se unan.</span></div>`;
+    : `<div class="pg" style="${esInscrita(etapaDe(p)) ? 'border-color:#e3b8ae' : ''}"><b>Cuenta en el aula</b><span style="font-size:.86rem;color:${esInscrita(etapaDe(p)) ? '#b8402f' : 'inherit'}">Aún no tiene cuenta.${esInscrita(etapaDe(p)) ? ' Ya está inscrita: pídele que la cree.' : ''}</span><span class="muted" style="font-size:.78rem">Si la creó con otro correo, corrígelo a la izquierda para que se unan.</span></div>`;
   const derecha = `${cuenta}<h4 style="font:600 .62rem/1 var(--f-caps);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:6px 0 0">Programas</h4>
     ${p.leads.map(tarjetaProg).join('')}${formacionPagada(p) && !formas.has('formacion') ? '<div class="pg"><div class="pg-top"><b>Formación completa</b><span class="pill done">Inscrita</span></div><span class="muted" style="font-size:.78rem">pagó en la plataforma</span></div>' : ''}
     ${faltan.length ? `<details class="pg pg-add"><summary>+ Agregar a otro programa</summary><div style="display:grid;gap:8px;margin-top:10px"><span class="muted" style="font-size:.8rem">Úsalo si pidió información por otro lado (llamada, mensaje) y no se registró en esa página. Entra en la primera etapa y tú la mueves con los pasos.</span><select id="fa-form" aria-label="Programa a agregar">${faltan.map(([f, t]) => `<option value="${f}">${esc(t)}</option>`).join('')}</select><button type="button" class="btn btn-primary btn-sm" id="fa-add">Agregar</button></div></details>` : ''}
@@ -894,7 +914,7 @@ V.inicio = () => {
   return `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>Hola, ${esc(nombre)}</h1><p>Lo que necesita tu atención hoy.</p></div></div>
   <div class="kpis">${kpi(nuevas.length, 'interesadas nuevas', 'interesadas')}${kpi(sinLeer, 'WhatsApp sin leer', 'whatsapp')}${kpi(A.questions.length, 'preguntas de clase', 'preguntas')}${kpi(A.tickets.length, 'mensajes de ayuda', 'ayuda')}</div>
   ${(() => { const t = personas().filter(seguimientoHoyP).sort((a, b) => a.followUp.localeCompare(b.followUp)), hoyS = ymd(hoyCL()); return t.length ? `<section class="card panel"><div class="panel-h"><h3>Para hoy (${t.length})</h3><button class="link" data-crm-hoy>Ver en el CRM</button></div><div class="tbl-wrap"><table class="tbl"><tbody>${t.slice(0, 8).map((q) => `<tr><td><button class="link" data-lead-open="${esc(q.id)}" style="font-weight:700">${esc(q.nombre)}</button><br><span class="muted" style="font-size:.84rem">${q.followUp < hoyS ? `Vencido el ${esc(fechaLarga(q.followUp))}` : 'Hoy'} · ${esc(q.leads.map((l) => PROG_CORTO[l.form] || l.form).join(', '))}</span></td><td style="text-align:right">${q.whatsapp ? `<a class="btn btn-ghost btn-sm" href="${waLink(q.whatsapp)}" data-wa-open="${esc(waNum(q.whatsapp))}" data-wa-name="${esc(q.nombre)}">WhatsApp</a>` : ''}</td></tr>`).join('')}</tbody></table></div>${t.length > 8 ? `<p class="muted" style="font-size:.84rem;margin:0">Y ${t.length - 8} más en el CRM.</p>` : ''}</section>` : ''; })()}
-  ${personas().filter((p) => etapaDe(p) === 'inscrita' && !p.alumna).length ? `<div class="alert"><div><b>${personas().filter((p) => etapaDe(p) === 'inscrita' && !p.alumna).length} inscrita${personas().filter((p) => etapaDe(p) === 'inscrita' && !p.alumna).length === 1 ? '' : 's'} sin cuenta en el aula</b><p>Ya están inscritas pero no crearon su cuenta. Escríbeles para que la creen con su correo.</p></div><button class="btn" data-crm-sincuenta-ya>Ver</button></div>` : ''}
+  ${personas().filter((p) => esInscrita(etapaDe(p)) && !p.alumna).length ? `<div class="alert"><div><b>${personas().filter((p) => esInscrita(etapaDe(p)) && !p.alumna).length} inscrita${personas().filter((p) => esInscrita(etapaDe(p)) && !p.alumna).length === 1 ? '' : 's'} sin cuenta en el aula</b><p>Ya están inscritas pero no crearon su cuenta. Escríbeles para que la creen con su correo.</p></div><button class="btn" data-crm-sincuenta-ya>Ver</button></div>` : ''}
   ${atrasadas.length ? `<div class="alert"><div><b>${atrasadas.length} cuota${atrasadas.length === 1 ? '' : 's'} atrasada${atrasadas.length === 1 ? '' : 's'}</b><p>${esc(atrasadas.slice(0, 3).map(nameOf).join(', '))}${atrasadas.length > 3 ? '…' : ''}</p></div><button class="btn" data-go="pagos">Ver pagos</button></div>` : ''}
   <div class="cols">
     <section class="card panel"><div class="panel-h"><h3>Interesadas por contactar</h3><button class="link" data-go="interesadas">Ver todas</button></div>
@@ -1157,7 +1177,7 @@ const claseInscritas = (v) => {
   const enlace = A.clases?.[v.type === 'clase-pendulo' ? 'enlacePendulo' : 'enlaceTarot'] || '';
   const texto = (l) => `Hola ${String(l.name || '').split(' ')[0]}, te recuerdo tu clase gratis de ${v.type === 'clase-pendulo' ? 'Péndulo Hebreo' : 'Tarot Terapéutico'}: ${fechaLarga(v.date)}${v.time ? ` a las ${v.time} (hora de Chile)` : ''}. ${enlace ? `Entra por Google Meet: ${enlace}` : ''} ¡Te espero!`;
   const fila = (l) => `<tr><td><input type="checkbox" data-asist="${esc(l.id)}" aria-label="Marcar que ${esc(l.name)} entró"></td><td><b>${esc(l.name)}</b>${l.country ? `<br><span class="muted">${esc(l.country)}</span>` : ''}</td><td>${l.whatsapp ? `<a href="${waLink(l.whatsapp)}" data-wa-open="${esc(waNum(l.whatsapp))}" data-wa-name="${esc(l.name)}">${esc(l.whatsapp)}</a>` : ''}</td><td>${l.email ? `<a href="mailto:${esc(l.email)}?subject=${encodeURIComponent('Tu clase gratis · Casa Muladhara')}&body=${encodeURIComponent(texto(l))}">${esc(l.email)}</a>` : ''}</td><td style="text-align:right"><button type="button" class="link" style="color:#b8402f" data-insc-del="${esc(l.id)}">Eliminar</button></td></tr>`;
-  return `<div class="card full" style="padding:12px 14px;display:grid;gap:8px;font-size:.84rem"><b>Inscritas a esta clase: ${lista.length}</b>${lista.length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:28px"><input type="checkbox" data-asist-all aria-label="Marcar todas"></th><th>Persona</th><th>WhatsApp</th><th>Correo</th><th></th></tr></thead><tbody>${lista.map(fila).join('')}</tbody></table></div><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button type="button" class="btn btn-primary btn-sm" data-asist-go="${esc(v.id)}">Marcar que tomaron la clase</button><span class="muted">Marca a quienes entraron y pasan a «Tomó la clase» en el CRM.</span></div>` : '<span class="muted">Todavía nadie se registró para esta fecha.</span>'}${enlace ? '' : '<span style="color:#b8402f;font-weight:700">Falta el enlace de Google Meet de esta clase en Ajustes del aula.</span>'}</div>`;
+  return `<div class="card full" style="padding:12px 14px;display:grid;gap:8px;font-size:.84rem"><b>Inscritas a esta clase: ${lista.length}</b>${lista.length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:28px"><input type="checkbox" data-asist-all aria-label="Marcar todas"></th><th>Persona</th><th>WhatsApp</th><th>Correo</th><th></th></tr></thead><tbody>${lista.map(fila).join('')}</tbody></table></div><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button type="button" class="btn btn-primary btn-sm" data-asist-go="${esc(v.id)}">Marcar como «Asistió confirmado»</button><span class="muted">Marca a quienes estuvieron en la clase; pasan a «Asistió confirmado» en el CRM.</span></div>` : '<span class="muted">Todavía nadie se registró para esta fecha.</span>'}${enlace ? '' : '<span style="color:#b8402f;font-weight:700">Falta el enlace de Google Meet de esta clase en Ajustes del aula.</span>'}</div>`;
 };
 function calForm(e) {
   const v = e || { type: 'bloqueado', date: ymd(S.calRef || hoyCL()) };
@@ -1281,16 +1301,16 @@ document.addEventListener('click', async (e) => {
   const ev = (A.cal || []).find((x) => x.id === b.dataset.asistGo);
   const marcadas = [...document.querySelectorAll('#dlg [data-asist]:checked')].map((c) => c.dataset.asist);
   if (!marcadas.length) return toast('Marca a quienes entraron a la clase.');
-  const ids = marcadas.filter((id) => ['nuevo', 'contactado'].includes(leadEtapa(A.leads.find((l) => l.id === id) || {}))); // no se retrocede a quien ya va más adelante
+  const ids = marcadas.filter((id) => (RANGO_ETAPA[leadEtapa(A.leads.find((l) => l.id === id) || {})] ?? 0) < RANGO_ETAPA.asistio_confirmado); // no se retrocede a quien ya va más adelante
   if (!ids.length) return toast('Todas esas ya estaban más adelante en el embudo.');
   b.disabled = true;
   try {
     const manana = ymd(hoyCL() + 864e5), hoy = ymd(hoyCL());
     const pide = (id) => { const q = personaDe(id); return !!q && (!q.followUp || q.followUp < hoy); }; // solo a quien no tiene ya un seguimiento pendiente
     const conSeg = ids.filter(pide), sinSeg = ids.filter((id) => !pide(id));
-    if (sinSeg.length) await data.leads({ action: 'estado', ids: sinSeg, status: 'clase' });
-    if (conSeg.length) await data.leads({ action: 'estado', ids: conSeg, status: 'clase', followUp: manana });
-    A.leads.forEach((l) => { if (ids.includes(l.id)) { l.status = 'clase'; l.eventos = [...(l.eventos || []), { t: Date.now(), tipo: 'etapa', texto: `Etapa: ${etapaNombre('clase')}` }]; if (conSeg.includes(l.id)) l.followUp = manana; } });
+    if (sinSeg.length) await data.leads({ action: 'estado', ids: sinSeg, status: 'asistio_confirmado' });
+    if (conSeg.length) await data.leads({ action: 'estado', ids: conSeg, status: 'asistio_confirmado', followUp: manana });
+    A.leads.forEach((l) => { if (ids.includes(l.id)) { l.status = 'asistio_confirmado'; l.eventos = [...(l.eventos || []), { t: Date.now(), tipo: 'etapa', texto: `Etapa: ${etapaNombre('asistio_confirmado')}` }]; if (conSeg.includes(l.id)) l.followUp = manana; } });
     A._per = null; paintNav(); render(false);
     if (ev && $('#dlg').open) calForm(ev);
     toast(`${ids.length} persona${ids.length === 1 ? '' : 's'} marcada${ids.length === 1 ? '' : 's'} como que tomó la clase.`);

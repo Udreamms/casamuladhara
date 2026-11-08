@@ -16,6 +16,8 @@
 //   action 'delete' -> { ids: [..] }   la Maestra elimina interesadas (hasta 100 a la vez); no se puede deshacer
 import crypto from 'node:crypto';
 import { FieldValue } from 'firebase-admin/firestore';
+import { chileAUtc } from '@/lib/server/agenda.js';
+import { ETAPAS, ETAPA_TXT, RANGO, baseSitio, claseDe, datosDeCodigo, nuevoCodigo, normaliza, venceCodigo, waClave } from '@/lib/server/embudo.js';
 import { auth, db, json } from '@/lib/server/services.js';
 import { contexto, enviarDespues, idValido, usuario } from '@/lib/server/meta.js';
 
@@ -24,14 +26,12 @@ const FORMS = ['pendulo', 'clase-pendulo', 'tarot', 'clase-tarot', 'formacion', 
 const ENLACE = { 'clase-pendulo': 'enlacePendulo', 'clase-tarot': 'enlaceTarot' };
 const FECHA = /^\d{4}-\d{2}-\d{2}$/;
 const HTTPS = /^https:\/\/[^\s"'<>]+$/i;
-const ETAPAS = ['nuevo', 'contactado', 'clase', 'conversando', 'inscrita', 'descartado'];
 const UTM = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'fbclid', 'gclid'];
 const str = (v, max) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const out = (d) => ({ id: d.id, ...d.data(), createdAt: d.data().createdAt?.toMillis?.() || 0, updatedAt: d.data().updatedAt?.toMillis?.() || 0 });
 const ID = /^[A-Za-z0-9]{1,40}$/;
 const MOTIVOS = ['No responde', 'Precio', 'No es el momento', 'No le interesa', 'Compró en otro lugar', 'Registro repetido o de prueba', 'Otro'];
-const ETAPA_TXT = { nuevo: 'Nueva', contactado: 'Contactada', clase: 'Tomó la clase', conversando: 'En conversación', inscrita: 'Inscrita', descartado: 'Descartada' };
 // Historial de cada registro: arreglo de { t (ms), tipo, texto }. arrayUnion no admite serverTimestamp, por eso la hora va en milisegundos.
 const ev = (tipo, texto) => ({ t: Date.now(), tipo, texto: String(texto).slice(0, 1000) });
 const etiquetasOk = (v) => (Array.isArray(v) ? [...new Set(v.map((x) => String(x ?? '').trim()))].filter(Boolean) : []);
@@ -40,16 +40,25 @@ const etiquetasOk = (v) => (Array.isArray(v) ? [...new Set(v.map((x) => String(x
 async function refDe(firestore, form, email, whatsapp) {
   const llave = email || String(whatsapp || '').replace(/\D/g, '');
   let ref = llave ? firestore.collection('leads').doc(crypto.createHash('sha1').update(`${form}|${llave}`).digest('hex').slice(0, 20)) : firestore.collection('leads').doc();
+  let hallado = false;
   if (email) {
     const previo = await firestore.collection('leads').where('email', '==', email).where('form', '==', form).limit(1).get();
-    if (!previo.empty) ref = previo.docs[0].ref;
+    if (!previo.empty) { ref = previo.docs[0].ref; hallado = true; }
+  }
+  // Misma persona aunque cambie de correo: se reconoce también por el WhatsApp (clave en dígitos con código de país)
+  const wk = waClave(whatsapp);
+  if (!hallado && wk) {
+    const porWa = await firestore.collection('leads').where('waKey', '==', wk).where('form', '==', form).limit(1).get();
+    if (!porWa.empty) ref = porWa.docs[0].ref;
   }
   return ref;
 }
+// Consentimiento de contacto: { aceptado, fecha, texto, origen } por canal
+const consentimientoOk = (c) => (c && typeof c === 'object' ? { aceptado: c.aceptado === true, fecha: str(c.fecha, 40) || new Date().toISOString(), texto: str(c.texto, 600), origen: str(c.origen, 80) } : null);
 
 export async function POST(request) {
   const body = await request.json().catch(() => ({}));
-  const delPortal = ['all', 'status', 'update', 'delete', 'estado', 'addProgram', 'nota', 'etiquetas'].includes(body.action); // acciones de la Maestra: su error no es el de una landing
+  const delPortal = ['all', 'status', 'update', 'delete', 'estado', 'addProgram', 'nota', 'etiquetas', 'preparar', 'codigo', 'clasificar'].includes(body.action); // acciones de la Maestra: su error no es el de una landing
   try {
     if (body.action === 'save') {
       // Campo trampa: las personas no lo ven, los bots lo llenan. Se responde ok para no darles pistas.
@@ -66,9 +75,14 @@ export async function POST(request) {
         message: str(body.message, 1500),
         page: str(body.page, 300),
         utm: Object.fromEntries(UTM.map((k) => [k, str(body.utm?.[k], 200)]).filter(([, v]) => v)),
-        status: 'nuevo',
+        status: form === 'clase-pendulo' || form === 'clase-tarot' ? 'registrada' : 'nuevo',
+        waKey: waClave(body.whatsapp),
         createdAt: FieldValue.serverTimestamp(),
       };
+      const edad = Math.round(Number(body.edad));
+      if (Number.isFinite(edad) && edad >= 5 && edad <= 110) lead.edad = edad;
+      const consentimiento = Object.fromEntries(['email', 'whatsapp'].map((k) => [k, consentimientoOk(body.consentimiento?.[k])]).filter(([, v]) => v));
+      if (Object.keys(consentimiento).length) lead.consentimiento = consentimiento;
       if (!lead.name) return json({ error: 'Escribe tu nombre.' }, 400);
       if (!lead.whatsapp && !lead.email) return json({ error: 'Déjanos tu WhatsApp o tu correo para poder escribirte.' }, 400);
       if (lead.email && !EMAIL.test(lead.email)) return json({ error: 'Revisa tu correo.' }, 400);
@@ -79,20 +93,26 @@ export async function POST(request) {
           if (!s.empty) Object.assign(lead, { claseEvento: s.docs[0].id, claseFecha: str(body.date, 10) });
         } catch (e) { console.error('leads clase', e); } // sin la asociación igual se guarda la interesada
       }
+      // Clase, código personal único (12 caracteres) y enlaces de esa persona: entrada y replay
+      Object.assign(lead, datosDeCodigo(form, baseSitio(request)));
       // Misma persona y mismo formulario = mismo registro. Dos envíos casi a la vez (doble clic, reintento) caen en el mismo
       // documento y la transacción deja solo uno.
       const firestore = db();
       const ref = await refDe(firestore, form, lead.email, lead.whatsapp);
-      let repetida = false;
+      let repetida = false, codigoFinal = lead.codigo || '';
       await firestore.runTransaction(async (tx) => {
         const snap = await tx.get(ref);
+        codigoFinal = lead.codigo || '';
         if (!snap.exists) { repetida = false; tx.set(ref, lead); return; }
         repetida = true;
-        const { createdAt, utm, status, form: f, ...nuevo } = lead; // se conservan la fecha, el origen de la campaña y la etapa
+        // se conservan la fecha, el origen de la campaña, la etapa y el código personal que ya tenía
+        const { createdAt, utm, status, form: f, clase, codigo, codigoVence, codigoRevocado, enlace_entrada, enlace_replay, ...nuevo } = lead;
+        if (snap.data().codigo) codigoFinal = snap.data().codigo;
         const vacio = (v) => v === '' || v === undefined;
         tx.update(ref, {
           ...Object.fromEntries(Object.entries(nuevo).filter(([, v]) => !vacio(v))),
-          ...(snap.data().status === 'descartado' ? { status: 'nuevo' } : {}), // si vuelve a escribir, vuelve a "por contactar"
+          ...(!snap.data().codigo && codigo ? { clase, codigo, codigoVence, codigoRevocado, ...(enlace_entrada ? { enlace_entrada, enlace_replay } : {}) } : {}),
+          ...(snap.data().status === 'descartado' ? { status: lead.status } : {}), // si vuelve a escribir, vuelve a "por contactar"
           repeticiones: FieldValue.increment(1),
           updatedAt: FieldValue.serverTimestamp(),
         });
@@ -106,9 +126,9 @@ export async function POST(request) {
         const guardado = ((await db().doc('config/clases').get()).data() || {})[ENLACE[form]];
         if (typeof guardado === 'string' && HTTPS.test(guardado.trim())) enlace = guardado.trim();
       }
-      return json({ ok: true, id: ref.id, ...(repetida ? { repetida: true } : {}), ...(enlace ? { enlace } : {}) });
+      return json({ ok: true, id: ref.id, ...(codigoFinal ? { codigo: codigoFinal } : {}), ...(repetida ? { repetida: true } : {}), ...(enlace ? { enlace } : {}) });
     }
-    if (body.action === 'all' || body.action === 'status' || body.action === 'update' || body.action === 'delete' || body.action === 'estado' || body.action === 'addProgram' || body.action === 'nota' || body.action === 'etiquetas') {
+    if (body.action === 'all' || body.action === 'status' || body.action === 'update' || body.action === 'delete' || body.action === 'estado' || body.action === 'addProgram' || body.action === 'nota' || body.action === 'etiquetas' || body.action === 'preparar' || body.action === 'codigo' || body.action === 'clasificar') {
       let user;
       try {
         user = await auth().verifyIdToken((request.headers.get('authorization') || '').replace(/^Bearer\s+/i, ''));
@@ -116,6 +136,91 @@ export async function POST(request) {
         return json({ error: 'Tu sesión expiró. Vuelve a entrar al portal.' }, 401);
       }
       if (user.admin !== true) return json({ error: 'Esta acción es solo para la Maestra.' }, 403);
+      if (body.action === 'preparar') {
+        // Deja a cada contacto con su clase, la clave de WhatsApp, el código personal y sus enlaces (los que ya tienen no se tocan)
+        const base = baseSitio(request);
+        if (!base) return json({ error: 'Falta la dirección pública del sitio (APP_URL en Vercel): sin ella los enlaces personales quedarían apuntando a este computador.' }, 400);
+        const firestore = db(), s = await firestore.collection('leads').limit(3000).get();
+        let lote = firestore.batch(), n = 0, enLote = 0;
+        for (const d of s.docs) {
+          const l = d.data(), need = {};
+          if (claseDe(l.form) && (!l.codigo || !l.enlace_entrada || !l.clase)) Object.assign(need, datosDeCodigo(l.form, base, l));
+          if (!l.waKey && waClave(l.whatsapp)) need.waKey = waClave(l.whatsapp);
+          if (!Object.keys(need).length) continue;
+          lote.update(d.ref, need); n++; enLote++;
+          if (enLote === 400) { await lote.commit(); lote = firestore.batch(); enLote = 0; }
+        }
+        if (enLote) await lote.commit();
+        return json({ ok: true, revisadas: s.size, actualizadas: n });
+      }
+      if (body.action === 'codigo') {
+        if (typeof body.id !== 'string' || !ID.test(body.id)) return json({ error: 'Datos no válidos.' }, 400);
+        const ref = db().doc(`leads/${body.id}`), snap = await ref.get();
+        if (!snap.exists) return json({ error: 'Esa persona ya no existe. Actualiza la lista.' }, 404);
+        if (body.accion === 'regenerar') {
+          const base = baseSitio(request);
+          if (!base) return json({ error: 'Falta la dirección pública del sitio (APP_URL en Vercel).' }, 400);
+          const nuevo = datosDeCodigo(snap.data().form, base, {});
+          await ref.update({ ...nuevo, eventos: FieldValue.arrayUnion(ev('codigo', 'Código personal regenerado: el anterior dejó de servir')), updatedAt: FieldValue.serverTimestamp() });
+          return json({ ok: true, codigo: nuevo.codigo });
+        }
+        await ref.update({ codigoRevocado: true, eventos: FieldValue.arrayUnion(ev('codigo', 'Código personal revocado')), updatedAt: FieldValue.serverTimestamp() });
+        return json({ ok: true });
+      }
+      if (body.action === 'clasificar') {
+        // Marca quiénes entraron a una clase (lista del informe de Meet) y deja al resto como No asistió / No identificada.
+        // Sin aplicar:true solo muestra cómo quedaría (nada se guarda).
+        const firestore = db();
+        const sesId = typeof body.sesion === 'string' && ID.test(body.sesion) ? body.sesion : '';
+        const nivel = body.nivel === 'entro' ? 'entro' : 'asistio_confirmado';
+        const lineas = (Array.isArray(body.lista) ? body.lista : String(body.lista || '').split(/\r?\n/)).map((x) => String(x).trim()).filter(Boolean).slice(0, 400);
+        const sesion = sesId ? await firestore.doc(`calendario/${sesId}`).get() : null;
+        if (!sesion?.exists || !['clase-pendulo', 'clase-tarot'].includes(sesion.data().type)) return json({ error: 'Elige la clase del Calendario.' }, 400);
+        const e = sesion.data(), inicio = e.date && e.time ? chileAUtc(e.date, e.time) : Date.now();
+        const todas = await firestore.collection('leads').where('form', '==', e.type).get();
+        const cand = todas.docs.map((d) => ({ id: d.id, ref: d.ref, ...d.data() })).filter((l) => l.claseEvento === sesId || l.claseFecha === e.date);
+        const porEmail = new Map(), porWa = new Map(), porNombre = new Map();
+        cand.forEach((l) => { if (l.email) porEmail.set(l.email, l); const k = l.waKey || waClave(l.whatsapp); if (k) porWa.set(k, l); if (l.name) porNombre.set(normaliza(l.name), l); });
+        const marcadas = new Map(), sinMatch = [];
+        for (const linea of lineas) {
+          const mail = ((linea.match(/[^\s@,;]+@[^\s@,;]+\.[^\s@,;]+/) || [])[0] || '').toLowerCase();
+          const tel = waClave((linea.match(/\+?\d[\d\s().-]{7,}\d/) || [])[0]);
+          let l = (mail && porEmail.get(mail)) || (tel && porWa.get(tel)) || null;
+          if (!l) {
+            const nom = normaliza(linea.replace(/[^\s@]+@[^\s@]+/g, ' ').replace(/\+?\d[\d\s().-]{7,}\d/g, ' '));
+            if (nom) {
+              l = porNombre.get(nom) || null;
+              const toks = nom.split(' ').filter((t) => t.length > 1);
+              if (!l && toks.length >= 2) { const hit = cand.filter((c) => { const ct = normaliza(c.name).split(' '); return toks.every((t) => ct.includes(t)); }); if (hit.length === 1) l = hit[0]; }
+            }
+          }
+          if (l) marcadas.set(l.id, l); else sinMatch.push(linea);
+        }
+        const yaAsistio = (l) => !!(l.asistencia?.entro || l.asistencia?.confirmada) || ['entro', 'asistio_confirmado', 'clase', 'conversando', 'vio_oferta', 'inscrita', 'matriculada'].includes(l.status);
+        const noAsist = [], noIdent = [];
+        cand.forEach((l) => {
+          if (marcadas.has(l.id) || yaAsistio(l)) return;
+          if (l.asistencia?.autodeclarada === 'si') { if (['registrada', 'nuevo', 'contactado', 'confirmada', 'no_asistio'].includes(l.status)) noIdent.push(l); } else if (['registrada', 'nuevo', 'contactado', 'confirmada'].includes(l.status)) noAsist.push(l);
+        });
+        const nombres = (arr) => arr.map((l) => ({ id: l.id, nombre: l.name }));
+        const informe = { total: cand.length, marcadas: nombres([...marcadas.values()]), noAsistio: nombres(noAsist), noIdentificada: nombres(noIdent), sinMatch };
+        if (body.aplicar !== true) return json({ ok: true, vista: true, ...informe });
+        const txt = `Clasificación de la clase del ${e.date}`;
+        const ops = [
+          ...[...marcadas.values()].map((l) => [l, {
+            status: (RANGO[nivel] ?? 0) > (RANGO[l.status] ?? 0) ? nivel : l.status,
+            asistencia: { ...(l.asistencia || {}), [nivel === 'entro' ? 'entro' : 'confirmada']: inicio, fuente: 'meet', evento: sesId },
+          }, `${txt}: ${ETAPA_TXT[nivel]}`]),
+          ...noAsist.map((l) => [l, { status: 'no_asistio' }, `${txt}: No asistió`]),
+          ...noIdent.map((l) => [l, { status: 'no_identificada' }, `${txt}: No identificada (dice que estuvo, pero no está en la lista)`]),
+        ];
+        for (let i = 0; i < ops.length; i += 400) {
+          const lote = firestore.batch();
+          ops.slice(i, i + 400).forEach(([l, cambios, texto]) => lote.update(l.ref, { ...cambios, eventos: FieldValue.arrayUnion(ev('asistencia', texto)), updatedAt: FieldValue.serverTimestamp() }));
+          await lote.commit();
+        }
+        return json({ ok: true, aplicado: true, ...informe });
+      }
       if (body.action === 'nota') {
         const ids = Array.isArray(body.ids) ? [...new Set(body.ids)] : [];
         const texto = typeof body.texto === 'string' ? body.texto.trim().slice(0, 1000) : '';
@@ -165,7 +270,6 @@ export async function POST(request) {
         const o = origen.data();
         const ref = await refDe(firestore, body.form, o.email || '', o.whatsapp || '');
         let creada = false;
-        const RANGO = { descartado: -1, nuevo: 0, contactado: 1, clase: 2, conversando: 3, inscrita: 4 };
         await firestore.runTransaction(async (tx) => {
           const snap = await tx.get(ref);
           creada = false;
