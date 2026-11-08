@@ -591,22 +591,23 @@ function pedirProgramasPago(p, opciones = {}) {
     const alCerrar = () => fin(null);
     const fin = (v) => { if (listo) return; listo = true; $('#dlg').removeEventListener('close', alCerrar); resolve(v); };
     dialog(`<span class="eyebrow">${opciones.etapa ? 'Pasar a un curso' : 'Inscrita'}</span><h3>${esc(p.nombre)}</h3>
-    <p class="muted" style="font-size:.88rem;margin:6px 0 12px">${opciones.etapa ? '¿A qué programa pago pasa?' : '¿A qué programa pago se inscribió?'} Se agrega a ese programa en su ficha y aparece en su pipeline, sin duplicarla. Si son varios, marca todos.</p>
+    <p class="muted" style="font-size:.88rem;margin:6px 0 12px">${opciones.etapa ? '¿A qué programa pasa? Entra a su pipeline como «Interesada» y desde ahí tú la mueves.' : '¿A qué programa pago se inscribió? Se agrega a ese programa como inscrita.'} Es la misma persona, no se duplica. Si son varios, marca todos.</p>
     <form id="pp-form" style="display:grid;gap:10px">${PROG_PAGOS.map(([k, t]) => `<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" name="pp" value="${k}"> ${esc(t)}${ya.has(k) ? ' <span class="muted">(ya está en este programa)</span>' : ''}</label>`).join('')}
-    ${opciones.etapa ? `<fieldset style="border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:grid;gap:6px"><legend style="font-size:.78rem;color:var(--muted);padding:0 6px">¿En qué etapa queda?</legend><label style="display:flex;gap:8px;align-items:center"><input type="radio" name="pe" value="conversando" checked> Quiere el curso y está en conversación</label><label style="display:flex;gap:8px;align-items:center"><input type="radio" name="pe" value="inscrita"> Ya se inscribió</label></fieldset>` : ''}
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary btn-sm">Confirmar</button>${opciones.etapa ? '' : '<button type="button" class="btn btn-ghost btn-sm" id="pp-skip">Marcar sin elegir programa</button>'}<button type="button" class="btn btn-ghost btn-sm" id="pp-no">Cancelar</button></div></form>`);
     $('#dlg').addEventListener('close', alCerrar);
     $('#pp-form').onsubmit = (e) => {
       e.preventDefault();
       const v = [...document.querySelectorAll('#pp-form input[name=pp]:checked')].map((x) => x.value);
       if (!v.length) return toast(opciones.etapa ? 'Elige a qué programa pasa.' : 'Elige un programa, o usa «Marcar sin elegir programa».');
-      const et = opciones.etapa ? (document.querySelector('#pp-form input[name=pe]:checked')?.value || 'conversando') : 'inscrita';
+      const et = opciones.etapa ? 'nuevo' : 'inscrita'; // al pasar a un curso entra como Interesada; al marcarla inscrita, como Inscrita
       fin({ forms: v, etapa: et }); $('#dlg').close();
     };
     const skip = $('#pp-skip'); if (skip) skip.onclick = () => { fin({ forms: [], etapa: 'inscrita' }); $('#dlg').close(); };
     $('#pp-no').onclick = () => $('#dlg').close();
   });
 }
+// Etiquetas que se ofrecen con un clic (Karen puede crear las suyas)
+const ETIQUETAS_SUGERIDAS = ['Pidió descuento', 'Quiere pagar en cuotas', 'Pidió más información', 'Sin respuesta', 'Cliente de terapias', 'Recomendada por alguien'];
 // Por qué se descartó a alguien (ayuda a ver, con el tiempo, dónde se pierde la gente)
 const MOTIVOS = ['No responde', 'Precio', 'No es el momento', 'No le interesa', 'Compró en otro lugar', 'Registro repetido o de prueba', 'Otro'];
 function pedirMotivo(p) {
@@ -700,7 +701,7 @@ async function pasarACurso(l) {
     for (const form of r.forms) await data.leads({ action: 'addProgram', fromId: l.id, form, status: r.etapa });
     if (r.etapa === 'inscrita' && l.status !== 'inscrita') await data.leads({ action: 'update', id: l.id, status: 'inscrita' });
     await data.leads({ action: 'all' }); A._per = null; paintNav(); render(false);
-    toast(`Agregada a ${r.forms.map((f) => PROG_AGREGAR.find(([k]) => k === f)?.[1] || f).join(' y ')}.`);
+    toast(`Pasó a ${r.forms.map((f) => PROG_AGREGAR.find(([k]) => k === f)?.[1] || f).join(' y ')} como interesada.`);
     return true;
   } catch (e) { fail(e); return false; }
 }
@@ -713,6 +714,7 @@ function leadFicha(id) {
   const pestana = (v, t) => `<button type="button" class="chip" data-ficha-tab="${v}" aria-pressed="${tab === v}">${t}</button>`;
   const secc = (t, html) => `<section class="ct-sec"><b>${t}</b>${html}</section>`;
   const todasTags = [...new Set(personas().flatMap((x) => x.tags))].sort();
+  const sugeridas = [...new Set([...ETIQUETAS_SUGERIDAS, ...todasTags])].filter((t) => !p.tags.includes(t)).slice(0, 8);
 
   // ----- centro: WhatsApp o Historial
   let centro = '';
@@ -749,7 +751,7 @@ function leadFicha(id) {
     : `<div class="pg" style="${etapaDe(p) === 'inscrita' ? 'border-color:#e3b8ae' : ''}"><b>Cuenta en el aula</b><span style="font-size:.86rem;color:${etapaDe(p) === 'inscrita' ? '#b8402f' : 'inherit'}">Aún no tiene cuenta.${etapaDe(p) === 'inscrita' ? ' Ya está inscrita: pídele que la cree.' : ''}</span><span class="muted" style="font-size:.78rem">Si la creó con otro correo, corrígelo a la izquierda para que se unan.</span></div>`;
   const derecha = `${cuenta}<h4 style="font:600 .62rem/1 var(--f-caps);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:6px 0 0">Programas</h4>
     ${p.leads.map(tarjetaProg).join('')}${formacionPagada(p) && !formas.has('formacion') ? '<div class="pg"><div class="pg-top"><b>Formación completa</b><span class="pill done">Inscrita</span></div><span class="muted" style="font-size:.78rem">pagó en la plataforma</span></div>' : ''}
-    ${faltan.length ? `<details class="pg pg-add"><summary>+ Agregar programa</summary><div style="display:grid;gap:8px;margin-top:10px"><select id="fa-form" aria-label="Programa a agregar">${faltan.map(([f, t]) => `<option value="${f}">${esc(t)}</option>`).join('')}</select><select id="fa-status" aria-label="Etapa inicial">${LEAD_STATES.filter(([x]) => x !== 'clase').map(([x, t]) => `<option value="${x}" ${x === 'conversando' ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select><button type="button" class="btn btn-primary btn-sm" id="fa-add">Agregar</button></div></details>` : ''}
+    ${faltan.length ? `<details class="pg pg-add"><summary>+ Agregar a otro programa</summary><div style="display:grid;gap:8px;margin-top:10px"><span class="muted" style="font-size:.8rem">Úsalo si pidió información por otro lado (llamada, mensaje) y no se registró en esa página. Entra en la primera etapa y tú la mueves con los pasos.</span><select id="fa-form" aria-label="Programa a agregar">${faltan.map(([f, t]) => `<option value="${f}">${esc(t)}</option>`).join('')}</select><button type="button" class="btn btn-primary btn-sm" id="fa-add">Agregar</button></div></details>` : ''}
     <p class="muted" style="font-size:.78rem;margin:0">Las etapas, el seguimiento y las etiquetas se guardan al instante. Los datos de contacto se guardan con «Guardar cambios».</p>`;
 
   // ----- izquierda: persona, contacto editable, seguimiento, etiquetas
@@ -763,7 +765,7 @@ function leadFicha(id) {
       <div class="ct-guardar"><span class="muted" id="ct-estado" style="font-size:.8rem">Todo guardado</span><button class="btn btn-primary btn-sm" id="ct-save" disabled>Guardar cambios</button></div>
     </form>
     ${secc('Próximo seguimiento', `<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><input type="date" id="sg-fecha" value="${esc(p.followUp || '')}" style="max-width:150px"><button type="button" class="btn btn-ghost btn-sm" data-sg="fecha">Guardar</button></div><div style="display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="chip" data-sg="1">Mañana</button><button type="button" class="chip" data-sg="3">En 3 días</button><button type="button" class="chip" data-sg="7">En 1 semana</button>${p.followUp ? '<button type="button" class="link" data-sg="quitar">Quitar</button>' : ''}</div>`)}
-    ${secc('Etiquetas', `<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">${p.tags.map((t) => `<span class="pill pres">${esc(t)} <button type="button" class="link" data-tag-del="${esc(t)}" aria-label="Quitar ${esc(t)}" style="padding:0 0 0 4px">×</button></span>`).join('')}</div><div style="display:flex;gap:6px"><input id="tg-nueva" list="tags-lista" placeholder="Nueva etiqueta" maxlength="30"><datalist id="tags-lista">${todasTags.map((t) => `<option value="${esc(t)}">`).join('')}</datalist><button type="button" class="btn btn-ghost btn-sm" id="tg-add">Agregar</button></div>`)}
+    ${secc('Etiquetas', `<span class="muted" style="font-size:.78rem">Marcas para agrupar personas (por ejemplo «Pidió descuento»). Luego puedes filtrar la lista por ellas.</span>${p.tags.length ? `<div style="display:flex;gap:6px;flex-wrap:wrap">${p.tags.map((t) => `<span class="pill pres">${esc(t)} <button type="button" class="link" data-tag-del="${esc(t)}" aria-label="Quitar ${esc(t)}" style="padding:0 0 0 4px">×</button></span>`).join('')}</div>` : ''}${sugeridas.length ? `<div style="display:flex;gap:6px;flex-wrap:wrap">${sugeridas.map((t) => `<button type="button" class="chip" data-tag-sug="${esc(t)}">+ ${esc(t)}</button>`).join('')}</div>` : ''}<div style="display:flex;gap:6px"><input id="tg-nueva" list="tags-lista" placeholder="Crear etiqueta propia" maxlength="30"><datalist id="tags-lista">${todasTags.map((t) => `<option value="${esc(t)}">`).join('')}</datalist><button type="button" class="btn btn-ghost btn-sm" id="tg-add">Agregar</button></div>`)}
     ${secc('Datos', `<dl class="kv" style="font-size:.84rem;gap:6px 12px"><dt>Origen</dt><dd>${esc(leadOrigenTxt(p.leads[0]))}</dd><dt>Primer registro</dt><dd>${fdateMs(p.leads[0].createdAt)}</dd>${p.leads.map((l) => l.message).filter(Boolean).pop() ? `<dt>Mensaje</dt><dd style="font-weight:400;text-align:left">${esc(p.leads.map((l) => l.message).filter(Boolean).pop())}</dd>` : ''}</dl>`)}
     <button type="button" class="link" id="lf-del" style="color:#b8402f;justify-self:start">Eliminar persona</button>`;
 
@@ -810,7 +812,7 @@ function leadFicha(id) {
   const add = $('#fa-add');
   if (add) add.onclick = async () => {
     add.disabled = true;
-    try { await data.leads({ action: 'addProgram', fromId: p.leads[0].id, form: $('#fa-form').value, status: $('#fa-status').value }); await data.leads({ action: 'all' }); refrescar(); leadFicha(id); toast('Programa agregado.'); } catch (err) { fail(err); add.disabled = false; }
+    try { await data.leads({ action: 'addProgram', fromId: p.leads[0].id, form: $('#fa-form').value, status: 'nuevo' }); await data.leads({ action: 'all' }); refrescar(); leadFicha(id); toast('Programa agregado.'); } catch (err) { fail(err); add.disabled = false; }
   };
 
   // Seguimiento, etiquetas y eliminar
@@ -822,6 +824,7 @@ function leadFicha(id) {
   const tagAccion = async (body, aplicar) => { try { await data.leads({ action: 'etiquetas', ids, ...body }); p.leads.forEach(aplicar); refrescar(); leadFicha(id); toast('Guardado.'); } catch (err) { fail(err); } };
   $('#tg-add').onclick = () => { const t = $('#tg-nueva').value.trim(); if (!t) return; tagAccion({ agregar: [t] }, (l) => { l.tags = [...new Set([...(l.tags || []), t])]; }); };
   $('#tg-nueva').onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); $('#tg-add').click(); } };
+  document.querySelectorAll('#dlg [data-tag-sug]').forEach((b) => (b.onclick = () => { const t = b.dataset.tagSug; tagAccion({ agregar: [t] }, (l) => { l.tags = [...new Set([...(l.tags || []), t])]; }); }));
   document.querySelectorAll('#dlg [data-tag-del]').forEach((b) => (b.onclick = () => { const t = b.dataset.tagDel; tagAccion({ quitar: [t] }, (l) => { l.tags = (l.tags || []).filter((x) => x !== t); }); }));
   $('#lf-del').onclick = async () => {
     if (!confirm(`¿Eliminar a ${p.nombre} de tu lista${p.leads.length > 1 ? ` (${p.leads.length} programas)` : ''}? No se puede deshacer.`)) return;
