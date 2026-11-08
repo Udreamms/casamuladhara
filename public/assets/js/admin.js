@@ -558,25 +558,34 @@ function exportarCsv() {
 }
 
 V.interesadas = () => {
-  const head = `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>CRM · Interesadas</h1><p>Cada persona es una sola tarjeta, aunque se haya registrado en varias páginas. Muévela por el embudo de cada programa, escribe notas y fija cuándo volver a escribirle.</p></div><span style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" data-crm-preparar title="Crea el código personal y los enlaces de cada contacto">Preparar contactos</button><button class="btn btn-ghost btn-sm" data-crm-clasificar>Clasificar una clase</button><button class="btn btn-primary btn-sm" data-go="envios">Envíos</button>${A.leads && repetidasPorLimpiar().length ? `<button class="btn btn-ghost btn-sm" data-leads-dedup>Limpiar repetidas (${repetidasPorLimpiar().length})</button>` : ''}<button class="btn btn-ghost btn-sm" data-crm-csv>Exportar a Excel</button><button class="btn btn-ghost btn-sm" data-leads-reload>Actualizar</button></span></div>`;
+  const head = `<div class="crm-head"><div><span class="eyebrow">CRM</span><h1>Interesadas</h1></div><div class="crm-acciones"><button class="btn btn-primary btn-sm" data-go="envios">Envíos</button>
+    <details class="menu"><summary class="btn btn-ghost btn-sm">Herramientas ▾</summary><div class="menu-lista">
+      <button type="button" data-crm-preparar title="Crea el código personal y los enlaces de cada contacto">Preparar contactos</button><button type="button" data-crm-clasificar>Clasificar una clase</button><button type="button" data-crm-csv>Exportar a Excel</button>
+      ${A.leads && repetidasPorLimpiar().length ? `<button type="button" data-leads-dedup>Limpiar repetidas (${repetidasPorLimpiar().length})</button>` : ''}<button type="button" data-leads-reload>Actualizar la lista</button></div></details></div></div>`;
   if (!A.leads) return `${head}<div class="card empty">Cargando interesadas…</div>`;
   const sinLink = [['enlacePendulo', 'Péndulo'], ['enlaceTarot', 'Tarot'], ['enlaceTerapias', 'terapias online']].filter(([k]) => !A.clases?.[k]).map(([, n]) => n);
   const aviso = sinLink.length ? `<div class="card" style="padding:12px 14px;font-size:.88rem;border-left:4px solid #b8402f"><b>Falta el enlace de Google Meet de ${sinLink.join(', ')}.</b> Mientras no esté, quienes se registren no ven el botón para entrar. Cárgalo en <button class="link" data-go="ajustes">Ajustes del aula</button>.</div>` : '';
   const prog = progDe(S.crmProg), lista = personasFiltradas(), vista = S.crmVista || 'embudo', todas = personas();
   const chip = (attr, v, t, on) => `<button class="chip" ${attr}="${esc(v)}" aria-pressed="${on}">${t}</button>`;
-  const vistas = `${chip('data-crm-vista', 'embudo', 'Embudo', vista === 'embudo')}${chip('data-crm-vista', 'tabla', 'Tabla', vista === 'tabla')}${chip('data-crm-vista', 'metricas', 'Métricas', vista === 'metricas')}`;
-  if (vista === 'metricas') return `${head}${aviso}<div class="filters">${vistas}</div>${metricasHTML()}`;
+  const seg = (attr, items, actual) => `<div class="seg" role="group">${items.map(([v, t]) => `<button type="button" ${attr}="${v}" aria-pressed="${actual === v}">${t}</button>`).join('')}</div>`;
+  const vistas = seg('data-crm-vista', [['embudo', 'Embudo'], ['tabla', 'Tabla'], ['metricas', 'Métricas']], vista);
+  if (vista === 'metricas') return `${head}${aviso}<div class="crm-bar">${vistas}</div>${metricasHTML()}`;
   const origenes = [...new Set(A.leads.map(leadOrigen))].sort(), tags = [...new Set(todas.flatMap((p) => p.tags))].sort();
-  const nSeg = todas.filter(seguimientoHoyP).length, nSin = todas.filter((p) => !p.alumna).length;
+  const base = prog ? todas.filter((p) => tieneProg(p, prog)) : todas;
+  const primera = prog && esClase(prog[0]) ? 'registrada' : 'nuevo';
+  const nSeg = base.filter(seguimientoHoyP).length, nSin = base.filter((p) => !p.alumna).length, nNuevas = base.filter((p) => etapaVista(p) === primera).length;
   const etapasProg = prog && esClase(prog[0]) ? [...ETAPAS_CLASE, ['descartado', 'Descartada']] : LEAD_STATES.filter(([k]) => !(prog && esPago(prog[0]) && k === 'clase'));
-  const controles = `<div class="filters">${vistas}
-    <input type="text" id="crm-q" placeholder="Buscar por nombre, correo, WhatsApp o nota" value="${esc(S.crmQ || '')}" style="flex:1;min-width:220px;border-radius:999px">
-    <select id="crm-origen" aria-label="Origen" style="border-radius:999px"><option value="">Todos los orígenes</option>${origenes.map((o) => `<option value="${esc(o)}" ${S.crmOrigen === o ? 'selected' : ''}>${esc(o === 'directo' ? 'Directo' : o)}</option>`).join('')}</select>
-    <select id="crm-etapa" aria-label="Etapa" style="border-radius:999px"><option value="">Todas las etapas</option>${etapasProg.map(([k]) => `<option value="${k}" ${S.crmEtapa === k ? 'selected' : ''}>${esc(etapaTxt(prog?.[0], k))}</option>`).join('')}</select>
-    ${tags.length ? `<select id="crm-tag" aria-label="Etiqueta" style="border-radius:999px"><option value="">Todas las etiquetas</option>${tags.map((t) => `<option ${S.crmTag === t ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select>` : ''}
-    <button class="chip" data-crm-seg aria-pressed="${!!S.crmSeg}">Seguimiento hoy${nSeg ? ` (${nSeg})` : ''}</button>
-    <button class="chip" data-crm-sincuenta aria-pressed="${!!S.crmSinCuenta}" title="Personas que aún no tienen cuenta en el aula">Sin cuenta en el aula (${nSin})</button></div>
-    <div class="filters">${chip('data-crm-prog', '', `Todos los programas (${todas.length} personas)`, !S.crmProg)}${LEAD_PROGS.map(([k, t, fs]) => chip('data-crm-prog', k, `${t} (${todas.filter((p) => tieneProg(p, [k, t, fs])).length})`, S.crmProg === k)).join('')}</div>`;
+  const hayFiltro = !!(S.crmQ || S.crmOrigen || S.crmEtapa || S.crmTag || S.crmSeg || S.crmSinCuenta);
+  const kpi = (k, n, t, on) => `<button type="button" class="crm-kpi" data-crm-kpi="${k}" aria-pressed="${on}"><b>${n}</b><span>${t}</span></button>`;
+  const kpis = `<div class="crm-kpis">${kpi('todos', base.length, prog ? 'en este programa' : 'personas', !hayFiltro)}${kpi('nuevas', nNuevas, 'por contactar', S.crmEtapa === primera)}${kpi('seg', nSeg, 'seguimientos hoy', !!S.crmSeg)}${kpi('sin', nSin, 'sin cuenta en el aula', !!S.crmSinCuenta)}</div>`;
+  const barra = `<div class="crm-bar">${vistas}
+    <input type="text" id="crm-q" placeholder="Buscar por nombre, correo, WhatsApp o nota" value="${esc(S.crmQ || '')}" aria-label="Buscar">
+    <select id="crm-origen" aria-label="Origen"><option value="">Origen: todos</option>${origenes.map((o) => `<option value="${esc(o)}" ${S.crmOrigen === o ? 'selected' : ''}>${esc(o === 'directo' ? 'Directo' : o)}</option>`).join('')}</select>
+    <select id="crm-etapa" aria-label="Etapa"><option value="">Etapa: todas</option>${etapasProg.map(([k]) => `<option value="${k}" ${S.crmEtapa === k ? 'selected' : ''}>${esc(etapaTxt(prog?.[0], k))}</option>`).join('')}</select>
+    ${tags.length ? `<select id="crm-tag" aria-label="Etiqueta"><option value="">Etiqueta: todas</option>${tags.map((t) => `<option ${S.crmTag === t ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select>` : ''}
+    ${hayFiltro ? '<button type="button" class="link" data-crm-kpi="todos">Quitar filtros</button>' : ''}</div>`;
+  const tabs = `<nav class="crm-tabs" aria-label="Programas">${[['', 'Todos', todas.length], ...LEAD_PROGS.map(([k, t, fs]) => [k, t, todas.filter((p) => tieneProg(p, [k, t, fs])).length])].map(([k, t, n]) => `<button type="button" data-crm-prog="${esc(k)}" aria-pressed="${(S.crmProg || '') === k}">${esc(t)}<span class="n">${n}</span></button>`).join('')}</nav>`;
+  const controles = `${kpis}${barra}${tabs}`;
   const tagsPills = (p) => p.tags.map((t) => `<span class="pill pres">${esc(t)}</span>`).join(' ');
 
   if (vista === 'tabla') {
@@ -589,7 +598,7 @@ V.interesadas = () => {
     <section class="card panel">${barra}<div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:32px"><input type="checkbox" data-lead-all aria-label="Seleccionar todas" ${lista.length && lista.every((p) => sel.has(p.id)) ? 'checked' : ''}></th><th>Persona</th><th>Programas</th><th>Origen</th><th>Registro</th><th>Cuenta y seguimiento</th><th>Etapa${prog ? ` en ${esc(prog[1])}` : ''}</th></tr></thead><tbody>
     ${lista.map((p) => { const trk = prog ? tracksEn(p, prog)[0] : null; return `<tr>
       <td><input type="checkbox" data-lead-sel="${esc(p.id)}" aria-label="Seleccionar a ${esc(p.nombre)}" ${sel.has(p.id) ? 'checked' : ''}></td>
-      <td><button class="link" data-lead-open="${esc(p.id)}" style="font-weight:700">${esc(p.nombre)}</button><br><span class="muted" style="font-size:.84rem">${contactoDe(p)}</span>${p.note ? `<br><span class="muted" style="font-size:.84rem">📝 ${esc(p.note.slice(0, 80))}${p.note.length > 80 ? '…' : ''}</span>` : ''}</td>
+      <td class="persona"><button class="link nom" data-lead-open="${esc(p.id)}">${esc(p.nombre)}</button><br><span class="muted" style="font-size:.84rem">${contactoDe(p)}</span>${p.note ? `<br><span class="muted" style="font-size:.84rem">📝 ${esc(p.note.slice(0, 80))}${p.note.length > 80 ? '…' : ''}</span>` : ''}</td>
       <td style="white-space:normal">${progPills(p)} ${tagsPills(p)}</td>
       <td class="muted" style="font-size:.84rem">${esc(leadOrigenTxt(p.leads[0]))}</td>
       <td class="muted" style="font-size:.84rem">${fdateMs(p.leads[0].createdAt)}</td>
@@ -610,7 +619,7 @@ V.interesadas = () => {
       <div class="kb-meta">${cuentaBadge(p)}${asistPersona(p)}${segBadge(p)}${tagsPills(p)}${otras}${p.whatsapp ? `<a class="btn btn-ghost btn-sm" href="${waLink(p.whatsapp)}" data-wa-open="${esc(waNum(p.whatsapp))}" data-wa-name="${esc(p.nombre)}">WhatsApp</a>` : ''}</div></article>`;
   };
   return `${head}${aviso}${controles}
-  <div class="filters"><button class="chip" data-crm-desc aria-pressed="${verDesc}">Mostrar descartadas (${lista.filter((p) => etapaVista(p) === 'descartado').length})</button><span class="muted" style="font-size:.82rem">${prog ? 'Arrastra una tarjeta a otra columna para cambiar su etapa en este programa. Toca una tarjeta para ver su ficha.' : 'Aquí cada persona aparece en su etapa más avanzada. Elige un programa arriba para mover las tarjetas, o abre una ficha para ver todos sus programas.'}</span></div>
+  <div class="crm-hint"><span>${prog ? 'Arrastra una tarjeta para cambiar su etapa. Toca una tarjeta para abrir su ficha.' : 'Cada persona aparece en su etapa más avanzada. Elige un programa para mover tarjetas.'}</span><button type="button" class="chip" data-crm-desc aria-pressed="${verDesc}">Mostrar descartadas (${lista.filter((p) => etapaVista(p) === 'descartado').length})</button></div>
   <div class="kb">${etapas.map(([k]) => { const col = lista.filter((p) => etapaVista(p) === k); return `<section class="kb-col" data-kb-col="${k}"><h4>${esc(etapaTxt(prog?.[0], k))} <span class="count">${col.length}</span></h4>${col.map(tarjeta).join('') || '<p class="muted" style="font-size:.82rem;margin:0">Nadie aquí.</p>'}</section>`; }).join('')}</div>`;
 };
 
@@ -796,7 +805,8 @@ function leadFicha(id) {
     <p class="muted" style="font-size:.78rem;margin:0">Las etapas, el seguimiento y las etiquetas se guardan al instante. Los datos de contacto se guardan con «Guardar cambios».</p>`;
 
   // ----- izquierda: persona, contacto editable, seguimiento, etiquetas
-  const izquierda = `<div class="ct-cab"><span class="av lg" style="--c:${colorFor(p.id)}">${esc(initials(p.nombre))}</span><div><h3>${esc(p.nombre)}</h3><div class="ct-badges">${cuentaBadge(p)} ${asistPersona(p)} ${segBadge(p)}<span class="pill lock">${esc(etapaTxt('', etapaDe(p)))}</span></div></div></div>
+  const izquierda = `<div class="ct-cab"><span class="av lg" style="--c:${colorFor(p.id)}">${esc(initials(p.nombre))}</span><div><h3>${esc(p.nombre)}</h3><span class="muted" style="font-size:.8rem">${esc(etapaTxt('', etapaDe(p)))}</span></div></div>
+    <div class="ct-badges" style="margin:0">${cuentaBadge(p)} ${asistPersona(p)} ${segBadge(p)}</div>
     <div class="ct-acc">${p.whatsapp ? '<button type="button" class="btn btn-primary btn-sm" data-ficha-tab="wa">WhatsApp</button>' : ''}${p.email ? `<a class="btn btn-ghost btn-sm" href="mailto:${esc(p.email)}">Correo</a>` : ''}</div>
     <form class="ct-form" id="ct-form">
       <label>Nombre<input data-ct="name" value="${esc(p.nombre)}" maxlength="120" autocomplete="off"></label>
@@ -1451,6 +1461,7 @@ document.addEventListener('click', async (e) => {
     toast('Eliminada.');
   } catch (err) { fail(err); b.disabled = false; }
 });
+document.addEventListener('click', (e) => { document.querySelectorAll('details.menu[open]').forEach((d) => { if (!d.contains(e.target)) d.removeAttribute('open'); }); });
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-copiar]'); if (b) navigator.clipboard?.writeText(b.dataset.copiar).then(() => toast('Copiado.')).catch(() => toast('No se pudo copiar.')); });
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-lead-alumna]'); if (b) { if ($('#dlg').open) $('#dlg').close(); openStudent(b.dataset.leadAlumna); } });
 document.addEventListener('click', (e) => { if (e.target.closest('[data-crm-hoy]')) { Object.assign(S, { crmSeg: true, crmProg: '', crmQ: '', crmOrigen: '', crmSinCuenta: false, crmEtapa: '', crmTag: '', crmVista: 'embudo' }); go('interesadas'); } });
@@ -1547,6 +1558,15 @@ function bind() {
       A._per = null; render(false); toast(`Etiqueta «${t}» agregada.`);
     } catch (e) { fail(e); b.disabled = false; }
   }));
+  document.querySelectorAll('[data-crm-kpi]').forEach((b) => (b.onclick = () => {
+    const k = b.dataset.crmKpi, prog = progDe(S.crmProg), primera = prog && esClase(prog[0]) ? 'registrada' : 'nuevo';
+    if (k === 'todos') Object.assign(S, { crmQ: '', crmOrigen: '', crmEtapa: '', crmTag: '', crmSeg: false, crmSinCuenta: false });
+    else if (k === 'nuevas') S.crmEtapa = S.crmEtapa === primera ? '' : primera;
+    else if (k === 'seg') S.crmSeg = !S.crmSeg;
+    else if (k === 'sin') S.crmSinCuenta = !S.crmSinCuenta;
+    render(false);
+  }));
+  document.querySelectorAll('.menu-lista button').forEach((b) => b.addEventListener('click', () => b.closest('details')?.removeAttribute('open')));
   document.querySelectorAll('[data-crm-preparar]').forEach((b) => (b.onclick = () => prepararContactos()));
   document.querySelectorAll('[data-crm-clasificar]').forEach((b) => (b.onclick = () => clasificarClase()));
   document.querySelectorAll('[data-env-clase]').forEach((b) => (b.onclick = () => { S.envClase = b.dataset.envClase; render(false); }));
