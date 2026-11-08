@@ -164,9 +164,14 @@ export async function POST(request) {
         if (!origen.exists) return json({ error: 'Esa persona ya no existe. Actualiza la lista.' }, 404);
         const o = origen.data();
         const ref = await refDe(firestore, body.form, o.email || '', o.whatsapp || '');
+        let creada = false;
+        const RANGO = { descartado: -1, nuevo: 0, contactado: 1, clase: 2, conversando: 3, inscrita: 4 };
         await firestore.runTransaction(async (tx) => {
           const snap = await tx.get(ref);
-          if (snap.exists) { tx.update(ref, { status: body.status, updatedAt: FieldValue.serverTimestamp() }); return; }
+          creada = false;
+          // Si ya estaba en ese programa, solo avanza de etapa (nunca la baja ni la pisa)
+          if (snap.exists) { if ((RANGO[body.status] ?? 0) > (RANGO[snap.data().status] ?? 0)) tx.update(ref, { status: body.status, updatedAt: FieldValue.serverTimestamp() }); return; }
+          creada = true;
           tx.set(ref, {
             form: body.form, name: o.name || '', email: o.email || '', whatsapp: o.whatsapp || '', country: o.country || '',
             interest: '', message: '', page: 'crm', utm: {}, status: body.status, desdeForm: o.form || '',
@@ -175,7 +180,7 @@ export async function POST(request) {
             createdAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp(),
           });
         });
-        return json({ ok: true, id: ref.id });
+        return json({ ok: true, id: ref.id, creada });
       }
       if (body.action === 'delete') {
         const ids = Array.isArray(body.ids) ? [...new Set(body.ids)] : [];

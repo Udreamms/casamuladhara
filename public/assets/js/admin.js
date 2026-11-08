@@ -38,7 +38,20 @@ const keyLevelName = (key) => { const lv = levelOfKey(key); if (!lv) return ''; 
 const CHANNELS = { general: 'General', presentaciones: 'Preséntate', n1: 'Nivel 1', n2: 'Nivel 2', n3: 'Nivel 3', n4: 'Nivel 4', n5: 'Nivel 5', testimonios: 'Testimonios' };
 
 let tt;
-function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(tt); tt = setTimeout(() => (t.hidden = true), 4200); }
+// Aviso abajo. Si hay una ventana abierta se muestra dentro de ella (si no, queda tapado). Con accion { label, fn } agrega un botón (p. ej. Deshacer).
+function toast(msg, accion) {
+  const t = $('#toast'), host = $('#dlg').open ? $('#dlg') : document.body;
+  if (t.parentElement !== host) host.appendChild(t);
+  t.textContent = msg;
+  if (accion) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.textContent = accion.label;
+    b.style.cssText = 'margin-left:12px;background:none;border:0;color:inherit;font:inherit;font-weight:700;text-decoration:underline;cursor:pointer';
+    b.onclick = () => { t.hidden = true; accion.fn(); };
+    t.append(b);
+  }
+  t.hidden = false; clearTimeout(tt); tt = setTimeout(() => (t.hidden = true), accion ? 10000 : 4200);
+}
 const fail = (e) => { console.error(e); toast(e?.message && !e.code ? e.message : 'No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.'); };
 
 // ---------- Regla de acceso (la misma que src/lib/server/access.js) ----------
@@ -164,6 +177,7 @@ const data = {
     });
     const out = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(out.error || 'No se pudieron cargar las interesadas.');
+    A._ultimo = out; // la última respuesta (p. ej. el id de lo que se acaba de crear)
     if (body.action === 'all') A.leads = out.leads;
     return A.leads;
   },
@@ -592,12 +606,12 @@ function pedirProgramasPago(p, opciones = {}) {
     const fin = (v) => { if (listo) return; listo = true; $('#dlg').removeEventListener('close', alCerrar); resolve(v); };
     dialog(`<span class="eyebrow">${opciones.etapa ? 'Pasar a un curso' : 'Inscrita'}</span><h3>${esc(p.nombre)}</h3>
     <p class="muted" style="font-size:.88rem;margin:6px 0 12px">${opciones.etapa ? '¿A qué programa pasa? Entra a su pipeline como «Interesada» y desde ahí tú la mueves.' : '¿A qué programa pago se inscribió? Se agrega a ese programa como inscrita.'} Es la misma persona, no se duplica. Si son varios, marca todos.</p>
-    <form id="pp-form" style="display:grid;gap:10px">${PROG_PAGOS.map(([k, t]) => `<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" name="pp" value="${k}"> ${esc(t)}${ya.has(k) ? ' <span class="muted">(ya está en este programa)</span>' : ''}</label>`).join('')}
+    <form id="pp-form" style="display:grid;gap:10px">${PROG_PAGOS.map(([k, t]) => `<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" name="pp" value="${k}" ${opciones.etapa && ya.has(k) ? 'disabled' : ''}> ${esc(t)}${ya.has(k) ? ' <span class="muted">(ya está en este programa)</span>' : ''}</label>`).join('')}
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary btn-sm">Confirmar</button>${opciones.etapa ? '' : '<button type="button" class="btn btn-ghost btn-sm" id="pp-skip">Marcar sin elegir programa</button>'}<button type="button" class="btn btn-ghost btn-sm" id="pp-no">Cancelar</button></div></form>`);
     $('#dlg').addEventListener('close', alCerrar);
     $('#pp-form').onsubmit = (e) => {
       e.preventDefault();
-      const v = [...document.querySelectorAll('#pp-form input[name=pp]:checked')].map((x) => x.value);
+      const v = [...document.querySelectorAll('#pp-form input[name=pp]:checked')].map((x) => x.value).filter(Boolean);
       if (!v.length) return toast(opciones.etapa ? 'Elige a qué programa pasa.' : 'Elige un programa, o usa «Marcar sin elegir programa».');
       const et = opciones.etapa ? 'nuevo' : 'inscrita'; // al pasar a un curso entra como Interesada; al marcarla inscrita, como Inscrita
       fin({ forms: v, etapa: et }); $('#dlg').close();
@@ -698,10 +712,15 @@ async function pasarACurso(l) {
   const p = personaDe(l.id), r = await pedirProgramasPago(p, { etapa: true });
   if (!r || !r.forms.length) return false;
   try {
-    for (const form of r.forms) await data.leads({ action: 'addProgram', fromId: l.id, form, status: r.etapa });
+    const creadas = [];
+    for (const form of r.forms) { await data.leads({ action: 'addProgram', fromId: l.id, form, status: r.etapa }); if (A._ultimo?.creada) creadas.push(A._ultimo.id); }
     if (r.etapa === 'inscrita' && l.status !== 'inscrita') await data.leads({ action: 'update', id: l.id, status: 'inscrita' });
     await data.leads({ action: 'all' }); A._per = null; paintNav(); render(false);
-    toast(`Pasó a ${r.forms.map((f) => PROG_AGREGAR.find(([k]) => k === f)?.[1] || f).join(' y ')} como interesada.`);
+    const nombres = r.forms.map((f) => PROG_AGREGAR.find(([k]) => k === f)?.[1] || f).join(' y ');
+    toast(`Pasó a ${nombres} como interesada.`, creadas.length ? {
+      label: 'Deshacer',
+      fn: async () => { try { await data.leads({ action: 'delete', ids: creadas }); A.leads = A.leads.filter((x) => !creadas.includes(x.id)); A._per = null; paintNav(); render(false); toast('Deshecho: ya no está en ese programa.'); } catch (e) { fail(e); } },
+    } : undefined);
     return true;
   } catch (e) { fail(e); return false; }
 }
@@ -740,10 +759,11 @@ function leadFicha(id) {
   const pasosDe = (l) => LEAD_STATES.filter(([k]) => k !== 'descartado' && !(esPago(l.form) && k === 'clase'));
   const tarjetaProg = (l) => {
     const pasos = pasosDe(l), act = leadEtapa(l), i = pasos.findIndex(([k]) => k === act);
-    return `<div class="pg"><div class="pg-top"><b>${esc(LEAD_FORMS[l.form] || l.form)}</b><button type="button" class="link" style="color:#b8402f;font-size:.78rem" data-trk-del="${esc(l.id)}">Quitar</button></div>
+    return `<div class="pg"><div class="pg-top"><b>${esc(LEAD_FORMS[l.form] || l.form)}</b></div>
       <span class="muted" style="font-size:.78rem">${fdateMs(l.createdAt)}${l.claseFecha ? ` · clase ${esc(fechaLarga(l.claseFecha))}` : ''}${l.desdeForm ? ' · agregado a mano' : ''}${act === 'descartado' && l.motivo ? ` · motivo: ${esc(l.motivo)}` : ''}</span>
       <div class="pasos" role="group" aria-label="Etapa en ${esc(LEAD_FORMS[l.form] || l.form)}">${pasos.map(([k], j) => `<button type="button" class="paso ${act === k ? 'on' : i > j ? 'hecha' : ''}" data-paso="${esc(l.id)}|${k}" aria-pressed="${act === k}">${esc(etapaTxt(l.form, k))}</button>`).join('')}<button type="button" class="paso descartar ${act === 'descartado' ? 'on' : ''}" data-paso="${esc(l.id)}|descartado" aria-pressed="${act === 'descartado'}">Descartada</button></div>
-      ${esClase(l.form) ? `<button type="button" class="btn btn-ghost btn-sm" data-pasar="${esc(l.id)}">Pasar a un curso →</button>` : ''}</div>`;
+      ${esClase(l.form) ? `<button type="button" class="btn btn-ghost btn-sm" data-pasar="${esc(l.id)}">Pasar a un curso →</button>` : ''}
+      <button type="button" class="btn btn-ghost btn-sm" style="color:#b8402f;border-color:#e3b8ae" data-trk-del="${esc(l.id)}" title="Borra solo este programa de la persona">${l.desdeForm ? '↩ Deshacer: no pasó a este programa' : '↩ Quitar de este programa'}</button></div>`;
   };
   const faltan = PROG_AGREGAR.filter(([f]) => !formas.has(f));
   const cuenta = p.alumna
@@ -802,7 +822,8 @@ function leadFicha(id) {
   document.querySelectorAll('#dlg [data-pasar]').forEach((b) => (b.onclick = async () => { const l = A.leads.find((x) => x.id === b.dataset.pasar); if (l) await pasarACurso(l); leadFicha(id); }));
   document.querySelectorAll('#dlg [data-trk-del]').forEach((b) => (b.onclick = async () => {
     const l = A.leads.find((x) => x.id === b.dataset.trkDel); if (!l) return;
-    if (!confirm(`¿Quitar a ${p.nombre} de ${LEAD_FORMS[l.form] || l.form}? Se borra ese registro y no se puede deshacer.${p.leads.length === 1 ? '\n\nEs su único programa: la persona se elimina de tu lista.' : ''}`)) return;
+    const resto = p.leads.filter((x) => x.id !== l.id).map((x) => LEAD_FORMS[x.form] || x.form);
+      if (!confirm(`¿Quitar a ${p.nombre} de ${LEAD_FORMS[l.form] || l.form}?\n\n${resto.length ? `Seguirá en: ${resto.join(', ')}.` : 'Es su único programa: la persona se elimina de tu lista.'}\n\nNo se puede deshacer.`)) return;
     try {
       await data.leads({ action: 'delete', ids: [l.id] }); A.leads = A.leads.filter((x) => x.id !== l.id); S.leadSel.delete(p.id); refrescar();
       if (p.leads.length > 1) leadFicha(p.leads.find((x) => x.id !== l.id).id); else $('#dlg').close();
