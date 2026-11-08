@@ -125,6 +125,9 @@ Cada persona que se inscribe a una clase recibe un **código personal** (12 cara
 | `vio_replay` | "Vio el replay" (no baja a quien ya asistió) |
 | `clic_comprar` | "Vio la oferta" + seguimiento para hoy en el CRM (tarea para Karen) |
 | `pago_confirmado` (`extra: { monto, moneda }`) | "Matriculada", sale de las secuencias de venta, se borra la tarea y queda inscrita en el curso |
+| `lista_espera` | Etapa «Lista de espera» (curso lleno), salvo que ya tenga cupo reservado o pagado |
+
+Cada `pago_confirmado` queda en el historial de pagos (`pagos`): así el CRM muestra «Cuotas pagadas 1/2 · 2/2» del Tarot. **Hay que enviar el evento en cada cuota pagada**, no solo en la primera.
 
 Estados (`estado`): `registrada, confirmada, entro, asistio_confirmado, vio_oferta, matriculada` y las alternativas `no_asistio, no_identificada, vio_replay, sin_respuesta, lista_espera`. Una etapa solo avanza con los eventos, nunca retrocede. Los tres niveles de asistencia (Entró, Autodeclarada, Asistió confirmado) se guardan por separado y no se mezclan.
 
@@ -140,3 +143,8 @@ Además de lo de siempre acepta `edad` y `consentimiento: { email: { aceptado, f
 
 ### Herramientas en el portal (Interesadas)
 **Preparar contactos** (crea código y enlaces a los registros de antes), **Clasificar una clase** (pega la lista de Meet: ve cómo quedaría y luego aplica) y **Envíos** (textos con variables `{{nombre}} {{enlace_entrada}} {{enlace_replay}} {{enlace_si}} {{enlace_no}} {{enlace_asistencia}} {{fecha_limite}}`, envío persona por persona y exportación para correo masivo).
+
+### Cupos, reserva del Péndulo y configuración por clase
+- **`GET /api/clases/estado?clase=pendulo|tarot`** (público, sin datos personales) → `{ "cupos_disponibles": 12, "lista_espera": false }`. `cupos_disponibles` es `null` si el curso no tiene límite; `lista_espera` es `true` cuando los cupos se llenaron y la lista de espera está activada. Lo leen las landings.
+- **`POST /api/embudo`** (sesión de la Maestra): `reserva` (Péndulo, $10.000 por WhatsApp: etapa «Reservó cupo», monto, fecha y saldo; con cupos llenos responde 409) y `saldo` (marca el saldo pagado y matricula).
+- **Clases y ofertas** (menú del portal): por clase, nombre, día y hora de la clase gratis, sala, replay, inicio, cierre (fecha y hora de Chile), precio, reserva o cuotas, cupos, lista de espera, palabra de asistencia con su ventana y texto de la oferta. Se guarda en `config/clases.ofertas`; lo vacío usa los valores de `OFERTAS` en `src/lib/server/embudo.js`. `configClases()` aplica los cambios a `OFERTAS` en cada petición, así las páginas del sitio los ven sin cambiar código.

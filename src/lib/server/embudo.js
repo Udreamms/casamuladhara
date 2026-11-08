@@ -25,7 +25,7 @@ export const ETAPA_TXT = {
   registrada: 'Registrada', confirmada: 'Confirmada', entro: 'Entró', asistio_confirmado: 'Asistió confirmado', vio_oferta: 'Vio la oferta', reservo_cupo: 'Reservó cupo', matriculada: 'Matriculada',
   no_asistio: 'No asistió', no_identificada: 'No identificada', vio_replay: 'Vio el replay', sin_respuesta: 'Sin respuesta', lista_espera: 'Lista de espera',
 };
-export const EVENTOS = ['clic_entrar', 'codigo_asistencia_ok', 'autodeclara_asistio', 'autodeclara_no_asistio', 'vio_replay', 'clic_comprar', 'pago_confirmado'];
+export const EVENTOS = ['clic_entrar', 'codigo_asistencia_ok', 'autodeclara_asistio', 'autodeclara_no_asistio', 'vio_replay', 'clic_comprar', 'pago_confirmado', 'lista_espera'];
 
 // Ofertas del curso de cada línea (hora de Chile). Son los valores de partida: la Maestra los cambia en /staff (Clases y ofertas),
 // se guardan en config/clases.ofertas y configClases() los aplica aquí. El código personal caduca 60 días después del cierre.
@@ -79,7 +79,8 @@ export async function configClases() {
     for (const n of ['precio', 'reserva', 'cuotas']) if (o[n] !== '' && o[n] != null && Number.isFinite(Number(o[n]))) dest[n] = Number(o[n]);
     if ('cupos' in o) dest.cupos = o.cupos === '' || o.cupos == null ? null : Number.isFinite(Number(o.cupos)) ? Number(o.cupos) : dest.cupos;
     if (typeof o.moneda === 'string' && /^[A-Z]{3}$/.test(o.moneda)) dest.moneda = o.moneda;
-    for (const n of ['nombre', 'texto']) if (typeof o[n] === 'string') dest[n] = o[n].slice(0, 1500);
+    if (typeof o.nombre === 'string' && o.nombre.trim()) dest.nombre = o.nombre.trim().slice(0, 80); // vacío = se queda el nombre de respaldo
+    if (typeof o.texto === 'string') dest.texto = o.texto.slice(0, 1500);
     for (const n of ['palabra', 'claseDia']) if (typeof o[n] === 'string') dest[n] = o[n].trim().slice(0, 40);
     if (HORA_OK.test(o.claseHora || '')) dest.claseHora = o.claseHora;
     for (const n of ['ventanaAntes', 'ventanaDespues']) if (o[n] !== '' && o[n] != null && Number.isFinite(Number(o[n])) && Number(o[n]) >= 0 && Number(o[n]) <= 240) dest[n] = Number(o[n]);
@@ -163,6 +164,9 @@ export async function registrarEvento({ codigo, evento, fechaIso, origen = '', e
       cambios.compraClicT = ts; subir('vio_oferta');
       const hoy = utcAChile(ahora).fecha;
       if (!l.followUp || l.followUp < hoy) { cambios.followUp = hoy; eventos.push(ev('seguimiento', 'Hizo clic en comprar y aún no paga: escribirle hoy')); }
+    } else if (evento === 'lista_espera') {
+      // Se anotó en la lista de espera (curso lleno): queda en esa etapa, salvo que ya tenga su lugar reservado o pagado
+      if ((RANGO[estado] ?? 0) < RANGO.reservo_cupo) estado = 'lista_espera';
     } else if (evento === 'pago_confirmado') {
       const monto = Number(extra?.monto), moneda = String(extra?.moneda || '').toUpperCase().slice(0, 3);
       cambios.pago = { t: ts, ...(Number.isFinite(monto) ? { monto } : {}), ...(moneda ? { moneda } : {}) };
