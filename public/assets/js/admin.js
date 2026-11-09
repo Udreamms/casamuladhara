@@ -960,7 +960,15 @@ const horaChile = () => Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Ame
 const diaChile = (ms) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Santiago' }).format(new Date(ms));
 
 // Segmentos para los mensajes: quienes asistieron (entraron o confirmaron), quienes no, y quienes dicen que estuvieron pero no se pudo identificar
-const SEGMENTOS = [['asistieron', 'Asistieron'], ['no_asistieron', 'No asistieron'], ['no_identificadas', 'No identificadas'], ['oferta', 'Vieron la oferta, sin respuesta'], ['todas', 'Todas (menos matriculadas)']];
+const SEGMENTOS = [['asistieron', 'Asistieron'], ['no_asistieron', 'No asistieron'], ['no_identificadas', 'No identificadas'], ['oferta', 'Vieron la oferta, sin respuesta'], ['estuvo', 'Estuvo (replay)'], ['no_pudo', 'No pudo entrar (replay)'], ['sin_dato', 'Sin dato (replay)'], ['todas', 'Todas (menos matriculadas)']];
+// Los mismos tres grupos que usa la página del replay para decidir su titular (src/lib/server/replay.js, segmentoDe). Si allá cambia, cambiar aquí.
+const segReplay = (l) => (l.asistencia?.entro || l.asistencia?.confirmada || l.asistencia?.autodeclarada === 'si' || ['entro', 'asistio_confirmado', 'clase', 'inscrita', 'matriculada'].includes(l.status) || ['entro', 'asistio_confirmado', 'matriculada'].includes(leadEtapa(l)) ? 'estuvo'
+  : l.asistencia?.autodeclarada === 'no' || l.status === 'no_asistio' || leadEtapa(l) === 'no_asistio' ? 'no_pudo' : 'sin_dato');
+// Textos de ejemplo para esos grupos (se usan mientras no guardes uno propio)
+const TEXTO_EJEMPLO = {
+  no_pudo: 'Hola {{nombre}}, sabemos que no pudiste entrar a la clase. Te dejo la grabación completa: {{enlace_replay}}',
+  estuvo: 'Gracias por estar en la clase, {{nombre}}. Aquí tienes la grabación para repasarla: {{enlace_replay}}',
+};
 const asistioL = (l) => !!(l.asistencia?.entro || l.asistencia?.confirmada) || ['entro', 'asistio_confirmado'].includes(leadEtapa(l));
 const segmentoDe = (l) => (asistioL(l) ? 'asistieron' : leadEtapa(l) === 'no_identificada' || l.asistencia?.autodeclarada === 'si' ? 'no_identificadas' : 'no_asistieron');
 // Quién no debe recibir mensajes de venta: ya compró, se descartó, pidió que no le escribamos, o rechazó el consentimiento
@@ -974,6 +982,8 @@ const variablesDe = (l) => {
     enlace_entrada: l.enlace_entrada || '', enlace_replay: l.enlace_replay || '',
     enlace_si: base && l.codigo ? `${base}/confirmar?l=${l.codigo}&r=si` : '', enlace_no: base && l.codigo ? `${base}/confirmar?l=${l.codigo}&r=no` : '',
     enlace_asistencia: base && l.codigo ? `${base}/asistencia?l=${l.codigo}` : '',
+    enlace_gracias: base && l.codigo ? `${base}/clase-${claseDeL(l) || 'pendulo'}/gracias?l=${l.codigo}` : '',
+    enlace_calendario: base && l.codigo ? `${base}/calendario?l=${l.codigo}` : '',
   };
 };
 const rellenar = (texto, l) => { const v = variablesDe(l); return String(texto || '').replace(/\{\{\s*(\w+)\s*\}\}/g, (m, k) => (k in v ? v[k] : m)); };
@@ -982,7 +992,7 @@ V.envios = () => {
   const head = `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>Envíos de la clase</h1><p>Escribe el texto una vez y envíalo persona por persona, con su enlace personal ya puesto. Cada envío queda anotado en su historial.</p></div></div>`;
   if (!A.leads || !A.plantillas) return `${head}<div class="card empty">Cargando…</div>`;
   const clase = S.envClase || 'pendulo', seg = S.envSeg || 'asistieron', clave = `${clase}_${seg}`;
-  const texto = A.plantillas[clave] || '';
+  const texto = textoEnvio(clase, seg), esEjemplo = !A.plantillas[clave] && !!TEXTO_EJEMPLO[seg];
   const chip = (attr, v, t, on) => `<button class="chip" ${attr}="${esc(v)}" aria-pressed="${on}">${t}</button>`;
   const todos = A.leads.filter((l) => l.form === `clase-${clase}`), porId = new Map(personas().flatMap((p) => p.leads.map((l) => [l.id, p])));
   const enSeg = todos.filter((l) => enSegmento(l, seg, porId.get(l.id)));
@@ -1004,9 +1014,9 @@ V.envios = () => {
   <div class="filters">${chip('data-env-clase', 'pendulo', 'Péndulo Hebreo', clase === 'pendulo')}${chip('data-env-clase', 'tarot', 'Tarot Terapéutico', clase === 'tarot')}</div>
   <div class="filters">${SEGMENTOS.map(([k, t]) => chip('data-env-seg', k, `${t} (${todos.filter((l) => enSegmento(l, k, porId.get(l.id)) && !excluidaDeEnvio(l, porId.get(l.id))).length})`, seg === k)).join('')}</div>
   <section class="card panel"><h3>Texto para: ${esc(SEGMENTOS.find(([k]) => k === seg)[1].toLowerCase())}</h3>
-    <p class="muted" style="font-size:.84rem;margin:0">Variables: <code>{{nombre}}</code> <code>{{clase}}</code> <code>{{enlace_entrada}}</code> <code>{{enlace_replay}}</code> <code>{{enlace_si}}</code> <code>{{enlace_no}}</code> <code>{{enlace_asistencia}}</code> <code>{{fecha_limite}}</code>. Cada una se reemplaza con los datos de la persona.</p>
+    <p class="muted" style="font-size:.84rem;margin:0">Variables: <code>{{nombre}}</code> <code>{{clase}}</code> <code>{{enlace_entrada}}</code> <code>{{enlace_replay}}</code> <code>{{enlace_si}}</code> <code>{{enlace_no}}</code> <code>{{enlace_asistencia}}</code> <code>{{enlace_gracias}}</code> <code>{{enlace_calendario}}</code> <code>{{fecha_limite}}</code>. Cada una se reemplaza con los datos de la persona.</p>
     <textarea id="env-texto" rows="7" maxlength="3000" placeholder="Hola {{nombre}}, te dejo el replay de la clase: {{enlace_replay}}&#10;&#10;La inscripción cierra el {{fecha_limite}}.&#10;¿Estuviste en la clase? Sí: {{enlace_si}} · No pude entrar: {{enlace_no}}" aria-label="Texto del mensaje">${esc(texto)}</textarea>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn btn-primary btn-sm" data-env-guardar>Guardar texto</button><span class="muted" style="font-size:.8rem">Se guarda para esta clase y este grupo.</span></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn btn-primary btn-sm" data-env-guardar>Guardar texto</button><span class="muted" style="font-size:.8rem">${esEjemplo ? 'Es un texto de ejemplo: edítalo si quieres y guárdalo para dejarlo fijo.' : 'Se guarda para esta clase y este grupo.'}</span></div>
     ${ejemplo ? `<div class="card" style="padding:12px 14px;font-size:.86rem;white-space:pre-wrap"><b style="display:block;margin-bottom:4px">Así le llegaría a ${esc(aEnviar[0].l.name.split(' ')[0])}:</b>${esc(ejemplo)}</div>` : ''}</section>
   <section class="card panel"><div class="panel-h"><h3>${aEnviar.length} persona${aEnviar.length === 1 ? '' : 's'} para escribir</h3><button class="btn btn-ghost btn-sm" data-env-csv>Exportar para correo masivo</button></div>
     ${sinCodigo ? `<p style="font-size:.84rem;color:#b8402f;margin:0"><b>${sinCodigo}</b> no tienen código personal todavía: usa «Preparar contactos» en Interesadas.</p>` : ''}
@@ -1018,18 +1028,20 @@ data.plantillas = async () => { A.plantillas = (await getDoc(doc(db, 'config', '
 async function envioMarcar(l, canal) {
   const clave = `${S.envClase || 'pendulo'}_${S.envSeg || 'asistieron'}`;
   try {
-    await data.leads({ action: 'enviado', ids: [l.id], canal, plantilla: clave });
+    const lleva = /\{\{\s*enlace_replay\s*\}\}/.test(textoEnvio(S.envClase || 'pendulo', S.envSeg || 'asistieron'));
+    await data.leads({ action: 'enviado', ids: [l.id], canal, plantilla: clave, ...(lleva ? { replay: true } : {}) });
+    if (lleva) l.replayEnviadoT = Date.now();
     l.ultimoEnvio = { ...(l.ultimoEnvio || {}), [canal]: Date.now() };
     l.eventos = [...(l.eventos || []), { t: Date.now(), tipo: 'envio', texto: `Mensaje por ${canal}: ${clave}` }];
     render(false);
   } catch (e) { fail(e); }
 }
 function exportarEnvioCsv() {
-  const clase = S.envClase || 'pendulo', seg = S.envSeg || 'asistieron', texto = (A.plantillas || {})[`${clase}_${seg}`] || '';
+  const clase = S.envClase || 'pendulo', seg = S.envSeg || 'asistieron', texto = textoEnvio(clase, seg);
   const porId = new Map(personas().flatMap((p) => p.leads.map((l) => [l.id, p])));
   const lista = A.leads.filter((l) => l.form === `clase-${clase}` && enSegmento(l, seg, porId.get(l.id)) && !excluidaDeEnvio(l, porId.get(l.id)));
-  const cab = ['Nombre', 'Correo', 'WhatsApp', 'nombre', 'enlace_entrada', 'enlace_replay', 'enlace_si', 'enlace_no', 'enlace_asistencia', 'fecha_limite', 'Mensaje'];
-  const fila = (l) => { const v = variablesDe(l); return [l.name, l.email, l.whatsapp, v.nombre, v.enlace_entrada, v.enlace_replay, v.enlace_si, v.enlace_no, v.enlace_asistencia, v.fecha_limite, rellenar(texto, l)]; };
+  const cab = ['Nombre', 'Correo', 'WhatsApp', 'nombre', 'enlace_entrada', 'enlace_replay', 'enlace_si', 'enlace_no', 'enlace_asistencia', 'enlace_gracias', 'enlace_calendario', 'fecha_limite', 'Mensaje'];
+  const fila = (l) => { const v = variablesDe(l); return [l.name, l.email, l.whatsapp, v.nombre, v.enlace_entrada, v.enlace_replay, v.enlace_si, v.enlace_no, v.enlace_asistencia, v.enlace_gracias, v.enlace_calendario, v.fecha_limite, rellenar(texto, l)]; };
   const celda = (x) => { let t = String(x ?? ''); if (/^[=@]|^[+\-](?![\d\s])/.test(t)) t = `'${t}`; return `"${t.replace(/"/g, '""')}"`; };
   const csv = `﻿${[cab, ...lista.map(fila)].map((r) => r.map(celda).join(',')).join('\r\n')}`;
   const a = document.createElement('a');
@@ -1150,6 +1162,7 @@ const pagoBadges = (l) => {
   if (l.reservaPagada) b.push(`<span class="pill pres" title="Reserva pagada por WhatsApp">Reserva ${clp(l.reservaMonto)}</span>`);
   if (l.reservaPagada && !pagoHecho(l)) b.push(`<span class="pill bad" title="Debe pagarse antes de la primera clase">Saldo ${clp(Math.max(0, ofertaDe('pendulo').precio - (l.reservaMonto || 0)))}</span>`);
   if (claseDeL(l) === 'tarot' && ((l.pagos || []).length || l.pago)) { const t = ofertaDe('tarot').cuotas || 2, n = Math.min(t, (l.pagos || []).length || 1); b.push(`<span class="pill ${n >= t ? 'done' : 'pres'}" title="Cuotas pagadas del Tarot">Cuotas ${n}/${t}</span>`); }
+  if (l.cobroFallido) b.push('<span class="pill bad" title="Un cobro falló: escribirle hoy">Cobro fallido</span>');
   return b.join(' ');
 };
 const pagoPersona = (p) => p.leads.filter((l) => esClase(l.form)).map(pagoBadges).filter(Boolean).join(' ');
@@ -1162,9 +1175,11 @@ const bloquePago = (l) => {
   const origen = pagoHecho(l) || l.reservaPagada ? `<span class="muted" style="font-size:.76rem">Origen: ${esc(origenMatricula(l))}</span>` : '';
   if (clase === 'tarot') {
     const pagos = l.pagos?.length ? l.pagos : l.pago ? [l.pago] : [], t = o.cuotas || 2, n = Math.min(t, pagos.length);
-    if (!pagos.length) return clic ? `<div class="pg-pago">${clic}</div>` : '';
-    return `<div class="pg-pago"><b>Cuotas pagadas</b><div style="display:flex;gap:6px;flex-wrap:wrap">${Array.from({ length: t }, (_, i) => `<span class="pill ${i < n ? 'done' : 'lock'}">${i + 1}/${t} ${i < n ? '✓' : 'pendiente'}</span>`).join(' ')}</div>
-      <span class="muted" style="font-size:.78rem">${pagos.slice(0, t).map((x) => `${esc(dinero(x.monto, (x.moneda || '').toUpperCase()))} el ${esc(fechaCorta(x.t))}`).join(' · ')}</span>${origen}</div>`;
+    const fallo = l.cobroFallido ? `<div class="alert" style="margin:0"><div><b>Cobro fallido: escribirle hoy</b><p>El ${esc(fechaCorta(l.cobroFallido.t))}${l.cobroFallido.monto ? ` no se pudo cobrar ${esc(dinero(l.cobroFallido.monto, (l.cobroFallido.moneda || '').toUpperCase()))}` : ' falló un cobro'}. Sigue matriculada.</p></div></div>` : '';
+    if (!pagos.length) return clic || fallo ? `<div class="pg-pago">${fallo}${clic}</div>` : '';
+    const sig = n < t && pagos[0]?.t ? (() => { const d = new Date(pagos[0].t); d.setMonth(d.getMonth() + 1); return d.getTime(); })() : 0;
+    return `<div class="pg-pago">${fallo}<b>Cuotas pagadas ${n}/${t}</b><div style="display:flex;gap:6px;flex-wrap:wrap">${Array.from({ length: t }, (_, i) => `<span class="pill ${i < n ? 'done' : 'lock'}">${i + 1}/${t} ${i < n ? '✓' : 'pendiente'}</span>`).join(' ')}</div>
+      <span class="muted" style="font-size:.78rem">${pagos.slice(0, t).map((x) => `${esc(dinero(x.monto, (x.moneda || '').toUpperCase()))} el ${esc(fechaCorta(x.t))}`).join(' · ')}${sig ? ` · la siguiente se cobra un mes después (hacia el ${esc(fechaCorta(sig))})` : ''}</span>${origen}</div>`;
   }
   const reserva = l.reservaPagada ? Number(l.reservaMonto) || 0 : 0, saldo = Math.max(0, o.precio - reserva);
   if (pagoHecho(l)) return `<div class="pg-pago"><b>Matrícula pagada completa</b><span style="font-size:.86rem">${esc(dinero(o.precio, o.moneda))}${l.reservaPagada ? ` (reserva ${esc(clp(reserva))} + saldo ${esc(clp(saldo))})` : ''}</span>${origen}</div>`;
@@ -1195,11 +1210,12 @@ const ofertasPorCerrar = () => ['pendulo', 'tarot'].map((clase) => {
   const filas = personas().flatMap((p) => p.leads.filter((l) => claseDeL(l) === clase && vioOfertaSinRespuesta(l, p)).map((l) => ({ p, l })));
   return { clase, horas: Math.ceil(ms / 36e5), filas };
 }).filter(Boolean);
-const ofertaBanner = () => ofertasPorCerrar().map((o) => `<div class="alert"><div><b>La oferta del ${esc(ofertaDe(o.clase).nombre)} cierra en ${o.horas} hora${o.horas === 1 ? '' : 's'}</b><p>${o.filas.length ? `${o.filas.length} persona${o.filas.length === 1 ? '' : 's'} vieron la oferta y no han respondido.` : 'Todas las que vieron la oferta ya respondieron.'}</p></div>${o.filas.length ? `<span style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-crm-lista="oferta:${o.clase}">Ver lista</button><button class="btn" data-env-ir="${o.clase}">Escribirles</button></span>` : ''}</div>`).join('');
+const ofertaBanner = () => ofertasPorCerrar().map((o) => `<div class="alert"><div><b>La oferta del ${esc(ofertaDe(o.clase).nombre)} cierra en ${o.horas} hora${o.horas === 1 ? '' : 's'}</b><p>${o.filas.length ? `${o.filas.length} persona${o.filas.length === 1 ? '' : 's'} vieron la oferta y no han respondido.` : 'Todas las que vieron la oferta ya respondieron.'}</p></div>${o.filas.length ? `<span style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-crm-lista="oferta:${o.clase}">Ver lista</button><button class="btn" data-env-ir="${o.clase}">Escribirles</button></span>` : ''}</div>`).join('') + avisosSeguimiento();
 
 // ----- Lista de seguimiento: clic en inscribirme sin pago, o vio la oferta sin responder
 const listaMatricula = () => {
   const modo = S.crmLista || '', clase = modo.startsWith('oferta:') ? modo.split(':')[1] : '';
+  if (modo === 'replay' || modo === 'fallido') return listaSeguimiento(modo);
   const filas = clase
     ? personas().flatMap((p) => p.leads.filter((l) => claseDeL(l) === clase && vioOfertaSinRespuesta(l, p)).map((l) => ({ p, l }))).sort((a, b) => (b.l.compraClicT || b.l.replayT || 0) - (a.l.compraClicT || a.l.replayT || 0))
     : filasClic();
@@ -1217,6 +1233,31 @@ const listaMatricula = () => {
     <section class="card panel"><div class="panel-h"><h3>${titulo} (${filas.length})</h3></div>
     <p class="muted" style="font-size:.82rem;margin:0">El botón de WhatsApp abre la conversación con el mensaje ya escrito; lo revisas antes de enviar.</p>
     <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Persona</th><th>Curso</th><th>Qué hizo</th><th>Hace</th><th>Estado</th><th></th></tr></thead><tbody>${filas.map(fila).join('') || '<tr><td colspan="6" class="muted">No hay nadie en esta lista.</td></tr>'}</tbody></table></div></section>`;
+};
+
+// ----- Seguimiento: «No abrió el replay» (24 h o más después de enviárselo) y «Cobro fallido» (cuota del Tarot que no se pudo cobrar)
+const replaySinAbrir = (l, p) => esClase(l.form) && !!l.replayEnviadoT && Date.now() - l.replayEnviadoT >= 24 * 36e5 && !l.replayT && leadEtapa(l) !== 'vio_replay'
+  && !pagoHecho(l) && !l.reservaPagada && !['descartado', 'reservo_cupo', 'lista_espera'].includes(leadEtapa(l)) && !(p?.tags || []).includes('No contactar') && !(l.seguimientoReplayT > l.replayEnviadoT);
+const filasReplay = () => personas().flatMap((p) => p.leads.filter((l) => replaySinAbrir(l, p)).map((l) => ({ p, l }))).sort((a, b) => a.l.replayEnviadoT - b.l.replayEnviadoT);
+const filasFallidas = () => personas().flatMap((p) => p.leads.filter((l) => esClase(l.form) && l.cobroFallido).map((l) => ({ p, l }))).sort((a, b) => b.l.cobroFallido.t - a.l.cobroFallido.t);
+const avisosSeguimiento = () => {
+  const r = filasReplay().length, f = filasFallidas().length;
+  return [f ? `<div class="alert"><div><b>${f} cobro${f === 1 ? '' : 's'} fallido${f === 1 ? '' : 's'}</b><p>Cobro fallido: escribirle hoy. La persona sigue matriculada; solo hay que ayudarle con el pago.</p></div><button class="btn" data-crm-lista="fallido">Ver lista</button></div>` : '', r ? `<div class="alert"><div><b>${r} persona${r === 1 ? '' : 's'} no abrieron el replay</b><p>Ya se lo enviaste hace 24 horas o más y no lo han visto. Pregúntales: «¿Pudiste ver la clase?».</p></div><button class="btn" data-crm-lista="replay">Ver lista</button></div>` : ''].join('');
+};
+const listaSeguimiento = (modo) => {
+  const replay = modo === 'replay', filas = replay ? filasReplay() : filasFallidas();
+  const msj = (p, l) => (replay ? `Hola ${String(p.nombre).split(' ')[0]}, ¿pudiste ver la clase?` : `Hola ${String(p.nombre).split(' ')[0]}, vi que no se pudo cobrar tu cuota del curso de ${ofertaDe(claseDeL(l)).nombre}. ¿Te ayudo a revisarlo?`);
+  const fila = ({ p, l }) => { const t = replay ? l.replayEnviadoT : l.cobroFallido.t, n = waNum(p.whatsapp), h = Math.floor((Date.now() - t) / 36e5);
+    const que = replay ? 'Se le envió el replay y no lo ha abierto' : `Cobro fallido${l.cobroFallido.monto ? `: ${dinero(l.cobroFallido.monto, (l.cobroFallido.moneda || '').toUpperCase())}` : ''}`;
+    return `<tr><td class="persona"><button class="link nom" data-lead-open="${esc(p.id)}">${esc(p.nombre)}</button><br><span class="muted" style="font-size:.84rem">${contactoDe(p)}</span></td>
+      <td>${esc(ofertaDe(claseDeL(l)).nombre)}</td><td class="muted" style="font-size:.84rem">${esc(que)}<br>${esc(fechaCorta(t))}</td>
+      <td><b>${h < 48 ? h : Math.floor(h / 24)}</b> <span class="muted" style="font-size:.8rem">${h < 48 ? 'horas' : 'días'}</span></td>
+      <td>${esc(etapaTxt(l.form, leadEtapa(l)))} ${pagoBadges(l)}</td>
+      <td style="text-align:right;white-space:nowrap">${n ? `<a class="btn btn-primary btn-sm" href="https://wa.me/${n}?text=${encodeURIComponent(msj(p, l))}" target="_blank" rel="noopener" ${replay ? `data-seg-replay="${esc(l.id)}"` : ''}>WhatsApp</a>` : '<span class="muted">sin WhatsApp</span>'}</td></tr>`; };
+  return `<div class="crm-hint"><button type="button" class="link" data-crm-lista="">← Volver al CRM</button></div>
+    <section class="card panel"><div class="panel-h"><h3>${replay ? 'No abrieron el replay' : 'Cobro fallido: escribirles hoy'} (${filas.length})</h3></div>
+    <p class="muted" style="font-size:.82rem;margin:0">${replay ? 'Ya se les envió el replay hace 24 horas o más y no hay registro de que lo hayan visto. Al abrir WhatsApp salen de esta lista.' : 'No cambia su etapa (siguen Matriculadas). El aviso se quita solo cuando se confirma un pago nuevo.'}</p>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Persona</th><th>Curso</th><th>Qué pasó</th><th>Hace</th><th>Estado</th><th></th></tr></thead><tbody>${filas.map(fila).join('') || '<tr><td colspan="6" class="muted">No hay nadie en esta lista.</td></tr>'}</tbody></table></div></section>`;
 };
 
 // ----- Origen de cada matrícula (en Métricas)
@@ -1274,7 +1315,9 @@ async function guardarClases(form) {
   try { await data.saveClases(d); render(false); toast('Clases y ofertas guardadas.'); } catch (e) { fail(e); }
 }
 
-const enSegmento = (l, k, p) => k === 'todas' || (k === 'oferta' ? vioOfertaSinRespuesta(l, p) : segmentoDe(l) === k);
+const enSegmento = (l, k, p) => k === 'todas' || (k === 'oferta' ? vioOfertaSinRespuesta(l, p) : ['estuvo', 'no_pudo', 'sin_dato'].includes(k) ? segReplay(l) === k : segmentoDe(l) === k);
+// Texto de un grupo: el guardado, o el de ejemplo mientras no haya uno guardado
+const textoEnvio = (clase, seg) => (A.plantillas || {})[`${clase}_${seg}`] || TEXTO_EJEMPLO[seg] || '';
 // ---------- Inicio: lo importante del día a mano ----------
 V.inicio = () => {
   const hoy = ymd(hoyCL()), nombre = (A.me?.displayName || '').split(' ')[0] || 'Karen';
@@ -1778,6 +1821,10 @@ function bind() {
   }));
   document.querySelectorAll('.menu-lista button').forEach((b) => b.addEventListener('click', () => b.closest('details')?.removeAttribute('open')));
   document.querySelectorAll('[data-crm-lista]').forEach((b) => (b.onclick = () => { S.crmLista = b.dataset.crmLista; go('interesadas'); }));
+  document.querySelectorAll('[data-seg-replay]').forEach((a) => (a.onclick = () => {
+    const l = A.leads.find((x) => x.id === a.dataset.segReplay); if (!l) return;
+    data.leads({ action: 'enviado', ids: [l.id], canal: 'whatsapp', plantilla: 'replay_seguimiento', seguimiento: 'replay' }).then(() => { l.seguimientoReplayT = Date.now(); l.ultimoEnvio = { ...(l.ultimoEnvio || {}), whatsapp: Date.now() }; render(false); }).catch(fail);
+  }));
   document.querySelectorAll('[data-env-ir]').forEach((b) => (b.onclick = () => { S.envClase = b.dataset.envIr; S.envSeg = 'oferta'; go('envios'); }));
   document.querySelectorAll('[data-clic-orden]').forEach((b) => (b.onclick = () => { S.clicOrden = b.dataset.clicOrden; render(false); }));
   const cf = $('#cfg-form'); if (cf) cf.onsubmit = (e) => { e.preventDefault(); guardarClases(cf); };
@@ -1800,7 +1847,7 @@ function bind() {
   document.querySelectorAll('[data-env-mail]').forEach(envCanal('email'));
   document.querySelectorAll('[data-env-copy]').forEach((b) => (b.onclick = () => {
     const l = A.leads.find((x) => x.id === b.dataset.envCopy); if (!l) return;
-    const texto = rellenar((A.plantillas || {})[`${S.envClase || 'pendulo'}_${S.envSeg || 'asistieron'}`], l);
+    const texto = rellenar(textoEnvio(S.envClase || 'pendulo', S.envSeg || 'asistieron'), l);
     navigator.clipboard?.writeText(texto).then(() => toast('Mensaje copiado.')).catch(() => toast('No se pudo copiar.'));
   }));
   document.querySelectorAll('[data-crm-sincuenta]').forEach((b) => (b.onclick = () => { S.crmSinCuenta = !S.crmSinCuenta; render(false); }));

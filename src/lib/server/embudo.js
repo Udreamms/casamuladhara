@@ -25,7 +25,7 @@ export const ETAPA_TXT = {
   registrada: 'Registrada', confirmada: 'Confirmada', entro: 'Entró', asistio_confirmado: 'Asistió confirmado', vio_oferta: 'Vio la oferta', reservo_cupo: 'Reservó cupo', matriculada: 'Matriculada',
   no_asistio: 'No asistió', no_identificada: 'No identificada', vio_replay: 'Vio el replay', sin_respuesta: 'Sin respuesta', lista_espera: 'Lista de espera',
 };
-export const EVENTOS = ['clic_entrar', 'codigo_asistencia_ok', 'autodeclara_asistio', 'autodeclara_no_asistio', 'vio_replay', 'clic_comprar', 'pago_confirmado', 'lista_espera'];
+export const EVENTOS = ['clic_entrar', 'codigo_asistencia_ok', 'autodeclara_asistio', 'autodeclara_no_asistio', 'vio_replay', 'clic_comprar', 'pago_confirmado', 'pago_fallido', 'lista_espera'];
 
 // Ofertas del curso de cada línea (hora de Chile). Son los valores de partida: la Maestra los cambia en /staff (Clases y ofertas),
 // se guardan en config/clases.ofertas y configClases() los aplica aquí. El código personal caduca 60 días después del cierre.
@@ -171,8 +171,14 @@ export async function registrarEvento({ codigo, evento, fechaIso, origen = '', e
       const monto = Number(extra?.monto), moneda = String(extra?.moneda || '').toUpperCase().slice(0, 3);
       cambios.pago = { t: ts, ...(Number.isFinite(monto) ? { monto } : {}), ...(moneda ? { moneda } : {}) };
       cambios.pagos = FieldValue.arrayUnion({ t: ts, ...(Number.isFinite(monto) ? { monto } : {}), ...(moneda ? { moneda } : {}) }); // historial: sirve para «cuotas pagadas 1/2 · 2/2»
-      estado = 'matriculada'; cambios.secuenciasVenta = false; cambios.followUp = '';
+      estado = 'matriculada'; cambios.secuenciasVenta = false; cambios.followUp = ''; cambios.cobroFallido = FieldValue.delete(); // un pago nuevo resuelve el aviso de cobro fallido
       eventos.push(ev('etapa', `Pago confirmado${Number.isFinite(monto) ? `: ${monto} ${moneda}` : ''}`));
+    } else if (evento === 'pago_fallido') {
+      // Un cobro (por ejemplo la 2.ª cuota del Tarot) falló: NO cambia la etapa; solo deja el aviso y un seguimiento para hoy
+      const monto = Number(extra?.monto), moneda = String(extra?.moneda || '').toUpperCase().slice(0, 3);
+      cambios.cobroFallido = { t: ts, ...(Number.isFinite(monto) ? { monto } : {}), ...(moneda ? { moneda } : {}) };
+      cambios.followUp = utcAChile(ahora).fecha;
+      eventos.push(ev('seguimiento', `Cobro fallido${Number.isFinite(monto) ? ` (${monto} ${moneda})` : ''}: escribirle hoy`));
     }
     if (estado !== l.status) { cambios.status = estado; eventos.push(ev('etapa', `Etapa: ${ETAPA_TXT[estado] || estado}`)); }
     tx.update(ref, { ...cambios, ...(Object.keys(asist).length ? { asistencia: asist } : {}), [`evtUltimo.${evento}`]: ahora, eventos: FieldValue.arrayUnion(...eventos), updatedAt: FieldValue.serverTimestamp() });

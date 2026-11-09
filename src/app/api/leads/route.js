@@ -146,7 +146,9 @@ export async function POST(request) {
         if (!canal || !ids.length || ids.length > 50 || ids.some((id) => typeof id !== 'string' || !ID.test(id))) return json({ error: 'Datos no válidos.' }, 400);
         const plantilla = str(body.plantilla, 60);
         const lote = db().batch();
-        ids.forEach((id) => lote.update(db().doc(`leads/${id}`), { [`ultimoEnvio.${canal}`]: Date.now(), eventos: FieldValue.arrayUnion(ev('envio', `Mensaje por ${canal}${plantilla ? `: ${plantilla}` : ''}`)), updatedAt: FieldValue.serverTimestamp() }));
+        // replay:true = el mensaje llevaba el enlace del replay (para el seguimiento «No abrió el replay»); seguimiento:'replay' = ya se le preguntó si lo vio
+        const marca = { ...(body.replay === true ? { replayEnviadoT: Date.now() } : {}), ...(body.seguimiento === 'replay' ? { seguimientoReplayT: Date.now() } : {}) };
+        ids.forEach((id) => lote.update(db().doc(`leads/${id}`), { ...marca, [`ultimoEnvio.${canal}`]: Date.now(), eventos: FieldValue.arrayUnion(ev('envio', `Mensaje por ${canal}${plantilla ? `: ${plantilla}` : ''}`)), updatedAt: FieldValue.serverTimestamp() }));
         try { await lote.commit(); } catch (e) {
           if (e.code === 5 || /NOT_FOUND/.test(String(e.message))) return json({ error: 'Esa persona ya no existe. Actualiza la lista.' }, 404);
           throw e;
@@ -217,7 +219,8 @@ export async function POST(request) {
         const noAsist = [], noIdent = [];
         cand.forEach((l) => {
           if (marcadas.has(l.id) || yaAsistio(l)) return;
-          if (l.asistencia?.autodeclarada === 'si') { if (['registrada', 'nuevo', 'contactado', 'confirmada', 'no_asistio'].includes(l.status)) noIdent.push(l); } else if (['registrada', 'nuevo', 'contactado', 'confirmada'].includes(l.status)) noAsist.push(l);
+          // Quien no entró queda "No asistió" (la página del replay le muestra «sabemos que no pudiste entrar»); "No identificada" es solo para quien dice que estuvo.
+          if (l.asistencia?.autodeclarada === 'si') { if (['registrada', 'nuevo', 'contactado', 'confirmada', 'no_asistio'].includes(l.status)) noIdent.push(l); } else if (['registrada', 'nuevo', 'contactado', 'confirmada', 'no_identificada', 'sin_respuesta'].includes(l.status)) noAsist.push(l);
         });
         const nombres = (arr) => arr.map((l) => ({ id: l.id, nombre: l.name }));
         const informe = { total: cand.length, marcadas: nombres([...marcadas.values()]), noAsistio: nombres(noAsist), noIdentificada: nombres(noIdent), sinMatch };

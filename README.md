@@ -125,6 +125,7 @@ Cada persona que se inscribe a una clase recibe un **código personal** (12 cara
 | `vio_replay` | "Vio el replay" (no baja a quien ya asistió) |
 | `clic_comprar` | "Vio la oferta" + seguimiento para hoy en el CRM (tarea para Karen) |
 | `pago_confirmado` (`extra: { monto, moneda }`) | "Matriculada", sale de las secuencias de venta, se borra la tarea y queda inscrita en el curso |
+| `pago_fallido` (`extra: { monto, moneda }`) | **No cambia la etapa** (sigue Matriculada). Deja el aviso «Cobro fallido: escribirle hoy» y una tarea para hoy; el siguiente `pago_confirmado` lo quita |
 | `lista_espera` | Etapa «Lista de espera» (curso lleno), salvo que ya tenga cupo reservado o pagado |
 
 Cada `pago_confirmado` queda en el historial de pagos (`pagos`): así el CRM muestra «Cuotas pagadas 1/2 · 2/2» del Tarot. **Hay que enviar el evento en cada cuota pagada**, no solo en la primera.
