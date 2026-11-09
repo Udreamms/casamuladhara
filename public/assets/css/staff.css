@@ -425,3 +425,5 @@ details.menu>summary::-webkit-details-marker{display:none}
 .cfg-f input,.cfg-f select,.cfg-f textarea{width:100%}
 .cfg-chk{display:flex;align-items:center;gap:8px;align-self:end}
 .cfg-chk input{width:auto}
+
+.cfg-f{align-content:start}
