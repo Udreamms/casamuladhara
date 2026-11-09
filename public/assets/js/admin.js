@@ -573,8 +573,8 @@ V.interesadas = () => {
       <button type="button" data-crm-preparar title="Crea el código personal y los enlaces de cada contacto">Preparar contactos</button><button type="button" data-crm-clasificar>Clasificar una clase</button><button type="button" data-crm-csv>Exportar a Excel</button>
       ${A.leads && repetidasPorLimpiar().length ? `<button type="button" data-leads-dedup>Limpiar repetidas (${repetidasPorLimpiar().length})</button>` : ''}<button type="button" data-leads-reload>Actualizar la lista</button></div></details></div></div>`;
   if (!A.leads) return `${head}<div class="card empty">Cargando interesadas…</div>`;
-  const sinLink = [['enlacePendulo', 'Péndulo'], ['enlaceTarot', 'Tarot'], ['enlaceTerapias', 'terapias online']].filter(([k]) => !A.clases?.[k]).map(([, n]) => n);
-  const aviso = sinLink.length ? `<div class="card" style="padding:12px 14px;font-size:.88rem;border-left:4px solid #b8402f"><b>Falta el enlace de Google Meet de ${sinLink.join(', ')}.</b> Mientras no esté, quienes se registren no ven el botón para entrar. Cárgalo en <button class="link" data-go="ajustes">Ajustes del aula</button>.</div>` : '';
+  const sinLink = [['enlaceTerapias', 'terapias online']].filter(([k]) => !A.clases?.[k]).map(([, n]) => n);
+  const aviso = sinLink.length ? `<div class="card" style="padding:12px 14px;font-size:.88rem;border-left:4px solid #b8402f"><b>Falta el enlace de Google Meet de ${sinLink.join(', ')}.</b> Cárgalo en <button class="link" data-go="ajustes">Ajustes del aula</button>.</div>` : '';
   const prog = progDe(S.crmProg), lista = personasFiltradas(), vista = S.crmVista === 'metricas' && !FUNC.metricas ? 'embudo' : S.crmVista || 'embudo', todas = personas();
   const chip = (attr, v, t, on) => `<button class="chip" ${attr}="${esc(v)}" aria-pressed="${on}">${t}</button>`;
   const seg = (attr, items, actual) => `<div class="seg" role="group">${items.map(([v, t]) => `<button type="button" ${attr}="${v}" aria-pressed="${actual === v}">${t}</button>`).join('')}</div>`;
@@ -714,8 +714,8 @@ async function leadMover(id, status) {
 
 // Respuestas rápidas del chat: se escriben en el cuadro para que Karen las ajuste antes de enviar
 const RESPUESTAS = [
-  ['Link de la clase', (c) => `Hola ${c.nombre}, te dejo el link de tu clase gratis de ${c.programa}${c.fecha ? ` (${c.fecha})` : ''}: ${c.link || '[falta el link]'}. ¡Te espero!`],
-  ['Recordatorio de la clase', (c) => `Hola ${c.nombre}, te recuerdo tu clase gratis de ${c.programa}${c.fecha ? `: ${c.fecha}` : ''}. Entra por aquí: ${c.link || '[falta el link]'}`],
+  ['Link de la clase', (c) => `Hola ${c.nombre}, te dejo el link de tu clase gratis de ${c.programa}${c.fecha ? ` (${c.fecha})` : ''}: ${c.link || '[falta su enlace personal: usa «Preparar contactos»]'}. ¡Te espero!`],
+  ['Recordatorio de la clase', (c) => `Hola ${c.nombre}, te recuerdo tu clase gratis de ${c.programa}${c.fecha ? `: ${c.fecha}` : ''}. Entra por aquí: ${c.link || '[falta su enlace personal: usa «Preparar contactos»]'}`],
   ['Después de la clase', (c) => `Hola ${c.nombre}, ¿cómo te fue en la clase de ${c.programa}? Me encantaría saber qué te pareció y resolver tus dudas.`],
   ['Contarle del curso', (c) => `Hola ${c.nombre}, si te gustó la clase, puedo contarte cómo funciona el curso y cómo inscribirte. ¿Te parece?`],
 ];
@@ -726,7 +726,7 @@ const ctxRespuesta = (p) => {
     nombre: String(p.nombre || '').split(' ')[0],
     programa: (LEAD_FORMS[trk?.form] || 'Casa Muladhara').replace('Clase gratis ', ''),
     fecha: trk?.claseFecha ? `${fechaLarga(trk.claseFecha)}${evt?.time ? ` a las ${evt.time} (hora de Chile)` : ''}` : '',
-    link: trk && esClase(trk.form) ? A.clases?.[trk.form === 'clase-pendulo' ? 'enlacePendulo' : 'enlaceTarot'] || '' : '',
+    link: trk && esClase(trk.form) ? trk.enlace_entrada || '' : '', // solo el enlace personal /entrar/<codigo>, nunca el de Meet
   };
 };
 
@@ -1344,10 +1344,9 @@ V.clases = () => {
   const head = '<div class="crm-head"><div><span class="eyebrow">CRM</span><h1>Clases y ofertas</h1></div></div><p class="muted" style="max-width:46em;margin:0">Lo que dejes vacío usa el valor de respaldo (el que aparece en gris). Los cambios se aplican en todo el sitio: páginas del replay, avisos, cupos y el CRM.</p>';
   const c = (clase) => {
     const b = OFERTA_UI[clase], o = A.clases?.ofertas?.[clase] || {}, f = (k, etq, tipo, ph, extra = '', val = o[k]) => `<label class="cfg-f"><b>${etq}</b><input data-cfg="${clase}.${k}" type="${tipo}" value="${esc(val ?? '')}" placeholder="${esc(ph ?? '')}" ${extra}>${tipo === 'date' || tipo === 'time' ? `<small class="muted" style="font-weight:400">Si está vacío se usa: ${esc(ph)}</small>` : ''}</label>`;
-    const sala = clase === 'pendulo' ? A.clases?.enlacePendulo : A.clases?.enlaceTarot, replay = clase === 'pendulo' ? A.clases?.replayPendulo : A.clases?.replayTarot, videoG = clase === 'pendulo' ? A.clases?.videoGraciasPendulo : A.clases?.videoGraciasTarot;
+    const replay = clase === 'pendulo' ? A.clases?.replayPendulo : A.clases?.replayTarot, videoG = clase === 'pendulo' ? A.clases?.videoGraciasPendulo : A.clases?.videoGraciasTarot;
     return `<section class="card panel"><h3>${esc(b.nombre)}</h3>
       <div class="cfg-g">${f('nombre', 'Nombre del curso', 'text', b.nombre)}${f('claseDia', 'Día de la clase gratis', 'text', b.claseDia)}${f('claseHora', 'Hora de la clase gratis (Chile)', 'time', b.claseHora)}
-        <label class="cfg-f"><b>Sala de la clase (Google Meet)</b><input data-cfg="${clase}.sala" type="url" value="${esc(sala || '')}" placeholder="https://meet.google.com/…"></label>
         <label class="cfg-f"><b>Enlace del replay</b><input data-cfg="${clase}.replay" type="url" value="${esc(replay || '')}" placeholder="https://youtu.be/…"></label>
         <label class="cfg-f"><b>Video de bienvenida de Karen (página de gracias)</b><input data-cfg="${clase}.videoGracias" type="url" value="${esc(videoG || '')}" placeholder="https://youtu.be/… o https://vimeo.com/…"><small class="muted" style="font-weight:400">Se muestra en /clase-${clase}/gracias. YouTube o Vimeo, con https.</small></label>
         ${f('inicio', 'Inicio del curso', 'date', b.inicio)}${f('cierreFecha', 'Cierre de inscripción: fecha', 'date', b.cierre[0])}${f('cierreHora', 'Cierre: hora (Chile)', 'time', b.cierre[1])}
@@ -1368,7 +1367,7 @@ async function guardarClases(form) {
   for (const clase of ['pendulo', 'tarot']) {
     const x = { ...(v[clase] || {}) }, o = {}, previo = A.clases?.ofertas?.[clase] || {};
     for (const k of ['reserva', 'cuotas', 'cupos', 'listaEspera']) if (!(k in x)) x[k] = previo[k] ?? (k === 'listaEspera' ? undefined : ''); // campo oculto: no se pisa lo guardado
-    for (const k of ['sala', 'replay']) if (x[k] && !isHttps(x[k])) return toast('Los enlaces deben empezar con https://');
+    for (const k of ['replay']) if (x[k] && !isHttps(x[k])) return toast('Los enlaces deben empezar con https://');
     if (x.videoGracias && !/^https:\/\/(www\.|m\.)?(youtube\.com|youtu\.be|vimeo\.com|player\.vimeo\.com)\/\S+$/i.test(x.videoGracias)) return toast('El video de bienvenida debe ser un enlace de YouTube o Vimeo con https://');
     if (!!x.cierreFecha !== !!x.cierreHora) return toast('El cierre necesita fecha y hora.');
     // Los campos vacíos se guardan vacíos: así se puede volver al valor de respaldo
@@ -1379,7 +1378,7 @@ async function guardarClases(form) {
     o.moneda = x.moneda; if (typeof x.listaEspera === 'boolean') o.listaEspera = x.listaEspera;
     ofertas[clase] = o;
   }
-  const d = { ofertas, enlacePendulo: v.pendulo?.sala || '', enlaceTarot: v.tarot?.sala || '', replayPendulo: v.pendulo?.replay || '', replayTarot: v.tarot?.replay || '', videoGraciasPendulo: v.pendulo?.videoGracias || '', videoGraciasTarot: v.tarot?.videoGracias || '' };
+  const d = { ofertas, replayPendulo: v.pendulo?.replay || '', replayTarot: v.tarot?.replay || '', videoGraciasPendulo: v.pendulo?.videoGracias || '', videoGraciasTarot: v.tarot?.videoGracias || '' };
   try { await data.saveClases(d); render(false); toast('Clases y ofertas guardadas.'); } catch (e) { fail(e); }
 }
 
@@ -1662,8 +1661,7 @@ V.calendario = () => {
 const claseInscritas = (v) => {
   if (!v.id || !['clase-pendulo', 'clase-tarot'].includes(v.type)) return '';
   const lista = (A.leads || []).filter((l) => l.claseEvento === v.id);
-  const enlace = A.clases?.[v.type === 'clase-pendulo' ? 'enlacePendulo' : 'enlaceTarot'] || '';
-  const texto = (l) => `Hola ${String(l.name || '').split(' ')[0]}, te recuerdo tu clase gratis de ${v.type === 'clase-pendulo' ? 'Péndulo Hebreo' : 'Tarot Terapéutico'}: ${fechaLarga(v.date)}${v.time ? ` a las ${v.time} (hora de Chile)` : ''}. ${enlace ? `Entra por Google Meet: ${enlace}` : ''} ¡Te espero!`;
+  const texto = (l) => `Hola ${String(l.name || '').split(' ')[0]}, te recuerdo tu clase gratis de ${v.type === 'clase-pendulo' ? 'Péndulo Hebreo' : 'Tarot Terapéutico'}: ${fechaLarga(v.date)}${v.time ? ` a las ${v.time} (hora de Chile)` : ''}. ${l.enlace_entrada ? `Entra con tu enlace personal: ${l.enlace_entrada}` : ''} ¡Te espero!`;
   const fila = (l) => `<tr><td><input type="checkbox" data-asist="${esc(l.id)}" aria-label="Marcar que ${esc(l.name)} entró"></td><td><b>${esc(l.name)}</b>${l.country ? `<br><span class="muted">${esc(l.country)}</span>` : ''}</td><td>${l.whatsapp ? `<a href="${waLink(l.whatsapp)}" data-wa-open="${esc(waNum(l.whatsapp))}" data-wa-name="${esc(l.name)}">${esc(l.whatsapp)}</a>` : ''}</td><td>${l.email ? `<a href="mailto:${esc(l.email)}?subject=${encodeURIComponent('Tu clase gratis · Casa Muladhara')}&body=${encodeURIComponent(texto(l))}">${esc(l.email)}</a>` : ''}</td><td style="text-align:right"><button type="button" class="link" style="color:#b8402f" data-insc-del="${esc(l.id)}">Eliminar</button></td></tr>`;
   return `<div class="card full" style="padding:12px 14px;display:grid;gap:8px;font-size:.84rem"><b>Inscritas a esta clase: ${lista.length}</b>${lista.length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:28px"><input type="checkbox" data-asist-all aria-label="Marcar todas"></th><th>Persona</th><th>WhatsApp</th><th>Correo</th><th></th></tr></thead><tbody>${lista.map(fila).join('')}</tbody></table></div><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button type="button" class="btn btn-primary btn-sm" data-asist-go="${esc(v.id)}">Marcar como «Asistió confirmado»</button><span class="muted">Marca a quienes estuvieron en la clase; pasan a «Asistió confirmado» en el CRM.</span></div>` : '<span class="muted">Todavía nadie se registró para esta fecha.</span>'}${enlace ? '' : '<span style="color:#b8402f;font-weight:700">Falta el enlace de Google Meet de esta clase en Ajustes del aula.</span>'}</div>`;
 };
@@ -1762,8 +1760,8 @@ V.ajustes = () => `<div class="view-head"><div><span class="eyebrow">Portal de l
   <section class="card panel"><h3>Video de bienvenida</h3><p class="muted" style="margin:0;font-size:.88rem">Lo ven las cuentas gratis en Inicio. Pega el enlace de YouTube, Vimeo o Google Drive. Déjalo vacío para mostrar "Muy pronto".</p>
     <form id="wv-form" style="display:flex;gap:8px;flex-wrap:wrap"><input type="url" id="wv-url" placeholder="https://" value="${esc(A.config.welcomeVideo || '')}" style="flex:1;min-width:220px"><button class="btn btn-primary btn-sm">Guardar</button></form></section>
   <section class="card panel"><h3>Formación: próximo grupo</h3><p class="muted" style="margin:0;font-size:.88rem">La portada y la página /formacion muestran la fecha más cercana de tipo "Inicio de un grupo de formación" que tengas en el Calendario, con "cupos limitados". Cuando la fecha pasa, dejan de mostrarla solas.</p><button class="btn btn-ghost btn-sm" style="justify-self:start" data-go="calendario">Abrir el calendario</button></section>
-  <section class="card panel"><h3>Google Meet: clases gratis y terapias online</h3><p class="muted" style="margin:0;font-size:.88rem">Al reservar su lugar, la persona ve un botón para entrar a la clase con este enlace. Déjalo vacío para mostrar "Te enviamos el enlace por WhatsApp".</p>
-    <form id="cl-form" style="display:grid;gap:10px"><label style="display:grid;gap:6px;font-size:.84rem"><b>Enlace de Google Meet · clase de Péndulo (sábados)</b><input type="url" id="cl-pendulo" placeholder="https://meet.google.com/abc-defg-hij" value="${esc(A.clases?.enlacePendulo || '')}"></label><label style="display:grid;gap:6px;font-size:.84rem"><b>Enlace de Google Meet · clase de Tarot (martes)</b><input type="url" id="cl-tarot" placeholder="https://meet.google.com/abc-defg-hij" value="${esc(A.clases?.enlaceTarot || '')}"></label><label style="display:grid;gap:6px;font-size:.84rem"><b>Enlace de Google Meet · terapias online</b><input type="url" id="cl-terapias" placeholder="https://meet.google.com/abc-defg-hij" value="${esc(A.clases?.enlaceTerapias || '')}"></label><button class="btn btn-primary btn-sm" style="justify-self:start">Guardar</button></form></section>
+  <section class="card panel"><h3>Google Meet: terapias online</h3><p class="muted" style="margin:0;font-size:.88rem">Las clases gratis ya no usan un enlace de Meet en el portal: cada persona entra con su enlace personal (/entrar/código).</p>
+    <form id="cl-form" style="display:grid;gap:10px"><label style="display:grid;gap:6px;font-size:.84rem"><b>Enlace de Google Meet · terapias online</b><input type="url" id="cl-terapias" placeholder="https://meet.google.com/abc-defg-hij" value="${esc(A.clases?.enlaceTerapias || '')}"></label><button class="btn btn-primary btn-sm" style="justify-self:start">Guardar</button></form></section>
   <section class="card panel"><h3>Cursos: próximo inicio</h3><p class="muted" style="margin:0;font-size:.88rem">Las páginas /pendulo y /tarot muestran la fecha más cercana que tengas en el Calendario como "Curso Péndulo Hebreo Nivel 1" o "Grupo de Tarot Terapéutico".</p><button class="btn btn-ghost btn-sm" style="justify-self:start" data-go="calendario">Abrir el calendario</button></section>
   <section class="card panel"><h3>Clases en vivo</h3><p class="muted" style="margin:0;font-size:.88rem">Las clases en vivo y sus grabaciones se programan dentro de cada clase del aula, donde ves el contenido.</p><a class="btn btn-ghost btn-sm" style="justify-self:start" href="/aula">Ir al aula</a></section>`;
 
@@ -2057,9 +2055,9 @@ function bind() {
 
   const cl = $('#cl-form'); if (cl) cl.onsubmit = async (e) => {
     e.preventDefault();
-    const enlacePendulo = $('#cl-pendulo').value.trim(), enlaceTarot = $('#cl-tarot').value.trim(), enlaceTerapias = $('#cl-terapias').value.trim();
-    if ([enlacePendulo, enlaceTarot, enlaceTerapias].some((u) => u && !isHttps(u))) return toast('Los enlaces deben empezar con https://');
-    try { await data.saveClases({ enlacePendulo, enlaceTarot, enlaceTerapias }); toast('Enlaces de Google Meet guardados'); } catch (err) { fail(err); }
+    const enlaceTerapias = $('#cl-terapias').value.trim();
+    if (enlaceTerapias && !isHttps(enlaceTerapias)) return toast('Los enlaces deben empezar con https://');
+    try { await data.saveClases({ enlaceTerapias }); toast('Enlace de terapias guardado'); } catch (err) { fail(err); }
   };
 }
 const papi = (uid) => profileApi(uid);
