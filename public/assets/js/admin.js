@@ -1236,11 +1236,12 @@ V.clases = () => {
   const head = '<div class="crm-head"><div><span class="eyebrow">CRM</span><h1>Clases y ofertas</h1></div></div><p class="muted" style="max-width:46em;margin:0">Lo que dejes vacío usa el valor de respaldo (el que aparece en gris). Los cambios se aplican en todo el sitio: páginas del replay, avisos, cupos y el CRM.</p>';
   const c = (clase) => {
     const b = OFERTA_UI[clase], o = A.clases?.ofertas?.[clase] || {}, f = (k, etq, tipo, ph, extra = '', val = o[k]) => `<label class="cfg-f"><b>${etq}</b><input data-cfg="${clase}.${k}" type="${tipo}" value="${esc(val ?? '')}" placeholder="${esc(ph ?? '')}" ${extra}>${tipo === 'date' || tipo === 'time' ? `<small class="muted" style="font-weight:400">Si está vacío se usa: ${esc(ph)}</small>` : ''}</label>`;
-    const sala = clase === 'pendulo' ? A.clases?.enlacePendulo : A.clases?.enlaceTarot, replay = clase === 'pendulo' ? A.clases?.replayPendulo : A.clases?.replayTarot;
+    const sala = clase === 'pendulo' ? A.clases?.enlacePendulo : A.clases?.enlaceTarot, replay = clase === 'pendulo' ? A.clases?.replayPendulo : A.clases?.replayTarot, videoG = clase === 'pendulo' ? A.clases?.videoGraciasPendulo : A.clases?.videoGraciasTarot;
     return `<section class="card panel"><h3>${esc(b.nombre)}</h3>
       <div class="cfg-g">${f('nombre', 'Nombre del curso', 'text', b.nombre)}${f('claseDia', 'Día de la clase gratis', 'text', b.claseDia)}${f('claseHora', 'Hora de la clase gratis (Chile)', 'time', b.claseHora)}
         <label class="cfg-f"><b>Sala de la clase (Google Meet)</b><input data-cfg="${clase}.sala" type="url" value="${esc(sala || '')}" placeholder="https://meet.google.com/…"></label>
         <label class="cfg-f"><b>Enlace del replay</b><input data-cfg="${clase}.replay" type="url" value="${esc(replay || '')}" placeholder="https://youtu.be/…"></label>
+        <label class="cfg-f"><b>Video de bienvenida de Karen (página de gracias)</b><input data-cfg="${clase}.videoGracias" type="url" value="${esc(videoG || '')}" placeholder="https://youtu.be/… o https://vimeo.com/…"><small class="muted" style="font-weight:400">Se muestra en /clase-${clase}/gracias. YouTube o Vimeo, con https.</small></label>
         ${f('inicio', 'Inicio del curso', 'date', b.inicio)}${f('cierreFecha', 'Cierre de inscripción: fecha', 'date', b.cierre[0])}${f('cierreHora', 'Cierre: hora (Chile)', 'time', b.cierre[1])}
         ${f('precio', `Precio (${b.moneda})`, 'number', String(b.precio), 'min="0" step="any"')}
         <label class="cfg-f"><b>Moneda</b><select data-cfg="${clase}.moneda">${['CLP', 'USD'].map((m) => `<option ${(o.moneda || b.moneda) === m ? 'selected' : ''}>${m}</option>`).join('')}</select></label>
@@ -1259,6 +1260,7 @@ async function guardarClases(form) {
   for (const clase of ['pendulo', 'tarot']) {
     const x = v[clase] || {}, o = {};
     for (const k of ['sala', 'replay']) if (x[k] && !isHttps(x[k])) return toast('Los enlaces deben empezar con https://');
+    if (x.videoGracias && !/^https:\/\/(www\.|m\.)?(youtube\.com|youtu\.be|vimeo\.com|player\.vimeo\.com)\/\S+$/i.test(x.videoGracias)) return toast('El video de bienvenida debe ser un enlace de YouTube o Vimeo con https://');
     if (!!x.cierreFecha !== !!x.cierreHora) return toast('El cierre necesita fecha y hora.');
     // Los campos vacíos se guardan vacíos: así se puede volver al valor de respaldo
     for (const k of ['nombre', 'claseDia', 'texto', 'palabra', 'claseHora', 'inicio', 'cierreFecha', 'cierreHora']) o[k] = x[k] || '';
@@ -1268,7 +1270,7 @@ async function guardarClases(form) {
     o.moneda = x.moneda; o.listaEspera = !!x.listaEspera;
     ofertas[clase] = o;
   }
-  const d = { ofertas, enlacePendulo: v.pendulo?.sala || '', enlaceTarot: v.tarot?.sala || '', replayPendulo: v.pendulo?.replay || '', replayTarot: v.tarot?.replay || '' };
+  const d = { ofertas, enlacePendulo: v.pendulo?.sala || '', enlaceTarot: v.tarot?.sala || '', replayPendulo: v.pendulo?.replay || '', replayTarot: v.tarot?.replay || '', videoGraciasPendulo: v.pendulo?.videoGracias || '', videoGraciasTarot: v.tarot?.videoGracias || '' };
   try { await data.saveClases(d); render(false); toast('Clases y ofertas guardadas.'); } catch (e) { fail(e); }
 }
 
