@@ -383,14 +383,14 @@ const ETAPAS_CLASE = [['registrada', 'Registrada'], ['confirmada', 'Confirmada']
   ['no_asistio', 'No asistió'], ['no_identificada', 'No identificada'], ['vio_replay', 'Vio el replay'], ['sin_respuesta', 'Sin respuesta'], ['lista_espera', 'Lista de espera']];
 const PASOS_CLASE = ETAPAS_CLASE.slice(0, 7).map(([k]) => k);
 // La reserva por WhatsApp es solo del Péndulo: en el Tarot no existe la etapa «Reservó cupo»
-const etapasOcultas = () => [...(FUNC.reserva ? [] : ['reservo_cupo']), ...(FUNC.listaEspera ? [] : ['lista_espera'])];
+const etapasOcultas = () => [...(FUNC.reserva ? [] : ['reservo_cupo']), ...(FUNC.listaEspera ? [] : ['lista_espera']), ...(FUNC.autodeclaracion ? [] : ['no_identificada'])];
 const etapasClaseDe = (form) => ETAPAS_CLASE.filter(([k]) => !etapasOcultas().includes(k) && (form !== 'clase-tarot' || k !== 'reservo_cupo'));
 // Quien ya estaba en una etapa oculta se ve en la etapa visible más cercana (el dato no se toca)
-const etapaVisible = (k) => (k === 'reservo_cupo' && !FUNC.reserva ? 'vio_oferta' : k === 'lista_espera' && !FUNC.listaEspera ? 'registrada' : k);
+const etapaVisible = (k) => (k === 'reservo_cupo' && !FUNC.reserva ? 'vio_oferta' : k === 'lista_espera' && !FUNC.listaEspera ? 'registrada' : k === 'no_identificada' && !FUNC.autodeclaracion ? 'no_asistio' : k);
 const ETAPA_NOMBRE = Object.fromEntries([...LEAD_STATES, ...ETAPAS_CLASE]);
 // ALCANCE CONGELADO: funciones ocultas con bandera apagada (el código sigue aquí, no se borró). Para volver a mostrar una, ponla en true.
 // El servidor tiene sus propias banderas para reserva y lista de espera (FUNCIONES en src/lib/server/embudo.js): deben coincidir.
-const FUNC = { fichaCompleta: false, etiquetas: false, tareas: false, metricas: false, deshacer: false, reserva: false, cuotas: false, listaEspera: false };
+const FUNC = { autodeclaracion: false, palabraAsistencia: false, fichaCompleta: false, etiquetas: false, tareas: false, metricas: false, deshacer: false, reserva: false, cuotas: false, listaEspera: false };
 const RANGO_ETAPA = { descartado: -1, nuevo: 0, registrada: 0, lista_espera: 0, contactado: 1, confirmada: 1, sin_respuesta: 1, no_asistio: 1, no_identificada: 1, entro: 2, vio_replay: 2, clase: 3, asistio_confirmado: 3, conversando: 4, vio_oferta: 4, reservo_cupo: 4.5, inscrita: 5, matriculada: 5 };
 // En una clase gratis, las etapas de antes se leen como las del embudo nuevo
 const CLASE_ANTIGUA = { nuevo: 'registrada', contactado: 'confirmada', clase: 'asistio_confirmado', conversando: 'vio_oferta', inscrita: 'matriculada' };
@@ -516,7 +516,7 @@ const cuentaBadge = (p) => {
 const asistBadges = (l) => { const a = l.asistencia || {}; return [
   a.confirmada ? '<span class="pill done" title="Escribió el código de asistencia o aparece en el informe de Meet">Asistió confirmado</span>' : '',
   a.entro ? '<span class="pill pres" title="Hizo clic en el enlace de entrada durante la clase">Entró</span>' : '',
-  a.autodeclarada ? `<span class="pill lock" title="Lo dijo ella en el mensaje; no está verificado">Autodeclarada: ${a.autodeclarada === 'si' ? 'sí' : 'no'}</span>` : ''].filter(Boolean).join(' '); };
+  FUNC.autodeclaracion && a.autodeclarada ? `<span class="pill lock" title="Lo dijo ella en el mensaje; no está verificado">Autodeclarada: ${a.autodeclarada === 'si' ? 'sí' : 'no'}</span>` : ''].filter(Boolean).join(' '); };
 const asistPersona = (p) => p.leads.filter((l) => esClase(l.form)).map(asistBadges).filter(Boolean).join(' ');
 const segBadge = (p) => (FUNC.tareas && p.followUp ? `<span class="pill ${seguimientoHoyP(p) ? 'bad' : 'lock'}" title="Próximo seguimiento">${seguimientoHoyP(p) ? 'Seguimiento hoy' : `Seguir ${fechaLarga(p.followUp)}`}</span>` : '');
 const progPills = (p) => `${p.leads.map((l) => `<span class="pill lock" title="${esc(LEAD_FORMS[l.form] || l.form)}">${esc(PROG_CORTO[l.form] || l.form)} · ${esc(etapaTxt(l.form, leadEtapa(l)))}</span>`).join(' ')}${formacionPagada(p) && !p.leads.some((l) => l.form === 'formacion') ? ' <span class="pill done">Formación · Inscrita</span>' : ''}`;
@@ -573,8 +573,8 @@ V.interesadas = () => {
       <button type="button" data-crm-preparar title="Crea el código personal y los enlaces de cada contacto">Preparar contactos</button><button type="button" data-crm-clasificar>Clasificar una clase</button><button type="button" data-crm-csv>Exportar a Excel</button>
       ${A.leads && repetidasPorLimpiar().length ? `<button type="button" data-leads-dedup>Limpiar repetidas (${repetidasPorLimpiar().length})</button>` : ''}<button type="button" data-leads-reload>Actualizar la lista</button></div></details></div></div>`;
   if (!A.leads) return `${head}<div class="card empty">Cargando interesadas…</div>`;
-  const sinLink = [['enlaceTerapias', 'terapias online']].filter(([k]) => !A.clases?.[k]).map(([, n]) => n);
-  const aviso = sinLink.length ? `<div class="card" style="padding:12px 14px;font-size:.88rem;border-left:4px solid #b8402f"><b>Falta el enlace de Google Meet de ${sinLink.join(', ')}.</b> Cárgalo en <button class="link" data-go="ajustes">Ajustes del aula</button>.</div>` : '';
+  const sinLink = [['enlacePendulo', 'Péndulo'], ['enlaceTarot', 'Tarot'], ['enlaceTerapias', 'terapias online']].filter(([k]) => !A.clases?.[k]).map(([, n]) => n);
+  const aviso = sinLink.length ? `<div class="card" style="padding:12px 14px;font-size:.88rem;border-left:4px solid #b8402f"><b>Falta el enlace de Google Meet de ${sinLink.join(', ')}.</b> Sin él, el enlace personal de la clase no tiene a dónde llevar. Cárgalo en <button class="link" data-go="clases">Clases y ofertas</button> (Péndulo y Tarot) o en <button class="link" data-go="ajustes">Ajustes del aula</button> (terapias).</div>` : '';
   const prog = progDe(S.crmProg), lista = personasFiltradas(), vista = S.crmVista === 'metricas' && !FUNC.metricas ? 'embudo' : S.crmVista || 'embudo', todas = personas();
   const chip = (attr, v, t, on) => `<button class="chip" ${attr}="${esc(v)}" aria-pressed="${on}">${t}</button>`;
   const seg = (attr, items, actual) => `<div class="seg" role="group">${items.map(([v, t]) => `<button type="button" ${attr}="${v}" aria-pressed="${actual === v}">${t}</button>`).join('')}</div>`;
@@ -772,7 +772,7 @@ function leadFichaSimple(id) {
   const ids = p.leads.map((l) => l.id), refrescar = () => { A._per = null; paintNav(); render(false); };
   const fila = (ok, txt, t) => `<li style="display:flex;gap:8px;align-items:center"><span class="pill ${ok ? 'done' : 'lock'}" style="min-width:2.4rem;text-align:center">${ok ? 'Sí' : 'No'}</span><span>${txt}</span>${ok && t ? `<span class="muted" style="font-size:.78rem">${esc(fechaCorta(t))}</span>` : ''}</li>`;
   const registro = (l) => { const a = l.asistencia || {}, e = leadEtapa(l);
-    return `<ul class="reg" style="list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:.88rem">${fila(!!a.entro, 'Entró a la clase', a.entro)}${fila(!!a.confirmada, 'Asistió confirmado', a.confirmada)}${fila(a.autodeclarada === 'si', `Asistencia autodeclarada${a.autodeclarada === 'no' ? ' (dijo que no pudo entrar)' : ''}`, a.autodeclaradaT)}${fila(!!l.replayT || e === 'vio_replay', 'Vio el replay', l.replayT)}${fila(!!l.compraClicT, 'Hizo clic en comprar', l.compraClicT)}${fila(esInscrita(e) || !!l.pago?.t, 'Matriculada', l.pago?.t)}</ul>`; };
+    return `<ul class="reg" style="list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:.88rem">${fila(!!a.entro, 'Entró a la clase (clic en su enlace)', a.entro)}${fila(!!a.confirmada, 'Asistió confirmado', a.confirmada)}${FUNC.autodeclaracion ? fila(a.autodeclarada === 'si', `Asistencia autodeclarada${a.autodeclarada === 'no' ? ' (dijo que no pudo entrar)' : ''}`, a.autodeclaradaT) : ''}${fila(!!l.replayT || e === 'vio_replay', 'Vio el replay', l.replayT)}${fila(!!l.compraClicT, 'Hizo clic en comprar', l.compraClicT)}${fila(esInscrita(e) || !!l.pago?.t, 'Matriculada', l.pago?.t)}</ul>`; };
   const opciones = (l) => (esClase(l.form) ? [...etapasClaseDe(l.form), ['descartado', 'Descartada']] : LEAD_STATES.filter(([k]) => !(esPago(l.form) && k === 'clase')));
   const tarjeta = (l) => { const act = esClase(l.form) ? etapaVisible(leadEtapa(l)) : leadEtapa(l);
     return `<div class="pg"><div class="pg-top"><b>${esc(LEAD_FORMS[l.form] || l.form)}</b></div>
@@ -1051,18 +1051,29 @@ const MESES_L = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio',
 const horaChile = () => Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'America/Santiago', hour: '2-digit', hourCycle: 'h23' }).format(new Date()));
 const diaChile = (ms) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Santiago' }).format(new Date(ms));
 
-// Segmentos para los mensajes: quienes asistieron (entraron o confirmaron), quienes no, y quienes dicen que estuvieron pero no se pudo identificar
-const SEGMENTOS = [['asistieron', 'Asistieron'], ['no_asistieron', 'No asistieron'], ['no_identificadas', 'No identificadas'], ['oferta', 'Vieron la oferta, sin respuesta'], ['estuvo', 'Estuvo (replay)'], ['no_pudo', 'No pudo entrar (replay)'], ['sin_dato', 'Sin dato (replay)'], ['todas', 'Todas (menos matriculadas)']];
-// Los mismos tres grupos que usa la página del replay para decidir su titular (src/lib/server/replay.js, segmentoDe). Si allá cambia, cambiar aquí.
-const segReplay = (l) => (l.asistencia?.entro || l.asistencia?.confirmada || l.asistencia?.autodeclarada === 'si' || ['entro', 'asistio_confirmado', 'clase', 'inscrita', 'matriculada'].includes(l.status) || ['entro', 'asistio_confirmado', 'matriculada'].includes(leadEtapa(l)) ? 'estuvo'
-  : l.asistencia?.autodeclarada === 'no' || l.status === 'no_asistio' || leadEtapa(l) === 'no_asistio' ? 'no_pudo' : 'sin_dato');
-// Textos de ejemplo para esos grupos (se usan mientras no guardes uno propio)
+// Segmentos para los mensajes, según el CLIC en /entrar/<codigo> dentro de la ventana de la clase (10 min antes a 30 después):
+//   Entró = tiene clic_entrar en la ventana (o la Maestra la marcó con «Clasificar una clase»); No entró = inscrita a esa clase y sin clic.
+//   Solo se calcula cuando la ventana terminó; antes queda «pendiente» y no entra en ningún grupo.
+const SEGMENTOS = [['entro', 'Entró'], ['no_entro', 'No entró'], ['oferta', 'Vieron la oferta, sin respuesta'], ['todas', 'Todas (menos matriculadas)']];
+// Textos de ejemplo (se usan mientras no guardes uno propio): quien entró recibe gracias + replay + oferta; quien no entró, replay + oferta con tono neutro
 const TEXTO_EJEMPLO = {
-  no_pudo: 'Hola {{nombre}}, sabemos que no pudiste entrar a la clase. Te dejo la grabación completa: {{enlace_replay}}',
-  estuvo: 'Gracias por estar en la clase, {{nombre}}. Aquí tienes la grabación para repasarla: {{enlace_replay}}',
+  entro: 'Gracias por estar en la clase, {{nombre}}. Aquí tienes la grabación para repasarla: {{enlace_replay}}\n\nLa inscripción al curso cierra el {{fecha_limite}}.',
+  no_entro: 'Hola {{nombre}}, te dejo la grabación de la clase por si no pudiste verla completa: {{enlace_replay}}\n\nLa inscripción al curso cierra el {{fecha_limite}}.',
+};
+// Cuándo termina la ventana de la clase de esta persona (ms), o 0 si no se sabe qué clase fue
+const finVentanaClase = (l) => {
+  const o = ofertaDe(claseDeL(l)) || {}, ev = l.claseEvento ? (A.cal || []).find((e) => e.id === l.claseEvento) : null;
+  const fecha = ev?.date || l.claseFecha, hora = ev?.time || o.claseHora;
+  if (!fecha || !hora) return 0;
+  return chileAMs(fecha, hora) + (Number.isFinite(Number(o.ventanaDespues)) ? Number(o.ventanaDespues) : 30) * 6e4;
 };
 const asistioL = (l) => !!(l.asistencia?.entro || l.asistencia?.confirmada) || ['entro', 'asistio_confirmado'].includes(leadEtapa(l));
-const segmentoDe = (l) => (asistioL(l) ? 'asistieron' : leadEtapa(l) === 'no_identificada' || l.asistencia?.autodeclarada === 'si' ? 'no_identificadas' : 'no_asistieron');
+// 'entro' | 'no_entro' | 'pendiente' (la clase aún no termina) | 'sin_dato' (no se sabe a qué clase se inscribió)
+const segClic = (l) => {
+  if (asistioL(l)) return 'entro';
+  const fin = finVentanaClase(l);
+  return !fin ? 'sin_dato' : Date.now() <= fin ? 'pendiente' : 'no_entro';
+};
 // Quién no debe recibir mensajes de venta: ya compró, se descartó, pidió que no le escribamos, o rechazó el consentimiento
 const excluidaDeEnvio = (l, p) => (['matriculada', 'descartado', 'lista_espera'].includes(leadEtapa(l)) ? 'Ya compró o está fuera'
   : l.secuenciasVenta === false ? 'Ya compró' : ((p?.tags || []).includes('No contactar') || l.noContactar) ? 'Pidió que no le escribamos' : l.consentimiento?.whatsapp?.aceptado === false ? 'No aceptó que le escribamos' : '');
@@ -1078,12 +1089,14 @@ const variablesDe = (l) => {
     enlace_calendario: base && l.codigo ? `${base}/calendario?l=${l.codigo}` : '',
   };
 };
+// Variables que se ofrecen (las de autodeclaración y palabra de asistencia están ocultas con su bandera)
+const varsEnvio = () => [['nombre'], ['clase'], ['enlace_entrada'], ['enlace_replay'], ['enlace_si', 'autodeclaracion'], ['enlace_no', 'autodeclaracion'], ['enlace_asistencia', 'palabraAsistencia'], ['enlace_gracias'], ['enlace_calendario'], ['fecha_limite']].filter(([, f]) => !f || FUNC[f]).map(([k]) => k);
 const rellenar = (texto, l) => { const v = variablesDe(l); return String(texto || '').replace(/\{\{\s*(\w+)\s*\}\}/g, (m, k) => (k in v ? v[k] : m)); };
 
 V.envios = () => {
   const head = `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>Envíos de la clase</h1><p>Escribe el texto una vez y envíalo persona por persona, con su enlace personal ya puesto. Cada envío queda anotado en su historial.</p></div></div>`;
   if (!A.leads || !A.plantillas) return `${head}<div class="card empty">Cargando…</div>`;
-  const clase = S.envClase || 'pendulo', seg = S.envSeg || 'asistieron', clave = `${clase}_${seg}`;
+  const clase = S.envClase || 'pendulo', seg = S.envSeg || 'entro', clave = `${clase}_${seg}`;
   const texto = textoEnvio(clase, seg), esEjemplo = !A.plantillas[clave] && !!TEXTO_EJEMPLO[seg];
   const chip = (attr, v, t, on) => `<button class="chip" ${attr}="${esc(v)}" aria-pressed="${on}">${t}</button>`;
   const todos = A.leads.filter((l) => l.form === `clase-${clase}`), porId = new Map(personas().flatMap((p) => p.leads.map((l) => [l.id, p])));
@@ -1093,7 +1106,7 @@ V.envios = () => {
   const hoy = diaChile(Date.now()), enviadoHoy = (l, canal) => !!l.ultimoEnvio?.[canal] && diaChile(l.ultimoEnvio[canal]) === hoy;
   const fuera = horaChile() < 8 || horaChile() >= 22;
   const aviso = fuera ? '<div class="card" style="padding:12px 14px;font-size:.88rem;border-left:4px solid #b8402f"><b>Es de noche en Chile.</b> No se envía entre las 22:00 y las 8:00: espera a la mañana.</div>' : '';
-  const sinCodigo = aEnviar.filter((f) => !f.l.codigo).length;
+  const sinCodigo = aEnviar.filter((f) => !f.l.codigo).length, pendientes = todos.filter((l) => segClic(l) === 'pendiente' && !excluidaDeEnvio(l, porId.get(l.id))).length;
   const fila = ({ l }) => { const msg = rellenar(texto, l), n = waNum(l.whatsapp);
     return `<tr><td><b>${esc(l.name)}</b><br><span class="muted" style="font-size:.8rem">${esc(l.email || '')}${l.email && l.whatsapp ? ' · ' : ''}${esc(l.whatsapp || '')}</span></td>
       <td>${asistBadges(l) || '<span class="muted" style="font-size:.8rem">—</span>'}${l.consentimiento ? '' : ' <span class="pill lock" title="No hay registro de que haya aceptado recibir mensajes">sin consentimiento registrado</span>'}</td>
@@ -1107,8 +1120,9 @@ V.envios = () => {
   <div class="filters">${chip('data-env-clase', 'pendulo', 'Péndulo Hebreo', clase === 'pendulo')}${chip('data-env-clase', 'tarot', 'Tarot Terapéutico', clase === 'tarot')}</div>
   <div class="filters">${SEGMENTOS.map(([k, t]) => chip('data-env-seg', k, `${t} (${todos.filter((l) => enSegmento(l, k, porId.get(l.id)) && !excluidaDeEnvio(l, porId.get(l.id))).length})`, seg === k)).join('')}</div>
   <section class="card panel"><h3>Texto para: ${esc(SEGMENTOS.find(([k]) => k === seg)[1].toLowerCase())}</h3>
-    <p class="muted" style="font-size:.84rem;margin:0">Variables: <code>{{nombre}}</code> <code>{{clase}}</code> <code>{{enlace_entrada}}</code> <code>{{enlace_replay}}</code> <code>{{enlace_si}}</code> <code>{{enlace_no}}</code> <code>{{enlace_asistencia}}</code> <code>{{enlace_gracias}}</code> <code>{{enlace_calendario}}</code> <code>{{fecha_limite}}</code>. Cada una se reemplaza con los datos de la persona.</p>
-    <textarea id="env-texto" rows="7" maxlength="3000" placeholder="Hola {{nombre}}, te dejo el replay de la clase: {{enlace_replay}}&#10;&#10;La inscripción cierra el {{fecha_limite}}.&#10;¿Estuviste en la clase? Sí: {{enlace_si}} · No pude entrar: {{enlace_no}}" aria-label="Texto del mensaje">${esc(texto)}</textarea>
+    <p class="muted" style="font-size:.84rem;margin:0">Variables: ${varsEnvio().map((k) => `<code>{{${k}}}</code>`).join(' ')}. Cada una se reemplaza con los datos de la persona.</p>
+    ${pendientes ? `<p class="muted" style="font-size:.82rem;margin:0">Hay ${pendientes} inscrita${pendientes === 1 ? '' : 's'} cuya clase aún no termina: se clasifican como «Entró» o «No entró» cuando pasa la ventana (30 minutos después del inicio).</p>` : ''}
+    <textarea id="env-texto" rows="7" maxlength="3000" placeholder="Hola {{nombre}}, te dejo el replay de la clase: {{enlace_replay}}&#10;&#10;La inscripción cierra el {{fecha_limite}}." aria-label="Texto del mensaje">${esc(texto)}</textarea>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn btn-primary btn-sm" data-env-guardar>Guardar texto</button><span class="muted" style="font-size:.8rem">${esEjemplo ? 'Es un texto de ejemplo: edítalo si quieres y guárdalo para dejarlo fijo.' : 'Se guarda para esta clase y este grupo.'}</span></div>
     ${ejemplo ? `<div class="card" style="padding:12px 14px;font-size:.86rem;white-space:pre-wrap"><b style="display:block;margin-bottom:4px">Así le llegaría a ${esc(aEnviar[0].l.name.split(' ')[0])}:</b>${esc(ejemplo)}</div>` : ''}</section>
   <section class="card panel"><div class="panel-h"><h3>${aEnviar.length} persona${aEnviar.length === 1 ? '' : 's'} para escribir</h3><button class="btn btn-ghost btn-sm" data-env-csv>Exportar para correo masivo</button></div>
@@ -1119,9 +1133,9 @@ V.envios = () => {
 // Las plantillas viven en config/plantillas (solo la Maestra las escribe, ver firestore.rules)
 data.plantillas = async () => { A.plantillas = (await getDoc(doc(db, 'config', 'plantillas'))).data() || {}; return A.plantillas; };
 async function envioMarcar(l, canal) {
-  const clave = `${S.envClase || 'pendulo'}_${S.envSeg || 'asistieron'}`;
+  const clave = `${S.envClase || 'pendulo'}_${S.envSeg || 'entro'}`;
   try {
-    const lleva = /\{\{\s*enlace_replay\s*\}\}/.test(textoEnvio(S.envClase || 'pendulo', S.envSeg || 'asistieron'));
+    const lleva = /\{\{\s*enlace_replay\s*\}\}/.test(textoEnvio(S.envClase || 'pendulo', S.envSeg || 'entro'));
     await data.leads({ action: 'enviado', ids: [l.id], canal, plantilla: clave, ...(lleva ? { replay: true } : {}) });
     if (lleva) l.replayEnviadoT = Date.now();
     l.ultimoEnvio = { ...(l.ultimoEnvio || {}), [canal]: Date.now() };
@@ -1130,11 +1144,11 @@ async function envioMarcar(l, canal) {
   } catch (e) { fail(e); }
 }
 function exportarEnvioCsv() {
-  const clase = S.envClase || 'pendulo', seg = S.envSeg || 'asistieron', texto = textoEnvio(clase, seg);
+  const clase = S.envClase || 'pendulo', seg = S.envSeg || 'entro', texto = textoEnvio(clase, seg);
   const porId = new Map(personas().flatMap((p) => p.leads.map((l) => [l.id, p])));
   const lista = A.leads.filter((l) => l.form === `clase-${clase}` && enSegmento(l, seg, porId.get(l.id)) && !excluidaDeEnvio(l, porId.get(l.id)));
-  const cab = ['Nombre', 'Correo', 'WhatsApp', 'nombre', 'enlace_entrada', 'enlace_replay', 'enlace_si', 'enlace_no', 'enlace_asistencia', 'enlace_gracias', 'enlace_calendario', 'fecha_limite', 'Mensaje'];
-  const fila = (l) => { const v = variablesDe(l); return [l.name, l.email, l.whatsapp, v.nombre, v.enlace_entrada, v.enlace_replay, v.enlace_si, v.enlace_no, v.enlace_asistencia, v.enlace_gracias, v.enlace_calendario, v.fecha_limite, rellenar(texto, l)]; };
+  const cols = varsEnvio(), cab = ['Nombre', 'Correo', 'WhatsApp', ...cols, 'Mensaje'];
+  const fila = (l) => { const v = variablesDe(l); return [l.name, l.email, l.whatsapp, ...cols.map((k) => v[k]), rellenar(texto, l)]; };
   const celda = (x) => { let t = String(x ?? ''); if (/^[=@]|^[+\-](?![\d\s])/.test(t)) t = `'${t}`; return `"${t.replace(/"/g, '""')}"`; };
   const csv = `﻿${[cab, ...lista.map(fila)].map((r) => r.map(celda).join(',')).join('\r\n')}`;
   const a = document.createElement('a');
@@ -1194,7 +1208,7 @@ const enlacesPersonales = (p) => {
   if (!ls.length) return '<span class="muted" style="font-size:.78rem">Aún no tiene código personal. Usa «Preparar contactos» en la lista de Interesadas.</span>';
   return ls.map((l) => {
     const base = l.enlace_entrada ? new URL(l.enlace_entrada).origin : '';
-    const filas = [['Entrada a la clase', l.enlace_entrada], ['Replay', l.enlace_replay], ['Botón «Sí estuve»', base && `${base}/confirmar?l=${l.codigo}&r=si`], ['Botón «No pude entrar»', base && `${base}/confirmar?l=${l.codigo}&r=no`], ['Código de asistencia', base && `${base}/asistencia?l=${l.codigo}`]].filter(([, u]) => u);
+    const filas = [['Entrada a la clase', l.enlace_entrada], ['Replay', l.enlace_replay], ...(FUNC.autodeclaracion ? [['Botón «Sí estuve»', base && `${base}/confirmar?l=${l.codigo}&r=si`], ['Botón «No pude entrar»', base && `${base}/confirmar?l=${l.codigo}&r=no`]] : []), ...(FUNC.palabraAsistencia ? [['Código de asistencia', base && `${base}/asistencia?l=${l.codigo}`]] : [])].filter(([, u]) => u);
     return `<div class="pg" style="gap:6px"><b style="font-size:.8rem">${esc(LEAD_FORMS[l.form] || l.form)}</b>${l.codigoRevocado ? '<span class="pill bad">Código revocado</span>' : ''}
       <span class="muted" style="font-size:.74rem">Código <code>${esc(l.codigo)}</code>${l.codigoVence ? ` · vence ${esc(fechaLarga(ymd(l.codigoVence)))}` : ''}</span>
       <div style="display:flex;gap:4px;flex-wrap:wrap">${filas.map(([t, u]) => `<button type="button" class="chip" data-copiar="${esc(u)}" title="${esc(u)}">Copiar: ${esc(t)}</button>`).join('')}</div>
@@ -1370,9 +1384,10 @@ V.clases = () => {
   const head = '<div class="crm-head"><div><span class="eyebrow">CRM</span><h1>Clases y ofertas</h1></div></div><p class="muted" style="max-width:46em;margin:0">Lo que dejes vacío usa el valor de respaldo (el que aparece en gris). Los cambios se aplican en todo el sitio: páginas del replay, avisos, cupos y el CRM.</p>';
   const c = (clase) => {
     const b = OFERTA_UI[clase], o = A.clases?.ofertas?.[clase] || {}, f = (k, etq, tipo, ph, extra = '', val = o[k]) => `<label class="cfg-f"><b>${etq}</b><input data-cfg="${clase}.${k}" type="${tipo}" value="${esc(val ?? '')}" placeholder="${esc(ph ?? '')}" ${extra}>${tipo === 'date' || tipo === 'time' ? `<small class="muted" style="font-weight:400">Si está vacío se usa: ${esc(ph)}</small>` : ''}</label>`;
-    const replay = clase === 'pendulo' ? A.clases?.replayPendulo : A.clases?.replayTarot, videoG = clase === 'pendulo' ? A.clases?.videoGraciasPendulo : A.clases?.videoGraciasTarot;
+    const sala = clase === 'pendulo' ? A.clases?.enlacePendulo : A.clases?.enlaceTarot, replay = clase === 'pendulo' ? A.clases?.replayPendulo : A.clases?.replayTarot, videoG = clase === 'pendulo' ? A.clases?.videoGraciasPendulo : A.clases?.videoGraciasTarot;
     return `<section class="card panel"><h3>${esc(b.nombre)}</h3>
       <div class="cfg-g">${f('nombre', 'Nombre del curso', 'text', b.nombre)}${f('claseDia', 'Día de la clase gratis', 'text', b.claseDia)}${f('claseHora', 'Hora de la clase gratis (Chile)', 'time', b.claseHora)}
+        <label class="cfg-f"><b>Enlace de Google Meet de la clase (sala real)</b><input data-cfg="${clase}.sala" type="url" value="${esc(sala || '')}" placeholder="https://meet.google.com/…"><small class="muted" style="font-weight:400">No se muestra a las alumnas: usan su enlace personal. Usa siempre la misma sala para esta clase.</small></label>
         <label class="cfg-f"><b>Enlace del replay</b><input data-cfg="${clase}.replay" type="url" value="${esc(replay || '')}" placeholder="https://youtu.be/…"></label>
         <label class="cfg-f"><b>Video de bienvenida de Karen (página de gracias)</b><input data-cfg="${clase}.videoGracias" type="url" value="${esc(videoG || '')}" placeholder="https://youtu.be/… o https://vimeo.com/…"><small class="muted" style="font-weight:400">Se muestra en /clase-${clase}/gracias. YouTube o Vimeo, con https.</small></label>
         ${f('inicio', 'Inicio del curso', 'date', b.inicio)}${f('cierreFecha', 'Cierre de inscripción: fecha', 'date', b.cierre[0])}${f('cierreHora', 'Cierre: hora (Chile)', 'time', b.cierre[1])}
@@ -1381,7 +1396,7 @@ V.clases = () => {
         ${clase === 'pendulo' ? (FUNC.reserva ? f('reserva', 'Reserva por WhatsApp (CLP)', 'number', String(b.reserva), 'min="0"') : '') : (FUNC.cuotas ? f('cuotas', 'Cuotas', 'number', String(b.cuotas), 'min="1" max="12"') : '')}
         ${FUNC.listaEspera ? `${f('cupos', 'Cupos máximos (vacío = sin límite)', 'number', 'sin límite', 'min="0"')}
         <label class="cfg-f cfg-chk"><input data-cfg="${clase}.listaEspera" type="checkbox" ${(typeof o.listaEspera === 'boolean' ? o.listaEspera : b.listaEspera) ? 'checked' : ''}><span>Abrir lista de espera cuando se llenen los cupos</span></label>` : ''}
-        ${f('palabra', 'Palabra de asistencia por defecto', 'text', 'se define en cada clase del Calendario')}${f('ventanaAntes', 'Ventana: minutos antes de la clase', 'number', String(b.ventanaAntes), 'min="0" max="240"')}${f('ventanaDespues', 'Ventana: minutos después del inicio', 'number', String(b.ventanaDespues), 'min="0" max="240"')}</div>
+        ${FUNC.palabraAsistencia ? f('palabra', 'Palabra de asistencia por defecto', 'text', 'se define en cada clase del Calendario') : ''}${f('ventanaAntes', 'Ventana: minutos antes de la clase', 'number', String(b.ventanaAntes), 'min="0" max="240"')}${f('ventanaDespues', 'Ventana: minutos después del inicio', 'number', String(b.ventanaDespues), 'min="0" max="240"')}</div>
       <label class="cfg-f"><b>Texto de la oferta</b><textarea data-cfg="${clase}.texto" rows="4" maxlength="1500" placeholder="Lo que se muestra junto a la fecha límite en la página del replay">${esc(o.texto || '')}</textarea></label></section>`;
   };
   return `${head}<form id="cfg-form" style="display:grid;gap:16px">${c('pendulo')}${c('tarot')}<div style="position:sticky;bottom:0;padding:12px 0;background:var(--bg)"><button class="btn btn-primary">Guardar clases y ofertas</button></div></form>`;
@@ -1392,8 +1407,8 @@ async function guardarClases(form) {
   const ofertas = {};
   for (const clase of ['pendulo', 'tarot']) {
     const x = { ...(v[clase] || {}) }, o = {}, previo = A.clases?.ofertas?.[clase] || {};
-    for (const k of ['reserva', 'cuotas', 'cupos', 'listaEspera']) if (!(k in x)) x[k] = previo[k] ?? (k === 'listaEspera' ? undefined : ''); // campo oculto: no se pisa lo guardado
-    for (const k of ['replay']) if (x[k] && !isHttps(x[k])) return toast('Los enlaces deben empezar con https://');
+    for (const k of ['reserva', 'cuotas', 'cupos', 'listaEspera', 'palabra']) if (!(k in x)) x[k] = previo[k] ?? (k === 'listaEspera' ? undefined : ''); // campo oculto: no se pisa lo guardado
+    for (const k of ['sala', 'replay']) if (x[k] && !isHttps(x[k])) return toast('Los enlaces deben empezar con https://');
     if (x.videoGracias && !/^https:\/\/(www\.|m\.)?(youtube\.com|youtu\.be|vimeo\.com|player\.vimeo\.com)\/\S+$/i.test(x.videoGracias)) return toast('El video de bienvenida debe ser un enlace de YouTube o Vimeo con https://');
     if (!!x.cierreFecha !== !!x.cierreHora) return toast('El cierre necesita fecha y hora.');
     // Los campos vacíos se guardan vacíos: así se puede volver al valor de respaldo
@@ -1404,11 +1419,11 @@ async function guardarClases(form) {
     o.moneda = x.moneda; if (typeof x.listaEspera === 'boolean') o.listaEspera = x.listaEspera;
     ofertas[clase] = o;
   }
-  const d = { ofertas, replayPendulo: v.pendulo?.replay || '', replayTarot: v.tarot?.replay || '', videoGraciasPendulo: v.pendulo?.videoGracias || '', videoGraciasTarot: v.tarot?.videoGracias || '' };
+  const d = { ofertas, enlacePendulo: v.pendulo?.sala || '', enlaceTarot: v.tarot?.sala || '', replayPendulo: v.pendulo?.replay || '', replayTarot: v.tarot?.replay || '', videoGraciasPendulo: v.pendulo?.videoGracias || '', videoGraciasTarot: v.tarot?.videoGracias || '' };
   try { await data.saveClases(d); render(false); toast('Clases y ofertas guardadas.'); } catch (e) { fail(e); }
 }
 
-const enSegmento = (l, k, p) => k === 'todas' || (k === 'oferta' ? vioOfertaSinRespuesta(l, p) : ['estuvo', 'no_pudo', 'sin_dato'].includes(k) ? segReplay(l) === k : segmentoDe(l) === k);
+const enSegmento = (l, k, p) => k === 'todas' || (k === 'oferta' ? vioOfertaSinRespuesta(l, p) : segClic(l) === k);
 // Texto de un grupo: el guardado, o el de ejemplo mientras no haya uno guardado
 const textoEnvio = (clase, seg) => (A.plantillas || {})[`${clase}_${seg}`] || TEXTO_EJEMPLO[seg] || '';
 // ---------- Inicio: lo importante del día a mano ----------
@@ -1706,7 +1721,7 @@ function calForm(e) {
     <p id="cf-warn" class="full" role="alert" style="margin:0;font-size:.82rem;font-weight:700;color:#b8402f" hidden>${AVISO_SIN_HORA}.</p>
     ${v.type === 'terapia' && (v.whatsapp || v.email) ? `<div class="card full" style="padding:12px 14px;display:grid;gap:6px;font-size:.84rem"><b>${esc(v.name || '')}</b><span>${esc(v.modalidad === 'online' ? 'Online' : v.direccion ? `Presencial · ${v.direccion}` : 'Presencial')}${v.clientTz ? ` · Zona: ${esc(v.clientTz)}` : ''}</span><span>${esc(v.whatsapp || '')} · ${esc(v.email || '')}</span><div style="display:flex;gap:6px;flex-wrap:wrap">${botonesRec(v)}</div></div>` : ''}
     ${claseInscritas(v)}
-    <label class="full" id="cf-palabra-fila" ${['clase-pendulo', 'clase-tarot'].includes(v.type) ? '' : 'hidden'}><b>Palabra de asistencia</b><input id="cf-palabra" maxlength="40" value="${esc(v.codigoAsistencia || '')}" placeholder="Una palabra que dirás en la clase"><span class="muted" style="font-size:.78rem;font-weight:400">Quien la escribe en /asistencia durante la clase (de 10 minutos antes a 30 después) queda «Asistió confirmado». Cada clase tiene su propia palabra: al repetir cada semana, las demás quedan vacías.</span></label>
+    <label class="full" id="cf-palabra-fila" ${FUNC.palabraAsistencia && ['clase-pendulo', 'clase-tarot'].includes(v.type) ? '' : 'hidden'}><b>Palabra de asistencia</b><input id="cf-palabra" maxlength="40" value="${esc(v.codigoAsistencia || '')}" placeholder="Una palabra que dirás en la clase"><span class="muted" style="font-size:.78rem;font-weight:400">Quien la escribe en /asistencia durante la clase (de 10 minutos antes a 30 después) queda «Asistió confirmado». Cada clase tiene su propia palabra: al repetir cada semana, las demás quedan vacías.</span></label>
     <label class="full"><b>Nota</b><textarea id="cf-note" maxlength="500" rows="2">${esc(v.note || '')}</textarea></label>
     ${e ? '' : '<label class="full rep"><input type="checkbox" id="cf-rep"> Repetir cada semana hasta <input type="date" id="cf-until"></label>'}
     <div class="full actions"><button class="btn btn-primary btn-sm">Guardar</button>${e ? '<button type="button" class="btn btn-ghost btn-sm" id="cf-del">Borrar</button>' : ''}</div>
@@ -1720,7 +1735,7 @@ function calForm(e) {
     $('#cf-title').placeholder = bloq ? 'Ej.: Médico, trámite, vacaciones (vacío: Karen no disponible)' : 'Si lo dejas vacío, se usa el tipo';
     $('#cf-warn').hidden = !!$('#cf-time').value || SIN_HORA_OK.includes($('#cf-type').value);
   };
-  $('#cf-type').addEventListener('change', () => { $('#cf-palabra-fila').hidden = !['clase-pendulo', 'clase-tarot'].includes($('#cf-type').value); });
+  $('#cf-type').addEventListener('change', () => { $('#cf-palabra-fila').hidden = !FUNC.palabraAsistencia || !['clase-pendulo', 'clase-tarot'].includes($('#cf-type').value); });
   $('#cf-type').onchange = avisar; $('#cf-time').oninput = avisar; $('#cf-allday').onchange = avisar; avisar();
   $('#cal-form').onsubmit = async (ev) => {
     ev.preventDefault();
@@ -1786,7 +1801,7 @@ V.ajustes = () => `<div class="view-head"><div><span class="eyebrow">Portal de l
   <section class="card panel"><h3>Video de bienvenida</h3><p class="muted" style="margin:0;font-size:.88rem">Lo ven las cuentas gratis en Inicio. Pega el enlace de YouTube, Vimeo o Google Drive. Déjalo vacío para mostrar "Muy pronto".</p>
     <form id="wv-form" style="display:flex;gap:8px;flex-wrap:wrap"><input type="url" id="wv-url" placeholder="https://" value="${esc(A.config.welcomeVideo || '')}" style="flex:1;min-width:220px"><button class="btn btn-primary btn-sm">Guardar</button></form></section>
   <section class="card panel"><h3>Formación: próximo grupo</h3><p class="muted" style="margin:0;font-size:.88rem">La portada y la página /formacion muestran la fecha más cercana de tipo "Inicio de un grupo de formación" que tengas en el Calendario, con "cupos limitados". Cuando la fecha pasa, dejan de mostrarla solas.</p><button class="btn btn-ghost btn-sm" style="justify-self:start" data-go="calendario">Abrir el calendario</button></section>
-  <section class="card panel"><h3>Google Meet: terapias online</h3><p class="muted" style="margin:0;font-size:.88rem">Las clases gratis ya no usan un enlace de Meet en el portal: cada persona entra con su enlace personal (/entrar/código).</p>
+  <section class="card panel"><h3>Google Meet: terapias online</h3><p class="muted" style="margin:0;font-size:.88rem">El Meet de las clases gratis (Péndulo y Tarot) se carga en Clases y ofertas y no se muestra a las alumnas: ellas entran con su enlace personal (/entrar/código).</p>
     <form id="cl-form" style="display:grid;gap:10px"><label style="display:grid;gap:6px;font-size:.84rem"><b>Enlace de Google Meet · terapias online</b><input type="url" id="cl-terapias" placeholder="https://meet.google.com/abc-defg-hij" value="${esc(A.clases?.enlaceTerapias || '')}"></label><button class="btn btn-primary btn-sm" style="justify-self:start">Guardar</button></form></section>
   <section class="card panel"><h3>Cursos: próximo inicio</h3><p class="muted" style="margin:0;font-size:.88rem">Las páginas /pendulo y /tarot muestran la fecha más cercana que tengas en el Calendario como "Curso Péndulo Hebreo Nivel 1" o "Grupo de Tarot Terapéutico".</p><button class="btn btn-ghost btn-sm" style="justify-self:start" data-go="calendario">Abrir el calendario</button></section>
   <section class="card panel"><h3>Clases en vivo</h3><p class="muted" style="margin:0;font-size:.88rem">Las clases en vivo y sus grabaciones se programan dentro de cada clase del aula, donde ves el contenido.</p><a class="btn btn-ghost btn-sm" style="justify-self:start" href="/aula">Ir al aula</a></section>`;
@@ -1927,7 +1942,7 @@ function bind() {
   document.querySelectorAll('[data-env-seg]').forEach((b) => (b.onclick = () => { S.envSeg = b.dataset.envSeg; render(false); }));
   document.querySelectorAll('[data-env-csv]').forEach((b) => (b.onclick = () => exportarEnvioCsv()));
   document.querySelectorAll('[data-env-guardar]').forEach((b) => (b.onclick = async () => {
-    const clave = `${S.envClase || 'pendulo'}_${S.envSeg || 'asistieron'}`, texto = $('#env-texto').value.trim();
+    const clave = `${S.envClase || 'pendulo'}_${S.envSeg || 'entro'}`, texto = $('#env-texto').value.trim();
     try { await setDoc(doc(db, 'config', 'plantillas'), { [clave]: texto, updatedAt: serverTimestamp() }, { merge: true }); A.plantillas[clave] = texto; render(false); toast('Texto guardado.'); } catch (e) { fail(e); }
   }));
   const envCanal = (canal) => (a) => (a.onclick = (e) => {
@@ -1947,7 +1962,7 @@ function bind() {
   }));
   document.querySelectorAll('[data-env-copy]').forEach((b) => (b.onclick = () => {
     const l = A.leads.find((x) => x.id === b.dataset.envCopy); if (!l) return;
-    const texto = rellenar(textoEnvio(S.envClase || 'pendulo', S.envSeg || 'asistieron'), l);
+    const texto = rellenar(textoEnvio(S.envClase || 'pendulo', S.envSeg || 'entro'), l);
     navigator.clipboard?.writeText(texto).then(() => toast('Mensaje copiado.')).catch(() => toast('No se pudo copiar.'));
   }));
   document.querySelectorAll('[data-crm-sincuenta]').forEach((b) => (b.onclick = () => { S.crmSinCuenta = !S.crmSinCuenta; render(false); }));
