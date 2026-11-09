@@ -124,12 +124,7 @@ export async function POST(request) {
       // Quien repite el formulario no se cuenta otra vez como Lead nuevo en las campañas.
       const ctx = contexto(request, lead.utm.fbclid);
       if (!repetida) enviarDespues({ nombre: 'Lead', id: idValido(body.eventId) || `lead-${ref.id}`, url: ctx.url, user: usuario({ email: lead.email, phone: lead.whatsapp, nombre: lead.name }, ctx) });
-      let enlace = '';
-      if (ENLACE[form]) {
-        const guardado = ((await db().doc('config/clases').get()).data() || {})[ENLACE[form]];
-        if (typeof guardado === 'string' && HTTPS.test(guardado.trim())) enlace = guardado.trim();
-      }
-      return json({ ok: true, id: ref.id, ...(codigoFinal ? { codigo: codigoFinal } : {}), ...(repetida ? { repetida: true } : {}), ...(enlace ? { enlace } : {}) });
+      return json({ ok: true, id: ref.id, ...(codigoFinal ? { codigo: codigoFinal } : {}), ...(repetida ? { repetida: true } : {}) });
     }
     if (body.action === 'all' || body.action === 'status' || body.action === 'update' || body.action === 'delete' || body.action === 'estado' || body.action === 'addProgram' || body.action === 'nota' || body.action === 'etiquetas' || body.action === 'preparar' || body.action === 'codigo' || body.action === 'clasificar' || body.action === 'enviado') {
       let user;

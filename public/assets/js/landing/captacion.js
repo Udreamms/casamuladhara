@@ -2,6 +2,7 @@
 // Cada formulario lleva data-lead="<nombre>" (pendulo, formacion, sala, terapias, meditacion, regalo) y sus campos un name:
 // name, email, whatsapp, country, interest, message. El mensaje de gracias es el .lp-ok o .gift-ok del propio formulario.
 (() => {
+  const GRACIAS_PAGINA = false; // página de gracias con video (apagada): al inscribirse se ve el mensaje de gracias dentro del formulario
   const PIXEL = '716765743270935'; // Píxel Casa Muladhara (Business Casa Muladhara)
 
   /* Píxel de Meta: código base oficial */
@@ -56,18 +57,19 @@
   const utc = (dt) => dt.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
   const icsTexto = (s) => String(s).replace(/\\/g, '\\\\').replace(/[,;]/g, (c) => `\\${c}`).replace(/\n/g, '\\n');
   const el = (tag, attrs = {}, text = '') => { const e = document.createElement(tag); Object.assign(e, attrs); if (text) e.textContent = text; return e; };
-  function graciasClase(f, enlace) {
+  function graciasClase(f, codigo) {
+    const enlace = `${location.origin}/entrar/${codigo}`; // enlace personal: anota la entrada y lleva a la sala (el Meet nunca va en el HTML)
     const op = f.elements.interest?.selectedOptions[0];
     const fecha = op?.dataset.date; // 'AAAA-MM-DD' si eligió un día concreto
     const dia = (op?.textContent || '').split(' · ')[0].toLowerCase();
     const titulo = `Clase gratis de ${f.dataset.clase} con Karen`;
     const nodos = [el('b', {}, fecha ? `¡Listo, tu lugar está reservado! Te esperamos el ${dia} a las 19:00 (hora de Chile).` : '¡Listo, tu lugar está reservado! La clase es a las 19:00 (hora de Chile).')];
     const acciones = el('span', { className: 'gracias-acciones' });
-    acciones.append(el('a', { className: 'btn btn-clase', href: enlace, target: '_blank', rel: 'noopener' }, 'Entrar a la clase por Google Meet'));
+    acciones.append(el('a', { className: 'btn btn-clase', href: enlace, target: '_blank', rel: 'noopener' }, 'Entrar a la clase'));
     if (fecha) {
       const [y, m, d] = fecha.split('-').map(Number);
       const ini = utcDeChile(y, m, d, 19, 0), fin = new Date(ini.getTime() + 30 * 60000);
-      const detalle = `Entra a la clase por Google Meet: ${enlace}`;
+      const detalle = `Entra a la clase con tu enlace personal: ${enlace}`;
       const g = new URL('https://calendar.google.com/calendar/render');
       g.search = new URLSearchParams({ action: 'TEMPLATE', text: titulo, dates: `${utc(ini)}/${utc(fin)}`, details: detalle, location: enlace }).toString();
       acciones.append(el('a', { className: 'btn btn-cal', href: g.toString(), target: '_blank', rel: 'noopener' }, 'Agregar a mi calendario'));
@@ -109,9 +111,14 @@
         const out = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(out.error || 'No pudimos enviar tus datos.');
         if (!out.repetida) fbq('track', 'Lead', {}, { eventID: body.eventId }); // quien repite el formulario no cuenta otro Lead en las campañas
-        f.querySelectorAll(out.enlace && f.dataset.clase ? 'label, button, small, .wa-alt' : 'label, button, small').forEach((el) => (el.hidden = true));
-        // Clase gratis con enlace de Google Meet guardado: el gracias trae el botón para entrar y el calendario
-        if (ok && out.enlace && f.dataset.clase) ok.replaceChildren(...graciasClase(f, out.enlace));
+        // Clase gratis: pasa a su página de gracias (video de Karen y pasos). La breve espera deja que el Píxel alcance a enviar el Lead.
+        if (GRACIAS_PAGINA && out.codigo && f.dataset.clase && ['clase-pendulo', 'clase-tarot'].includes(f.dataset.lead)) {
+          setTimeout(() => { location.href = `/${f.dataset.lead}/gracias?l=${encodeURIComponent(out.codigo)}`; }, 500);
+          return;
+        }
+        f.querySelectorAll(out.codigo && f.dataset.clase ? 'label, button, small, .wa-alt' : 'label, button, small').forEach((el) => (el.hidden = true));
+        // Clase gratis: el gracias trae el botón para entrar (enlace personal /entrar/<código>) y el calendario
+        if (ok && out.codigo && f.dataset.clase) ok.replaceChildren(...graciasClase(f, out.codigo));
         if (ok) { ok.hidden = false; ok.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
       } catch (ex) {
         const m = ex.message || 'No pudimos enviar tus datos.';
