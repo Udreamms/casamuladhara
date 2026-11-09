@@ -2,7 +2,7 @@
 // Cada formulario lleva data-lead="<nombre>" (pendulo, formacion, sala, terapias, meditacion, regalo) y sus campos un name:
 // name, email, whatsapp, country, interest, message. El mensaje de gracias es el .lp-ok o .gift-ok del propio formulario.
 (() => {
-  const GRACIAS_PAGINA = false; // página de gracias con video (apagada): al inscribirse se ve el mensaje de gracias dentro del formulario
+  const GRACIAS_PAGINA = true; // al inscribirse en una clase gratis, la persona pasa a su página de gracias (/clase-*/gracias)
   const PIXEL = '716765743270935'; // Píxel Casa Muladhara (Business Casa Muladhara)
 
   /* Píxel de Meta: código base oficial */

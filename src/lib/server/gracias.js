@@ -3,7 +3,7 @@
 import { chileAUtc, utcAChile } from '@/lib/server/agenda.js';
 import { contactoPorCodigo, primerNombre } from '@/lib/server/embudo.js';
 import { CSS } from '@/lib/server/replay.js';
-import { extras } from '@/lib/server/banderas.js';
+import { gracias } from '@/lib/server/banderas.js';
 import { enlaceInvalido, esc, pagina, pixel, reproductor, WHATSAPP } from '@/lib/server/paginas.js';
 import { db } from '@/lib/server/services.js';
 
@@ -29,7 +29,7 @@ function fechaDeClase(clase, elegida) {
 
 // Persona + su clase, o null si el código no sirve. PREVIEWLOCAL (solo en el computador local) permite ver la página sin datos reales.
 export async function claseDePersona(codigo) {
-  if (!extras()) return null; // apagada (ver banderas.js)
+  if (!gracias()) return null; // apagada (ver banderas.js)
   const prueba = process.env.NODE_ENV !== 'production' && ['PREVIEWLOCAL', 'PREVIEWPENDU'].includes(codigo);
   const c = prueba ? { name: 'María Prueba', clase: codigo === 'PREVIEWPENDU' ? 'pendulo' : 'tarot', codigo } : await contactoPorCodigo(codigo);
   if (!c) return null;
@@ -48,7 +48,7 @@ export function ics({ clase, codigo, fecha }, origen) {
 }
 
 export async function paginaGracias(request, clase) {
-  if (!extras()) return enlaceInvalido(); // apagada (ver banderas.js)
+  if (!gracias()) return enlaceInvalido(); // apagada (ver banderas.js)
   const codigo = new URL(request.url).searchParams.get('l') || '';
   try {
     const d = await claseDePersona(codigo);
@@ -58,9 +58,8 @@ export async function paginaGracias(request, clase) {
     const cuando = `${DIAS[f.getUTCDay()]} ${f.getUTCDate()} de ${MESES[f.getUTCMonth()]} a las ${HORA} (hora de Chile)`;
     const cfg = (await db().doc('config/clases').get()).data() || {};
     const url = cfg[clase === 'tarot' ? 'videoGraciasTarot' : 'videoGraciasPendulo'];
-    const video = /^https:\/\//i.test(url || '')
-      ? reproductor(url)
-      : '<div class="marco"><div><i>▶</i><b>Aquí irá el video de Karen</b><p class="muted" style="color:#c9d4cc">Un mensaje para ti antes de la clase.</p></div></div>';
+    // Sin video cargado no se muestra nada en su lugar
+    const video = /^https:\/\/\S+$/i.test(url || '') ? reproductor(url) : '';
     const ini = chileAUtc(fecha, HORA), fin = ini + DURACION_MIN * 60e3, origen = new URL(request.url).origin;
     const g = new URL('https://calendar.google.com/calendar/render');
     g.search = new URLSearchParams({ action: 'TEMPLATE', text: `Clase gratis de ${NOMBRE[clase]} con Karen`, dates: `${utc(ini)}/${utc(fin)}`, details: `Es una clase en vivo. Entra con tu enlace personal: ${origen}/entrar/${codigo}`, location: `${origen}/entrar/${codigo}` }).toString();
@@ -73,7 +72,7 @@ export async function paginaGracias(request, clase) {
 .paso>div:last-child{min-width:0}main{grid-template-columns:minmax(0,1fr)}.paso{display:flex;gap:16px;background:#fffdf6;border:1px solid #d9d5c3;border-radius:18px;padding:18px 20px}.paso .n{flex:none;width:38px;height:38px;border-radius:50%;background:#1f3f32;color:#e8c98a;display:grid;place-items:center;font:400 1.2rem/1 Marcellus,Georgia,serif}
 .paso h3{margin:0 0 4px;font:400 1.25rem/1.3 Marcellus,Georgia,serif;color:#1f3f32}.acc{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}a.b.s{padding:12px 20px;font-size:.8rem}a.b.alt2{background:#e9e4d0;color:#1f3f32;box-shadow:none}</style></head><body>
 <div class="top">Tu lugar está reservado · <b>${esc(cuando)}</b></div>
-<main><section class="hero"><span class="k">Casa Muladhara · Clase gratis</span><h1>¡Listo, ${esc(primerNombre(c.name))}! Tu lugar está reservado</h1><p>Te esperamos el <b>${esc(cuando)}</b>. Mira este mensaje de Karen y haz los tres pasos de abajo.</p></section>
+<main><section class="hero"><span class="k">Casa Muladhara · Clase gratis</span><h1>¡Listo, ${esc(primerNombre(c.name))}! Tu lugar está reservado</h1><p>Te esperamos el <b>${esc(cuando)}</b>. ${video ? 'Mira este mensaje de Karen y haz' : 'Haz'} los tres pasos de abajo.</p></section>
 ${video}
 <section style="display:grid;gap:12px"><h2>Haz esto ahora, para no perderte la clase</h2>
 ${paso(1, 'Agéndala en tu calendario', 'Es una clase en vivo: reserva ese momento solo para ti.', `<a class="b s" href="${esc(g.toString())}" target="_blank" rel="noopener">Google Calendar</a><a class="b s alt2" href="/calendario?l=${esc(codigo)}">iPhone / Outlook (.ics)</a>`)}
