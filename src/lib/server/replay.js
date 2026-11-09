@@ -1,7 +1,7 @@
 // Landing del replay de una clase (estilo página de venta con video): anota que la persona la vio, muestra el video (o su marco
 // mientras no esté cargado), cuenta regresiva al cierre de la inscripción, el botón de inscripción, preguntas frecuentes y testimonios.
 import { OFERTAS, cierreOferta, configClases, contactoPorCodigo, primerNombre, registrarEvento } from '@/lib/server/embudo.js';
-import { utcAChile } from '@/lib/server/agenda.js';
+import { chileAUtc, utcAChile } from '@/lib/server/agenda.js';
 import { extras } from '@/lib/server/banderas.js';
 import { enlaceInvalido, esc, pagina, pixel, reproductor, WHATSAPP } from '@/lib/server/paginas.js';
 
@@ -34,12 +34,18 @@ footer{text-align:center}`;
 const CUENTA = `(()=>{const el=document.querySelector('.cuenta');if(!el)return;const t=+el.dataset.cierre,p=(n)=>String(n).padStart(2,'0');const u=(k)=>el.querySelector('[data-u='+k+']');
 const tick=()=>{const s=Math.max(0,Math.floor((t-Date.now())/1000));u('d').textContent=p(Math.floor(s/86400));u('h').textContent=p(Math.floor(s%86400/3600));u('m').textContent=p(Math.floor(s%3600/60));u('s').textContent=p(s%60);};tick();setInterval(tick,1000)})()`;
 
-// Quién es la persona respecto a la clase: 'si' (estuvo), 'no' (no pudo entrar) o 'neutro' (no lo sabemos)
+// Quién es la persona respecto a la clase. Decide si ENTRÓ a la clase: el clic en su enlace /entrar dentro de la ventana de la clase
+// (asistencia.entro) o el informe de Meet cargado por Karen en «Clasificar una clase». No cuentan la palabra de asistencia ni la autodeclaración.
+//   'si'     entró
+//   'no'     no entró: Karen la clasificó «No asistió», o ya pasó su clase y no hizo clic dentro de la ventana
+//   'neutro' sin dato: no se puede identificar («No identificada»), o su clase aún no pasa
 const ESTUVO = ['entro', 'asistio_confirmado', 'clase', 'inscrita', 'matriculada'];
-export function segmentoDe(c) {
+export function segmentoDe(c, ahora = Date.now()) {
   const a = c.asistencia || {};
-  if (a.entro || a.confirmada || a.autodeclarada === 'si' || ESTUVO.includes(c.status)) return 'si';
-  if (a.autodeclarada === 'no' || c.status === 'no_asistio') return 'no';
+  if (c.status === 'no_identificada') return 'neutro';
+  if (a.entro || (a.confirmada && a.fuente === 'meet') || ESTUVO.includes(c.status)) return 'si';
+  if (c.status === 'no_asistio') return 'no';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(c.claseFecha || '') && chileAUtc(c.claseFecha, '19:00') + 30 * 60e3 < ahora) return 'no';
   return 'neutro';
 }
 

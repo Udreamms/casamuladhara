@@ -2,17 +2,20 @@
 // Si coincide queda "Asistió confirmado". Se limitan los intentos para que nadie adivine la palabra.
 import { FieldValue } from 'firebase-admin/firestore';
 import { contactoPorCodigo, normaliza, primerNombre, registrarEvento, sesionEn } from '@/lib/server/embudo.js';
+import { asistenciaPalabra } from '@/lib/server/banderas.js';
 import { enlaceInvalido, esc, pagina } from '@/lib/server/paginas.js';
 
 const formulario = (codigo, mensaje = '') => pagina('Código de asistencia', `<h1>Confirma tu asistencia</h1><p class="muted">Escribe la palabra que se dijo durante la clase.</p>${mensaje ? `<p class="err">${mensaje}</p>` : ''}
   <form method="post" action="/asistencia?l=${esc(codigo)}" style="display:grid;gap:12px"><input name="palabra" autocomplete="off" required maxlength="60" placeholder="La palabra de la clase" aria-label="Palabra de la clase"><button>Confirmar</button></form>`);
 
 export async function GET(request) {
+  if (!asistenciaPalabra()) return enlaceInvalido(); // apagado (ver banderas.js)
   const codigo = new URL(request.url).searchParams.get('l') || '';
   return (await contactoPorCodigo(codigo)) ? formulario(codigo) : enlaceInvalido();
 }
 
 export async function POST(request) {
+  if (!asistenciaPalabra()) return enlaceInvalido(); // apagado (ver banderas.js)
   const codigo = new URL(request.url).searchParams.get('l') || '';
   try {
     const c = await contactoPorCodigo(codigo);
