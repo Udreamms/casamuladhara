@@ -145,6 +145,14 @@ Además de lo de siempre acepta `edad` y `consentimiento: { email: { aceptado, f
 ### Herramientas en el portal (Interesadas)
 **Preparar contactos** (crea código y enlaces a los registros de antes), **Clasificar una clase** (pega la lista de Meet: ve cómo quedaría y luego aplica) y **Envíos** (textos con variables `{{nombre}} {{enlace_entrada}} {{enlace_replay}} {{enlace_si}} {{enlace_no}} {{enlace_asistencia}} {{fecha_limite}}`, envío persona por persona y exportación para correo masivo).
 
+### Alcance congelado (qué está activo y qué está oculto)
+Mientras el alcance está congelado, estas funciones están **ocultas con una bandera apagada** (el código no se borró; para volver a mostrarlas se pone la bandera en `true`):
+- Portal: `FUNC` en `public/assets/js/admin.js` → `fichaCompleta` (ficha estilo GoHighLevel; mientras está apagada se usa `leadFichaSimple`), `etiquetas`, `tareas` (seguimientos), `metricas`, `deshacer`, `reserva`, `cuotas`, `listaEspera`.
+- Servidor: `FUNCIONES` en `src/lib/server/embudo.js` → `reserva` (`/api/embudo` responde 409) y `listaEspera` (el evento `lista_espera` se ignora y `/api/clases/estado` responde sin cupos ni lista de espera). Deben coincidir con las del portal.
+- Lo que queda **activo**: código personal por contacto, registro simple (entró, asistió confirmado, autodeclarada, vio replay, clic en comprar, matriculada), Envíos (plantillas, envío por persona, exportar), «Preparar contactos», «Clasificar una clase», `/contacto/validar`, `/eventos`, sin duplicados por correo y WhatsApp.
+- Reglas de envío: máximo 1 mensaje por canal por persona al día (el portal bloquea), nada entre 22:00 y 8:00 (Chile), y quien responde «no» (o «stop», «baja»…) queda con `noContactar` (lo marca el webhook de WhatsApp; también el botón «Pidió parar» o la etiqueta «No contactar») y sale de todos los envíos.
+- Los datos que ya se guardan (pagos, reserva, cupos configurados, etiquetas) **no se pierden** al ocultar: «Clases y ofertas» conserva lo guardado aunque sus campos estén ocultos.
+
 ### Cupos, reserva del Péndulo y configuración por clase
 - **`GET /api/clases/estado?clase=pendulo|tarot`** (público, sin datos personales) → `{ "cupos_disponibles": 12, "lista_espera": false }`. `cupos_disponibles` es `null` si el curso no tiene límite; `lista_espera` es `true` cuando los cupos se llenaron y la lista de espera está activada. Lo leen las landings.
 - **`POST /api/embudo`** (sesión de la Maestra): `reserva` (Péndulo, $10.000 por WhatsApp: etapa «Reservó cupo», monto, fecha y saldo; con cupos llenos responde 409) y `saldo` (marca el saldo pagado y matricula).

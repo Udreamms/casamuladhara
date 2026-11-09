@@ -11,6 +11,7 @@ import crypto from 'node:crypto';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { auth, db, json } from '@/lib/server/services.js';
 import { configurado, enviarPlantilla, enviarTexto, normalizar } from '@/lib/server/whatsapp.js';
+import { pideParar } from '@/lib/server/embudo.js';
 
 const VENTANA = 24 * 60 * 60 * 1000;
 const TIPOS = { image: 'Imagen', audio: 'Audio', voice: 'Nota de voz', video: 'Video', document: 'Documento', sticker: 'Sticker', location: 'Ubicación', contacts: 'Contacto', button: '', interactive: '', reaction: 'Reacción' };
@@ -49,6 +50,15 @@ async function guardar(numero, { dir, id, text, nombre, ms, status }) {
   await chat.collection('messages').doc(id).set({ dir, text: text.slice(0, 4000), ts, ...(status ? { status } : {}) }, { merge: true });
 }
 
+// Quien responde «no» (o «stop», «baja»…) no recibe más mensajes: se marca en todos sus registros y sale de los envíos del portal
+async function noContactar(numero) {
+  try {
+    const s = await db().collection('leads').where('waKey', '==', numero).get();
+    const e = { t: Date.now(), tipo: 'envio', texto: 'Respondió «no»: no se le escribe más' };
+    await Promise.all(s.docs.map((d) => d.ref.update({ noContactar: true, eventos: FieldValue.arrayUnion(e), updatedAt: FieldValue.serverTimestamp() })));
+  } catch (err) { console.error('whatsapp noContactar', err); }
+}
+
 async function aviso(payload) {
   for (const entrada of payload.entry || []) {
     for (const cambio of entrada.changes || []) {
@@ -57,6 +67,7 @@ async function aviso(payload) {
       for (const m of v.messages || []) {
         const numero = normalizar(m.from);
         if (numero) await guardar(numero, { dir: 'in', id: m.id, text: textoDe(m), nombre: nombres[m.from], ms: Number(m.timestamp) * 1000 });
+        if (numero && pideParar(textoDe(m))) await noContactar(numero);
       }
       // Lo que Karen escribe desde la app de WhatsApp Business en su teléfono también queda en el chat del portal
       for (const m of v.message_echoes || []) {

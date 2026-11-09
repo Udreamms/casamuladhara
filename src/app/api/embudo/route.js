@@ -6,7 +6,7 @@
 //   action 'saldo'   -> { id }   Marca el saldo pagado: queda «Matriculada» y su curso inscrito. Sale de las secuencias de venta.
 import { FieldValue } from 'firebase-admin/firestore';
 import { utcAChile } from '@/lib/server/agenda.js';
-import { OFERTAS, RANGO, asegurarCurso, configClases, estadoCupos } from '@/lib/server/embudo.js';
+import { FUNCIONES, OFERTAS, RANGO, asegurarCurso, configClases, estadoCupos } from '@/lib/server/embudo.js';
 import { auth, db, json } from '@/lib/server/services.js';
 
 const ID = /^[A-Za-z0-9]{1,40}$/;
@@ -24,6 +24,7 @@ export async function POST(request) {
   const body = await request.json().catch(() => ({}));
   try {
     if (!['reserva', 'saldo'].includes(body.action)) return json({ error: 'Acción desconocida.' }, 400);
+    if (!FUNCIONES.reserva) return json({ error: 'La reserva y el saldo están desactivados por ahora.' }, 409);
     if (typeof body.id !== 'string' || !ID.test(body.id)) return json({ error: 'Datos no válidos.' }, 400);
     const ref = db().doc(`leads/${body.id}`), snap = await ref.get();
     if (!snap.exists) return json({ error: 'Esa persona ya no existe. Actualiza la lista.' }, 404);

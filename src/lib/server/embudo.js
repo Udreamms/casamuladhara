@@ -26,6 +26,12 @@ export const ETAPA_TXT = {
   no_asistio: 'No asistió', no_identificada: 'No identificada', vio_replay: 'Vio el replay', sin_respuesta: 'Sin respuesta', lista_espera: 'Lista de espera',
 };
 export const EVENTOS = ['clic_entrar', 'codigo_asistencia_ok', 'autodeclara_asistio', 'autodeclara_no_asistio', 'vio_replay', 'clic_comprar', 'pago_confirmado', 'pago_fallido', 'lista_espera'];
+// ALCANCE CONGELADO: funciones apagadas (el código sigue aquí, no se borró). Deben coincidir con FUNC en public/assets/js/admin.js.
+//   reserva: reserva del Péndulo y saldo (API /api/embudo).  listaEspera: cupos máximos y lista de espera (evento lista_espera y /api/clases/estado).
+export const FUNCIONES = { reserva: false, listaEspera: false };
+// Palabras con las que alguien pide que no le escribamos más (respuesta «no», «stop», «baja»…). Se compara el mensaje completo, sin tildes ni signos.
+const PARAR = new Set(['no', 'nop', 'stop', 'baja', 'basta', 'parar', 'para', 'no gracias', 'no quiero', 'no quiero mas mensajes', 'no me escribas', 'no me escriban', 'no me escribas mas', 'no mas', 'cancelar', 'desuscribir', 'darme de baja']);
+export const pideParar = (texto) => PARAR.has(String(texto || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9ñ ]/g, ' ').replace(/\s+/g, ' ').trim());
 
 // Ofertas del curso de cada línea (hora de Chile). Son los valores de partida: la Maestra los cambia en /staff (Clases y ofertas),
 // se guardan en config/clases.ofertas y configClases() los aplica aquí. El código personal caduca 60 días después del cierre.
@@ -129,6 +135,7 @@ export async function contactoPorCodigo(codigo) {
 // Devuelve { ok, estado, ignorado } o { error, status }.
 export async function registrarEvento({ codigo, evento, fechaIso, origen = '', extra = {} }) {
   if (!EVENTOS.includes(evento)) return { error: 'evento_invalido', status: 400 };
+  if (evento === 'lista_espera' && !FUNCIONES.listaEspera) return { ok: true, ignorado: true }; // función apagada: se recibe pero no se usa
   if (!CODIGO.test(String(codigo || ''))) return { error: 'codigo_invalido', status: 404 };
   const q = await db().collection('leads').where('codigo', '==', codigo).limit(1).get();
   if (q.empty) return { error: 'codigo_invalido', status: 404 };
@@ -214,6 +221,7 @@ export async function estadoCupos(clase) {
   await configClases();
   const o = OFERTAS[clase];
   if (!o) return null;
+  if (!FUNCIONES.listaEspera) return { cupos: null, ocupados: 0, cupos_disponibles: null, lista_espera: false }; // sin cupos ni lista de espera por ahora
   const cupos = o.cupos == null ? null : Number(o.cupos);
   const ocupados = cupos == null ? 0 : await cuposOcupados(clase);
   const disponibles = cupos == null ? null : Math.max(0, cupos - ocupados);

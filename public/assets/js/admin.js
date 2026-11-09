@@ -383,8 +383,14 @@ const ETAPAS_CLASE = [['registrada', 'Registrada'], ['confirmada', 'Confirmada']
   ['no_asistio', 'No asistió'], ['no_identificada', 'No identificada'], ['vio_replay', 'Vio el replay'], ['sin_respuesta', 'Sin respuesta'], ['lista_espera', 'Lista de espera']];
 const PASOS_CLASE = ETAPAS_CLASE.slice(0, 7).map(([k]) => k);
 // La reserva por WhatsApp es solo del Péndulo: en el Tarot no existe la etapa «Reservó cupo»
-const etapasClaseDe = (form) => ETAPAS_CLASE.filter(([k]) => form !== 'clase-tarot' || k !== 'reservo_cupo');
+const etapasOcultas = () => [...(FUNC.reserva ? [] : ['reservo_cupo']), ...(FUNC.listaEspera ? [] : ['lista_espera'])];
+const etapasClaseDe = (form) => ETAPAS_CLASE.filter(([k]) => !etapasOcultas().includes(k) && (form !== 'clase-tarot' || k !== 'reservo_cupo'));
+// Quien ya estaba en una etapa oculta se ve en la etapa visible más cercana (el dato no se toca)
+const etapaVisible = (k) => (k === 'reservo_cupo' && !FUNC.reserva ? 'vio_oferta' : k === 'lista_espera' && !FUNC.listaEspera ? 'registrada' : k);
 const ETAPA_NOMBRE = Object.fromEntries([...LEAD_STATES, ...ETAPAS_CLASE]);
+// ALCANCE CONGELADO: funciones ocultas con bandera apagada (el código sigue aquí, no se borró). Para volver a mostrar una, ponla en true.
+// El servidor tiene sus propias banderas para reserva y lista de espera (FUNCIONES en src/lib/server/embudo.js): deben coincidir.
+const FUNC = { fichaCompleta: false, etiquetas: false, tareas: false, metricas: false, deshacer: false, reserva: false, cuotas: false, listaEspera: false };
 const RANGO_ETAPA = { descartado: -1, nuevo: 0, registrada: 0, lista_espera: 0, contactado: 1, confirmada: 1, sin_respuesta: 1, no_asistio: 1, no_identificada: 1, entro: 2, vio_replay: 2, clase: 3, asistio_confirmado: 3, conversando: 4, vio_oferta: 4, reservo_cupo: 4.5, inscrita: 5, matriculada: 5 };
 // En una clase gratis, las etapas de antes se leen como las del embudo nuevo
 const CLASE_ANTIGUA = { nuevo: 'registrada', contactado: 'confirmada', clase: 'asistio_confirmado', conversando: 'vio_oferta', inscrita: 'matriculada' };
@@ -462,9 +468,9 @@ const mejorDe = (es) => { const v = es.filter((k) => k !== 'descartado'); return
 const etapaDe = (p) => mejorDe(p.leads.map(leadEtapa));
 // Etapa en un programa; quien ya paga la Formación completa figura Inscrita aunque no tenga registro en ese formulario
 const etapaEn = (p, prog) => (prog[0] === 'formacion' && formacionPagada(p) ? 'inscrita' : mejorDe(tracksEn(p, prog).map(leadEtapa)));
-const etapaVista = (p) => { const prog = progDe(S.crmProg); if (!prog) return bucketEtapa(etapaDe(p)); const e = etapaEn(p, prog); return esClase(prog[0]) ? e : bucketEtapa(e); };
+const etapaVista = (p) => { const prog = progDe(S.crmProg); if (!prog) return bucketEtapa(etapaDe(p)); const e = etapaEn(p, prog); return esClase(prog[0]) ? etapaVisible(e) : bucketEtapa(e); };
 const ultimaActividad = (p) => Math.max(...p.leads.map((l) => l.createdAt || 0));
-const seguimientoHoyP = (p) => !!p.followUp && p.followUp <= ymd(hoyCL()) && !esInscrita(etapaDe(p)) && etapaDe(p) !== 'descartado';
+const seguimientoHoyP = (p) => FUNC.tareas && !!p.followUp && p.followUp <= ymd(hoyCL()) && !esInscrita(etapaDe(p)) && etapaDe(p) !== 'descartado';
 // Repetidas: la misma persona (correo o WhatsApp) en el mismo formulario con menos de 24 horas entre un envío y otro (doble envío por accidente).
 // De cada grupo se conserva la que está más avanzada en el embudo (o tiene nota) y, si empatan, la primera.
 // Descartada va al final: si una de dos fue descartada a mano para esconder la repetida, se queda la otra.
@@ -512,7 +518,7 @@ const asistBadges = (l) => { const a = l.asistencia || {}; return [
   a.entro ? '<span class="pill pres" title="Hizo clic en el enlace de entrada durante la clase">Entró</span>' : '',
   a.autodeclarada ? `<span class="pill lock" title="Lo dijo ella en el mensaje; no está verificado">Autodeclarada: ${a.autodeclarada === 'si' ? 'sí' : 'no'}</span>` : ''].filter(Boolean).join(' '); };
 const asistPersona = (p) => p.leads.filter((l) => esClase(l.form)).map(asistBadges).filter(Boolean).join(' ');
-const segBadge = (p) => (p.followUp ? `<span class="pill ${seguimientoHoyP(p) ? 'bad' : 'lock'}" title="Próximo seguimiento">${seguimientoHoyP(p) ? 'Seguimiento hoy' : `Seguir ${fechaLarga(p.followUp)}`}</span>` : '');
+const segBadge = (p) => (FUNC.tareas && p.followUp ? `<span class="pill ${seguimientoHoyP(p) ? 'bad' : 'lock'}" title="Próximo seguimiento">${seguimientoHoyP(p) ? 'Seguimiento hoy' : `Seguir ${fechaLarga(p.followUp)}`}</span>` : '');
 const progPills = (p) => `${p.leads.map((l) => `<span class="pill lock" title="${esc(LEAD_FORMS[l.form] || l.form)}">${esc(PROG_CORTO[l.form] || l.form)} · ${esc(etapaTxt(l.form, leadEtapa(l)))}</span>`).join(' ')}${formacionPagada(p) && !p.leads.some((l) => l.form === 'formacion') ? ' <span class="pill done">Formación · Inscrita</span>' : ''}`;
 
 // Resumen por origen de campaña, por programa y por motivo de descarte (se calcula con las personas, desde su primer registro)
@@ -569,10 +575,10 @@ V.interesadas = () => {
   if (!A.leads) return `${head}<div class="card empty">Cargando interesadas…</div>`;
   const sinLink = [['enlacePendulo', 'Péndulo'], ['enlaceTarot', 'Tarot'], ['enlaceTerapias', 'terapias online']].filter(([k]) => !A.clases?.[k]).map(([, n]) => n);
   const aviso = sinLink.length ? `<div class="card" style="padding:12px 14px;font-size:.88rem;border-left:4px solid #b8402f"><b>Falta el enlace de Google Meet de ${sinLink.join(', ')}.</b> Mientras no esté, quienes se registren no ven el botón para entrar. Cárgalo en <button class="link" data-go="ajustes">Ajustes del aula</button>.</div>` : '';
-  const prog = progDe(S.crmProg), lista = personasFiltradas(), vista = S.crmVista || 'embudo', todas = personas();
+  const prog = progDe(S.crmProg), lista = personasFiltradas(), vista = S.crmVista === 'metricas' && !FUNC.metricas ? 'embudo' : S.crmVista || 'embudo', todas = personas();
   const chip = (attr, v, t, on) => `<button class="chip" ${attr}="${esc(v)}" aria-pressed="${on}">${t}</button>`;
   const seg = (attr, items, actual) => `<div class="seg" role="group">${items.map(([v, t]) => `<button type="button" ${attr}="${v}" aria-pressed="${actual === v}">${t}</button>`).join('')}</div>`;
-  const vistas = seg('data-crm-vista', [['embudo', 'Embudo'], ['tabla', 'Tabla'], ['metricas', 'Métricas']], vista);
+  const vistas = seg('data-crm-vista', [['embudo', 'Embudo'], ['tabla', 'Tabla'], ...(FUNC.metricas ? [['metricas', 'Métricas']] : [])], vista);
   if (S.crmLista) return `${head}${aviso}${ofertaBanner()}${listaMatricula()}`;
   if (vista === 'metricas') return `${head}${aviso}<div class="crm-bar">${vistas}</div>${metricasHTML()}`;
   const origenes = [...new Set(A.leads.map(leadOrigen))].sort(), tags = [...new Set(todas.flatMap((p) => p.tags))].sort();
@@ -582,22 +588,22 @@ V.interesadas = () => {
   const etapasProg = prog && esClase(prog[0]) ? [...etapasClaseDe(prog[0]), ['descartado', 'Descartada']] : LEAD_STATES.filter(([k]) => !(prog && esPago(prog[0]) && k === 'clase'));
   const hayFiltro = !!(S.crmQ || S.crmOrigen || S.crmEtapa || S.crmTag || S.crmSeg || S.crmSinCuenta);
   const kpi = (k, n, t, on) => `<button type="button" class="crm-kpi" data-crm-kpi="${k}" aria-pressed="${on}"><b>${n}</b><span>${t}</span></button>`;
-  const kpis = `<div class="crm-kpis">${kpi('todos', base.length, prog ? 'en este programa' : 'personas', !hayFiltro)}${kpi('nuevas', nNuevas, 'por contactar', S.crmEtapa === primera)}${kpi('seg', nSeg, 'seguimientos hoy', !!S.crmSeg)}${kpi('sin', nSin, 'sin cuenta en el aula', !!S.crmSinCuenta)}${kpi('clic', filasClic().length, 'clic sin pagar', S.crmLista === 'clic')}</div>`;
+  const kpis = `<div class="crm-kpis">${kpi('todos', base.length, prog ? 'en este programa' : 'personas', !hayFiltro)}${kpi('nuevas', nNuevas, 'por contactar', S.crmEtapa === primera)}${FUNC.tareas ? kpi('seg', nSeg, 'seguimientos hoy', !!S.crmSeg) : ''}${kpi('sin', nSin, 'sin cuenta en el aula', !!S.crmSinCuenta)}${kpi('clic', filasClic().length, 'clic sin pagar', S.crmLista === 'clic')}</div>`;
   const barra = `<div class="crm-bar">${vistas}
     <input type="text" id="crm-q" placeholder="Buscar por nombre, correo, WhatsApp o nota" value="${esc(S.crmQ || '')}" aria-label="Buscar">
     <select id="crm-origen" aria-label="Origen"><option value="">Origen: todos</option>${origenes.map((o) => `<option value="${esc(o)}" ${S.crmOrigen === o ? 'selected' : ''}>${esc(o === 'directo' ? 'Directo' : o)}</option>`).join('')}</select>
     <select id="crm-etapa" aria-label="Etapa"><option value="">Etapa: todas</option>${etapasProg.map(([k]) => `<option value="${k}" ${S.crmEtapa === k ? 'selected' : ''}>${esc(etapaTxt(prog?.[0], k))}</option>`).join('')}</select>
-    ${tags.length ? `<select id="crm-tag" aria-label="Etiqueta"><option value="">Etiqueta: todas</option>${tags.map((t) => `<option ${S.crmTag === t ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select>` : ''}
+    ${FUNC.etiquetas && tags.length ? `<select id="crm-tag" aria-label="Etiqueta"><option value="">Etiqueta: todas</option>${tags.map((t) => `<option ${S.crmTag === t ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select>` : ''}
     ${hayFiltro ? '<button type="button" class="link" data-crm-kpi="todos">Quitar filtros</button>' : ''}</div>`;
   const tabs = `<nav class="crm-tabs" aria-label="Programas">${[['', 'Todos', todas.length], ...LEAD_PROGS.map(([k, t, fs]) => [k, t, todas.filter((p) => tieneProg(p, [k, t, fs])).length])].map(([k, t, n]) => `<button type="button" data-crm-prog="${esc(k)}" aria-pressed="${(S.crmProg || '') === k}">${esc(t)}<span class="n">${n}</span></button>`).join('')}</nav>`;
   const controles = `${ofertaBanner()}${cuposHTML() ? `<div class="cupos">${cuposHTML()}</div>` : ''}${kpis}${barra}${tabs}`;
-  const tagsPills = (p) => p.tags.map((t) => `<span class="pill pres">${esc(t)}</span>`).join(' ');
+  const tagsPills = (p) => !FUNC.etiquetas ? '' : p.tags.map((t) => `<span class="pill pres">${esc(t)}</span>`).join(' ');
 
   if (vista === 'tabla') {
     const sel = S.leadSel, n = sel.size;
     const barra = n ? `<div class="filters" style="padding:0 4px 12px"><b>${n} persona${n === 1 ? '' : 's'} seleccionada${n === 1 ? '' : 's'}</b>
       ${prog ? `<select id="bulk-etapa" aria-label="Mover a" style="border-radius:999px"><option value="">Mover a…</option>${etapasProg.map(([k]) => `<option value="${k}">${esc(etapaTxt(prog[0], k))}</option>`).join('')}</select>` : ''}
-      <input id="bulk-tag" list="tags-lista" placeholder="Etiqueta" maxlength="30" style="border-radius:999px;max-width:160px"><datalist id="tags-lista">${tags.map((t) => `<option value="${esc(t)}">`).join('')}</datalist><button class="btn btn-ghost btn-sm" data-bulk-tag>Etiquetar</button>
+      ${FUNC.etiquetas ? `<input id="bulk-tag" list="tags-lista" placeholder="Etiqueta" maxlength="30" style="border-radius:999px;max-width:160px"><datalist id="tags-lista">${tags.map((t) => `<option value="${esc(t)}">`).join('')}</datalist><button class="btn btn-ghost btn-sm" data-bulk-tag>Etiquetar</button>` : ''}
       <button class="btn btn-ghost btn-sm" style="color:#b8402f" data-leads-del>Eliminar seleccionadas</button><button class="link" data-leads-clear>Quitar selección</button></div>` : '';
     return `${head}${aviso}${controles}
     <section class="card panel">${barra}<div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:32px"><input type="checkbox" data-lead-all aria-label="Seleccionar todas" ${lista.length && lista.every((p) => sel.has(p.id)) ? 'checked' : ''}></th><th>Persona</th><th>Programas</th><th>Origen</th><th>Registro</th><th>Cuenta y seguimiento</th><th>Etapa${prog ? ` en ${esc(prog[1])}` : ''}</th></tr></thead><tbody>
@@ -608,7 +614,7 @@ V.interesadas = () => {
       <td class="muted" style="font-size:.84rem">${esc(leadOrigenTxt(p.leads[0]))}</td>
       <td class="muted" style="font-size:.84rem">${fdateMs(p.leads[0].createdAt)}</td>
       <td>${cuentaBadge(p)} ${segBadge(p)}</td>
-      <td>${trk ? `<select data-lead-status="${esc(trk.id)}" aria-label="Etapa">${etapasProg.map(([k]) => `<option value="${k}" ${leadEtapa(trk) === k ? 'selected' : ''}>${esc(etapaTxt(prog[0], k))}</option>`).join('')}</select>` : `<span class="pill lock">${esc(etapaTxt(prog?.[0], etapaVista(p)))}</span>`}</td></tr>`; }).join('') || '<tr><td colspan="7" class="muted">No hay personas con estos filtros.</td></tr>'}
+      <td>${trk ? `<select data-lead-status="${esc(trk.id)}" aria-label="Etapa">${etapasProg.map(([k]) => `<option value="${k}" ${(esClase(trk.form) ? etapaVisible(leadEtapa(trk)) : leadEtapa(trk)) === k ? 'selected' : ''}>${esc(etapaTxt(prog[0], k))}</option>`).join('')}</select>` : `<span class="pill lock">${esc(etapaTxt(prog?.[0], etapaVista(p)))}</span>`}</td></tr>`; }).join('') || '<tr><td colspan="7" class="muted">No hay personas con estos filtros.</td></tr>'}
     </tbody></table></div></section>`;
   }
 
@@ -672,7 +678,7 @@ function pedirMotivo(p) {
   });
 }
 // Después de que alguien toma la clase queda una tarea para el día siguiente (ofrecerle el curso), si no tenía un seguimiento pendiente
-const seguimientoAuto = (p) => (!p.followUp || p.followUp < ymd(hoyCL()) ? ymd(hoyCL() + 864e5) : null);
+const seguimientoAuto = (p) => (FUNC.tareas && (!p.followUp || p.followUp < ymd(hoyCL()) ? ymd(hoyCL() + 864e5) : null));
 const etapaNombre = (k) => LEAD_STATES.find(([x]) => x === k)?.[1] || k;
 
 // Cambia la etapa de una persona en un programa (un registro). Devuelve true si cambió.
@@ -750,7 +756,7 @@ async function pasarACurso(l) {
     if (r.etapa === 'inscrita' && !esInscrita(l.status)) await data.leads({ action: 'update', id: l.id, status: esClase(l.form) ? 'matriculada' : 'inscrita' });
     await data.leads({ action: 'all' }); A._per = null; paintNav(); render(false);
     const nombres = r.forms.map((f) => PROG_AGREGAR.find(([k]) => k === f)?.[1] || f).join(' y ');
-    toast(`Pasó a ${nombres} como interesada.`, creadas.length ? {
+    toast(`Pasó a ${nombres} como interesada.`, FUNC.deshacer && creadas.length ? {
       label: 'Deshacer',
       fn: async () => { try { await data.leads({ action: 'delete', ids: creadas }); A.leads = A.leads.filter((x) => !creadas.includes(x.id)); A._per = null; paintNav(); render(false); toast('Deshecho: ya no está en ese programa.'); } catch (e) { fail(e); } },
     } : undefined);
@@ -758,7 +764,67 @@ async function pasarACurso(l) {
   } catch (e) { fail(e); return false; }
 }
 
+
+// Ficha simple (la que está activa mientras el alcance está congelado): contacto, registro de la clase, etapa por programa, enlaces personales y nota.
+// La ficha completa (pestañas, etiquetas, seguimientos, pagos) sigue en leadFicha(); se activa con FUNC.fichaCompleta.
+function leadFichaSimple(id) {
+  const p = personaDe(id) || personas().find((x) => x.id === id); if (!p) return;
+  const ids = p.leads.map((l) => l.id), refrescar = () => { A._per = null; paintNav(); render(false); };
+  const fila = (ok, txt, t) => `<li style="display:flex;gap:8px;align-items:center"><span class="pill ${ok ? 'done' : 'lock'}" style="min-width:2.4rem;text-align:center">${ok ? 'Sí' : 'No'}</span><span>${txt}</span>${ok && t ? `<span class="muted" style="font-size:.78rem">${esc(fechaCorta(t))}</span>` : ''}</li>`;
+  const registro = (l) => { const a = l.asistencia || {}, e = leadEtapa(l);
+    return `<ul class="reg" style="list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:.88rem">${fila(!!a.entro, 'Entró a la clase', a.entro)}${fila(!!a.confirmada, 'Asistió confirmado', a.confirmada)}${fila(a.autodeclarada === 'si', `Asistencia autodeclarada${a.autodeclarada === 'no' ? ' (dijo que no pudo entrar)' : ''}`, a.autodeclaradaT)}${fila(!!l.replayT || e === 'vio_replay', 'Vio el replay', l.replayT)}${fila(!!l.compraClicT, 'Hizo clic en comprar', l.compraClicT)}${fila(esInscrita(e) || !!l.pago?.t, 'Matriculada', l.pago?.t)}</ul>`; };
+  const opciones = (l) => (esClase(l.form) ? [...etapasClaseDe(l.form), ['descartado', 'Descartada']] : LEAD_STATES.filter(([k]) => !(esPago(l.form) && k === 'clase')));
+  const tarjeta = (l) => { const act = esClase(l.form) ? etapaVisible(leadEtapa(l)) : leadEtapa(l);
+    return `<div class="pg"><div class="pg-top"><b>${esc(LEAD_FORMS[l.form] || l.form)}</b></div>
+      <span class="muted" style="font-size:.78rem">${fdateMs(l.createdAt)}${l.claseFecha ? ` · clase ${esc(fechaLarga(l.claseFecha))}` : ''}${l.status === 'descartado' && l.motivo ? ` · motivo: ${esc(l.motivo)}` : ''}</span>
+      <label style="display:grid;gap:4px;font-size:.8rem">Etapa<select data-fs-etapa="${esc(l.id)}">${opciones(l).map(([k, t]) => `<option value="${k}" ${act === k ? 'selected' : ''}>${esc(etapaTxt(l.form, k))}</option>`).join('')}</select></label>
+      ${esClase(l.form) ? registro(l) : ''}</div>`; };
+  dialog(`<div style="display:grid;gap:14px;max-width:680px"><div class="ct-cab"><span class="av lg" style="--c:${colorFor(p.id)}">${esc(initials(p.nombre))}</span><div><h3>${esc(p.nombre)}</h3><span class="muted" style="font-size:.8rem">${esc(etapaTxt('', etapaDe(p)))}</span></div></div>
+    <div class="ct-acc">${p.whatsapp ? `<a class="btn btn-primary btn-sm" href="${waLink(p.whatsapp)}" data-wa-open="${esc(waNum(p.whatsapp))}" data-wa-name="${esc(p.nombre)}">WhatsApp</a>` : ''}${p.email ? `<a class="btn btn-ghost btn-sm" href="mailto:${esc(p.email)}">Correo</a>` : ''}</div>
+    <form class="ct-form" id="ct-form">
+      <label>Nombre<input data-ct="name" value="${esc(p.nombre)}" maxlength="120" autocomplete="off"></label>
+      <label>Correo<input data-ct="email" type="email" value="${esc(p.email)}" maxlength="160" autocomplete="off"></label>
+      <label>WhatsApp<input data-ct="whatsapp" type="tel" value="${esc(p.whatsapp)}" maxlength="40" autocomplete="off"></label>
+      <label>País<input data-ct="country" value="${esc(p.country)}" maxlength="60" autocomplete="off"></label>
+      <div class="ct-guardar"><span class="muted" id="ct-estado" style="font-size:.8rem">Todo guardado</span><button class="btn btn-primary btn-sm" id="ct-save" disabled>Guardar cambios</button></div>
+    </form>
+    ${p.leads.map(tarjeta).join('')}
+    <section class="ct-sec"><b>Enlaces personales</b>${enlacesPersonales(p)}</section>
+    <section class="ct-sec"><b>Nota</b><form id="nota-form" style="display:grid;gap:8px"><textarea id="nt-text" maxlength="1000" rows="3" placeholder="Anota lo que conversaron…" aria-label="Nota">${esc(p.note || '')}</textarea><button class="btn btn-primary btn-sm" style="justify-self:start">Guardar nota</button></form></section>
+    <button type="button" class="link" id="lf-del" style="color:#b8402f;justify-self:start">Eliminar persona</button></div>`, true);
+  $('#dlg').classList.add('contacto');
+  const campos = [...document.querySelectorAll('#dlg [data-ct]')], orig = { name: p.nombre, email: p.email, whatsapp: p.whatsapp, country: p.country };
+  const sucio = () => campos.some((c) => c.value.trim() !== (orig[c.dataset.ct] || ''));
+  const marcar = () => { $('#ct-save').disabled = !sucio(); $('#ct-estado').textContent = sucio() ? 'Hay cambios sin guardar' : 'Todo guardado'; };
+  campos.forEach((c) => (c.oninput = marcar));
+  $('#ct-form').onsubmit = async (e) => {
+    e.preventDefault(); if (!sucio()) return;
+    const contacto = Object.fromEntries(campos.map((c) => [c.dataset.ct, c.value.trim()])), b = $('#ct-save'); b.disabled = true;
+    try { await data.leads({ action: 'update', ids, contacto }); p.leads.forEach((l) => Object.assign(l, contacto, { email: contacto.email.toLowerCase() })); refrescar(); leadFichaSimple(id); toast('Cambios guardados.'); } catch (err) { fail(err); b.disabled = false; }
+  };
+  document.querySelectorAll('#dlg [data-fs-etapa]').forEach((s) => (s.onchange = async () => { const cambio = await leadMover(s.dataset.fsEtapa, s.value); if (cambio) toast('Guardado.'); leadFichaSimple(id); }));
+  document.querySelectorAll('#dlg [data-codigo]').forEach((b) => (b.onclick = async () => {
+    const [tid, accion] = b.dataset.codigo.split('|'), l = A.leads.find((x) => x.id === tid); if (!l) return;
+    if (!confirm(accion === 'revocar' ? 'Si lo revocas, los enlaces de esta persona dejan de funcionar. ¿Revocar el código?' : 'Se crea un código nuevo y los enlaces anteriores dejan de funcionar. ¿Regenerar?')) return;
+    try {
+      await data.leads({ action: 'codigo', id: tid, accion });
+      if (accion === 'revocar') l.codigoRevocado = true; else await data.leads({ action: 'all' });
+      refrescar(); leadFichaSimple(id); toast(accion === 'revocar' ? 'Código revocado.' : 'Código regenerado.');
+    } catch (err) { fail(err); }
+  }));
+  $('#nota-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const texto = $('#nt-text').value.trim(); if (!texto) return toast('Escribe la nota.');
+    try { await data.leads({ action: 'nota', ids, texto }); p.leads.forEach((l) => { l.note = texto; }); refrescar(); leadFichaSimple(id); toast('Nota guardada.'); } catch (err) { fail(err); }
+  };
+  $('#lf-del').onclick = async () => {
+    if (!confirm(`¿Eliminar a ${p.nombre} de tu lista${p.leads.length > 1 ? ` (${p.leads.length} programas)` : ''}? No se puede deshacer.`)) return;
+    try { await data.leads({ action: 'delete', ids }); A.leads = A.leads.filter((x) => !ids.includes(x.id)); S.leadSel.delete(p.id); $('#dlg').close(); refrescar(); toast('Eliminada.'); } catch (err) { fail(err); }
+  };
+}
+
 function leadFicha(id) {
+  if (!FUNC.fichaCompleta) return leadFichaSimple(id);
   const p = personaDe(id) || personas().find((x) => x.id === id); if (!p) return;
   const tab = S.fichaTab === 'wa' ? 'wa' : 'historial';
   const ids = p.leads.map((l) => l.id), formas = new Set(p.leads.map((l) => l.form));
@@ -973,7 +1039,7 @@ const asistioL = (l) => !!(l.asistencia?.entro || l.asistencia?.confirmada) || [
 const segmentoDe = (l) => (asistioL(l) ? 'asistieron' : leadEtapa(l) === 'no_identificada' || l.asistencia?.autodeclarada === 'si' ? 'no_identificadas' : 'no_asistieron');
 // Quién no debe recibir mensajes de venta: ya compró, se descartó, pidió que no le escribamos, o rechazó el consentimiento
 const excluidaDeEnvio = (l, p) => (['matriculada', 'descartado', 'lista_espera'].includes(leadEtapa(l)) ? 'Ya compró o está fuera'
-  : l.secuenciasVenta === false ? 'Ya compró' : (p?.tags || []).includes('No contactar') ? 'Pidió que no le escribamos' : l.consentimiento?.whatsapp?.aceptado === false ? 'No aceptó que le escribamos' : '');
+  : l.secuenciasVenta === false ? 'Ya compró' : ((p?.tags || []).includes('No contactar') || l.noContactar) ? 'Pidió que no le escribamos' : l.consentimiento?.whatsapp?.aceptado === false ? 'No aceptó que le escribamos' : '');
 // Variables que se reemplazan en los textos con los datos de cada persona
 const variablesDe = (l) => {
   const base = l.enlace_entrada ? new URL(l.enlace_entrada).origin : '';
@@ -1008,7 +1074,8 @@ V.envios = () => {
       <td style="white-space:normal">${enviadoHoy(l, 'whatsapp') ? '<span class="pill done">WhatsApp enviado hoy</span> ' : ''}${enviadoHoy(l, 'email') ? '<span class="pill done">Correo enviado hoy</span>' : ''}</td>
       <td style="text-align:right;white-space:nowrap">${n && texto ? `<a class="btn btn-ghost btn-sm" href="https://wa.me/${n}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener" data-env-wa="${esc(l.id)}">WhatsApp</a>` : ''}
         ${l.email && texto ? `<a class="btn btn-ghost btn-sm" href="mailto:${esc(l.email)}?subject=${encodeURIComponent(`${ofertaDe(clase).nombre}: tu clase y tu lugar`)}&body=${encodeURIComponent(msg)}" data-env-mail="${esc(l.id)}">Correo</a>` : ''}
-        ${texto ? `<button type="button" class="btn btn-ghost btn-sm" data-env-copy="${esc(l.id)}">Copiar</button>` : ''}</td></tr>`; };
+        ${texto ? `<button type="button" class="btn btn-ghost btn-sm" data-env-copy="${esc(l.id)}">Copiar</button>` : ''}
+        <button type="button" class="link" style="color:#b8402f;font-size:.78rem" data-env-parar="${esc(l.id)}" title="Respondió «no» o pidió que no le escribamos: sale de todos los envíos">Pidió parar</button></td></tr>`; };
   const ejemplo = aEnviar[0] ? rellenar(texto, aEnviar[0].l) : '';
   return `${head}${aviso}
   <div class="filters">${chip('data-env-clase', 'pendulo', 'Péndulo Hebreo', clase === 'pendulo')}${chip('data-env-clase', 'tarot', 'Tarot Terapéutico', clase === 'tarot')}</div>
@@ -1020,7 +1087,7 @@ V.envios = () => {
     ${ejemplo ? `<div class="card" style="padding:12px 14px;font-size:.86rem;white-space:pre-wrap"><b style="display:block;margin-bottom:4px">Así le llegaría a ${esc(aEnviar[0].l.name.split(' ')[0])}:</b>${esc(ejemplo)}</div>` : ''}</section>
   <section class="card panel"><div class="panel-h"><h3>${aEnviar.length} persona${aEnviar.length === 1 ? '' : 's'} para escribir</h3><button class="btn btn-ghost btn-sm" data-env-csv>Exportar para correo masivo</button></div>
     ${sinCodigo ? `<p style="font-size:.84rem;color:#b8402f;margin:0"><b>${sinCodigo}</b> no tienen código personal todavía: usa «Preparar contactos» en Interesadas.</p>` : ''}
-    <p class="muted" style="font-size:.8rem;margin:0">Máximo un mensaje por canal por persona al día: si ya le escribiste hoy, te lo avisa antes de abrir de nuevo. ${excl.length ? `Se dejan fuera ${excl.length} (ya compraron, pidieron no recibir mensajes o no aceptaron).` : ''}</p>
+    <p class="muted" style="font-size:.8rem;margin:0">Reglas: máximo un mensaje por canal por persona al día, nada entre las 22:00 y las 8:00 (Chile), y quien responde «no» o pide parar sale de los envíos. ${excl.length ? `Se dejan fuera ${excl.length} (ya compraron, pidieron no recibir mensajes o no aceptaron).` : ''}</p>
     <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Persona</th><th>Asistencia</th><th>Hoy</th><th></th></tr></thead><tbody>${aEnviar.map(fila).join('') || '<tr><td colspan="4" class="muted">No hay personas en este grupo.</td></tr>'}</tbody></table></div></section>`;
 };
 // Las plantillas viven en config/plantillas (solo la Maestra las escribe, ver firestore.rules)
@@ -1156,13 +1223,13 @@ const filasClic = () => personas().map((p) => { const ls = p.leads.filter(clicSi
 // Ya vio la oferta (replay o clic) y no ha pagado, reservado ni respondido por WhatsApp
 const respondioDespues = (l) => { const n = waNum(l.whatsapp), c = n && A.wa.chats.find((x) => x.id === n); return (c?.lastInboundAt?.toMillis?.() || 0) > (l.replayT || l.compraClicT || 0); };
 const vioOfertaSinRespuesta = (l, p) => esClase(l.form) && (['vio_oferta', 'vio_replay'].includes(leadEtapa(l)) || !!l.replayT || !!l.compraClicT) && !pagoHecho(l) && !l.reservaPagada
-  && !['descartado', 'reservo_cupo', 'lista_espera'].includes(leadEtapa(l)) && !(p?.tags || []).includes('No contactar') && !respondioDespues(l); // en lista de espera no se les apura: el curso está lleno
+  && !['descartado', 'reservo_cupo', 'lista_espera'].includes(leadEtapa(l)) && !(p?.tags || []).includes('No contactar') && !l.noContactar && !respondioDespues(l); // en lista de espera no se les apura: el curso está lleno
 const pagoBadges = (l) => {
   const b = [];
-  if (l.reservaPagada) b.push(`<span class="pill pres" title="Reserva pagada por WhatsApp">Reserva ${clp(l.reservaMonto)}</span>`);
-  if (l.reservaPagada && !pagoHecho(l)) b.push(`<span class="pill bad" title="Debe pagarse antes de la primera clase">Saldo ${clp(Math.max(0, ofertaDe('pendulo').precio - (l.reservaMonto || 0)))}</span>`);
-  if (claseDeL(l) === 'tarot' && ((l.pagos || []).length || l.pago)) { const t = ofertaDe('tarot').cuotas || 2, n = Math.min(t, (l.pagos || []).length || 1); b.push(`<span class="pill ${n >= t ? 'done' : 'pres'}" title="Cuotas pagadas del Tarot">Cuotas ${n}/${t}</span>`); }
-  if (l.cobroFallido) b.push('<span class="pill bad" title="Un cobro falló: escribirle hoy">Cobro fallido</span>');
+  if (FUNC.reserva && l.reservaPagada) b.push(`<span class="pill pres" title="Reserva pagada por WhatsApp">Reserva ${clp(l.reservaMonto)}</span>`);
+  if (FUNC.reserva && l.reservaPagada && !pagoHecho(l)) b.push(`<span class="pill bad" title="Debe pagarse antes de la primera clase">Saldo ${clp(Math.max(0, ofertaDe('pendulo').precio - (l.reservaMonto || 0)))}</span>`);
+  if (FUNC.cuotas && claseDeL(l) === 'tarot' && ((l.pagos || []).length || l.pago)) { const t = ofertaDe('tarot').cuotas || 2, n = Math.min(t, (l.pagos || []).length || 1); b.push(`<span class="pill ${n >= t ? 'done' : 'pres'}" title="Cuotas pagadas del Tarot">Cuotas ${n}/${t}</span>`); }
+  if (FUNC.cuotas && l.cobroFallido) b.push('<span class="pill bad" title="Un cobro falló: escribirle hoy">Cobro fallido</span>');
   return b.join(' ');
 };
 const pagoPersona = (p) => p.leads.filter((l) => esClase(l.form)).map(pagoBadges).filter(Boolean).join(' ');
@@ -1170,7 +1237,7 @@ const origenMatricula = (l) => `Clase gratis de ${(ofertaDe(claseDeL(l))?.nombre
 // Bloque de la ficha: reserva y saldo (Péndulo) o cuotas (Tarot)
 const bloquePago = (l) => {
   const clase = claseDeL(l), o = ofertaDe(clase), id = esc(l.id);
-  if (!o || !esClase(l.form)) return '';
+  if (!o || !esClase(l.form) || (clase === 'tarot' ? !FUNC.cuotas : !FUNC.reserva)) return '';
   const clic = l.compraClicT ? `<span class="muted" style="font-size:.78rem">Hizo clic en «inscribirme» el ${esc(fechaCorta(l.compraClicT))}${pagoHecho(l) || l.reservaPagada ? '' : ' y todavía no paga'}.</span>` : '';
   const origen = pagoHecho(l) || l.reservaPagada ? `<span class="muted" style="font-size:.76rem">Origen: ${esc(origenMatricula(l))}</span>` : '';
   if (clase === 'tarot') {
@@ -1197,7 +1264,7 @@ const cuposDe = (clase) => {
   const espera = ps.filter((p) => p.leads.some((l) => claseDeL(l) === clase && esClase(l.form) && leadEtapa(l) === 'lista_espera')).length;
   return { cupos: o.cupos, ocupados, espera, lleno: o.cupos != null && ocupados >= o.cupos, nombre: o.nombre };
 };
-const cuposHTML = () => ['pendulo', 'tarot'].map((c) => {
+const cuposHTML = () => !FUNC.listaEspera ? '' : ['pendulo', 'tarot'].map((c) => {
   const k = cuposDe(c); if (k.cupos == null) return '';
   const pct = Math.min(100, Math.round((k.ocupados / (k.cupos || 1)) * 100));
   return `<div class="cupo ${k.lleno ? 'lleno' : ''}"><div class="cupo-top"><b>${esc(k.nombre)}</b><span>${k.ocupados} de ${k.cupos} cupos${k.lleno ? ' · LLENO' : ''}${k.espera ? ` · ${k.espera} en lista de espera` : ''}</span></div><div class="cupo-barra"><i style="width:${pct}%"></i></div></div>`;
@@ -1237,11 +1304,11 @@ const listaMatricula = () => {
 
 // ----- Seguimiento: «No abrió el replay» (24 h o más después de enviárselo) y «Cobro fallido» (cuota del Tarot que no se pudo cobrar)
 const replaySinAbrir = (l, p) => esClase(l.form) && !!l.replayEnviadoT && Date.now() - l.replayEnviadoT >= 24 * 36e5 && !l.replayT && leadEtapa(l) !== 'vio_replay'
-  && !pagoHecho(l) && !l.reservaPagada && !['descartado', 'reservo_cupo', 'lista_espera'].includes(leadEtapa(l)) && !(p?.tags || []).includes('No contactar') && !(l.seguimientoReplayT > l.replayEnviadoT);
+  && !pagoHecho(l) && !l.reservaPagada && !['descartado', 'reservo_cupo', 'lista_espera'].includes(leadEtapa(l)) && !(p?.tags || []).includes('No contactar') && !l.noContactar && !(l.seguimientoReplayT > l.replayEnviadoT);
 const filasReplay = () => personas().flatMap((p) => p.leads.filter((l) => replaySinAbrir(l, p)).map((l) => ({ p, l }))).sort((a, b) => a.l.replayEnviadoT - b.l.replayEnviadoT);
 const filasFallidas = () => personas().flatMap((p) => p.leads.filter((l) => esClase(l.form) && l.cobroFallido).map((l) => ({ p, l }))).sort((a, b) => b.l.cobroFallido.t - a.l.cobroFallido.t);
 const avisosSeguimiento = () => {
-  const r = filasReplay().length, f = filasFallidas().length;
+  const r = filasReplay().length, f = FUNC.cuotas ? filasFallidas().length : 0;
   return [f ? `<div class="alert"><div><b>${f} cobro${f === 1 ? '' : 's'} fallido${f === 1 ? '' : 's'}</b><p>Cobro fallido: escribirle hoy. La persona sigue matriculada; solo hay que ayudarle con el pago.</p></div><button class="btn" data-crm-lista="fallido">Ver lista</button></div>` : '', r ? `<div class="alert"><div><b>${r} persona${r === 1 ? '' : 's'} no abrieron el replay</b><p>Ya se lo enviaste hace 24 horas o más y no lo han visto. Pregúntales: «¿Pudiste ver la clase?».</p></div><button class="btn" data-crm-lista="replay">Ver lista</button></div>` : ''].join('');
 };
 const listaSeguimiento = (modo) => {
@@ -1286,9 +1353,9 @@ V.clases = () => {
         ${f('inicio', 'Inicio del curso', 'date', b.inicio)}${f('cierreFecha', 'Cierre de inscripción: fecha', 'date', b.cierre[0])}${f('cierreHora', 'Cierre: hora (Chile)', 'time', b.cierre[1])}
         ${f('precio', `Precio (${b.moneda})`, 'number', String(b.precio), 'min="0" step="any"')}
         <label class="cfg-f"><b>Moneda</b><select data-cfg="${clase}.moneda">${['CLP', 'USD'].map((m) => `<option ${(o.moneda || b.moneda) === m ? 'selected' : ''}>${m}</option>`).join('')}</select></label>
-        ${clase === 'pendulo' ? f('reserva', 'Reserva por WhatsApp (CLP)', 'number', String(b.reserva), 'min="0"') : f('cuotas', 'Cuotas', 'number', String(b.cuotas), 'min="1" max="12"')}
-        ${f('cupos', 'Cupos máximos (vacío = sin límite)', 'number', 'sin límite', 'min="0"')}
-        <label class="cfg-f cfg-chk"><input data-cfg="${clase}.listaEspera" type="checkbox" ${(typeof o.listaEspera === 'boolean' ? o.listaEspera : b.listaEspera) ? 'checked' : ''}><span>Abrir lista de espera cuando se llenen los cupos</span></label>
+        ${clase === 'pendulo' ? (FUNC.reserva ? f('reserva', 'Reserva por WhatsApp (CLP)', 'number', String(b.reserva), 'min="0"') : '') : (FUNC.cuotas ? f('cuotas', 'Cuotas', 'number', String(b.cuotas), 'min="1" max="12"') : '')}
+        ${FUNC.listaEspera ? `${f('cupos', 'Cupos máximos (vacío = sin límite)', 'number', 'sin límite', 'min="0"')}
+        <label class="cfg-f cfg-chk"><input data-cfg="${clase}.listaEspera" type="checkbox" ${(typeof o.listaEspera === 'boolean' ? o.listaEspera : b.listaEspera) ? 'checked' : ''}><span>Abrir lista de espera cuando se llenen los cupos</span></label>` : ''}
         ${f('palabra', 'Palabra de asistencia por defecto', 'text', 'se define en cada clase del Calendario')}${f('ventanaAntes', 'Ventana: minutos antes de la clase', 'number', String(b.ventanaAntes), 'min="0" max="240"')}${f('ventanaDespues', 'Ventana: minutos después del inicio', 'number', String(b.ventanaDespues), 'min="0" max="240"')}</div>
       <label class="cfg-f"><b>Texto de la oferta</b><textarea data-cfg="${clase}.texto" rows="4" maxlength="1500" placeholder="Lo que se muestra junto a la fecha límite en la página del replay">${esc(o.texto || '')}</textarea></label></section>`;
   };
@@ -1299,7 +1366,8 @@ async function guardarClases(form) {
   document.querySelectorAll('[data-cfg]').forEach(pon);
   const ofertas = {};
   for (const clase of ['pendulo', 'tarot']) {
-    const x = v[clase] || {}, o = {};
+    const x = { ...(v[clase] || {}) }, o = {}, previo = A.clases?.ofertas?.[clase] || {};
+    for (const k of ['reserva', 'cuotas', 'cupos', 'listaEspera']) if (!(k in x)) x[k] = previo[k] ?? (k === 'listaEspera' ? undefined : ''); // campo oculto: no se pisa lo guardado
     for (const k of ['sala', 'replay']) if (x[k] && !isHttps(x[k])) return toast('Los enlaces deben empezar con https://');
     if (x.videoGracias && !/^https:\/\/(www\.|m\.)?(youtube\.com|youtu\.be|vimeo\.com|player\.vimeo\.com)\/\S+$/i.test(x.videoGracias)) return toast('El video de bienvenida debe ser un enlace de YouTube o Vimeo con https://');
     if (!!x.cierreFecha !== !!x.cierreHora) return toast('El cierre necesita fecha y hora.');
@@ -1308,7 +1376,7 @@ async function guardarClases(form) {
     for (const k of ['precio', 'reserva', 'cuotas', 'ventanaAntes', 'ventanaDespues']) { if (x[k] === undefined || x[k] === '') { o[k] = ''; continue; } if (!Number.isFinite(Number(x[k])) || Number(x[k]) < 0) return toast(`Revisa el número de «${k}».`); o[k] = Number(x[k]); }
     o.cupos = x.cupos === '' || x.cupos === undefined ? '' : Number(x.cupos);
     if (o.cupos !== '' && (!Number.isFinite(o.cupos) || o.cupos < 0)) return toast('Revisa los cupos máximos.');
-    o.moneda = x.moneda; o.listaEspera = !!x.listaEspera;
+    o.moneda = x.moneda; if (typeof x.listaEspera === 'boolean') o.listaEspera = x.listaEspera;
     ofertas[clase] = o;
   }
   const d = { ofertas, enlacePendulo: v.pendulo?.sala || '', enlaceTarot: v.tarot?.sala || '', replayPendulo: v.pendulo?.replay || '', replayTarot: v.tarot?.replay || '', videoGraciasPendulo: v.pendulo?.videoGracias || '', videoGraciasTarot: v.tarot?.videoGracias || '' };
@@ -1730,7 +1798,7 @@ document.addEventListener('click', async (e) => {
   b.disabled = true;
   try {
     const manana = ymd(hoyCL() + 864e5), hoy = ymd(hoyCL());
-    const pide = (id) => { const q = personaDe(id); return !!q && (!q.followUp || q.followUp < hoy); }; // solo a quien no tiene ya un seguimiento pendiente
+    const pide = (id) => { const q = personaDe(id); return FUNC.tareas && !!q && (!q.followUp || q.followUp < hoy); }; // solo a quien no tiene ya un seguimiento pendiente
     const conSeg = ids.filter(pide), sinSeg = ids.filter((id) => !pide(id));
     if (sinSeg.length) await data.leads({ action: 'estado', ids: sinSeg, status: 'asistio_confirmado' });
     if (conSeg.length) await data.leads({ action: 'estado', ids: conSeg, status: 'asistio_confirmado', followUp: manana });
@@ -1823,6 +1891,7 @@ function bind() {
   document.querySelectorAll('[data-crm-lista]').forEach((b) => (b.onclick = () => { S.crmLista = b.dataset.crmLista; go('interesadas'); }));
   document.querySelectorAll('[data-seg-replay]').forEach((a) => (a.onclick = () => {
     const l = A.leads.find((x) => x.id === a.dataset.segReplay); if (!l) return;
+    if (horaChile() < 8 || horaChile() >= 22) { return toast('No se envía entre las 22:00 y las 8:00 (hora de Chile).'); }
     data.leads({ action: 'enviado', ids: [l.id], canal: 'whatsapp', plantilla: 'replay_seguimiento', seguimiento: 'replay' }).then(() => { l.seguimientoReplayT = Date.now(); l.ultimoEnvio = { ...(l.ultimoEnvio || {}), whatsapp: Date.now() }; render(false); }).catch(fail);
   }));
   document.querySelectorAll('[data-env-ir]').forEach((b) => (b.onclick = () => { S.envClase = b.dataset.envIr; S.envSeg = 'oferta'; go('envios'); }));
@@ -1840,11 +1909,18 @@ function bind() {
   const envCanal = (canal) => (a) => (a.onclick = (e) => {
     const l = A.leads.find((x) => x.id === a.dataset[canal === 'whatsapp' ? 'envWa' : 'envMail']); if (!l) return;
     if (horaChile() < 8 || horaChile() >= 22) { e.preventDefault(); return toast('No se envía entre las 22:00 y las 8:00 (hora de Chile).'); }
-    if (l.ultimoEnvio?.[canal] && diaChile(l.ultimoEnvio[canal]) === diaChile(Date.now()) && !confirm(`Ya le escribiste hoy por ${canal === 'whatsapp' ? 'WhatsApp' : 'correo'}. ¿Enviarle otro?`)) { e.preventDefault(); return; }
+    if (l.ultimoEnvio?.[canal] && diaChile(l.ultimoEnvio[canal]) === diaChile(Date.now())) { e.preventDefault(); return toast(`Ya le escribiste hoy por ${canal === 'whatsapp' ? 'WhatsApp' : 'correo'}: máximo un mensaje por canal al día. Mañana puedes volver a escribirle.`); }
+    if (l.noContactar || (personaDe(l.id)?.tags || []).includes('No contactar')) { e.preventDefault(); return toast('Pidió que no le escribamos.'); }
     envioMarcar(l, canal);
   });
   document.querySelectorAll('[data-env-wa]').forEach(envCanal('whatsapp'));
   document.querySelectorAll('[data-env-mail]').forEach(envCanal('email'));
+  document.querySelectorAll('[data-env-parar]').forEach((b) => (b.onclick = async () => {
+    const l = A.leads.find((x) => x.id === b.dataset.envParar); if (!l) return;
+    if (!confirm(`¿Marcar a ${l.name} como «No contactar»? Sale de todos los envíos y no se le escribe más.`)) return;
+    const q = personaDe(l.id), ids = q ? q.leads.map((x) => x.id) : [l.id];
+    try { await data.leads({ action: 'etiquetas', ids, agregar: ['No contactar'] }); A.leads.forEach((x) => { if (ids.includes(x.id)) x.tags = [...new Set([...(x.tags || []), 'No contactar'])]; }); A._per = null; render(false); toast('Listo: no se le escribe más.'); } catch (e) { fail(e); }
+  }));
   document.querySelectorAll('[data-env-copy]').forEach((b) => (b.onclick = () => {
     const l = A.leads.find((x) => x.id === b.dataset.envCopy); if (!l) return;
     const texto = rellenar(textoEnvio(S.envClase || 'pendulo', S.envSeg || 'asistieron'), l);
