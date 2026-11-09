@@ -427,3 +427,6 @@ details.menu>summary::-webkit-details-marker{display:none}
 .cfg-chk input{width:auto}
 
 .cfg-f{align-content:start}
+.pg select{font:inherit;font-size:.9rem;border:1px solid var(--line);border-radius:10px;padding:8px 11px;background:var(--bg);color:var(--fg);width:100%}
+.pg .reg li{padding:2px 0;border-top:1px solid var(--line)}
+.pg .reg li:first-child{border-top:0}

@@ -779,8 +779,15 @@ function leadFichaSimple(id) {
       <span class="muted" style="font-size:.78rem">${fdateMs(l.createdAt)}${l.claseFecha ? ` · clase ${esc(fechaLarga(l.claseFecha))}` : ''}${l.status === 'descartado' && l.motivo ? ` · motivo: ${esc(l.motivo)}` : ''}</span>
       <label style="display:grid;gap:4px;font-size:.8rem">Etapa<select data-fs-etapa="${esc(l.id)}">${opciones(l).map(([k, t]) => `<option value="${k}" ${act === k ? 'selected' : ''}>${esc(etapaTxt(l.form, k))}</option>`).join('')}</select></label>
       ${esClase(l.form) ? registro(l) : ''}</div>`; };
-  dialog(`<div style="display:grid;gap:14px;max-width:680px"><div class="ct-cab"><span class="av lg" style="--c:${colorFor(p.id)}">${esc(initials(p.nombre))}</span><div><h3>${esc(p.nombre)}</h3><span class="muted" style="font-size:.8rem">${esc(etapaTxt('', etapaDe(p)))}</span></div></div>
-    <div class="ct-acc">${p.whatsapp ? `<a class="btn btn-primary btn-sm" href="${waLink(p.whatsapp)}" data-wa-open="${esc(waNum(p.whatsapp))}" data-wa-name="${esc(p.nombre)}">WhatsApp</a>` : ''}${p.email ? `<a class="btn btn-ghost btn-sm" href="mailto:${esc(p.email)}">Correo</a>` : ''}</div>
+  const n = waNum(p.whatsapp), c = A.wa.chats.find((x) => x.id === n), libre = waLibre(c);
+  const chat = !n ? '<div class="wa-empty" style="flex:1;border:1px dashed var(--line);border-radius:12px">Esta persona no dejó WhatsApp.</div>' : `<div class="alert" id="wf-aviso" ${A.wa.on === false ? '' : 'hidden'}><div><b>WhatsApp todavía no está conectado</b><p>Cuando esté el número definitivo y las llaves de Meta, aquí podrás conversar uno a uno. Mientras tanto el chat no envía ni recibe.</p></div></div>
+      <div class="wa-msgs" id="wf-msgs" style="flex:1;min-height:260px;border:1px solid var(--line);border-radius:12px"><div class="wa-empty">Cargando conversación…</div></div>
+      ${libre ? `<div style="display:grid;gap:8px"><select id="wf-resp" aria-label="Respuestas rápidas"><option value="">Respuestas rápidas…</option>${RESPUESTAS.map(([t], i) => `<option value="${i}">${esc(t)}</option>`).join('')}</select>
+        <form class="wa-send" id="wf-form" style="padding:0;border:0"><textarea id="wf-text" rows="2" placeholder="Escribe un mensaje…" aria-label="Mensaje"></textarea><button class="btn btn-primary btn-sm">Enviar</button></form></div>`
+      : `<div class="wa-note"><span>${c?.lastInboundAt ? 'Pasaron más de 24 horas desde su último mensaje.' : 'Esta persona aún no te ha escrito.'} WhatsApp solo permite empezar con un mensaje de plantilla (con costo); cuando responda podrás escribirle libremente.</span><button type="button" class="btn btn-primary btn-sm" id="wf-plantilla">Enviar plantilla</button></div>`}`;
+  dialog(`<div class="ct"><aside class="ct-izq"><div class="ct-cab"><span class="av lg" style="--c:${colorFor(p.id)}">${esc(initials(p.nombre))}</span><div><h3>${esc(p.nombre)}</h3><span class="muted" style="font-size:.8rem">${esc(etapaTxt('', etapaDe(p)))}</span></div></div>
+    <div class="ct-badges" style="margin:0">${cuentaBadge(p)} ${asistPersona(p)}</div>
+    <div class="ct-acc">${p.email ? `<a class="btn btn-ghost btn-sm" href="mailto:${esc(p.email)}">Escribir correo</a>` : ''}</div>
     <form class="ct-form" id="ct-form">
       <label>Nombre<input data-ct="name" value="${esc(p.nombre)}" maxlength="120" autocomplete="off"></label>
       <label>Correo<input data-ct="email" type="email" value="${esc(p.email)}" maxlength="160" autocomplete="off"></label>
@@ -788,11 +795,30 @@ function leadFichaSimple(id) {
       <label>País<input data-ct="country" value="${esc(p.country)}" maxlength="60" autocomplete="off"></label>
       <div class="ct-guardar"><span class="muted" id="ct-estado" style="font-size:.8rem">Todo guardado</span><button class="btn btn-primary btn-sm" id="ct-save" disabled>Guardar cambios</button></div>
     </form>
-    ${p.leads.map(tarjeta).join('')}
+    <section class="ct-sec"><b>Datos</b><dl class="kv" style="font-size:.84rem;gap:6px 12px"><dt>Origen</dt><dd>${esc(leadOrigenTxt(p.leads[0]))}</dd><dt>Primer registro</dt><dd>${fdateMs(p.leads[0].createdAt)}</dd></dl></section>
     <section class="ct-sec"><b>Enlaces personales</b>${enlacesPersonales(p)}</section>
-    <section class="ct-sec"><b>Nota</b><form id="nota-form" style="display:grid;gap:8px"><textarea id="nt-text" maxlength="1000" rows="3" placeholder="Anota lo que conversaron…" aria-label="Nota">${esc(p.note || '')}</textarea><button class="btn btn-primary btn-sm" style="justify-self:start">Guardar nota</button></form></section>
-    <button type="button" class="link" id="lf-del" style="color:#b8402f;justify-self:start">Eliminar persona</button></div>`, true);
+    <button type="button" class="link" id="lf-del" style="color:#b8402f;justify-self:start">Eliminar persona</button></aside>
+  <main class="ct-centro"><div class="ct-sec"><b>Conversación de WhatsApp${n ? ` · ${esc(p.whatsapp)}` : ''}</b></div>${chat}</main>
+  <aside class="ct-der"><h4 style="font:600 .62rem/1 var(--f-caps);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0">Programas y registro</h4>${p.leads.map(tarjeta).join('')}
+    <section class="ct-sec"><b>Nota</b><form id="nota-form" style="display:grid;gap:8px"><textarea id="nt-text" maxlength="1000" rows="3" placeholder="Anota lo que conversaron…" aria-label="Nota">${esc(p.note || '')}</textarea><button class="btn btn-primary btn-sm" style="justify-self:start">Guardar nota</button></form></section></aside></div>`, true);
   $('#dlg').classList.add('contacto');
+  $('#dlg').addEventListener('close', () => { waFichaOff?.(); waFichaOff = null; }, { once: true });
+  if (n) {
+    waFichaMontar(p);
+    const t = $('#wf-text'), form = $('#wf-form'), resp = $('#wf-resp'), pl = $('#wf-plantilla');
+    if (resp) resp.onchange = () => { if (resp.value === '') return; t.value = RESPUESTAS[Number(resp.value)][1](ctxRespuesta(p)); resp.value = ''; t.focus(); };
+    if (form) {
+      t.onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } };
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        const text = t.value.trim(); if (!text) return;
+        const b = form.querySelector('button'); b.disabled = true;
+        try { await waApi({ action: 'enviar', to: n, text, name: p.nombre }); t.value = ''; } catch (err) { fail(err); }
+        b.disabled = false;
+      };
+    }
+    if (pl) pl.onclick = async () => { pl.disabled = true; try { await waApi({ action: 'plantilla', to: n, name: p.nombre }); toast('Plantilla enviada. Cuando responda podrás escribirle aquí.'); } catch (err) { fail(err); pl.disabled = false; } };
+  }
   const campos = [...document.querySelectorAll('#dlg [data-ct]')], orig = { name: p.nombre, email: p.email, whatsapp: p.whatsapp, country: p.country };
   const sucio = () => campos.some((c) => c.value.trim() !== (orig[c.dataset.ct] || ''));
   const marcar = () => { $('#ct-save').disabled = !sucio(); $('#ct-estado').textContent = sucio() ? 'Hay cambios sin guardar' : 'Todo guardado'; };
