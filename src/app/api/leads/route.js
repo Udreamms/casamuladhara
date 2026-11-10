@@ -17,7 +17,7 @@
 import crypto from 'node:crypto';
 import { FieldValue } from 'firebase-admin/firestore';
 import { chileAUtc } from '@/lib/server/agenda.js';
-import { ETAPAS, ETAPA_TXT, RANGO, baseSitio, claseDe, datosDeCodigo, nuevoCodigo, normaliza, venceCodigo, waClave } from '@/lib/server/embudo.js';
+import { ETAPAS, ETAPAS_DE_LA_CLASE, ETAPA_TXT, RANGO, anotarAsistencia, asistenciaMigrada, baseSitio, claseDe, claseVigente, datosDeCodigo, diaLargo, mismaClase, nuevoCodigo, normaliza, venceCodigo, waClave } from '@/lib/server/embudo.js';
 import { auth, db, json } from '@/lib/server/services.js';
 import { contexto, enviarDespues, idValido, usuario } from '@/lib/server/meta.js';
 
@@ -90,7 +90,7 @@ export async function POST(request) {
       if (ENLACE[form] && FECHA.test(str(body.date, 10))) {
         try {
           const s = await db().collection('calendario').where('type', '==', form).where('date', '==', str(body.date, 10)).limit(1).get();
-          if (!s.empty) Object.assign(lead, { claseEvento: s.docs[0].id, claseFecha: str(body.date, 10) });
+          if (!s.empty) Object.assign(lead, { claseEvento: s.docs[0].id, claseFecha: str(body.date, 10), clases: [{ evento: s.docs[0].id, fecha: str(body.date, 10), t: Date.now() }] });
         } catch (e) { console.error('leads clase', e); } // sin la asociación igual se guarda la interesada
       }
       // Clase, código personal único (12 caracteres) y enlaces de esa persona: entrada y replay
@@ -106,9 +106,27 @@ export async function POST(request) {
         if (!snap.exists) { repetida = false; tx.set(ref, lead); return; }
         repetida = true;
         // se conservan la fecha, el origen de la campaña, la etapa y el código personal que ya tenía
-        const { createdAt, utm, status, form: f, clase, codigo, codigoVence, codigoRevocado, enlace_entrada, enlace_replay, email, ...nuevo } = lead;
+        const { createdAt, utm, status, form: f, clase, codigo, codigoVence, codigoRevocado, enlace_entrada, enlace_replay, email, clases: _c, ...nuevo } = lead;
         if (snap.data().codigo) codigoFinal = snap.data().codigo;
         const vacio = (v) => v === '' || v === undefined;
+        // Se inscribe de nuevo, pero a OTRA clase (p. ej. no se convenció con la del 7 y viene a la del 14): la asistencia de la anterior se guarda
+        // con esa clase, la etapa vuelve a «Registrada» para la nueva, queda una línea en su historial y se conserva la lista de clases.
+        const prev = snap.data(), nueva = lead.claseEvento || lead.claseFecha ? { evento: lead.claseEvento || '', fecha: lead.claseFecha || '' } : null, vieja = claseVigente(prev);
+        const otraClase = !!nueva && !mismaClase(nueva, vieja);
+        const cambioClase = {};
+        if (otraClase) {
+          const lista = Array.isArray(prev.clases) ? [...prev.clases] : [];
+          if ((vieja.evento || vieja.fecha) && !lista.some((c) => mismaClase(c, vieja))) lista.unshift({ ...vieja });
+          lista.push({ ...nueva, t: Date.now() });
+          const migrada = asistenciaMigrada(prev) || prev.asistencia;
+          Object.assign(cambioClase, {
+            clases: lista,
+            ...(migrada?.sesiones ? { asistencia: { sesiones: migrada.sesiones } } : {}),
+            replayEnviadoT: FieldValue.delete(), seguimientoReplayT: FieldValue.delete(),
+            ...(ETAPAS_DE_LA_CLASE.includes(prev.status) ? { status: lead.status } : {}),
+            eventos: FieldValue.arrayUnion(ev('inscripcion', `Se inscribió de nuevo para el ${diaLargo(nueva.fecha)}`), ...(ETAPAS_DE_LA_CLASE.includes(prev.status) && prev.status !== lead.status ? [ev('etapa', `Etapa: ${ETAPA_TXT[lead.status] || lead.status} (nueva clase)`)] : [])),
+          });
+        }
         tx.update(ref, {
           ...Object.fromEntries(Object.entries(nuevo).filter(([, v]) => !vacio(v))),
           // Un correo distinto del que ya teníamos no lo pisa: queda como correo adicional (así no se pierde el vínculo con su cuenta)
@@ -116,6 +134,7 @@ export async function POST(request) {
           ...(email && snap.data().email && snap.data().email !== email ? { emailsExtra: FieldValue.arrayUnion(email) } : {}),
           ...(!snap.data().codigo && codigo ? { clase, codigo, codigoVence, codigoRevocado, ...(enlace_entrada ? { enlace_entrada, enlace_replay } : {}) } : {}),
           ...(snap.data().status === 'descartado' ? { status: lead.status } : {}), // si vuelve a escribir, vuelve a "por contactar"
+          ...cambioClase,
           repeticiones: FieldValue.increment(1),
           updatedAt: FieldValue.serverTimestamp(),
         });
@@ -165,6 +184,9 @@ export async function POST(request) {
           const l = d.data(), need = {};
           if (claseDe(l.form) && (!l.codigo || !l.enlace_entrada || !l.clase)) Object.assign(need, datosDeCodigo(l.form, base, l));
           if (!l.waKey && waClave(l.whatsapp)) need.waKey = waClave(l.whatsapp);
+          // La asistencia que ya estaba guardada (campos sueltos) queda asignada a su clase (p. ej. las del 7 de noviembre) y se arma la lista de clases
+          const mig = asistenciaMigrada(l); if (mig) need.asistencia = mig;
+          if (!Array.isArray(l.clases) && (l.claseEvento || l.claseFecha)) need.clases = [claseVigente(l)];
           if (!Object.keys(need).length) continue;
           lote.update(d.ref, need); n++; enLote++;
           if (enLote === 400) { await lote.commit(); lote = firestore.batch(); enLote = 0; }
@@ -215,7 +237,10 @@ export async function POST(request) {
           }
           if (l) marcadas.set(l.id, l); else sinMatch.push(linea);
         }
-        const yaAsistio = (l) => !!(l.asistencia?.entro || l.asistencia?.confirmada) || ['entro', 'asistio_confirmado', 'clase', 'conversando', 'vio_oferta', 'inscrita', 'matriculada'].includes(l.status);
+        // La asistencia es por clase: aquí solo cuenta la de ESTA clase (no la de otra a la que haya entrado antes)
+        const estaClase = { evento: sesId, fecha: e.date };
+        const deEstaClase = (l) => { const a = asistenciaMigrada(l) || l.asistencia || {}; return a.sesiones ? Object.values(a.sesiones).find((x) => mismaClase(x, estaClase)) || {} : a; };
+        const yaAsistio = (l) => !!(deEstaClase(l).entro || deEstaClase(l).confirmada) || ['entro', 'asistio_confirmado', 'clase', 'conversando', 'vio_oferta', 'inscrita', 'matriculada'].includes(l.status);
         const noAsist = [], noIdent = [];
         cand.forEach((l) => {
           if (marcadas.has(l.id) || yaAsistio(l)) return;
@@ -229,7 +254,7 @@ export async function POST(request) {
         const ops = [
           ...[...marcadas.values()].map((l) => [l, {
             status: (RANGO[nivel] ?? 0) > (RANGO[l.status] ?? 0) ? nivel : l.status,
-            asistencia: { ...(l.asistencia || {}), [nivel === 'entro' ? 'entro' : 'confirmada']: inicio, fuente: 'meet', evento: sesId },
+            asistencia: anotarAsistencia(l, estaClase, { [nivel === 'entro' ? 'entro' : 'confirmada']: inicio, fuente: 'meet' }, true),
           }, `${txt}: ${ETAPA_TXT[nivel]}`]),
           ...noAsist.map((l) => [l, { status: 'no_asistio' }, `${txt}: No asistió`]),
           ...noIdent.map((l) => [l, { status: 'no_identificada' }, `${txt}: No identificada (dice que estuvo, pero no está en la lista)`]),

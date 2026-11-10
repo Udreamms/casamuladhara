@@ -114,7 +114,7 @@ Cada persona que se inscribe a una clase recibe un **código personal** (12 cara
 → `{ "valido": false }` si el código no existe, fue revocado o venció. Sin clave: 401 (503 si el servidor no tiene `CRM_API_KEY`).
 
 `POST /eventos` con `{ "codigo": "...", "evento": "...", "fecha_iso": "2026-11-07T19:03:00-03:00", "origen": "whatsapp", "extra": {} }`
-→ `{ "ok": true, "ignorado": false, "estado": "entro" }`. El mismo evento del mismo contacto en menos de 60 segundos responde `{ "ok": true, "ignorado": true }`. Código inválido: 404 `{ "ok": false, "error": "codigo_invalido" }`; evento desconocido: 400 `evento_invalido`.
+→ `{ "ok": true, "ignorado": false, "estado": "entro", "sesion_id": "<id de la clase del Calendario>", "cuenta": true, "clase_id": "<clase a la que está inscrita ahora>", "clase_fecha": "2026-11-14" }`. El mismo evento del mismo contacto en menos de 60 segundos responde `{ "ok": true, "ignorado": true }`. Código inválido: 404 `{ "ok": false, "error": "codigo_invalido" }`; evento desconocido: 400 `evento_invalido`.
 
 | evento | efecto |
 |---|---|
@@ -127,6 +127,9 @@ Cada persona que se inscribe a una clase recibe un **código personal** (12 cara
 | `pago_confirmado` (`extra: { monto, moneda }`) | "Matriculada", sale de las secuencias de venta, se borra la tarea y queda inscrita en el curso |
 | `pago_fallido` (`extra: { monto, moneda }`) | **No cambia la etapa** (sigue Matriculada). Deja el aviso «Cobro fallido: escribirle hoy» y una tarea para hoy; el siguiente `pago_confirmado` lo quita |
 | `lista_espera` | Etapa «Lista de espera» (curso lleno), salvo que ya tenga cupo reservado o pagado |
+
+**La asistencia es POR CLASE.** Una persona puede inscribirse a varias clases del mismo programa (la del 7, la del 14…) con la misma tarjeta y el mismo código. La asistencia se guarda en `asistencia.sesiones[<id de la clase>]` y los campos sueltos (`asistencia.entro`, `confirmada`…) reflejan solo la clase a la que está inscrita ahora (`claseEvento` / `claseFecha`). `clic_entrar` y `codigo_asistencia_ok` aceptan `sesion_id` (id de la clase en el Calendario); sin él se toma la clase en curso a esa hora. Respuesta: `sesion_id` = clase en cuya ventana cayó el evento (`null` si ninguna), `clase_id` / `clase_fecha` = clase a la que está inscrita ahora, `cuenta` = si el evento cuenta para esa clase de ahora (un clic en la ventana de la clase del 7 no cuenta para quien ya está inscrita a la del 14).
+Al inscribirse de nuevo (`api/leads`, registro repetido) a **otra** clase: la tarjeta es la misma; la asistencia de la clase anterior queda guardada con esa clase; la etapa vuelve a «Registrada» (se conservan Matriculada, Inscrita, Reservó cupo y En conversación); el historial suma «Se inscribió de nuevo para el {día fecha}» y `clases` conserva la lista de clases. «Preparar contactos» asigna a su clase la asistencia que ya estaba guardada (las del 7 de noviembre).
 
 Cada `pago_confirmado` queda en el historial de pagos (`pagos`): así el CRM muestra «Cuotas pagadas 1/2 · 2/2» del Tarot. **Hay que enviar el evento en cada cuota pagada**, no solo en la primera.
 

@@ -513,7 +513,14 @@ const cuentaBadge = (p) => {
   return `<span class="pill ${urgente ? 'bad' : 'lock'}" title="${urgente ? 'Está inscrita y aún no creó su cuenta en el aula' : 'Aún no tiene cuenta en el aula'}">Sin cuenta</span>`;
 };
 // Tres niveles de asistencia, con etiquetas distintas que no se mezclan: Entró (clic en el enlace), Autodeclarada (lo dijo ella) y Asistió confirmado (código o informe de Meet)
-const asistBadges = (l) => { const a = l.asistencia || {}; return [
+// La asistencia se guarda POR CLASE (asistencia.sesiones). Aquí se lee solo la de la clase a la que la persona está inscrita ahora (claseEvento / claseFecha).
+// Lo guardado antes de este cambio (campos sueltos) cuenta para la clase que tenía; si ya tiene otra clase y no se sabe de cuál era, no cuenta.
+const asistenciaActual = (l) => {
+  const a = l.asistencia || {}, ev = l.claseEvento || '', fe = l.claseFecha || '';
+  if (a.sesiones) { const r = Object.values(a.sesiones).find((x) => (ev && x.evento === ev) || (fe && x.fecha === fe)); return r || (!ev && !fe ? a : {}); }
+  return a.evento && ev && a.evento !== ev ? {} : a;
+};
+const asistBadges = (l) => { const a = asistenciaActual(l); return [
   a.confirmada ? '<span class="pill done" title="Escribió el código de asistencia o aparece en el informe de Meet">Asistió confirmado</span>' : '',
   a.entro ? '<span class="pill pres" title="Hizo clic en el enlace de entrada durante la clase">Entró</span>' : '',
   FUNC.autodeclaracion && a.autodeclarada ? `<span class="pill lock" title="Lo dijo ella en el mensaje; no está verificado">Autodeclarada: ${a.autodeclarada === 'si' ? 'sí' : 'no'}</span>` : ''].filter(Boolean).join(' '); };
@@ -771,7 +778,7 @@ function leadFichaSimple(id) {
   const p = personaDe(id) || personas().find((x) => x.id === id); if (!p) return;
   const ids = p.leads.map((l) => l.id), refrescar = () => { A._per = null; paintNav(); render(false); };
   const fila = (ok, txt, t) => `<li style="display:flex;gap:8px;align-items:center"><span class="pill ${ok ? 'done' : 'lock'}" style="min-width:2.4rem;text-align:center">${ok ? 'Sí' : 'No'}</span><span>${txt}</span>${ok && t ? `<span class="muted" style="font-size:.78rem">${esc(fechaCorta(t))}</span>` : ''}</li>`;
-  const registro = (l) => { const a = l.asistencia || {}, e = leadEtapa(l);
+  const registro = (l) => { const a = asistenciaActual(l), e = leadEtapa(l);
     return `<ul class="reg" style="list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:.88rem">${fila(!!a.entro, 'Entró a la clase (clic en su enlace)', a.entro)}${fila(!!a.confirmada, 'Asistió confirmado', a.confirmada)}${FUNC.autodeclaracion ? fila(a.autodeclarada === 'si', `Asistencia autodeclarada${a.autodeclarada === 'no' ? ' (dijo que no pudo entrar)' : ''}`, a.autodeclaradaT) : ''}${fila(!!l.replayT || e === 'vio_replay', 'Vio el replay', l.replayT)}${fila(!!l.compraClicT, 'Hizo clic en comprar', l.compraClicT)}${fila(esInscrita(e) || !!l.pago?.t, 'Matriculada', l.pago?.t)}</ul>`; };
   const opciones = (l) => (esClase(l.form) ? [...etapasClaseDe(l.form), ['descartado', 'Descartada']] : LEAD_STATES.filter(([k]) => !(esPago(l.form) && k === 'clase')));
   const tarjeta = (l) => { const act = esClase(l.form) ? etapaVisible(leadEtapa(l)) : leadEtapa(l);
@@ -1067,7 +1074,7 @@ const finVentanaClase = (l) => {
   if (!fecha || !hora) return 0;
   return chileAMs(fecha, hora) + (Number.isFinite(Number(o.ventanaDespues)) ? Number(o.ventanaDespues) : 30) * 6e4;
 };
-const asistioL = (l) => !!(l.asistencia?.entro || l.asistencia?.confirmada) || ['entro', 'asistio_confirmado'].includes(leadEtapa(l));
+const asistioL = (l) => !!(asistenciaActual(l).entro || asistenciaActual(l).confirmada) || ['entro', 'asistio_confirmado'].includes(leadEtapa(l));
 // 'entro' | 'no_entro' | 'pendiente' (la clase aún no termina) | 'sin_dato' (no se sabe a qué clase se inscribió)
 const segClic = (l) => {
   if (asistioL(l)) return 'entro';

@@ -99,11 +99,14 @@ export async function configClases() {
 }
 
 // Clase gratis cuya ventana (10 minutos antes a 30 después del inicio) contiene el instante ts. Trae la palabra de asistencia.
-export async function sesionEn(clase, ts) {
+// Con sesionId (id de la clase en el Calendario) solo se mira esa clase; sin él, se busca la que esté en curso.
+export async function sesionEn(clase, ts, sesionId = '') {
   await configClases(); // trae los cambios de la Maestra (ventana y palabra por defecto)
   const of = OFERTAS[clase] || {}, antes = (of.ventanaAntes ?? 10) * 60e3, despues = (of.ventanaDespues ?? 30) * 60e3;
   const tipo = clase === 'tarot' ? 'clase-tarot' : 'clase-pendulo';
-  const s = await db().collection('calendario').where('type', '==', tipo).get();
+  const s = sesionId && /^[A-Za-z0-9]{1,40}$/.test(sesionId)
+    ? { docs: [await db().doc(`calendario/${sesionId}`).get()].filter((d) => d.exists && d.data().type === tipo) }
+    : await db().collection('calendario').where('type', '==', tipo).get();
   for (const d of s.docs) {
     const e = d.data();
     if (!e.date || !e.time || e.tentative) continue;
@@ -112,6 +115,35 @@ export async function sesionEn(clase, ts) {
   }
   return null;
 }
+
+// ASISTENCIA POR CLASE. Una persona puede inscribirse a varias clases del mismo programa (la del 7, la del 14…) con el mismo código.
+// La asistencia se guarda por clase en asistencia.sesiones[clave] = { evento (id del Calendario), fecha, entro?, confirmada?, fuente?, autodeclarada?, autodeclaradaT? }
+// y los campos de siempre (asistencia.entro / confirmada / autodeclarada) reflejan SOLO la clase a la que está inscrita ahora (claseEvento / claseFecha).
+export const claveClase = (c) => c?.evento || (c?.fecha ? `f${c.fecha}` : 'sinClase');
+export const claseVigente = (l) => ({ evento: l.claseEvento || '', fecha: l.claseFecha || '' });
+export const mismaClase = (a, b) => !!((a?.evento && b?.evento && a.evento === b.evento) || (a?.fecha && b?.fecha && a.fecha === b.fecha));
+const CAMPOS_ASIST = ['entro', 'confirmada', 'fuente', 'autodeclarada', 'autodeclaradaT'];
+// Lo que ya estaba guardado (campos sueltos, de antes de este cambio) queda asignado a la clase que tenía la persona: p. ej. las 12 del 7 de noviembre.
+// Devuelve la asistencia con sesiones (la misma si ya las tiene) o null si no había nada que asignar.
+export function asistenciaMigrada(l) {
+  const a = l.asistencia || {};
+  if (a.sesiones || !CAMPOS_ASIST.some((k) => k !== 'fuente' && a[k] !== undefined && a[k] !== '')) return null;
+  const evento = a.evento || l.claseEvento || '', fecha = !a.evento || a.evento === l.claseEvento ? l.claseFecha || '' : '';
+  const reg = { evento, fecha, ...Object.fromEntries(CAMPOS_ASIST.filter((k) => a[k] !== undefined && a[k] !== '').map((k) => [k, a[k]])) };
+  return { ...a, ...(evento ? { evento } : {}), sesiones: { [claveClase(reg)]: reg } };
+}
+// Anota campos en la asistencia de una clase. Los campos sueltos solo cambian si es la clase vigente (vigente = true).
+export function anotarAsistencia(l, clase, campos, vigente) {
+  const base = asistenciaMigrada(l) || { ...(l.asistencia || {}) }, k = claveClase(clase);
+  const sesiones = { ...(base.sesiones || {}) };
+  sesiones[k] = { ...(sesiones[k] || {}), evento: clase.evento || '', fecha: clase.fecha || '', ...campos };
+  return { ...base, ...(vigente ? { ...campos, ...(clase.evento ? { evento: clase.evento } : {}) } : {}), sesiones };
+}
+const DIAS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+export const diaLargo = (fecha) => { const d = new Date(`${fecha}T12:00:00Z`); return Number.isNaN(d.getTime()) ? String(fecha) : `${DIAS[d.getUTCDay()]} ${d.getUTCDate()} de ${MESES[d.getUTCMonth()]}`; };
+// Al inscribirse a otra clase, estas etapas eran de la clase anterior y vuelven a «Registrada» (el resto —matriculada, inscrita, reservó cupo, en conversación— se conserva)
+export const ETAPAS_DE_LA_CLASE = ['nuevo', 'contactado', 'confirmada', 'entro', 'asistio_confirmado', 'clase', 'vio_replay', 'vio_oferta', 'no_asistio', 'no_identificada', 'sin_respuesta', 'lista_espera', 'descartado'];
 
 // Sin tildes, minúsculas y sin signos: para comparar palabras y nombres
 export const normaliza = (t) => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9ñ ]/g, ' ').replace(/\s+/g, ' ').trim();
@@ -133,7 +165,7 @@ export async function contactoPorCodigo(codigo) {
 
 // Un evento del embudo para el contacto con ese código. Ignora el mismo evento del mismo contacto en menos de 60 segundos.
 // Devuelve { ok, estado, ignorado } o { error, status }.
-export async function registrarEvento({ codigo, evento, fechaIso, origen = '', extra = {} }) {
+export async function registrarEvento({ codigo, evento, fechaIso, origen = '', extra = {}, sesionId = '' }) {
   if (!EVENTOS.includes(evento)) return { error: 'evento_invalido', status: 400 };
   if (evento === 'lista_espera' && !FUNCIONES.listaEspera) return { ok: true, ignorado: true }; // función apagada: se recibe pero no se usa
   if (!CODIGO.test(String(codigo || ''))) return { error: 'codigo_invalido', status: 404 };
@@ -144,27 +176,36 @@ export async function registrarEvento({ codigo, evento, fechaIso, origen = '', e
   let ts = Date.parse(fechaIso);
   if (!Number.isFinite(ts) || Math.abs(ts - ahora) > 864e5) ts = ahora; // se acepta la hora enviada solo si es razonable
   const clase = previo.clase || claseDe(previo.form);
-  const sesion = evento === 'clic_entrar' || evento === 'codigo_asistencia_ok' ? await sesionEn(clase, ts) : null;
+  const sesion = evento === 'clic_entrar' || evento === 'codigo_asistencia_ok' ? await sesionEn(clase, ts, typeof sesionId === 'string' ? sesionId : '') : null;
   const ev = (tipo, texto) => ({ t: ahora, tipo, texto: String(texto).slice(0, 300) });
   let resultado = { ok: true };
   await db().runTransaction(async (tx) => {
     const l = (await tx.get(ref)).data();
-    if (l.evtUltimo?.[evento] && ahora - l.evtUltimo[evento] < 60000) { resultado = { ok: true, ignorado: true, estado: l.status }; return; }
-    const asist = { ...(l.asistencia || {}) };
+    const vigente = claseVigente(l);
+    const claseInfo = { sesion_id: sesion?.id || null, clase_id: vigente.evento || null, clase_fecha: vigente.fecha || null };
+    if (l.evtUltimo?.[evento] && ahora - l.evtUltimo[evento] < 60000) { resultado = { ok: true, ignorado: true, estado: l.status, ...claseInfo, cuenta: false }; return; }
+    // La asistencia es de UNA clase. Un clic en la ventana de otra clase se anota en esa clase, pero no cuenta para la que tiene ahora.
+    const claseDelEvento = sesion ? { evento: sesion.id, fecha: sesion.fecha } : vigente;
+    const esVigente = (!vigente.evento && !vigente.fecha) || mismaClase(claseDelEvento, vigente);
+    let asist = asistenciaMigrada(l) || { ...(l.asistencia || {}) }, cuenta = false;
+    const ent = (c, k) => (asist.sesiones?.[claveClase(c)] || {})[k];
     let estado = l.status;
     const subir = (nuevo) => { if ((RANGO[nuevo] ?? 0) > (RANGO[estado] ?? 0)) estado = nuevo; };
     const cambios = {};
     const eventos = [ev('evento', `${evento}${origen ? ` · ${origen}` : ''}`)];
     if (evento === 'clic_entrar') {
-      if (sesion) { asist.entro = asist.entro || ts; asist.evento = sesion.id; subir('entro'); }
-      else eventos.push(ev('evento', 'Clic en entrar fuera del horario de la clase: no cuenta como entrada'));
+      if (sesion) {
+        asist = anotarAsistencia({ ...l, asistencia: asist }, claseDelEvento, { entro: ent(claseDelEvento, 'entro') || ts }, esVigente);
+        if (esVigente) { subir('entro'); cuenta = true; } else eventos.push(ev('evento', `Clic durante la clase del ${diaLargo(sesion.fecha)}: no es la clase a la que está inscrita ahora`));
+      } else eventos.push(ev('evento', 'Clic en entrar fuera del horario de la clase: no cuenta como entrada'));
     } else if (evento === 'codigo_asistencia_ok') {
-      asist.confirmada = ts; asist.fuente = 'codigo'; if (sesion) asist.evento = sesion.id; subir('asistio_confirmado');
+      asist = anotarAsistencia({ ...l, asistencia: asist }, claseDelEvento, { confirmada: ts, fuente: 'codigo' }, esVigente);
+      if (esVigente) { subir('asistio_confirmado'); cuenta = true; }
     } else if (evento === 'autodeclara_asistio') {
-      asist.autodeclarada = 'si'; asist.autodeclaradaT = ts;
+      asist = anotarAsistencia({ ...l, asistencia: asist }, vigente, { autodeclarada: 'si', autodeclaradaT: ts }, true);
       if (estado === 'no_asistio') estado = 'no_identificada'; // dice que estuvo pero no aparece en la lista: no se puede identificar
     } else if (evento === 'autodeclara_no_asistio') {
-      asist.autodeclarada = 'no'; asist.autodeclaradaT = ts; subir('no_asistio');
+      asist = anotarAsistencia({ ...l, asistencia: asist }, vigente, { autodeclarada: 'no', autodeclaradaT: ts }, true); subir('no_asistio');
     } else if (evento === 'vio_replay') {
       cambios.replayT = ts; subir('vio_replay');
     } else if (evento === 'clic_comprar') {
@@ -189,7 +230,7 @@ export async function registrarEvento({ codigo, evento, fechaIso, origen = '', e
     }
     if (estado !== l.status) { cambios.status = estado; eventos.push(ev('etapa', `Etapa: ${ETAPA_TXT[estado] || estado}`)); }
     tx.update(ref, { ...cambios, ...(Object.keys(asist).length ? { asistencia: asist } : {}), [`evtUltimo.${evento}`]: ahora, eventos: FieldValue.arrayUnion(...eventos), updatedAt: FieldValue.serverTimestamp() });
-    resultado = { ok: true, ignorado: false, estado };
+    resultado = { ok: true, ignorado: false, estado, ...claseInfo, cuenta };
   });
   if (evento === 'pago_confirmado' && !resultado.ignorado) { try { await asegurarCurso(previo, clase); } catch (e) { console.error('embudo curso', e); } }
   return resultado;
