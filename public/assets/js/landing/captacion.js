@@ -58,26 +58,17 @@
   const icsTexto = (s) => String(s).replace(/\\/g, '\\\\').replace(/[,;]/g, (c) => `\\${c}`).replace(/\n/g, '\\n');
   const el = (tag, attrs = {}, text = '') => { const e = document.createElement(tag); Object.assign(e, attrs); if (text) e.textContent = text; return e; };
   function graciasClase(f, codigo) {
-    const enlace = `${location.origin}/entrar/${codigo}`; // enlace personal: anota la entrada y lleva a la sala (el Meet nunca va en el HTML)
     const op = f.elements.interest?.selectedOptions[0];
     const fecha = op?.dataset.date; // 'AAAA-MM-DD' si eligió un día concreto
     const dia = (op?.textContent || '').split(' · ')[0].toLowerCase();
-    const titulo = `Clase gratis de ${f.dataset.clase} con Karen`;
     const nodos = [el('b', {}, fecha ? `¡Listo, tu lugar está reservado! Te esperamos el ${dia} a las 19:00 (hora de Chile).` : '¡Listo, tu lugar está reservado! La clase es a las 19:00 (hora de Chile).')];
-    const acciones = el('span', { className: 'gracias-acciones' });
-    acciones.append(el('a', { className: 'btn btn-clase', href: enlace, target: '_blank', rel: 'noopener' }, 'Entrar a la clase'));
-    if (fecha) {
-      const [y, m, d] = fecha.split('-').map(Number);
-      const ini = utcDeChile(y, m, d, 19, 0), fin = new Date(ini.getTime() + 30 * 60000);
-      const detalle = `Entra a la clase con tu enlace personal: ${enlace}`;
-      const g = new URL('https://calendar.google.com/calendar/render');
-      g.search = new URLSearchParams({ action: 'TEMPLATE', text: titulo, dates: `${utc(ini)}/${utc(fin)}`, details: detalle, location: enlace }).toString();
-      acciones.append(el('a', { className: 'btn btn-cal', href: g.toString(), target: '_blank', rel: 'noopener' }, 'Agregar a mi calendario'));
+    // El link de la clase se entrega solo por WhatsApp: un único botón, con el mensaje ya escrito y el código personal
+    if (window.CM_WA_NUM) {
+      const msg = `Hola, ya me registré para la clase gratuita de ${f.dataset.clase} con Karen. Quiero recibir el enlace de la clase para poder ingresar.${codigo ? ` Mi código: ${codigo}` : ''}`;
+      const acciones = el('span', { className: 'gracias-acciones' });
+      acciones.append(el('a', { className: 'btn btn-clase', href: `https://wa.me/${window.CM_WA_NUM}?text=${encodeURIComponent(msg)}`, target: '_blank', rel: 'noopener' }, 'Recibe el link de la clase por WhatsApp'));
+      nodos.push(acciones);
     }
-    // Debajo del calendario: dudas por WhatsApp de Karen, con el mensaje ya escrito
-    const duda = `Hola Karen, tengo una pregunta sobre la clase gratis de ${f.dataset.clase}`;
-    if (window.CM_WA_NUM) acciones.append(el('a', { className: 'btn btn-cal', href: `https://wa.me/${window.CM_WA_NUM}?text=${encodeURIComponent(duda)}`, target: '_blank', rel: 'noopener' }, '¿Tienes preguntas? Escríbenos por WhatsApp'));
-    nodos.push(acciones, el('small', {}, 'Agrégala a tu calendario para que te avise 1 hora antes. Karen también te escribirá por WhatsApp.'));
     return nodos;
   }
 
