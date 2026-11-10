@@ -11,5 +11,5 @@ export const asistenciaPalabra = () => false;
 // Invitación a crear la cuenta de la plataforma (clases gratis en el aula) en la landing del replay.
 // En el computador local se ve siempre; en producción se enciende con EMBUDO_PLATAFORMA=1 cuando el aula ya tenga las clases gratis abiertas.
 export const plataforma = () => process.env.NODE_ENV !== 'production' || process.env.EMBUDO_PLATAFORMA === '1';
-// Dirección donde crean su cuenta (provisoria: la página de acceso del aula; se cambia aquí cuando el aula tenga su registro).
-export const PLATAFORMA_URL = '/aula';
+// Dirección donde crean su cuenta gratis en el aula (único lugar; la landing le agrega &l=<codigo> si la persona tiene código).
+export const PLATAFORMA_URL = '/login?register=true&origen=clase-gratis&ver=gratis';
