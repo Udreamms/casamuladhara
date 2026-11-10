@@ -1,9 +1,11 @@
 // GET /confirmar?l=<codigo>&r=si|no  -> el botón "Sí estuve" / "No pude entrar" del primer mensaje. Queda como asistencia AUTODECLARADA
 // (no se mezcla con "Entró" ni con "Asistió confirmado").
 import { contactoPorCodigo, primerNombre, registrarEvento } from '@/lib/server/embudo.js';
+import { asistenciaPalabra } from '@/lib/server/banderas.js';
 import { enlaceInvalido, esc, pagina, WHATSAPP } from '@/lib/server/paginas.js';
 
 export async function GET(request) {
+  if (!asistenciaPalabra()) return enlaceInvalido(); // apagado (ver banderas.js)
   const q = new URL(request.url).searchParams, codigo = q.get('l') || '', si = q.get('r') === 'si';
   if (!['si', 'no'].includes(q.get('r') || '')) return enlaceInvalido();
   try {

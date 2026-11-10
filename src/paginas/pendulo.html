@@ -73,7 +73,7 @@
 <section class="section tone-light"><div class="wrap kit">
   <div><span class="eyebrow">Qué incluye</span><h2 style="font-size:clamp(1.8rem,3.6vw,2.6rem);margin-block:12px">Todo para empezar a practicar</h2>
   <ul class="ticks" style="color:var(--muted)"><li>2 clases online en vivo con Karen</li><li>Práctica guiada presencial en Santiago, con videos de apoyo</li><li>Kit de práctica en la práctica presencial: péndulo de madera, Tintura Madre de Muérdago y cuaderno con láminas</li><li>Certificado de Péndulo Hebreo Nivel 1 de Casa Muladhara</li></ul>
-  <div style="margin-top:22px"><span class="eyebrow">Inversión</span><div class="precio">$69.900<small>CLP · pago único</small></div></div></div>
+  <div style="margin-top:22px"><span class="eyebrow">Inversión</span><div class="precio">$69.900<small>CLP · pago único</small></div><a class="btn btn-sun" id="pagar-pendulo" href="/comprar?curso=pendulo" style="margin-top:14px">Pagar $69.900 CLP</a></div></div>
   <div class="kit-imgs"><img loading="lazy" decoding="async" src="assets/img/41a246e938.webp" alt="Clase práctica de Péndulo Hebreo"><img loading="lazy" decoding="async" src="assets/img/cdf5f76943.webp" alt="Tintura Madre de Muérdago"></div>
 </div></section>
 <section class="section tone-dark"><div class="wrap">
@@ -86,7 +86,7 @@
   <div class="faq">
     <details><summary>¿Necesito experiencia previa?</summary><p>No. El Nivel 1 está pensado para empezar desde cero. Si quieres conocerlo antes, ven a la <a href="/clase-pendulo" style="color:#2b5443">clase gratis de los sábados</a>.</p></details>
     <details><summary>¿Cómo son las clases?</summary><p>Son 2 clases online en vivo por videollamada y una práctica guiada: presencial en Casa Muladhara, Santiago, con videos de apoyo para practicar. Por ahora el curso es solo para personas en Chile. Todos los horarios son de Chile. Al inscribirte te enviamos el calendario y la dirección o el enlace.</p></details>
-    <details><summary>¿Cómo pago?</summary><p>Al confirmar tu cupo por WhatsApp te enviamos el enlace de pago. El valor es $69.900 CLP e incluye el certificado y, en la práctica presencial, el kit de práctica.</p></details>
+    <details><summary>¿Cómo pago?</summary><p>Puedes pagar ahora con el botón «Pagar $69.900 CLP» (Mercado Pago), o pedirnos el enlace por WhatsApp. El valor es $69.900 CLP e incluye el certificado y, en la práctica presencial, el kit de práctica.</p></details>
     <details><summary>¿Puedo tomarlo desde otro país?</summary><p>Por ahora el Péndulo Hebreo Nivel 1 es solo para personas en Chile, porque incluye la práctica presencial en Santiago. Si vives en otro país, el <a href="/tarot" style="color:#2b5443">Tarot Terapéutico</a> sí es online, en español y para todo el mundo.</p></details>
     <details><summary>¿Qué recibo al terminar?</summary><p>El certificado de Péndulo Hebreo Nivel 1 de Casa Muladhara. Es un certificado de nuestra escuela, no un título oficial.</p></details>
   </div>
@@ -102,6 +102,7 @@
 <script src="/assets/js/landing/petalos.js"></script>
 <script src="/assets/js/landing/horarios.js" data-curso="pendulo" defer></script>
 <script src="/assets/js/landing/menu.js"></script>
+<script>(()=>{const l=new URLSearchParams(location.search).get("l"),a=document.getElementById("pagar-pendulo");if(a&&l)a.href="/comprar?l="+encodeURIComponent(l)})()</script>
 <script src="/assets/js/landing/captacion.js"></script>
 <script src="/assets/js/landing/agendar.js" defer></script>
 </body></html>

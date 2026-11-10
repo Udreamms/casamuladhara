@@ -1,8 +1,12 @@
 // Páginas públicas sencillas del embudo (confirmar asistencia, código de asistencia, replay). Son HTML simple con los colores del sitio.
 export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-export const WHATSAPP = 'https://wa.me/56940044528';
+import { WHATSAPP_NUMERO } from '@/lib/whatsapp.js';
+export const WHATSAPP = `https://wa.me/${WHATSAPP_NUMERO}`;
 
-export function pagina(titulo, cuerpo, status = 200) {
+// Píxel de Meta solo en el sitio real (igual que captacion.js); evento: evento propio opcional, p. ej. ReplayView
+export const pixel = (evento, id = '', params = null) => `<script>if(['casamuladhara.com','www.casamuladhara.com'].includes(location.hostname)){!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','716765743270935');fbq('track','PageView');${evento ? `fbq('${['InitiateCheckout', 'Contact'].includes(evento) ? 'track' : 'trackCustom'}','${evento}'${params || id ? `,${JSON.stringify(params || {})}` : ''}${id ? `,{eventID:'${id}'}` : ''});` : ''}}</script>`;
+
+export function pagina(titulo, cuerpo, status = 200, evento = '', eventoId = '') {
   const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
 <title>${esc(titulo)} · Casa Muladhara</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Mulish:wght@400;700&display=swap">
@@ -14,7 +18,7 @@ h1{margin:0;font:400 1.7rem/1.25 Marcellus,Georgia,serif;color:#1f3f32}p{margin:
 a.b,button{display:inline-flex;justify-content:center;align-items:center;padding:14px 22px;border-radius:999px;border:0;background:#2b5443;color:#ece7d3;font:700 .85rem/1 Mulish,sans-serif;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;cursor:pointer}
 a.b.alt{background:#e9e4d0;color:#1f3f32}input{font:inherit;padding:13px 15px;border-radius:12px;border:1px solid #d9d5c3;background:#f6f4ec;width:100%}
 .muted{color:#5d6b63;font-size:.9rem}.err{color:#b8402f;font-weight:700}.video{aspect-ratio:16/9;width:100%;border:0;border-radius:14px;background:#000}
-</style></head><body><main><small class="k">Casa Muladhara</small>${cuerpo}</main></body></html>`;
+</style></head><body><main><small class="k">Casa Muladhara</small>${cuerpo}</main>${pixel(evento, eventoId)}</body></html>`;
   return new Response(html, { status, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex' } });
 }
 export const enlaceInvalido = () => pagina('Enlace no válido', `<h1>Este enlace ya no es válido</h1><p>Puede haber caducado. Escríbenos por WhatsApp y te ayudamos.</p><a class="b" href="${WHATSAPP}">Escribir por WhatsApp</a>`, 404);

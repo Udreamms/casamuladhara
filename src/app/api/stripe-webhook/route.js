@@ -12,6 +12,7 @@ import { cleanLevels, INSTALLMENTS, START_LEVELS, unlockedOf } from '@/lib/serve
 import { applyAccess } from '@/lib/server/apply.js';
 import { db, json, stripe, webhookSecret } from '@/lib/server/services.js';
 import { enviarDespues, usuario } from '@/lib/server/meta.js';
+import { registrarEvento } from '@/lib/server/embudo.js';
 
 const ACTIVE = ['active', 'trialing'];
 const OVERDUE = ['past_due', 'unpaid'];
@@ -152,6 +153,22 @@ const compraMeta = ({ id, email, valor, moneda, creado, uid }) => enviarDespues(
   user: usuario({ email, uid }), custom: { value: valor, currency: String(moneda || 'usd').toUpperCase() },
 });
 
+// Curso de Tarot comprado desde la página del replay (sin cuenta del aula): 2 cuotas de 70 USD. Se identifica por el código personal.
+// La primera cuota deja a la persona «Matriculada» en el CRM y cuenta como compra para Meta; tras la segunda se detiene el cobro.
+async function tarotCuota(inv, meta) {
+  const sub = subscriptionOf(inv);
+  if (inv.billing_reason === 'subscription_create') {
+    await registrarEvento({ codigo: meta.codigo, evento: 'pago_confirmado', fechaIso: new Date().toISOString(), origen: 'stripe', extra: { monto: inv.amount_paid / 100, moneda: inv.currency } });
+    compraMeta({ id: inv.id, email: inv.customer_email, valor: 140, moneda: inv.currency, creado: inv.created });
+  }
+  if (sub) {
+    const total = Number(meta.installments) || 2;
+    const pagadas = (await stripe().invoices.list({ subscription: sub, status: 'paid', limit: 100 })).data.filter((i) => i.amount_paid > 0).length;
+    if (pagadas >= total) await cancelQuietly(sub);
+  }
+}
+const esTarot = (o) => o?.metadata?.kind === 'tarot';
+
 const subscriptionOf = (inv) => idOf(inv.parent?.subscription_details?.subscription ?? inv.subscription);
 
 export async function POST(request) {
@@ -166,6 +183,7 @@ export async function POST(request) {
     const o = event.data.object;
     switch (event.type) {
       case 'checkout.session.completed':
+        if (esTarot(o)) break; // el Tarot se registra con la factura (invoice.paid)
         if (o.mode === 'subscription' && o.subscription) await syncSubscription(idOf(o.subscription), o.client_reference_id, true);
         else if (o.mode === 'payment' && o.payment_status === 'paid' && o.metadata?.kind === 'completo') {
           await paidInFull(o);
@@ -177,11 +195,13 @@ export async function POST(request) {
       case 'customer.subscription.deleted':
       case 'customer.subscription.paused':
       case 'customer.subscription.resumed':
-        await syncSubscription(o.id);
+        if (!esTarot(o)) await syncSubscription(o.id);
         break;
       case 'invoice.paid':
       case 'invoice.payment_failed': {
         const paid = event.type === 'invoice.paid';
+        const metaFactura = o.parent?.subscription_details?.metadata || o.subscription_details?.metadata || {};
+        if (metaFactura.kind === 'tarot') { if (paid) await tarotCuota(o, metaFactura); break; }
         const uid = await recordInvoice(o, paid);
         // Meta: solo la primera cuota cuenta como compra; las siguientes son la misma venta
         if (paid && o.billing_reason === 'subscription_create') compraMeta({ id: o.id, email: o.customer_email, valor: o.amount_paid / 100, moneda: o.currency, creado: o.created, uid });
