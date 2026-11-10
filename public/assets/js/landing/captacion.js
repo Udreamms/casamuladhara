@@ -76,7 +76,7 @@
     }
     // Debajo del calendario: dudas por WhatsApp de Karen, con el mensaje ya escrito
     const duda = `Hola Karen, tengo una pregunta sobre la clase gratis de ${f.dataset.clase}`;
-    acciones.append(el('a', { className: 'btn btn-cal', href: `https://wa.me/56940044528?text=${encodeURIComponent(duda)}`, target: '_blank', rel: 'noopener' }, '¿Tienes preguntas? Escríbenos por WhatsApp'));
+    if (window.CM_WA_NUM) acciones.append(el('a', { className: 'btn btn-cal', href: `https://wa.me/${window.CM_WA_NUM}?text=${encodeURIComponent(duda)}`, target: '_blank', rel: 'noopener' }, '¿Tienes preguntas? Escríbenos por WhatsApp'));
     nodos.push(acciones, el('small', {}, 'Agrégala a tu calendario para que te avise 1 hora antes. Karen también te escribirá por WhatsApp.'));
     return nodos;
   }

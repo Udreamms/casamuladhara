@@ -3,6 +3,7 @@
 // y todo lo demás se entrega tal cual. Los scripts corren al cargar la página porque los enlaces son <a> normales.
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { WHATSAPP_NUMERO } from '@/lib/whatsapp.js';
 
 const texto = (s) => s.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").trim();
 const metaDe = (html, name) => html.match(new RegExp(`<meta[^>]*name="${name}"[^>]*content="([^"]*)"`, 'i'))?.[1];
@@ -23,7 +24,8 @@ function leer(nombre) {
     themeColor: metaDe(head, 'theme-color'),
     colorScheme: metaDe(head, 'color-scheme'),
     robots: metaDe(head, 'robots'),
-    html: fijarTema + quitar(head) + quitar(body),
+    // El número de WhatsApp sale de un solo lugar (lib/whatsapp.js): se cambia en los enlaces wa.me escritos en el HTML y se expone al script
+    html: `<script>window.CM_WA_NUM=${JSON.stringify(WHATSAPP_NUMERO)}</script>` + (fijarTema + quitar(head) + quitar(body)).replaceAll('wa.me/56940044528', `wa.me/${WHATSAPP_NUMERO}`),
   };
 }
 

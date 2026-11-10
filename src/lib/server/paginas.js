@@ -1,6 +1,7 @@
 // Páginas públicas sencillas del embudo (confirmar asistencia, código de asistencia, replay). Son HTML simple con los colores del sitio.
 export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-export const WHATSAPP = 'https://wa.me/56940044528';
+import { WHATSAPP_NUMERO } from '@/lib/whatsapp.js';
+export const WHATSAPP = `https://wa.me/${WHATSAPP_NUMERO}`;
 
 // Píxel de Meta solo en el sitio real (igual que captacion.js); evento: evento propio opcional, p. ej. ReplayView
 export const pixel = (evento, id = '', params = null) => `<script>if(['casamuladhara.com','www.casamuladhara.com'].includes(location.hostname)){!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','716765743270935');fbq('track','PageView');${evento ? `fbq('${['InitiateCheckout', 'Contact'].includes(evento) ? 'track' : 'trackCustom'}','${evento}'${params || id ? `,${JSON.stringify(params || {})}` : ''}${id ? `,{eventID:'${id}'}` : ''});` : ''}}</script>`;
