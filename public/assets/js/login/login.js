@@ -6,7 +6,13 @@ import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithP
 const $ = (s) => document.querySelector(s);
 const params = new URLSearchParams(location.search);
 // Solo se permite volver a páginas internas conocidas (evita redirecciones abiertas)
-const NEXT = ['/aula'].includes(params.get('next')) ? params.get('next') : '/aula';
+const NEXT = (['/aula'].includes(params.get('next')) ? params.get('next') : '/aula') + (params.get('ver') === 'gratis' ? '?ver=gratis' : '');
+// De dónde llegó (p. ej. ?origen=clase-gratis) y su código personal (?l=…): el aula lo anota en el CRM cuando se crea la cuenta (/api/aula/cuenta)
+try {
+  const o = params.get('origen') || '', l = params.get('l') || '';
+  const origen = /^[a-z0-9_-]{1,40}$/.test(o) ? o : '', cod = /^[A-Za-z0-9]{12}$/.test(l) ? l : '';
+  if (origen || cod) sessionStorage.setItem('cm_origen', JSON.stringify({ origen, l: cod }));
+} catch (e) { /* sin almacenamiento: la cuenta igual se crea, solo queda sin origen */ }
 
 let registering = false, busy = false, tt;
 

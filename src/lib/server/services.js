@@ -25,6 +25,7 @@ let client;
 export const stripe = () => (client ||= new Stripe(need('STRIPE_SECRET_KEY')));
 // Precio mensual de la cuota (55 USD) y precio único de la formación completa (449 USD)
 export const priceId = () => need('STRIPE_PRICE_ID');
+export const tarotPriceId = () => need('STRIPE_PRICE_TAROT_ID');
 export const fullPriceId = () => need('STRIPE_PRICE_FULL_ID');
 export const webhookSecret = () => need('STRIPE_WEBHOOK_SECRET');
 

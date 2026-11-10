@@ -13,6 +13,7 @@ V.inicio=()=>{
     <div class="ring-wrap"><svg class="ring" viewBox="0 0 120 120"><circle cx="60" cy="60" r="${r}" fill="none" stroke="rgba(236,231,211,.15)" stroke-width="8"/><circle cx="60" cy="60" r="${r}" fill="none" stroke="#f2c66d" stroke-width="8" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-p/100)}" transform="rotate(-90 60 60)"/><text x="60" y="58" text-anchor="middle" font-family="Marcellus,Georgia,serif" font-size="26" fill="#ece7d3">${p}%</text><text x="60" y="76" text-anchor="middle" font-family="Josefin Sans,system-ui,sans-serif" font-size="7" letter-spacing="1.5" fill="#b9c4b5">DE TU FORMACIÓN</text></svg>
       <span class="lbl">Camino a Terapeuta<br>Holístico Integral</span></div>
   </section>
+  ${CM.free&&GRATIS_GRUPOS.some(([g])=>gratisDe(g).length)?`<section class="card panel gr-banner"><div><span class="eyebrow">Empieza aquí</span><h3 style="font-size:1.35rem">Tus clases gratis</h3><p class="muted" style="margin:4px 0 0">Mira las clases de Péndulo Hebreo y de Tarot Terapéutico, sin costo.</p></div><button class="btn btn-primary" data-go="gratis">Ver clases gratis</button></section>`:''}
   ${CM.free?`<section class="card panel" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));align-items:center;gap:22px">
     ${CM.config.welcomeVideo?videoHTML(CM.config.welcomeVideo,'Bienvenida de la Maestra'):playerMsg('<span class="pill pres">Muy pronto</span><b style="font:400 clamp(1.1rem,2.6vw,1.6rem)/1.2 var(--f-display)">Un video de bienvenida de la Maestra</b>')}
     <div style="display:grid;gap:12px"><span class="eyebrow">Bienvenida</span><h3 style="font-size:1.35rem">Conoce la formación</h3><p class="muted" style="margin:0">La Maestra te cuenta qué vas a aprender en los cinco niveles y cómo funciona la formación. Revisa el programa del Nivel 1, preséntate en la comunidad y mira las próximas clases.</p><button class="btn btn-primary" style="justify-self:start" data-go="pagos">${CTA_TXT}</button></div></section>`:''}
@@ -32,6 +33,18 @@ V.inicio=()=>{
   </div>`;
 };
 function fileHTML(f){const k=f.k||f.type;return `<div class="file"><span class="ficon ${k}">${k.toUpperCase()}</span><div class="fx"><b>${esc(f.t||f.name)}</b><small>${f.size}</small></div>${f.href&&f.lvl>0&&!hasLv(f.lvl)?`<button class="btn btn-ghost btn-sm" data-go="pagos">Inscríbete</button>`:f.href?`<a class="btn btn-ghost btn-sm" href="${f.href}" target="_blank" rel="noopener">Abrir PDF</a>`:`<button class="btn btn-ghost btn-sm" data-toast="En la plataforma real esto descarga el archivo">${k==='mp3'||k==='mp4'?'Reproducir':'Descargar'}</button>`}</div>`}
+
+// Clases gratis: las ve toda cuenta (pagada o no). La Maestra las carga y ordena en /staff → «Clases gratis del aula».
+const GRATIS_GRUPOS=[['pendulo','Péndulo Hebreo','Cuatro clases para conocer el método'],['tarot','Tarot Terapéutico','Cuatro clases para empezar con el tarot']];
+const gratisDe=g=>(CM.gratis||[]).filter(c=>c.grupo===g&&c.gratis!==false&&c.titulo).sort((a,b)=>(Number(a.orden)||0)-(Number(b.orden)||0));
+V.gratis=()=>{
+  const todas=GRATIS_GRUPOS.flatMap(([g])=>gratisDe(g)),cur=todas.find(c=>c.id===S.gratisId);
+  const grupo=([g,nombre,sub])=>{const L=gratisDe(g);return `<section class="card panel"><div><h3 style="font-size:1.3rem">${nombre}</h3><p class="muted" style="margin:2px 0 0;font-size:.88rem">${sub}</p></div>${L.length?`<div class="gr-list">${L.map((c,i)=>`<button class="gr-row ${cur&&cur.id===c.id?'cur':''}" data-gratis-ver="${esc(c.id)}"><span class="n">${i+1}</span><span class="t">${esc(c.titulo)}</span><small>${cur&&cur.id===c.id?'Viendo':'Ver clase'}</small></button>`).join('')}</div>`:'<p class="muted" style="font-size:.9rem">Estas clases se publican aquí muy pronto.</p>'}</section>`};
+  return `<div class="view-head"><div><span class="eyebrow">Empieza aquí</span><h1>Clases gratis</h1><p>Disponibles para ti desde que creas tu cuenta, sin costo. Elige una clase y mírala cuando quieras.</p></div></div>
+  ${cur?`<div style="display:grid;gap:12px;max-width:900px">${videoHTML(cur.video,cur.titulo)}<h2 style="font-size:1.3rem">${esc(cur.titulo)}</h2></div>`:''}
+  <div class="gr-grid">${GRATIS_GRUPOS.map(grupo).join('')}</div>
+  ${!S.paying&&!CM.isAdmin?`<section class="card panel gr-banner"><div><b>¿Quieres seguir?</b><p class="muted" style="margin:4px 0 0">La formación completa abre el resto de las clases, videos y materiales.</p></div><button class="btn btn-primary" data-go="pagos">${CTA_TXT}</button></section>`:''}`;
+};
 
 V.formacion=()=>`
   <div class="view-head"><div><span class="eyebrow">Escuela de Formación Holística</span><h1>Mi formación</h1><p>Cinco niveles que te llevan a la certificación de Terapeuta Holístico Integral. Toca un nivel para ver sus clases, videos y materiales.</p></div>

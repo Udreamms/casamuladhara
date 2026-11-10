@@ -54,6 +54,7 @@ document.addEventListener('click',e=>{
   const t=e.target.closest('button');if(!t)return;const d=t.dataset;
   if(d.go)go(d.go);
   else if(d.openLevel)openLevel(d.openLevel);
+  else if(d.gratisVer){S.gratisId=d.gratisVer;render(false);window.scrollTo(0,0)}
   else if(d.openLesson){const [id,i,j]=d.openLesson.split(',');S.level=id;S.lesson=[+i,+j];S.view='curso';S.tab='temas';S.t=0;stopPlay();render()}
   else if(d.les){if(t.getAttribute('aria-disabled')){toast(S.level==='especializaciones'?'Esta clase se abre cuando la Maestra te la habilite':'Esta clase se abre al completar el nivel anterior');return}S.lesson=d.les.split(',').map(Number);S.t=0;S.tab='temas';stopPlay();render(false);if(innerWidth<1100)window.scrollTo({top:0,behavior:'smooth'})}
   else if(d.slide!==undefined)goSlide(d.slide);

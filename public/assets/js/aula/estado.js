@@ -2,9 +2,10 @@
 let PAYMENTS=[];
 const STP={none:'<span class="pill lock">Sin plan</span>',ok:'<span class="pill done">Al día</span>',full:'<span class="pill done">Pagado completo</span>',retry:'<span class="pill prog">Reintentando cobro</span>',overdue:'<span class="pill bad">Pago pendiente</span>',paused:'<span class="pill bad">Acceso pausado</span>'};
 let ME={name:'',ini:'',c:'#f2c66d',photo:''};
-const S={overdue:false,plan:'none',paying:false,lvl:0,lvls:new Set(),view:'inicio',level:'radiestesia',lesson:[1,0],tab:'temas',ch:'n3',resType:'Todos',resLvl:'0',resQ:'',supTopic:'clases',openMods:{},playing:false,t:0,notes:{},qa:{},sent:false,sl:{},anim:0};
+const S={overdue:false,plan:'none',paying:false,lvl:0,lvls:new Set(),view:'inicio',level:'radiestesia',lesson:[1,0],tab:'temas',ch:'n3',resType:'Todos',resLvl:'0',resQ:'',supTopic:'clases',gratisId:'',openMods:{},playing:false,t:0,notes:{},qa:{},sent:false,sl:{},anim:0};
 const NAV=[
  ['inicio','Inicio','<path d="M4 11 12 4l8 7v9h-5v-6H9v6H4z"/>'],
+ ['gratis','Clases gratis','<circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5z"/>'],
  ['formacion','Mi formación','<path d="M3 8 12 4l9 4-9 4z"/><path d="M7 10v5c3 2 7 2 10 0v-5"/>'],
  ['insignias','Insignias','<circle cx="12" cy="9" r="6"/><path d="m9 14-2 7 5-3 5 3-2-7"/>'],
  ['comunidad','Comunidad','<path d="M4 5h16v11H9l-5 4z"/>'],

@@ -120,6 +120,8 @@ window.cmStart=async function(cm){
   const q=new URLSearchParams(location.search),dl=LEVELS.find(l=>l.id===q.get('nivel'));
   if(dl){const [i,j]=(q.get('clase')||'').split('-').map(Number);const ok=dl.modules[i]&&dl.modules[i].lessons[j];
     S.level=dl.id;S.lesson=ok?[i,j]:[0,0];S.openMods[dl.id+S.lesson[0]]=true;S.tab='temas';S.view='curso'}
+  // /aula?ver=gratis abre la sección de clases gratis (a ella apuntan el registro y la página del replay)
+  if(!dl&&q.get('ver')==='gratis')S.view='gratis';
   $('#login').hidden=true;
   render();
 };

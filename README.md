@@ -102,3 +102,69 @@ Puesta en marcha (una sola vez):
 5. Publica las reglas: `firebase deploy --only firestore:rules`.
 
 Reglas de WhatsApp: solo se puede escribir con texto libre dentro de las 24 h desde el último mensaje de la persona. Para empezar la conversación se envía una **plantilla aprobada** (por defecto `hello_world`; crea una propia en español en el administrador de WhatsApp y configura `WHATSAPP_TEMPLATE_NAME`, `WHATSAPP_TEMPLATE_LANG` y, si lleva `{{1}}` con el nombre, `WHATSAPP_TEMPLATE_VARS=1`). Las imágenes y audios que lleguen se ven como aviso en el portal; se abren en la app de WhatsApp.
+
+## Embudo de las clases gratis (Péndulo, Tarot, Formación) y contrato con la landing
+Cada persona que se inscribe a una clase recibe un **código personal** (12 caracteres al azar, revocable, vence 60 días después del cierre de la oferta) y sus enlaces. El CRM mide quién entró, quién asistió y quién compró. Código en `src/lib/server/embudo.js`.
+
+**Variables en Vercel:** `CRM_API_KEY` (clave secreta entre el sitio y el CRM; invéntala larga y aleatoria) y `APP_URL` (dirección pública del sitio, con `https://`, sin `/` al final; sin ella no se crean los enlaces personales).
+
+### API (clave secreta: `Authorization: Bearer <CRM_API_KEY>`)
+`GET /contacto/validar?codigo=XXXXXXXXXXXX`
+→ `{ "valido": true, "primer_nombre": "Ana", "estado": "registrada", "clase": "pendulo", "sala_url": "https://meet.google.com/..." }`
+→ `{ "valido": false }` si el código no existe, fue revocado o venció. Sin clave: 401 (503 si el servidor no tiene `CRM_API_KEY`).
+
+`POST /eventos` con `{ "codigo": "...", "evento": "...", "fecha_iso": "2026-11-07T19:03:00-03:00", "origen": "whatsapp", "extra": {} }`
+→ `{ "ok": true, "ignorado": false, "estado": "entro", "sesion_id": "<id de la clase del Calendario>", "cuenta": true, "clase_id": "<clase a la que está inscrita ahora>", "clase_fecha": "2026-11-14" }`. El mismo evento del mismo contacto en menos de 60 segundos responde `{ "ok": true, "ignorado": true }`. Código inválido: 404 `{ "ok": false, "error": "codigo_invalido" }`; evento desconocido: 400 `evento_invalido`.
+
+| evento | efecto |
+|---|---|
+| `clic_entrar` | "Entró" solo si ocurre entre 10 minutos antes y 30 después del inicio de la clase (del Calendario); fuera de ese rango se anota pero no cuenta |
+| `codigo_asistencia_ok` | "Asistió confirmado" |
+| `autodeclara_asistio` | asistencia **autodeclarada: sí** (no cambia la etapa; si figuraba "No asistió" pasa a "No identificada") |
+| `autodeclara_no_asistio` | asistencia autodeclarada: no (etapa "No asistió" si no tenía otra) |
+| `vio_replay` | "Vio el replay" (no baja a quien ya asistió) |
+| `clic_comprar` | "Vio la oferta" + seguimiento para hoy en el CRM (tarea para Karen) |
+| `pago_confirmado` (`extra: { monto, moneda }`) | "Matriculada", sale de las secuencias de venta, se borra la tarea y queda inscrita en el curso |
+| `pago_fallido` (`extra: { monto, moneda }`) | **No cambia la etapa** (sigue Matriculada). Deja el aviso «Cobro fallido: escribirle hoy» y una tarea para hoy; el siguiente `pago_confirmado` lo quita |
+| `lista_espera` | Etapa «Lista de espera» (curso lleno), salvo que ya tenga cupo reservado o pagado |
+
+**La asistencia es POR CLASE.** Una persona puede inscribirse a varias clases del mismo programa (la del 7, la del 14…) con la misma tarjeta y el mismo código. La asistencia se guarda en `asistencia.sesiones[<id de la clase>]` y los campos sueltos (`asistencia.entro`, `confirmada`…) reflejan solo la clase a la que está inscrita ahora (`claseEvento` / `claseFecha`). `clic_entrar` y `codigo_asistencia_ok` aceptan `sesion_id` (id de la clase en el Calendario); sin él se toma la clase en curso a esa hora. Respuesta: `sesion_id` = clase en cuya ventana cayó el evento (`null` si ninguna), `clase_id` / `clase_fecha` = clase a la que está inscrita ahora, `cuenta` = si el evento cuenta para esa clase de ahora (un clic en la ventana de la clase del 7 no cuenta para quien ya está inscrita a la del 14).
+Al inscribirse de nuevo (`api/leads`, registro repetido) a **otra** clase: la tarjeta es la misma; la asistencia de la clase anterior queda guardada con esa clase; la etapa vuelve a «Registrada» (se conservan Matriculada, Inscrita, Reservó cupo y En conversación); el historial suma «Se inscribió de nuevo para el {día fecha}» y `clases` conserva la lista de clases. «Preparar contactos» asigna a su clase la asistencia que ya estaba guardada (las del 7 de noviembre).
+
+Cada `pago_confirmado` queda en el historial de pagos (`pagos`): así el CRM muestra «Cuotas pagadas 1/2 · 2/2» del Tarot. **Hay que enviar el evento en cada cuota pagada**, no solo en la primera.
+
+Estados (`estado`): `registrada, confirmada, entro, asistio_confirmado, vio_oferta, matriculada` y las alternativas `no_asistio, no_identificada, vio_replay, sin_respuesta, lista_espera`. Una etapa solo avanza con los eventos, nunca retrocede. Los tres niveles de asistencia (Entró, Autodeclarada, Asistió confirmado) se guardan por separado y no se mezclan.
+
+### Páginas del sitio (las usa la landing y los mensajes)
+- `/entrar/<codigo>`: anota `clic_entrar` y lleva a la sala de la clase (el enlace de Google Meet de Ajustes).
+- `/confirmar?l=<codigo>&r=si|no`: botones «Sí estuve» / «No pude entrar» (asistencia autodeclarada).
+- `/asistencia?l=<codigo>`: la persona escribe la palabra de la clase. La palabra se define en el Calendario, dentro de cada clase gratis; vale de 10 minutos antes a 30 después; máximo 8 intentos.
+- `/clase-pendulo/replay?l=<codigo>` y `/clase-tarot/replay?l=<codigo>`: anotan `vio_replay`, muestran el video (enlace de Ajustes) y la oferta con su fecha límite.
+- `/comprar?l=<codigo>`: anota `clic_comprar` y lleva a la página del curso.
+
+### Registro (`POST /api/leads`, `action: "save"`)
+Además de lo de siempre acepta `edad` y `consentimiento: { email: { aceptado, fecha, texto, origen }, whatsapp: { ... } }`, y devuelve el `codigo` de la persona. La clave de unicidad es el correo y el WhatsApp (en dígitos con código de país): si ya existe, se actualiza y no se duplica; un correo distinto no pisa al anterior (queda como correo adicional).
+
+### Herramientas en el portal (Interesadas)
+**Preparar contactos** (crea código y enlaces a los registros de antes), **Clasificar una clase** (pega la lista de Meet: ve cómo quedaría y luego aplica) y **Envíos** (textos con variables `{{nombre}} {{enlace_entrada}} {{enlace_replay}} {{enlace_si}} {{enlace_no}} {{enlace_asistencia}} {{fecha_limite}}`, envío persona por persona y exportación para correo masivo).
+
+### Alcance congelado (qué está activo y qué está oculto)
+Mientras el alcance está congelado, estas funciones están **ocultas con una bandera apagada** (el código no se borró; para volver a mostrarlas se pone la bandera en `true`):
+- Portal: `FUNC` en `public/assets/js/admin.js` → `fichaCompleta` (ficha estilo GoHighLevel; mientras está apagada se usa `leadFichaSimple`), `etiquetas`, `tareas` (seguimientos), `metricas`, `deshacer`, `reserva`, `cuotas`, `listaEspera`.
+- Servidor: `FUNCIONES` en `src/lib/server/embudo.js` → `reserva` (`/api/embudo` responde 409) y `listaEspera` (el evento `lista_espera` se ignora y `/api/clases/estado` responde sin cupos ni lista de espera). Deben coincidir con las del portal.
+- Asistencia: los grupos de Envíos se basan en el **clic** en `/entrar/<codigo>` dentro de la ventana de la clase (10 min antes a 30 después): **Entró** (o marcada con «Clasificar una clase») y **No entró** (inscrita a esa clase y sin clic; solo se calcula cuando la ventana terminó). La autodeclaración y la palabra de asistencia están ocultas con `FUNC.autodeclaracion` y `FUNC.palabraAsistencia` (el código sigue). En «Clases y ofertas» se cargan los Meet reales de cada clase (no se muestran a las alumnas).
+- Lo que queda **activo**: código personal por contacto, registro simple (entró, asistió confirmado, autodeclarada, vio replay, clic en comprar, matriculada), Envíos (plantillas, envío por persona, exportar), «Preparar contactos», «Clasificar una clase», `/contacto/validar`, `/eventos`, sin duplicados por correo y WhatsApp.
+- Reglas de envío: máximo 1 mensaje por canal por persona al día (el portal bloquea), nada entre 22:00 y 8:00 (Chile), y quien responde «no» (o «stop», «baja»…) queda con `noContactar` (lo marca el webhook de WhatsApp; también el botón «Pidió parar» o la etiqueta «No contactar») y sale de todos los envíos.
+- Los datos que ya se guardan (pagos, reserva, cupos configurados, etiquetas) **no se pierden** al ocultar: «Clases y ofertas» conserva lo guardado aunque sus campos estén ocultos.
+
+### Cupos, reserva del Péndulo y configuración por clase
+- **`GET /api/clases/estado?clase=pendulo|tarot`** (público, sin datos personales) → `{ "cupos_disponibles": 12, "lista_espera": false }`. `cupos_disponibles` es `null` si el curso no tiene límite; `lista_espera` es `true` cuando los cupos se llenaron y la lista de espera está activada. Lo leen las landings.
+- **`POST /api/embudo`** (sesión de la Maestra): `reserva` (Péndulo, $10.000 por WhatsApp: etapa «Reservó cupo», monto, fecha y saldo; con cupos llenos responde 409) y `saldo` (marca el saldo pagado y matricula).
+- **Clases y ofertas** (menú del portal): por clase, nombre, día y hora de la clase gratis, sala, replay, inicio, cierre (fecha y hora de Chile), precio, reserva o cuotas, cupos, lista de espera, palabra de asistencia con su ventana y texto de la oferta. Se guarda en `config/clases.ofertas`; lo vacío usa los valores de `OFERTAS` en `src/lib/server/embudo.js`. `configClases()` aplica los cambios a `OFERTAS` en cada petición, así las páginas del sitio los ven sin cambiar código.
+
+## Clases gratis dentro del aula
+Cualquier cuenta del aula, aunque no haya pagado (`CM.free`), ve la sección **Clases gratis** con dos grupos: Péndulo Hebreo y Tarot Terapéutico. El resto del aula sigue cerrado para quien no pagó (nada de esa sección abre niveles).
+- **Dónde se cargan:** portal `/staff` → «Clases gratis del aula» (título, enlace del video —YouTube, Vimeo o Drive—, orden y «Gratis»; sin «Gratis» la clase queda oculta). Se guardan en `config/clasesGratis.clases`; las reglas de Firestore ya dejan leer `config/*` a cualquier cuenta con sesión, así que **no hay que cambiar reglas**.
+- **URL de registro** (para el botón de la página del replay): `/login?register=true&origen=clase-gratis&ver=gratis`. Opcionales: `&l=<codigo personal>` (une la cuenta con esa persona aunque use otro correo) y `&email=<correo>` (lo deja escrito). Al terminar el registro entra directo a la sección.
+- **URL de la sección** (quien ya tiene cuenta): `/aula?ver=gratis` (si no tiene sesión pasa por el login y vuelve).
+- **Cuenta gratis:** correo y contraseña, o Google (lo que ya existía). Al crearse el perfil por primera vez, el aula llama a `POST /api/aula/cuenta` (con su sesión; manda el `origen` y el `l` que traía el enlace). Evento que queda: **`cuenta_gratis_creada`** en el historial de la persona y el campo `cuentaAula { t, origen, uid }`. Si la persona ya estaba en el CRM (mismo correo o mismo código) se marcan sus registros sin cambiar su etapa; si no, se crea un registro nuevo del programa «Cuenta gratis del aula» con `origen`. Repetir la llamada no duplica.
