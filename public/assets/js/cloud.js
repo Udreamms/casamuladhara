@@ -36,7 +36,7 @@ if (PREVIEW) {
 
 const user = await new Promise((res) => { const off = onAuthStateChanged(auth, (u) => { off(); res(u); }); });
 if (!user) {
-  location.replace('/login?mode=login&next=/aula');
+  location.replace(`/login?mode=login&next=/aula${new URLSearchParams(location.search).get('ver') === 'gratis' ? '&ver=gratis' : ''}`);
   await new Promise(() => {});
 }
 // Si cierra sesión en otra pestaña, sale también de esta
@@ -58,7 +58,8 @@ const mine = (name) => collection(db, 'users', uid, name);
 // ---- Perfil (se crea la primera vez que entra; nivel/plan/pago los fija solo la Maestra) ----
 const userRef = doc(db, 'users', uid);
 let snap = await getDoc(userRef);
-if (!snap.exists()) {
+const primeraVez = !snap.exists();
+if (primeraVez) {
   await setDoc(userRef, {
     uid,
     email: (user.email || '').trim().toLowerCase(),
@@ -75,6 +76,12 @@ const p = snap.data();
 
 const token = await user.getIdTokenResult(true);
 setSessionCookie(token.token);
+// Cuenta nueva: se anota en el CRM (evento cuenta_gratis_creada, con el origen con que llegó). Si falla, el aula sigue igual.
+if (primeraVez) {
+  let o = {}; try { o = JSON.parse(sessionStorage.getItem('cm_origen') || '{}'); sessionStorage.removeItem('cm_origen'); } catch (e) { /* sin origen */ }
+  fetch('/api/aula/cuenta', { method: 'POST', headers: { Authorization: `Bearer ${token.token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ origen: o.origen || '', l: o.l || '' }), keepalive: true })
+    .catch((e) => console.warn('cuenta crm', e.message));
+}
 const isAdmin = token.claims.admin === true;
 // lvls (los niveles que tiene abiertos, p. ej. [3]) y lvl (el más alto) los ponen el webhook de Stripe y la Maestra desde su portal
 const paid = new URLSearchParams(location.search).get('pago');
@@ -209,6 +216,9 @@ CM.deleteLive = async (key) => {
 // ---- Ajustes del aula (video de bienvenida) ----
 CM.config = {};
 CM.loadConfig = async () => { CM.config = (await getDoc(doc(db, 'config', 'aula'))).data() || {}; };
+// Clases gratis (las ve toda cuenta, pagada o no): config/clasesGratis.clases = [{ id, grupo: 'pendulo'|'tarot', titulo, video, orden, gratis }]. Las carga la Maestra en /staff.
+CM.gratis = [];
+CM.loadGratis = async () => { CM.gratis = ((await getDoc(doc(db, 'config', 'clasesGratis'))).data() || {}).clases || []; };
 CM.saveConfig = async (data) => {
   await setDoc(doc(db, 'config', 'aula'), { ...data, updatedAt: serverTimestamp() }, { merge: true });
   await CM.loadConfig();
@@ -233,7 +243,7 @@ CM.answer = async (q, reply, lessonTitle) => {
   CM.pending = CM.pending.filter((x) => x.id !== q.id);
 };
 
-await Promise.all([CM.loadLive(), CM.loadConfig()]).catch((e) => console.warn('aula', e.code || e));
+await Promise.all([CM.loadLive(), CM.loadConfig(), CM.loadGratis()]).catch((e) => console.warn('aula', e.code || e));
 
 // ---- Suscripción (Stripe): devuelve la URL de pago o del portal para administrarla ----
 CM.billing = async (kind) => {

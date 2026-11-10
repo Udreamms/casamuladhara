@@ -75,7 +75,7 @@ const A = { wa: { chats: [], msgs: [], on: null }, students: [], questions: [], 
 let api = null; // llama a /api/admin con el token de la Maestra
 
 async function loadAll() {
-  const [us, qs, tk, ps, cf, fm, cl] = await Promise.all([
+  const [us, qs, tk, ps, cf, fm, cl, gr] = await Promise.all([
     getDocs(query(collection(db, 'users'), orderBy('createdAt', 'desc'))),
     getDocs(query(collectionGroup(db, 'questions'), where('answered', '==', false), orderBy('createdAt', 'desc'), limit(100))),
     getDocs(query(collectionGroup(db, 'tickets'), where('status', '==', 'open'), orderBy('createdAt', 'desc'), limit(100))),
@@ -83,9 +83,11 @@ async function loadAll() {
     getDoc(doc(db, 'config', 'aula')),
     getDoc(doc(db, 'config', 'formacion')),
     getDoc(doc(db, 'config', 'clases')),
+    getDoc(doc(db, 'config', 'clasesGratis')),
   ]);
   A.formacion = fm.data() || {};
   A.clases = cl.data() || {};
+  A.gratis = (gr.data() || {}).clases || [];
   A.students = us.docs.map((d) => ({ id: d.id, ...d.data() })).filter((u) => u.role !== 'admin');
   A.questions = qs.docs.map((d) => ({ id: d.id, uid: d.ref.parent.parent.id, ...d.data() }));
   A.tickets = tk.docs.map((d) => ({ id: d.id, uid: d.ref.parent.parent.id, ...d.data() }));
@@ -186,6 +188,7 @@ const data = {
   // Fecha de inicio y cupos del próximo grupo de la formación: los muestra la landing /formacion (src/app/api/formacion)
   // Enlaces de Google Meet de las clases gratis (se entregan al registrarse, src/app/api/leads).
   // El inicio de los cursos (/pendulo, /tarot) sale del Calendario (src/app/api/proximas).
+  saveGratis: async (clases) => { await setDoc(doc(db, 'config', 'clasesGratis'), { clases, updatedAt: serverTimestamp() }); A.gratis = clases; A.gratisDraft = null; },
   saveClases: async (d) => { await setDoc(doc(db, 'config', 'clases'), { ...d, updatedAt: serverTimestamp() }, { merge: true }); Object.assign(A.clases, d); },
   saveFormacion: async (d) => { await setDoc(doc(db, 'config', 'formacion'), { ...d, updatedAt: serverTimestamp() }, { merge: true }); Object.assign(A.formacion, d); },
 };
@@ -200,6 +203,7 @@ const NAV = [
   ['calendario', 'Calendario', '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'],
   ['envios', 'Envíos', '<path d="M4 12 20 4l-4 16-4-7z"/><path d="M12 13l8-9"/>'],
   ['clases', 'Clases y ofertas', '<path d="M12 3v3M12 18v3M4.2 6.2l2.1 2.1M17.7 15.7l2.1 2.1M3 12h3M18 12h3M4.2 17.8l2.1-2.1M17.7 8.3l2.1-2.1"/><circle cx="12" cy="12" r="3"/>'],
+  ['gratis', 'Clases gratis del aula', '<circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5z"/>'],
   ['--', 'Alumnas'],
   ['alumnas', 'Alumnas', '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5a6.5 6.5 0 0 1 3.5 5.5"/>', () => alumnasSinVer().length],
   ['pagos', 'Pagos', '<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h4"/>'],
@@ -376,7 +380,7 @@ V.clase = () => {
   <div class="view-head"><div><span class="eyebrow">Nivel ${lv.n} · ${esc(lv.title)}</span><h1 style="font-size:clamp(1.4rem,2.6vw,1.9rem)">${esc(m.title)}</h1><p>Así la ven tus alumnas. Desde el temario del nivel puedes recorrer todas sus clases.</p></div><a class="btn btn-ghost btn-sm" href="${src}" target="_blank" rel="noopener">Abrir en otra pestaña</a></div>
   <iframe class="aula-frame" src="${src}&embed=1" title="Clase: ${esc(l.t)}"></iframe>`;
 };
-const LEAD_FORMS = { pendulo: 'Péndulo Hebreo', 'clase-pendulo': 'Clase gratis Péndulo', tarot: 'Tarot Terapéutico', 'clase-tarot': 'Clase gratis Tarot', formacion: 'Formación', sala: 'Sala Abierta', terapias: 'Terapias', meditacion: 'Meditación', regalo: 'Portada · Sala Abierta' };
+const LEAD_FORMS = { pendulo: 'Péndulo Hebreo', 'clase-pendulo': 'Clase gratis Péndulo', tarot: 'Tarot Terapéutico', 'clase-tarot': 'Clase gratis Tarot', formacion: 'Formación', sala: 'Sala Abierta', terapias: 'Terapias', meditacion: 'Meditación', regalo: 'Portada · Sala Abierta', 'cuenta-gratis': 'Cuenta gratis del aula' };
 const LEAD_STATES = [['nuevo', 'Nueva'], ['contactado', 'Contactada'], ['clase', 'Tomó la clase'], ['conversando', 'En conversación'], ['inscrita', 'Inscrita'], ['descartado', 'Descartada']];
 // Embudo de las clases gratis (las mismas etapas y rangos que el servidor, src/lib/server/embudo.js). Se guardan en el campo status.
 const ETAPAS_CLASE = [['registrada', 'Registrada'], ['confirmada', 'Confirmada'], ['entro', 'Entró'], ['asistio_confirmado', 'Asistió confirmado'], ['vio_oferta', 'Vio la oferta'], ['reservo_cupo', 'Reservó cupo'], ['matriculada', 'Matriculada'],
@@ -404,7 +408,7 @@ const LEAD_PROGS = [['clase-pendulo', 'Clase gratis Péndulo', ['clase-pendulo']
 // Programas pagos (se pagan por fuera con Karen, salvo la Formación completa, que también se detecta por Stripe) y los que se pueden sumar a una persona
 const PROG_PAGOS = [['pendulo', 'Curso Péndulo'], ['tarot', 'Curso Tarot'], ['formacion', 'Formación completa']];
 const PROG_AGREGAR = [['clase-pendulo', 'Clase gratis Péndulo'], ['clase-tarot', 'Clase gratis Tarot'], ...PROG_PAGOS];
-const PROG_CORTO = { 'clase-pendulo': 'Clase Péndulo', 'clase-tarot': 'Clase Tarot', pendulo: 'Curso Péndulo', tarot: 'Curso Tarot', formacion: 'Formación', sala: 'Sala', terapias: 'Terapias', meditacion: 'Meditación', regalo: 'Portada' };
+const PROG_CORTO = { 'clase-pendulo': 'Clase Péndulo', 'clase-tarot': 'Clase Tarot', pendulo: 'Curso Péndulo', tarot: 'Curso Tarot', formacion: 'Formación', sala: 'Sala', terapias: 'Terapias', meditacion: 'Meditación', regalo: 'Portada', 'cuenta-gratis': 'Cuenta gratis' };
 const esClase = (f) => f === 'clase-pendulo' || f === 'clase-tarot';
 const esPago = (f) => ['pendulo', 'tarot', 'formacion'].includes(f);
 // En un curso pago la primera etapa es "Interesada"; en una clase gratis, "Inscrita" quiere decir inscrita a un curso
@@ -413,7 +417,7 @@ const etapaTxt = (form, k) => (k === 'nuevo' && esPago(form) ? 'Interesada' : ET
 const waNum = (n) => { let d = String(n || '').replace(/\D/g, '').replace(/^00/, ''); if (d.length === 9 && d[0] === '9') d = `56${d}`; return d.length >= 8 && d.length <= 15 ? d : ''; };
 const waLink = (n) => { const d = String(n || '').replace(/\D/g, ''); return d ? `https://wa.me/${d}` : ''; };
 const leadOrigen = (l) => l.utm?.utm_source || 'directo';
-const leadOrigenTxt = (l) => [l.utm?.utm_source && l.utm?.utm_medium ? `${l.utm.utm_source} / ${l.utm.utm_medium}` : l.utm?.utm_source, l.utm?.utm_campaign, l.utm?.utm_content].filter(Boolean).join(' · ') || 'Directo';
+const leadOrigenTxt = (l) => [l.utm?.utm_source && l.utm?.utm_medium ? `${l.utm.utm_source} / ${l.utm.utm_medium}` : l.utm?.utm_source, l.utm?.utm_campaign, l.utm?.utm_content].filter(Boolean).join(' · ') || (l.origen ? `Cuenta del aula (${l.origen})` : 'Directo');
 // Vínculos: una interesada y una alumna son la misma persona si comparten correo o WhatsApp
 const llavesDe = (x) => [String(x.email || '').trim().toLowerCase(), ...(x.emailsExtra || []).map((e) => String(e).trim().toLowerCase()), waNum(x.whatsapp || x.phone)].filter(Boolean);
 const vinculos = () => {
@@ -802,7 +806,7 @@ function leadFichaSimple(id) {
       <label>País<input data-ct="country" value="${esc(p.country)}" maxlength="60" autocomplete="off"></label>
       <div class="ct-guardar"><span class="muted" id="ct-estado" style="font-size:.8rem">Todo guardado</span><button class="btn btn-primary btn-sm" id="ct-save" disabled>Guardar cambios</button></div>
     </form>
-    <section class="ct-sec"><b>Datos</b><dl class="kv" style="font-size:.84rem;gap:6px 12px"><dt>Origen</dt><dd>${esc(leadOrigenTxt(p.leads[0]))}</dd><dt>Primer registro</dt><dd>${fdateMs(p.leads[0].createdAt)}</dd></dl></section>
+    <section class="ct-sec"><b>Datos</b><dl class="kv" style="font-size:.84rem;gap:6px 12px"><dt>Origen</dt><dd>${esc(leadOrigenTxt(p.leads[0]))}</dd><dt>Primer registro</dt><dd>${fdateMs(p.leads[0].createdAt)}</dd>${((c) => (c ? `<dt>Cuenta del aula</dt><dd>Creada ${esc(fdateMs(c.t))} · origen: ${esc(c.origen || 'directo')}</dd>` : ''))(p.leads.map((x) => x.cuentaAula).find(Boolean))}</dl></section>
     <section class="ct-sec"><b>Enlaces personales</b>${enlacesPersonales(p)}</section>
     <button type="button" class="link" id="lf-del" style="color:#b8402f;justify-self:start">Eliminar persona</button></aside>
   <main class="ct-centro"><div class="ct-sec"><b>Conversación de WhatsApp${n ? ` · ${esc(p.whatsapp)}` : ''}</b></div>${chat}</main>
@@ -1386,6 +1390,49 @@ const matriculasHTML = () => {
     ${filas.map(({ p, l, t }) => `<tr><td><button class="link nom" data-lead-open="${esc(p.id)}">${esc(p.nombre)}</button></td><td>${esc(ofertaDe(claseDeL(l)).nombre)}</td><td>${esc(etapaTxt(l.form, leadEtapa(l)))}</td><td>${esc(pagado(l))}</td><td class="muted">${esc(fechaCorta(t))}</td><td class="muted">${esc(l.claseFecha || '—')}</td><td>${esc(l.utm?.utm_campaign || '—')}</td><td>${esc(l.utm?.utm_content || '—')}</td><td>${esc(l.utm?.utm_source || 'directo')}</td></tr>`).join('')}</tbody></table></div>` : '<p class="muted">Todavía no hay reservas ni matrículas.</p>'}</section>`;
 };
 
+// ----- Clases gratis del aula: las ve toda cuenta (pagada o no) en /aula, sección «Clases gratis». Se guardan en config/clasesGratis.clases
+// [{ id, grupo: 'pendulo' | 'tarot', titulo, video, orden, gratis }]. Sin «Gratis» marcado, la clase queda oculta (borrador).
+const GRATIS_GRUPOS = [['pendulo', 'Péndulo Hebreo'], ['tarot', 'Tarot Terapéutico']];
+const gratisBorrador = () => (A.gratisDraft ||= (A.gratis || []).map((c) => ({ ...c })));
+const gratisNuevoId = () => `c${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
+// Pasa lo que está escrito en pantalla al borrador (antes de agregar, quitar o guardar)
+const gratisLeer = () => document.querySelectorAll('[data-gr-id]').forEach((fila) => {
+  const c = gratisBorrador().find((x) => x.id === fila.dataset.grId); if (!c) return;
+  const v = (k) => fila.querySelector(`[data-gr="${k}"]`);
+  c.titulo = v('titulo').value.trim(); c.video = v('video').value.trim(); c.orden = Number(v('orden').value) || 0; c.gratis = v('gratis').checked;
+});
+V.gratis = () => {
+  const base = location.origin, L = gratisBorrador();
+  const urls = [['Registro (para el botón de la página del replay)', `${base}/login?register=true&origen=clase-gratis&ver=gratis`], ['Sección «Clases gratis» (quien ya tiene cuenta)', `${base}/aula?ver=gratis`]];
+  const grupo = ([g, nombre]) => {
+    const f = L.filter((c) => c.grupo === g).sort((a, b) => (Number(a.orden) || 0) - (Number(b.orden) || 0));
+    return `<section class="card panel"><h3>${esc(nombre)}</h3>
+      <div class="gr-rows">${f.map((c) => `<div class="gr-fila" data-gr-id="${esc(c.id)}">
+        <label>Orden<input data-gr="orden" type="number" min="1" step="1" value="${esc(c.orden ?? '')}"></label>
+        <label>Título de la clase<input data-gr="titulo" type="text" maxlength="120" value="${esc(c.titulo || '')}" placeholder="Clase 1 · …"></label>
+        <label>Enlace del video<input data-gr="video" type="url" value="${esc(c.video || '')}" placeholder="https://youtu.be/… o https://vimeo.com/…"></label>
+        <label class="cfg-chk"><input data-gr="gratis" type="checkbox" ${c.gratis !== false ? 'checked' : ''}><span>Gratis</span></label>
+        <button type="button" class="btn btn-ghost btn-sm" data-gr-quitar="${esc(c.id)}">Quitar</button></div>`).join('') || '<p class="muted" style="margin:0">Aún no hay clases en este grupo.</p>'}</div>
+      <div><button type="button" class="btn btn-ghost btn-sm" data-gr-agregar="${g}">+ Agregar clase</button></div></section>`;
+  };
+  return `<div class="crm-head"><div><span class="eyebrow">Aula</span><h1>Clases gratis del aula</h1></div><a class="btn btn-ghost btn-sm" href="/aula?ver=gratis" target="_blank" rel="noopener">Ver como la ven ellas</a></div>
+    <p class="muted" style="max-width:46em;margin:0">Cualquier persona con cuenta del aula, aunque no haya pagado, ve estas clases en «Clases gratis». El resto del aula sigue cerrado para quien no pagó. El número de «Orden» define cómo se ven; con «Gratis» desmarcado la clase queda oculta mientras la preparas.</p>
+    <section class="card panel"><h3>Enlaces para la página del replay</h3><div style="display:grid;gap:8px">${urls.map(([t, u]) => `<div style="display:grid;gap:2px"><small class="muted">${esc(t)}</small><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><code style="word-break:break-all">${esc(u)}</code><button type="button" class="btn btn-ghost btn-sm" data-copiar="${esc(u)}">Copiar</button></div></div>`).join('')}</div></section>
+    <form id="gr-form" style="display:grid;gap:16px">${GRATIS_GRUPOS.map(grupo).join('')}<div style="position:sticky;bottom:0;padding:12px 0;background:var(--bg)"><button class="btn btn-primary">Guardar clases gratis</button></div></form>`;
+};
+async function guardarGratis() {
+  gratisLeer();
+  const lista = [];
+  for (const c of gratisBorrador()) {
+    if (!c.titulo && !c.video) continue; // fila vacía: no se guarda
+    if (!c.titulo) return toast('Cada clase necesita un título.');
+    if (c.video && !isHttps(c.video)) return toast(`El enlace del video de «${c.titulo}» debe empezar con https://`);
+    if (c.gratis !== false && !c.video) return toast(`«${c.titulo}»: agrega el enlace del video, o desmarca «Gratis» para dejarla oculta.`);
+    lista.push({ id: c.id, grupo: c.grupo, titulo: c.titulo, video: c.video || '', orden: Number(c.orden) || 0, gratis: c.gratis !== false });
+  }
+  try { await data.saveGratis(lista); render(false); toast('Clases gratis guardadas.'); } catch (e) { fail(e); }
+}
+
 // ----- Clases y ofertas: configuración por clase (se guarda en config/clases)
 V.clases = () => {
   const head = '<div class="crm-head"><div><span class="eyebrow">CRM</span><h1>Clases y ofertas</h1></div></div><p class="muted" style="max-width:46em;margin:0">Lo que dejes vacío usa el valor de respaldo (el que aparece en gris). Los cambios se aplican en todo el sitio: páginas del replay, avisos, cupos y el CRM.</p>';
@@ -1943,6 +1990,19 @@ function bind() {
   document.querySelectorAll('[data-env-ir]').forEach((b) => (b.onclick = () => { S.envClase = b.dataset.envIr; S.envSeg = 'oferta'; go('envios'); }));
   document.querySelectorAll('[data-clic-orden]').forEach((b) => (b.onclick = () => { S.clicOrden = b.dataset.clicOrden; render(false); }));
   const cf = $('#cfg-form'); if (cf) cf.onsubmit = (e) => { e.preventDefault(); guardarClases(cf); };
+  const gf = $('#gr-form');
+  if (gf) {
+    gf.onsubmit = (e) => { e.preventDefault(); guardarGratis(); };
+    gf.querySelectorAll('[data-gr-agregar]').forEach((b) => (b.onclick = () => {
+      gratisLeer(); const g = b.dataset.grAgregar;
+      gratisBorrador().push({ id: gratisNuevoId(), grupo: g, titulo: '', video: '', orden: Math.max(0, ...gratisBorrador().filter((c) => c.grupo === g).map((c) => Number(c.orden) || 0)) + 1, gratis: true });
+      render(false);
+    }));
+    gf.querySelectorAll('[data-gr-quitar]').forEach((b) => (b.onclick = () => {
+      gratisLeer(); if (!confirm('¿Quitar esta clase de la lista? Se borra al guardar.')) return;
+      A.gratisDraft = gratisBorrador().filter((c) => c.id !== b.dataset.grQuitar); render(false);
+    }));
+  }
   document.querySelectorAll('[data-crm-preparar]').forEach((b) => (b.onclick = () => prepararContactos()));
   document.querySelectorAll('[data-crm-clasificar]').forEach((b) => (b.onclick = () => clasificarClase()));
   document.querySelectorAll('[data-env-clase]').forEach((b) => (b.onclick = () => { S.envClase = b.dataset.envClase; render(false); }));

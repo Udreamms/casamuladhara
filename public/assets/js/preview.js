@@ -14,6 +14,12 @@ export function startPreview() {
     profile: { name, ini: 'MR', c: '#f2c66d', accessLevel: 5, plan: 'completo', paymentStatus: 'ok' },
     progress: {}, doneAt: {}, notes: {}, questions: {}, tickets: [], payments: [], notifications: [],
     posts: [], likes: new Set(), students: [], agenda: [], liveLinks: {}, config: {}, pending: [],
+    // clases gratis de ejemplo (solo en este modo revisión; las reales las carga la Maestra en /staff)
+    gratis: [
+      { id: 'g1', grupo: 'pendulo', titulo: 'Clase 1 · Ejemplo', video: 'https://youtu.be/dQw4w9WgXcQ', orden: 1, gratis: true },
+      { id: 'g2', grupo: 'pendulo', titulo: 'Clase 2 · Ejemplo', video: 'https://youtu.be/dQw4w9WgXcQ', orden: 2, gratis: true },
+      { id: 'g3', grupo: 'tarot', titulo: 'Clase 1 · Ejemplo', video: 'https://youtu.be/dQw4w9WgXcQ', orden: 1, gratis: true },
+    ],
     onPosts: () => {},
     // edición de perfil en el modo revisión: solo en memoria
     editor: { hasGoogle: false, api: {

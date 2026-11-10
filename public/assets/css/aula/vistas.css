@@ -360,3 +360,14 @@ table.tbl{width:100%;border-collapse:collapse;font-size:.88rem;min-width:520px}
 .shop-price{font:400 1.6rem/1 var(--f-display)}
 .shop-price small{display:block;font:600 .62rem/1.4 var(--f-caps);letter-spacing:.14em;color:var(--muted);margin-top:4px}
 .shop-foot{display:flex;flex-wrap:wrap;gap:8px 22px;justify-content:center;font-size:.82rem;color:var(--muted)}
+
+/* Clases gratis */
+.gr-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.gr-list{display:grid;gap:8px}
+.gr-row{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;text-align:left;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:inherit;font:inherit;cursor:pointer}
+.gr-row:hover,.gr-row.cur{border-color:var(--gold,#f2c66d)}
+.gr-row .n{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--line);font:600 .8rem/1 var(--f-caps,inherit)}
+.gr-row .t{font-weight:600}
+.gr-row small{color:var(--muted);font-size:.78rem}
+.gr-banner{grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:16px}
+@media(max-width:560px){.gr-banner{grid-template-columns:1fr}}
