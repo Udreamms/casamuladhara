@@ -59,7 +59,7 @@ export async function paginaReplay(request, clase) {
     // En la vista previa local se elige el caso con &e=si|no|neutro
     const seg = prueba ? (['si', 'no', 'neutro'].includes(new URL(request.url).searchParams.get('e')) ? new URL(request.url).searchParams.get('e') : 'neutro') : segmentoDe(c);
     const nombre = esc(primerNombre(c.name));
-    const titulo = seg === 'si' ? `Gracias por estar en la clase, ${nombre}` : seg === 'no' ? `${nombre}, sabemos que no pudiste entrar a la clase` : `Hola ${nombre}, aquí tienes la grabación de la clase`;
+    const titulo = seg === 'si' ? `Gracias por estar en la clase, ${nombre}` : seg === 'no' ? `${nombre}, aquí tienes la clase completa, por si no pudiste verla` : `Hola ${nombre}, aquí tienes la grabación de la clase`;
     const bajada = seg === 'si' ? `Aquí tienes la grabación para que la repases. Si sientes que es tu camino, abajo puedes inscribirte al curso.` : seg === 'no' ? `Aquí te dejamos la grabación completa de la clase de ${NOMBRE[clase]}. Mírala con calma: cuando termines, abajo puedes inscribirte.` : `Mira la clase completa y, si sientes que es tu camino, abajo puedes inscribirte al curso.`;
     if (!prueba) await registrarEvento({ codigo, evento: 'vio_replay', fechaIso: new Date().toISOString(), origen: 'replay' });
     const url = (await configClases()).replay[clase];
