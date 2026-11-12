@@ -11,8 +11,8 @@ import { appUrl, stripe, tarotPriceId } from '@/lib/server/services.js';
 // Enlace de pago del Péndulo: Mercado Pago, 69.900 CLP, valor fijo
 const PAGO_PENDULO = 'https://mpago.la/2jXpsgn';
 
-const salida = (url, evento, id) => pagina('Abriendo…', `<h1>Un momento…</h1><p>Te llevamos al siguiente paso.</p><a class="b" href="${esc(url)}">Continuar</a>
-  <script>setTimeout(()=>location.replace(${JSON.stringify(url)}),700)</script>`, 200, evento, id);
+const salida = (url, evento, id, params = null) => pagina('Abriendo…', `<h1>Un momento…</h1><p>Te llevamos al siguiente paso.</p><a class="b" href="${esc(url)}">Continuar</a>
+  <script>setTimeout(()=>location.replace(${JSON.stringify(url)}),700)</script>`, 200, evento, id, params);
 
 export async function GET(request) {
   const q = new URL(request.url).searchParams, codigo = q.get('l') || '';
@@ -22,7 +22,7 @@ export async function GET(request) {
       const cierre = cierreOferta('pendulo');
       if (cierre && Date.now() >= cierre) return new Response(null, { status: 302, headers: { Location: '/pendulo' } });
       if (codigo && await contactoPorCodigo(codigo)) await registrarEvento({ codigo, evento: 'clic_comprar', fechaIso: new Date().toISOString(), origen: 'pendulo' });
-      return salida(PAGO_RESERVA_PENDULO, 'InitiateCheckout', `ic-reserva-${codigo || 'web'}-${Date.now()}`);
+      return salida(PAGO_RESERVA_PENDULO, 'InitiateCheckout', `ic-reserva-${codigo || 'web'}-${Date.now()}`, { value: 10000, currency: 'CLP', content_name: 'Reserva Péndulo Hebreo Nivel 1' });
     }
     if (!codigo && q.get('curso') === 'pendulo') return salida(PAGO_PENDULO, 'InitiateCheckout', `ic-pendulo-${Date.now()}`);
     const c = await contactoPorCodigo(codigo);
