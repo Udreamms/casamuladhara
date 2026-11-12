@@ -4,9 +4,16 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { WHATSAPP_NUMERO } from '@/lib/whatsapp.js';
+import { reservaPendulo } from '@/lib/server/banderas.js';
 
 const texto = (s) => s.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").trim();
 const metaDe = (html, name) => html.match(new RegExp(`<meta[^>]*name="${name}"[^>]*content="([^"]*)"`, 'i'))?.[1];
+
+// Bloques que dependen de una bandera: <!--RESERVA-->…<!--/RESERVA--> se ve con la reserva encendida y <!--SINRESERVA-->…<!--/SINRESERVA--> con ella apagada
+const bandera = (html) => {
+  const [quita, deja] = reservaPendulo() ? ['SINRESERVA', 'RESERVA'] : ['RESERVA', 'SINRESERVA'];
+  return html.split(`<!--${quita}-->`).map((t, i) => (i === 0 ? t : t.slice(t.indexOf(`<!--/${quita}-->`) + `<!--/${quita}-->`.length))).join('').replaceAll(`<!--${deja}-->`, '').replaceAll(`<!--/${deja}-->`, '');
+};
 
 function leer(nombre) {
   const html = readFileSync(join(process.cwd(), 'src', 'paginas', `${nombre}.html`), 'utf8');
@@ -25,7 +32,7 @@ function leer(nombre) {
     colorScheme: metaDe(head, 'color-scheme'),
     robots: metaDe(head, 'robots'),
     // El número de WhatsApp sale de un solo lugar (lib/whatsapp.js): se cambia en los enlaces wa.me escritos en el HTML y se expone al script
-    html: `<script>window.CM_WA_NUM=${JSON.stringify(WHATSAPP_NUMERO)}</script>` + (fijarTema + quitar(head) + quitar(body)).replaceAll('wa.me/56940044528', `wa.me/${WHATSAPP_NUMERO}`),
+    html: bandera(`<script>window.CM_WA_NUM=${JSON.stringify(WHATSAPP_NUMERO)}</script>` + (fijarTema + quitar(head) + quitar(body)).replaceAll('wa.me/56940044528', `wa.me/${WHATSAPP_NUMERO}`)),
   };
 }
 
