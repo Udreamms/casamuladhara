@@ -102,6 +102,8 @@
         const out = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(out.error || 'No pudimos enviar tus datos.');
         if (!out.repetida) fbq('track', 'Lead', {}, { eventID: body.eventId }); // quien repite el formulario no cuenta otro Lead en las campañas
+        // Reserva con pago (Péndulo): los datos quedan en el CRM y de ahí pasa al pago. La breve espera deja que el Píxel alcance a enviar el Lead.
+        if (f.dataset.destino && /^\/[a-z]/.test(f.dataset.destino)) { setTimeout(() => { location.href = f.dataset.destino; }, 600); return; }
         // Clase gratis: pasa a su página de gracias (video de Karen y pasos). La breve espera deja que el Píxel alcance a enviar el Lead.
         if (GRACIAS_PAGINA && out.codigo && f.dataset.clase && ['clase-pendulo', 'clase-tarot'].includes(f.dataset.lead)) {
           setTimeout(() => { location.href = `/${f.dataset.lead}/gracias?l=${encodeURIComponent(out.codigo)}`; }, 500);
