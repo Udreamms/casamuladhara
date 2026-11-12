@@ -92,7 +92,7 @@
         action: 'save', form: f.dataset.lead,
         name: val('name'), email: val('email'), whatsapp, country: val('country') || pais,
         interest: val('interest'), date: f.elements.interest?.selectedOptions?.[0]?.dataset.date || '', message: val('message'), web: val('web'),
-        page: location.pathname, utm: origen(),
+        page: location.pathname, utm: origen(), ...(f.dataset.montoReserva === '10000' ? { reserva: true } : {}),
         eventId: crypto.randomUUID?.() || String(Date.now()) + Math.random().toString(36).slice(2, 10), // mismo id en el Píxel y en la API de conversiones
       };
       f.dataset.sending = '1'; err.hidden = true;
