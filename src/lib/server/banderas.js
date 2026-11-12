@@ -18,4 +18,4 @@ export const PLATAFORMA_URL = '/login?register=true&origen=clase-gratis&ver=grat
 // /pendulo es una página fija: la variable debe existir cuando se construye el sitio (build).
 export const reservaPendulo = () => process.env.NODE_ENV !== 'production' || process.env.EMBUDO_RESERVA_PENDULO === '1';
 // Enlaces de Mercado Pago (valor fijo). El saldo de $59.900 (https://mpago.la/29TeLus) NO va en la web: solo lo envía Karen por WhatsApp.
-export const PAGO_RESERVA_PENDULO = 'https://mpago.la/1tk7Mac';
+export const PAGO_RESERVA_PENDULO = 'https://www.mercadopago.cl/checkout/v1/payment/redirect?source=link&preference-id=2117348879-f0dc7d8e-c04d-4af5-8a93-e7629866c6b1'; // link de pago sin vencimiento: «Reserva no reembolsable Péndulo Hebreo», $10.000
