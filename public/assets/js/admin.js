@@ -194,7 +194,7 @@ const data = {
 };
 
 // ---------- Vista ----------
-const S = { view: 'inicio', leadSel: new Set(), crmVista: 'embudo', crmProg: '', crmQ: '', crmOrigen: '', crmSeg: false, crmDesc: false, crmSinCuenta: false, crmEtapa: '', crmTag: '', crmRango: '', crmMetrica: 'origen', fichaTab: 'resumen', crmLista: '', clicOrden: 'recientes', q: '', open: null, filter: 'todas', lvOpen: {}, fq: '', cls: null, ansWho: '', ansLv: 0 };
+const S = { view: 'inicio', leadSel: new Set(), crmVista: 'embudo', crmProg: '', crmQ: '', crmOrigen: '', crmSeg: false, crmDesc: false, crmSinCuenta: false, crmEtapa: '', crmReserva: '', crmTag: '', crmRango: '', crmMetrica: 'origen', fichaTab: 'resumen', crmLista: '', clicOrden: 'recientes', q: '', open: null, filter: 'todas', lvOpen: {}, fq: '', cls: null, ansWho: '', ansLv: 0 };
 const NAV = [
   ['inicio', 'Inicio', '<path d="M4 11 12 4l8 7v9H4z"/><path d="M10 20v-6h4v6"/>'],
   ['--', 'CRM'],
@@ -386,15 +386,15 @@ const LEAD_STATES = [['nuevo', 'Nueva'], ['contactado', 'Contactada'], ['clase',
 const ETAPAS_CLASE = [['registrada', 'Registrada'], ['confirmada', 'Confirmada'], ['entro', 'Entró'], ['asistio_confirmado', 'Asistió confirmado'], ['vio_oferta', 'Vio la oferta'], ['reservo_cupo', 'Reservó cupo'], ['matriculada', 'Matriculada'],
   ['no_asistio', 'No asistió'], ['no_identificada', 'No identificada'], ['vio_replay', 'Vio el replay'], ['sin_respuesta', 'Sin respuesta'], ['lista_espera', 'Lista de espera']];
 const PASOS_CLASE = ETAPAS_CLASE.slice(0, 7).map(([k]) => k);
-// La reserva por WhatsApp es solo del Péndulo: en el Tarot no existe la etapa «Reservó cupo»
-const etapasOcultas = () => [...(FUNC.reserva ? [] : ['reservo_cupo']), ...(FUNC.listaEspera ? [] : ['lista_espera']), ...(FUNC.autodeclaracion ? [] : ['no_identificada'])];
+// La reserva ya no es una etapa: se ve como etiqueta («Reserva iniciada, sin pago» / «Reservó») según lead.reserva.estado y la etapa no cambia. La etapa «Reservó cupo» sigue existiendo en los datos antiguos, pero no se ofrece.
+const etapasOcultas = () => ['reservo_cupo',  ...(FUNC.listaEspera ? [] : ['lista_espera']), ...(FUNC.autodeclaracion ? [] : ['no_identificada'])];
 const etapasClaseDe = (form) => ETAPAS_CLASE.filter(([k]) => !etapasOcultas().includes(k) && (form !== 'clase-tarot' || k !== 'reservo_cupo'));
 // Quien ya estaba en una etapa oculta se ve en la etapa visible más cercana (el dato no se toca)
-const etapaVisible = (k) => (k === 'reservo_cupo' && !FUNC.reserva ? 'vio_oferta' : k === 'lista_espera' && !FUNC.listaEspera ? 'registrada' : k === 'no_identificada' && !FUNC.autodeclaracion ? 'no_asistio' : k);
+const etapaVisible = (k) => (k === 'reservo_cupo' ? 'vio_oferta' : k === 'lista_espera' && !FUNC.listaEspera ? 'registrada' : k === 'no_identificada' && !FUNC.autodeclaracion ? 'no_asistio' : k);
 const ETAPA_NOMBRE = Object.fromEntries([...LEAD_STATES, ...ETAPAS_CLASE]);
 // ALCANCE CONGELADO: funciones ocultas con bandera apagada (el código sigue aquí, no se borró). Para volver a mostrar una, ponla en true.
 // El servidor tiene sus propias banderas para reserva y lista de espera (FUNCIONES en src/lib/server/embudo.js): deben coincidir.
-const FUNC = { autodeclaracion: false, palabraAsistencia: false, fichaCompleta: false, etiquetas: false, tareas: false, metricas: false, deshacer: false, reserva: false, cuotas: false, listaEspera: false };
+const FUNC = { autodeclaracion: false, palabraAsistencia: false, fichaCompleta: false, etiquetas: false, tareas: false, metricas: false, deshacer: false, reserva: true, cuotas: false, listaEspera: false };
 const RANGO_ETAPA = { descartado: -1, nuevo: 0, registrada: 0, lista_espera: 0, contactado: 1, confirmada: 1, sin_respuesta: 1, no_asistio: 1, no_identificada: 1, entro: 2, vio_replay: 2, clase: 3, asistio_confirmado: 3, conversando: 4, vio_oferta: 4, reservo_cupo: 4.5, inscrita: 5, matriculada: 5 };
 // En una clase gratis, las etapas de antes se leen como las del embudo nuevo
 const CLASE_ANTIGUA = { nuevo: 'registrada', contactado: 'confirmada', clase: 'asistio_confirmado', conversando: 'vio_oferta', inscrita: 'matriculada' };
@@ -506,6 +506,7 @@ const personasFiltradas = () => {
     && (!S.crmSinCuenta || !p.alumna)
     && (!S.crmTag || p.tags.includes(S.crmTag))
     && (!S.crmEtapa || etapaVista(p) === S.crmEtapa)
+    && (!FUNC.reserva || !S.crmReserva || ((x) => (S.crmReserva === 'sin' ? !x : x === S.crmReserva))(reservaPersona(p, prog ? claseDeForm(prog[0]) : '')))
     && (!q || [p.nombre, p.email, p.whatsapp, p.note, ...p.leads.map((l) => `${l.interest} ${l.message}`)].join(' ').toLowerCase().includes(q)))
     .sort((a, b) => ultimaActividad(b) - ultimaActividad(a));
 };
@@ -597,13 +598,14 @@ V.interesadas = () => {
   const primera = prog && esClase(prog[0]) ? 'registrada' : 'nuevo';
   const nSeg = base.filter(seguimientoHoyP).length, nSin = base.filter((p) => !p.alumna).length, nNuevas = base.filter((p) => etapaVista(p) === primera).length;
   const etapasProg = prog && esClase(prog[0]) ? [...etapasClaseDe(prog[0]), ['descartado', 'Descartada']] : LEAD_STATES.filter(([k]) => !(prog && esPago(prog[0]) && k === 'clase'));
-  const hayFiltro = !!(S.crmQ || S.crmOrigen || S.crmEtapa || S.crmTag || S.crmSeg || S.crmSinCuenta);
+  const hayFiltro = !!(S.crmQ || S.crmOrigen || S.crmEtapa || (FUNC.reserva && S.crmReserva) || S.crmTag || S.crmSeg || S.crmSinCuenta);
   const kpi = (k, n, t, on) => `<button type="button" class="crm-kpi" data-crm-kpi="${k}" aria-pressed="${on}"><b>${n}</b><span>${t}</span></button>`;
   const kpis = `<div class="crm-kpis">${kpi('todos', base.length, prog ? 'en este programa' : 'personas', !hayFiltro)}${kpi('nuevas', nNuevas, 'por contactar', S.crmEtapa === primera)}${FUNC.tareas ? kpi('seg', nSeg, 'seguimientos hoy', !!S.crmSeg) : ''}${kpi('sin', nSin, 'sin cuenta en el aula', !!S.crmSinCuenta)}${kpi('clic', filasClic().length, 'clic sin pagar', S.crmLista === 'clic')}</div>`;
   const barra = `<div class="crm-bar">${vistas}
     <input type="text" id="crm-q" placeholder="Buscar por nombre, correo, WhatsApp o nota" value="${esc(S.crmQ || '')}" aria-label="Buscar">
     <select id="crm-origen" aria-label="Origen"><option value="">Origen: todos</option>${origenes.map((o) => `<option value="${esc(o)}" ${S.crmOrigen === o ? 'selected' : ''}>${esc(o === 'directo' ? 'Directo' : o)}</option>`).join('')}</select>
     <select id="crm-etapa" aria-label="Etapa"><option value="">Etapa: todas</option>${etapasProg.map(([k]) => `<option value="${k}" ${S.crmEtapa === k ? 'selected' : ''}>${esc(etapaTxt(prog?.[0], k))}</option>`).join('')}</select>
+    ${FUNC.reserva ? `<select id="crm-reserva" aria-label="Reserva"><option value="">Reserva: todas</option>${[['sin', 'Sin etiqueta'], ['iniciada', 'Reserva iniciada, sin pago'], ['pagada', 'Reservó']].map(([k, t]) => `<option value="${k}" ${S.crmReserva === k ? 'selected' : ''}>${t}</option>`).join('')}</select>` : ''}
     ${FUNC.etiquetas && tags.length ? `<select id="crm-tag" aria-label="Etiqueta"><option value="">Etiqueta: todas</option>${tags.map((t) => `<option ${S.crmTag === t ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select>` : ''}
     ${hayFiltro ? '<button type="button" class="link" data-crm-kpi="todos">Quitar filtros</button>' : ''}</div>`;
   const tabs = `<nav class="crm-tabs" aria-label="Programas">${[['', 'Todos', todas.length], ...LEAD_PROGS.map(([k, t, fs]) => [k, t, todas.filter((p) => tieneProg(p, [k, t, fs])).length])].map(([k, t, n]) => `<button type="button" data-crm-prog="${esc(k)}" aria-pressed="${(S.crmProg || '') === k}">${esc(t)}<span class="n">${n}</span></button>`).join('')}</nav>`;
@@ -624,7 +626,7 @@ V.interesadas = () => {
       <td style="white-space:normal">${progPills(p)} ${tagsPills(p)}</td>
       <td class="muted" style="font-size:.84rem">${esc(leadOrigenTxt(p.leads[0]))}</td>
       <td class="muted" style="font-size:.84rem">${fdateMs(p.leads[0].createdAt)}</td>
-      <td>${cuentaBadge(p)} ${segBadge(p)}</td>
+      <td>${cuentaBadge(p)} ${segBadge(p)} ${pagoPersona(p)}</td>
       <td>${trk ? `<select data-lead-status="${esc(trk.id)}" aria-label="Etapa">${etapasProg.map(([k]) => `<option value="${k}" ${(esClase(trk.form) ? etapaVisible(leadEtapa(trk)) : leadEtapa(trk)) === k ? 'selected' : ''}>${esc(etapaTxt(prog[0], k))}</option>`).join('')}</select>` : `<span class="pill lock">${esc(etapaTxt(prog?.[0], etapaVista(p)))}</span>`}</td></tr>`; }).join('') || '<tr><td colspan="7" class="muted">No hay personas con estos filtros.</td></tr>'}
     </tbody></table></div></section>`;
   }
@@ -789,7 +791,7 @@ function leadFichaSimple(id) {
     return `<div class="pg"><div class="pg-top"><b>${esc(LEAD_FORMS[l.form] || l.form)}</b></div>
       <span class="muted" style="font-size:.78rem">${fdateMs(l.createdAt)}${l.claseFecha ? ` · clase ${esc(fechaLarga(l.claseFecha))}` : ''}${l.status === 'descartado' && l.motivo ? ` · motivo: ${esc(l.motivo)}` : ''}</span>
       <label style="display:grid;gap:4px;font-size:.8rem">Etapa<select data-fs-etapa="${esc(l.id)}">${opciones(l).map(([k, t]) => `<option value="${k}" ${act === k ? 'selected' : ''}>${esc(etapaTxt(l.form, k))}</option>`).join('')}</select></label>
-      ${esClase(l.form) ? registro(l) : ''}</div>`; };
+      ${esClase(l.form) ? registro(l) : ''}${bloqueReserva(l, p)}</div>`; };
   const n = waNum(p.whatsapp), c = A.wa.chats.find((x) => x.id === n), libre = waLibre(c);
   const chat = !n ? '<div class="wa-empty" style="flex:1;border:1px dashed var(--line);border-radius:12px">Esta persona no dejó WhatsApp.</div>' : `<div class="alert" id="wf-aviso" ${A.wa.on === false ? '' : 'hidden'}><div><b>WhatsApp todavía no está conectado</b><p>Cuando esté el número definitivo y las llaves de Meta, aquí podrás conversar uno a uno. Mientras tanto el chat no envía ni recibe.</p></div></div>
       <div class="wa-msgs" id="wf-msgs" style="flex:1;min-height:260px;border:1px solid var(--line);border-radius:12px"><div class="wa-empty">Cargando conversación…</div></div>
@@ -840,6 +842,14 @@ function leadFichaSimple(id) {
     try { await data.leads({ action: 'update', ids, contacto }); p.leads.forEach((l) => Object.assign(l, contacto, { email: contacto.email.toLowerCase() })); refrescar(); leadFichaSimple(id); toast('Cambios guardados.'); } catch (err) { fail(err); b.disabled = false; }
   };
   document.querySelectorAll('#dlg [data-fs-etapa]').forEach((s) => (s.onchange = async () => { const cambio = await leadMover(s.dataset.fsEtapa, s.value); if (cambio) toast('Guardado.'); leadFichaSimple(id); }));
+  document.querySelectorAll('#dlg [data-reserva]').forEach((b) => (b.onclick = async () => {
+    const [tid, accion] = b.dataset.reserva.split('|');
+    if (await reservaAccion(tid, accion)) { refrescar(); leadFichaSimple(id); toast('Guardado.'); }
+  }));
+  document.querySelectorAll('#dlg [data-saldo]').forEach((c) => (c.onchange = async () => {
+    if (!c.checked) return;
+    if (await reservaAccion(c.dataset.saldo, 'saldo')) { refrescar(); leadFichaSimple(id); toast('Saldo pagado: matriculada.'); } else c.checked = false;
+  }));
   document.querySelectorAll('#dlg [data-codigo]').forEach((b) => (b.onclick = async () => {
     const [tid, accion] = b.dataset.codigo.split('|'), l = A.leads.find((x) => x.id === tid); if (!l) return;
     if (!confirm(accion === 'revocar' ? 'Si lo revocas, los enlaces de esta persona dejan de funcionar. ¿Revocar el código?' : 'Se crea un código nuevo y los enlaces anteriores dejan de funcionar. ¿Regenerar?')) return;
@@ -961,27 +971,8 @@ function leadFicha(id) {
     leadFicha(id);
   }));
   document.querySelectorAll('#dlg [data-reserva]').forEach((b) => (b.onclick = async () => {
-    const [tid, accion] = b.dataset.reserva.split('|'), o = ofertaDe('pendulo');
-    try {
-      if (accion === 'pagar') {
-        const txt = prompt(`Monto de la reserva pagada (por defecto ${clp(o.reserva)}):`, String(o.reserva)); if (txt === null) return;
-        const monto = Number(String(txt).replace(/\D/g, '')) || o.reserva;
-        try { await embApi({ action: 'reserva', id: tid, pagada: true, monto }); } catch (err) {
-          if (err.codigo !== 'cupos_llenos') throw err;
-          const d = err.datos || {};
-          if (confirm(`Los cupos del ${o.nombre} están llenos (${d.ocupados} de ${d.cupos}).\n\n¿Pasarla a la lista de espera?`)) { await leadMover(tid, 'lista_espera'); leadFicha(id); return; }
-          if (!confirm('¿Darle el cupo de todas formas, por encima del máximo?')) return;
-          await embApi({ action: 'reserva', id: tid, pagada: true, monto, forzar: true });
-        }
-      } else if (accion === 'deshacer') {
-        if (!confirm('¿Deshacer la reserva? Vuelve a «Vio la oferta».')) return;
-        await embApi({ action: 'reserva', id: tid, pagada: false });
-      } else if (accion === 'saldo') {
-        if (!confirm('¿Marcar el saldo como pagado? Queda matriculada en el curso.')) return;
-        await embApi({ action: 'saldo', id: tid });
-      }
-      await data.leads({ action: 'all' }); refrescar(); leadFicha(id); toast('Guardado.');
-    } catch (err) { fail(err); }
+    const [tid, accion] = b.dataset.reserva.split('|');
+    if (await reservaAccion(tid, accion)) { refrescar(); leadFicha(id); toast('Guardado.'); }
   }));
   document.querySelectorAll('#dlg [data-pasar]').forEach((b) => (b.onclick = async () => { const l = A.leads.find((x) => x.id === b.dataset.pasar); if (l) await pasarACurso(l); leadFicha(id); }));
   document.querySelectorAll('#dlg [data-trk-del]').forEach((b) => (b.onclick = async () => {
@@ -1230,7 +1221,7 @@ const enlacesPersonales = (p) => {
 // Valores de partida de cada oferta (los mismos que usa el servidor). Lo que la Maestra guarda en «Clases y ofertas» (config/clases.ofertas) manda sobre esto.
 const OFERTA_UI = {
   pendulo: { nombre: 'Péndulo Hebreo', claseDia: 'sábado', claseHora: '19:00', cierre: ['2026-11-18', '17:00'], inicio: '2026-11-18', precio: 69900, moneda: 'CLP', reserva: 10000, cupos: null, listaEspera: true, ventanaAntes: 10, ventanaDespues: 30, palabra: '', texto: '' },
-  tarot: { nombre: 'Tarot Terapéutico', claseDia: 'martes', claseHora: '19:00', cierre: ['2026-11-26', '17:00'], inicio: '2026-11-26', precio: 70, moneda: 'USD', cuotas: 2, cupos: null, listaEspera: true, ventanaAntes: 10, ventanaDespues: 30, palabra: '', texto: '' },
+  tarot: { nombre: 'Tarot Terapéutico', claseDia: 'martes', claseHora: '19:00', cierre: ['2026-11-26', '17:00'], inicio: '2026-11-26', precio: 70, moneda: 'USD', cuotas: 2, reserva: 10, cupos: null, listaEspera: true, ventanaAntes: 10, ventanaDespues: 30, palabra: '', texto: '' },
 };
 const FECHA_OK = /^\d{4}-\d{2}-\d{2}$/, HORA_OK = /^([01]\d|2[0-3]):[0-5]\d$/;
 const ofertaDe = (clase) => {
@@ -1268,29 +1259,53 @@ const embApi = async (body) => {
 
 // ----- Pagos
 const pagoHecho = (l) => !!(l.pago?.t || (l.pagos || []).length || l.saldoPagado) || esInscrita(leadEtapa(l));
-const clicSinPago = (l) => esClase(l.form) && !!l.compraClicT && !pagoHecho(l) && !l.reservaPagada && leadEtapa(l) !== 'descartado';
-const filasClic = () => personas().map((p) => { const ls = p.leads.filter(clicSinPago).sort((a, b) => b.compraClicT - a.compraClicT); return ls.length ? { p, l: ls[0] } : null; }).filter(Boolean)
+// Reserva: la guarda la landing en lead.reserva = { monto, moneda, estado: 'iniciada' | 'sin_pago' | 'pagada', t, pagadaT?, stripeSession?, marcadaPor? }.
+// Las reservas del Péndulo anotadas antes (reservaPagada / reservaMonto / reservaFecha) se leen igual. Devuelve null si no hay reserva.
+const reservaDe = (l) => {
+  const r = l.reserva;
+  if (r && typeof r === 'object' && r.estado) {
+    const pagada = String(r.estado).startsWith('pag');
+    return { pagada, estado: pagada ? 'pagada' : 'iniciada', monto: Number(r.monto) || 0, moneda: r.moneda || (claseDeL(l) === 'tarot' ? 'USD' : 'CLP'), t: r.t || 0, pagadaT: r.pagadaT || 0, stripe: !!r.stripeSession, por: r.marcadaPor || '' };
+  }
+  if (l.reservaPagada) return { pagada: true, estado: 'pagada', monto: Number(l.reservaMonto) || 0, moneda: 'CLP', t: l.reservaFecha || 0, pagadaT: l.reservaFecha || 0, stripe: false, por: '' };
+  return null;
+};
+// Dinero por moneda, sin mezclar: Péndulo en CLP ($10.000 CLP), Tarot en USD (10 USD)
+const montoReserva = (n, mon) => (mon === 'USD' ? `${Number(n || 0).toLocaleString('es-CL')} USD` : `${clp(n)} CLP`);
+const reservoLinea = (p, clase) => !!p && p.leads.some((x) => claseDeL(x) === clase && reservaDe(x)?.pagada);
+// '' (sin reserva) | 'iniciada' | 'pagada' (la más avanzada entre sus programas; con linea, solo esa línea: 'pendulo' o 'tarot')
+const reservaPersona = (p, linea = '') => { const rs = p.leads.filter((l) => !linea || claseDeL(l) === linea).map(reservaDe).filter(Boolean); return rs.some((r) => r.pagada) ? 'pagada' : rs.length ? 'iniciada' : ''; };
+// Saldo: Péndulo = precio − reserva. Tarot = 1.ª cuota (precio − reserva) y 2.ª cuota (el precio) el segundo mes
+const saldoDe = (l) => { const c = claseDeL(l), o = ofertaDe(c), r = reservaDe(l); return { primera: Math.max(0, o.precio - (r?.pagada ? r.monto : 0)), segunda: c === 'tarot' && (o.cuotas || 2) > 1 ? o.precio : 0, moneda: o.moneda }; };
+const saldoTxt = (l) => { const s = saldoDe(l), m = (n) => montoReserva(n, s.moneda); return s.segunda ? `${m(s.primera)} (1.ª cuota) y ${m(s.segunda)} el segundo mes` : m(s.primera); };
+// Reservó y todavía no pagó el saldo (si otro de sus registros de esa línea ya está pagado, tampoco cuenta)
+const saldoPendiente = (l, p) => FUNC.reserva && !!reservaDe(l)?.pagada && !pagoHecho(l) && !(p && p.leads.some((x) => x !== l && claseDeL(x) === claseDeL(l) && pagoHecho(x)));
+const inicioCursoMs = (clase) => chileAMs(ofertaDe(clase).inicio, '19:00'); // el curso empieza a las 19:00 (Chile)
+const clicSinPago = (l) => esClase(l.form) && !!l.compraClicT && !pagoHecho(l) && !reservaDe(l)?.pagada && leadEtapa(l) !== 'descartado';
+const filasClic = () => personas().map((p) => { const ls = p.leads.filter((l) => clicSinPago(l) && !reservoLinea(p, claseDeL(l))).sort((a, b) => b.compraClicT - a.compraClicT); return ls.length ? { p, l: ls[0] } : null; }).filter(Boolean)
   .sort((a, b) => (S.clicOrden === 'antiguos' ? a.l.compraClicT - b.l.compraClicT : b.l.compraClicT - a.l.compraClicT));
 // Ya vio la oferta (replay o clic) y no ha pagado, reservado ni respondido por WhatsApp
 const respondioDespues = (l) => { const n = waNum(l.whatsapp), c = n && A.wa.chats.find((x) => x.id === n); return (c?.lastInboundAt?.toMillis?.() || 0) > (l.replayT || l.compraClicT || 0); };
-const vioOfertaSinRespuesta = (l, p) => esClase(l.form) && (['vio_oferta', 'vio_replay'].includes(leadEtapa(l)) || !!l.replayT || !!l.compraClicT) && !pagoHecho(l) && !l.reservaPagada
+const vioOfertaSinRespuesta = (l, p) => esClase(l.form) && (['vio_oferta', 'vio_replay'].includes(leadEtapa(l)) || !!l.replayT || !!l.compraClicT) && !pagoHecho(l) && !reservaDe(l)?.pagada && !reservoLinea(p, claseDeL(l))
   && !['descartado', 'reservo_cupo', 'lista_espera'].includes(leadEtapa(l)) && !(p?.tags || []).includes('No contactar') && !l.noContactar && !respondioDespues(l); // en lista de espera no se les apura: el curso está lleno
 const pagoBadges = (l) => {
   const b = [];
-  if (FUNC.reserva && l.reservaPagada) b.push(`<span class="pill pres" title="Reserva pagada por WhatsApp">Reserva ${clp(l.reservaMonto)}</span>`);
-  if (FUNC.reserva && l.reservaPagada && !pagoHecho(l)) b.push(`<span class="pill bad" title="Debe pagarse antes de la primera clase">Saldo ${clp(Math.max(0, ofertaDe('pendulo').precio - (l.reservaMonto || 0)))}</span>`);
+  const rv = FUNC.reserva ? reservaDe(l) : null, prog = (ofertaDe(claseDeL(l))?.nombre || '').replace(' Hebreo', '').replace(' Terapéutico', '');
+  if (rv && rv.pagada) b.push(`<span class="pill done" title="Reserva de ${esc(prog)} pagada${rv.stripe ? ' (Stripe)' : rv.por ? ' (la marcaste a mano)' : ''}">Reservó · ${esc(montoReserva(rv.monto, rv.moneda))}</span>`);
+  else if (rv) b.push(`<span class="pill bad" title="Apretó «Reservar» en ${esc(prog)} y todavía no hay pago">Reserva iniciada, sin pago</span>`);
+  if (rv && rv.pagada && !pagoHecho(l)) b.push(`<span class="pill pres" title="Debe pagarse antes del inicio del curso">Saldo ${esc(saldoTxt(l))}</span>`);
   if (FUNC.cuotas && claseDeL(l) === 'tarot' && ((l.pagos || []).length || l.pago)) { const t = ofertaDe('tarot').cuotas || 2, n = Math.min(t, (l.pagos || []).length || 1); b.push(`<span class="pill ${n >= t ? 'done' : 'pres'}" title="Cuotas pagadas del Tarot">Cuotas ${n}/${t}</span>`); }
   if (FUNC.cuotas && l.cobroFallido) b.push('<span class="pill bad" title="Un cobro falló: escribirle hoy">Cobro fallido</span>');
   return b.join(' ');
 };
-const pagoPersona = (p) => p.leads.filter((l) => esClase(l.form)).map(pagoBadges).filter(Boolean).join(' ');
+const pagoPersona = (p) => p.leads.filter((l) => esClase(l.form) || reservaDe(l)).map(pagoBadges).filter(Boolean).join(' ');
 const origenMatricula = (l) => `Clase gratis de ${(ofertaDe(claseDeL(l))?.nombre || '').replace(' Hebreo', '').replace(' Terapéutico', '')}${l.claseFecha ? ` del ${l.claseFecha}` : ''} · campaña ${l.utm?.utm_campaign || '—'} · anuncio ${l.utm?.utm_content || '—'}`;
 // Bloque de la ficha: reserva y saldo (Péndulo) o cuotas (Tarot)
 const bloquePago = (l) => {
   const clase = claseDeL(l), o = ofertaDe(clase), id = esc(l.id);
   if (!o || !esClase(l.form) || (clase === 'tarot' ? !FUNC.cuotas : !FUNC.reserva)) return '';
-  const clic = l.compraClicT ? `<span class="muted" style="font-size:.78rem">Hizo clic en «inscribirme» el ${esc(fechaCorta(l.compraClicT))}${pagoHecho(l) || l.reservaPagada ? '' : ' y todavía no paga'}.</span>` : '';
-  const origen = pagoHecho(l) || l.reservaPagada ? `<span class="muted" style="font-size:.76rem">Origen: ${esc(origenMatricula(l))}</span>` : '';
+  const clic = l.compraClicT ? `<span class="muted" style="font-size:.78rem">Hizo clic en «inscribirme» el ${esc(fechaCorta(l.compraClicT))}${pagoHecho(l) || reservaDe(l)?.pagada ? '' : ' y todavía no paga'}.</span>` : '';
+  const origen = pagoHecho(l) || reservaDe(l)?.pagada ? `<span class="muted" style="font-size:.76rem">Origen: ${esc(origenMatricula(l))}</span>` : '';
   if (clase === 'tarot') {
     const pagos = l.pagos?.length ? l.pagos : l.pago ? [l.pago] : [], t = o.cuotas || 2, n = Math.min(t, pagos.length);
     const fallo = l.cobroFallido ? `<div class="alert" style="margin:0"><div><b>Cobro fallido: escribirle hoy</b><p>El ${esc(fechaCorta(l.cobroFallido.t))}${l.cobroFallido.monto ? ` no se pudo cobrar ${esc(dinero(l.cobroFallido.monto, (l.cobroFallido.moneda || '').toUpperCase()))}` : ' falló un cobro'}. Sigue matriculada.</p></div></div>` : '';
@@ -1299,13 +1314,66 @@ const bloquePago = (l) => {
     return `<div class="pg-pago">${fallo}<b>Cuotas pagadas ${n}/${t}</b><div style="display:flex;gap:6px;flex-wrap:wrap">${Array.from({ length: t }, (_, i) => `<span class="pill ${i < n ? 'done' : 'lock'}">${i + 1}/${t} ${i < n ? '✓' : 'pendiente'}</span>`).join(' ')}</div>
       <span class="muted" style="font-size:.78rem">${pagos.slice(0, t).map((x) => `${esc(dinero(x.monto, (x.moneda || '').toUpperCase()))} el ${esc(fechaCorta(x.t))}`).join(' · ')}${sig ? ` · la siguiente se cobra un mes después (hacia el ${esc(fechaCorta(sig))})` : ''}</span>${origen}</div>`;
   }
-  const reserva = l.reservaPagada ? Number(l.reservaMonto) || 0 : 0, saldo = Math.max(0, o.precio - reserva);
-  if (pagoHecho(l)) return `<div class="pg-pago"><b>Matrícula pagada completa</b><span style="font-size:.86rem">${esc(dinero(o.precio, o.moneda))}${l.reservaPagada ? ` (reserva ${esc(clp(reserva))} + saldo ${esc(clp(saldo))})` : ''}</span>${origen}</div>`;
-  if (l.reservaPagada) return `<div class="pg-pago"><b>Reserva pagada · ${esc(clp(reserva))}</b><span style="font-size:.86rem">Pagada el ${esc(fechaCorta(l.reservaFecha))}. <b>Saldo pendiente ${esc(clp(saldo))}</b>: debe pagarse antes de la primera clase (${esc(fechaLarga(o.inicio))}).</span>${origen}
+  const rv = reservaDe(l), reserva = rv?.pagada ? rv.monto : 0, saldo = Math.max(0, o.precio - reserva);
+  if (pagoHecho(l)) return `<div class="pg-pago"><b>Matrícula pagada completa</b><span style="font-size:.86rem">${esc(dinero(o.precio, o.moneda))}${rv?.pagada ? ` (reserva ${esc(clp(reserva))} + saldo ${esc(clp(saldo))})` : ''}</span>${origen}</div>`;
+  if (rv?.pagada) return `<div class="pg-pago"><b>Reserva pagada · ${esc(clp(reserva))}</b><span style="font-size:.86rem">Pagada el ${esc(fechaCorta(rv.pagadaT || rv.t))}. <b>Saldo pendiente ${esc(clp(saldo))}</b>: debe pagarse antes de la primera clase (${esc(fechaLarga(o.inicio))}).</span>${origen}
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button type="button" class="btn btn-primary btn-sm" data-reserva="${id}|saldo">Marcar saldo pagado</button><button type="button" class="link" style="color:#b8402f" data-reserva="${id}|deshacer">Deshacer reserva</button></div></div>`;
   return `<div class="pg-pago"><b>Reserva y saldo</b><span class="muted" style="font-size:.82rem">Reserva ${esc(clp(o.reserva))} por WhatsApp · saldo ${esc(clp(Math.max(0, o.precio - o.reserva)))} antes de la primera clase.</span>${clic}
     <button type="button" class="btn btn-ghost btn-sm" data-reserva="${id}|pagar">Marcar reserva pagada (${esc(clp(o.reserva))})</button></div>`;
 };
+
+// Bloque de la ficha simple: reserva (según lead.reserva.estado) y casilla «Saldo pagado». Se muestra en la tarjeta del curso (Péndulo / Tarot) o donde ya hay reserva;
+// en una clase gratis solo si la persona no tiene tarjeta del curso de esa línea (así se puede marcar una reserva pagada por otra vía).
+const mostrarReserva = (l, p) => {
+  if (!FUNC.reserva) return false;
+  const c = claseDeL(l); if (!['pendulo', 'tarot'].includes(c)) return false;
+  if (reservaDe(l)) return true;
+  return esPago(l.form) ? ['pendulo', 'tarot'].includes(l.form) : esClase(l.form) && !p.leads.some((x) => esPago(x.form) && claseDeL(x) === c);
+};
+const bloqueReserva = (l, p) => {
+  if (!mostrarReserva(l, p)) return '';
+  const c = claseDeL(l), o = ofertaDe(c), r = reservaDe(l), id = esc(l.id), ok = pagoHecho(l), curso = o.nombre;
+  const cab = (txt, clase) => `<span class="pill ${clase}" style="justify-self:start">${esc(txt)}</span>`;
+  if (!r) return `<div class="pg-pago"><b>Reserva · ${esc(curso)}</b><span class="muted" style="font-size:.82rem">Sin reserva registrada. Si pagó por otra vía, márcala.</span>
+    <button type="button" class="btn btn-ghost btn-sm" data-reserva="${id}|pagar">Marcar reserva pagada</button></div>`;
+  if (!r.pagada) return `<div class="pg-pago"><b>Reserva · ${esc(curso)}</b>${cab('Reserva iniciada, sin pago', 'bad')}
+    <span class="muted" style="font-size:.82rem">Apretó «Reservar»${r.t ? ` el ${esc(fechaCorta(r.t))}` : ''} (${esc(montoReserva(r.monto || o.reserva, r.moneda))}) y no hay pago registrado. Si ya pagó, márcala.</span>
+    <button type="button" class="btn btn-primary btn-sm" data-reserva="${id}|pagar">Marcar reserva pagada</button></div>`;
+  const quien = r.stripe ? 'Pagada con Stripe' : r.por ? `Marcada a mano por ${r.por}` : 'Pagada';
+  return `<div class="pg-pago"><b>Reserva · ${esc(curso)}</b>${cab(`Reservó · ${montoReserva(r.monto, r.moneda)}`, 'done')}
+    <span class="muted" style="font-size:.82rem">${esc(quien)}${r.pagadaT || r.t ? ` el ${esc(fechaCorta(r.pagadaT || r.t))}` : ''}.</span>
+    ${ok ? `<label style="display:flex;gap:8px;align-items:center;font-size:.88rem"><input type="checkbox" checked disabled> <b>Saldo pagado</b> · matriculada</label>`
+      : `<label style="display:flex;gap:8px;align-items:center;font-size:.88rem"><input type="checkbox" data-saldo="${id}"> <b>Saldo pagado</b></label>
+        <span class="muted" style="font-size:.8rem">Saldo pendiente: ${esc(saldoTxt(l))}. Debe pagarse antes del inicio del curso (${esc(fechaLarga(o.inicio))}, 19:00 hora de Chile). El link de cobro lo envías tú por WhatsApp.</span>
+        <button type="button" class="link" style="color:#b8402f;justify-self:start" data-reserva="${id}|deshacer">Deshacer reserva</button>`}</div>`;
+};
+// Acciones de la ficha: marcar / deshacer la reserva y marcar el saldo. Devuelve true si se guardó.
+async function reservaAccion(tid, accion) {
+  const l = A.leads.find((x) => x.id === tid); if (!l) return false;
+  const c = claseDeL(l), o = ofertaDe(c), r = reservaDe(l);
+  try {
+    if (accion === 'pagar') {
+      if (!confirm(`¿Marcar la reserva de ${o.nombre} como pagada (${montoReserva(r?.monto || o.reserva, r?.moneda || o.moneda)})?\n\nQueda anotado que la marcaste tú y cuándo.`)) return false;
+      try { await embApi({ action: 'reserva', id: tid, pagada: true }); } catch (err) {
+        if (err.codigo !== 'cupos_llenos') throw err;
+        const d = err.datos || {};
+        if (esClase(l.form) && confirm(`Los cupos del ${o.nombre} están llenos (${d.ocupados} de ${d.cupos}).
+
+¿Pasarla a la lista de espera?`)) { await leadMover(tid, 'lista_espera'); return true; }
+        if (!confirm('¿Darle el cupo de todas formas, por encima del máximo?')) return false;
+        await embApi({ action: 'reserva', id: tid, pagada: true, forzar: true });
+      }
+    } else if (accion === 'deshacer') {
+      if (!confirm(`¿Deshacer la reserva?${r?.stripe ? '\n\nOjo: esta reserva se pagó con Stripe.' : ''}\n\nVuelve a «Reserva iniciada, sin pago».`)) return false;
+      await embApi({ action: 'reserva', id: tid, pagada: false });
+    } else if (accion === 'saldo') {
+      if (!confirm(`¿Marcar el saldo como pagado?\n\nLa persona queda matriculada en ${o.nombre}.`)) return false;
+      await embApi({ action: 'saldo', id: tid });
+    } else return false;
+    await data.leads({ action: 'all' }); A._per = null;
+    return true;
+  } catch (err) { fail(err); return false; }
+}
 
 // ----- Cupos y lista de espera
 const ocupaCupo = (l) => ['reservo_cupo', 'matriculada'].includes(leadEtapa(l)) || (['pendulo', 'tarot'].includes(l.form) && leadEtapa(l) === 'inscrita');
@@ -1334,6 +1402,7 @@ const ofertaBanner = () => ofertasPorCerrar().map((o) => `<div class="alert"><di
 const listaMatricula = () => {
   const modo = S.crmLista || '', clase = modo.startsWith('oferta:') ? modo.split(':')[1] : '';
   if (modo === 'replay' || modo === 'fallido') return listaSeguimiento(modo);
+  if (modo === 'saldo') return listaSaldos();
   const filas = clase
     ? personas().flatMap((p) => p.leads.filter((l) => claseDeL(l) === clase && vioOfertaSinRespuesta(l, p)).map((l) => ({ p, l }))).sort((a, b) => (b.l.compraClicT || b.l.replayT || 0) - (a.l.compraClicT || a.l.replayT || 0))
     : filasClic();
@@ -1355,12 +1424,34 @@ const listaMatricula = () => {
 
 // ----- Seguimiento: «No abrió el replay» (24 h o más después de enviárselo) y «Cobro fallido» (cuota del Tarot que no se pudo cobrar)
 const replaySinAbrir = (l, p) => esClase(l.form) && !!l.replayEnviadoT && Date.now() - l.replayEnviadoT >= 24 * 36e5 && !l.replayT && leadEtapa(l) !== 'vio_replay'
-  && !pagoHecho(l) && !l.reservaPagada && !['descartado', 'reservo_cupo', 'lista_espera'].includes(leadEtapa(l)) && !(p?.tags || []).includes('No contactar') && !l.noContactar && !(l.seguimientoReplayT > l.replayEnviadoT);
+  && !pagoHecho(l) && !reservaDe(l)?.pagada && !reservoLinea(p, claseDeL(l)) && !['descartado', 'reservo_cupo', 'lista_espera'].includes(leadEtapa(l)) && !(p?.tags || []).includes('No contactar') && !l.noContactar && !(l.seguimientoReplayT > l.replayEnviadoT);
 const filasReplay = () => personas().flatMap((p) => p.leads.filter((l) => replaySinAbrir(l, p)).map((l) => ({ p, l }))).sort((a, b) => a.l.replayEnviadoT - b.l.replayEnviadoT);
 const filasFallidas = () => personas().flatMap((p) => p.leads.filter((l) => esClase(l.form) && l.cobroFallido).map((l) => ({ p, l }))).sort((a, b) => b.l.cobroFallido.t - a.l.cobroFallido.t);
+// Reservaron y todavía no pagan el saldo (plazo: antes del inicio del curso). El cobro lo envía Karen por WhatsApp: aquí solo se lista y se abre la conversación.
+const filasSaldo = () => personas().flatMap((p) => p.leads.filter((l) => saldoPendiente(l, p)).map((l) => ({ p, l }))).sort((a, b) => inicioCursoMs(claseDeL(a.l)) - inicioCursoMs(claseDeL(b.l)) || (a.l.reserva?.pagadaT || a.l.reserva?.t || 0) - (b.l.reserva?.pagadaT || b.l.reserva?.t || 0));
+const plazoSaldo = (clase) => { const o = ofertaDe(clase), ms = inicioCursoMs(clase), d = Math.ceil((ms - Date.now()) / 864e5); return { txt: `${fechaLarga(o.inicio)}, 19:00 (Chile)`, dias: d, vencido: ms < Date.now() }; };
+const avisoSaldos = () => {
+  const f = FUNC.reserva ? filasSaldo() : []; if (!f.length) return '';
+  const por = ['pendulo', 'tarot'].map((c) => [c, f.filter(({ l }) => claseDeL(l) === c).length]).filter(([, n]) => n);
+  return `<div class="alert"><div><b>${f.length} reservaron y no han pagado el saldo</b><p>${por.map(([c, n]) => `${esc(ofertaDe(c).nombre)}: ${n}, antes del ${esc(plazoSaldo(c).txt)}`).join(' · ')}.</p></div><button class="btn" data-crm-lista="saldo">Ver lista</button></div>`;
+};
+const listaSaldos = () => {
+  const filas = filasSaldo();
+  const msj = (p, l) => `Hola ${String(p.nombre).split(' ')[0]}, ¡gracias por reservar tu cupo en ${ofertaDe(claseDeL(l)).nombre}! Te escribo por el saldo (${saldoTxt(l)}), que se paga antes del inicio del curso (${plazoSaldo(claseDeL(l)).txt}). ¿Te lo envío por aquí?`;
+  const fila = ({ p, l }) => { const r = reservaDe(l), pl = plazoSaldo(claseDeL(l)), n = waNum(p.whatsapp);
+    return `<tr><td class="persona"><button class="link nom" data-lead-open="${esc(p.id)}">${esc(p.nombre)}</button><br><span class="muted" style="font-size:.84rem">${contactoDe(p)}</span></td>
+      <td>${esc(ofertaDe(claseDeL(l)).nombre)}</td><td class="muted" style="font-size:.84rem">Reservó ${esc(montoReserva(r.monto, r.moneda))}<br>${esc(fechaCorta(r.pagadaT || r.t))}</td>
+      <td><b>${esc(saldoTxt(l))}</b></td>
+      <td style="font-size:.84rem">${esc(pl.txt)}<br><span class="${pl.vencido || pl.dias <= 3 ? 'pill bad' : 'muted'}">${pl.vencido ? 'ya empezó' : pl.dias <= 0 ? 'hoy' : `faltan ${pl.dias} día${pl.dias === 1 ? '' : 's'}`}</span></td>
+      <td style="text-align:right;white-space:nowrap">${n ? `<a class="btn btn-primary btn-sm" href="https://wa.me/${n}?text=${encodeURIComponent(msj(p, l))}" target="_blank" rel="noopener">WhatsApp</a>` : '<span class="muted">sin WhatsApp</span>'} <button type="button" class="btn btn-ghost btn-sm" data-lead-open="${esc(p.id)}">Abrir ficha</button></td></tr>`; };
+  return `<div class="crm-hint"><button type="button" class="link" data-crm-lista="">← Volver al CRM</button></div>
+    <section class="card panel"><div class="panel-h"><h3>Reservaron y no han pagado el saldo (${filas.length})</h3></div>
+    <p class="muted" style="font-size:.82rem;margin:0">El saldo se paga antes del inicio del curso. El link de cobro (Stripe o Mercado Pago) lo envías tú por WhatsApp; aquí no se envía nada ni se muestra a las alumnas. Cuando pague, abre su ficha y marca «Saldo pagado»: queda matriculada y sale de esta lista.</p>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Persona</th><th>Curso</th><th>Reserva</th><th>Saldo</th><th>Plazo</th><th></th></tr></thead><tbody>${filas.map(fila).join('') || '<tr><td colspan="6" class="muted">No hay nadie con saldo pendiente.</td></tr>'}</tbody></table></div></section>`;
+};
 const avisosSeguimiento = () => {
   const r = filasReplay().length, f = FUNC.cuotas ? filasFallidas().length : 0;
-  return [f ? `<div class="alert"><div><b>${f} cobro${f === 1 ? '' : 's'} fallido${f === 1 ? '' : 's'}</b><p>Cobro fallido: escribirle hoy. La persona sigue matriculada; solo hay que ayudarle con el pago.</p></div><button class="btn" data-crm-lista="fallido">Ver lista</button></div>` : '', r ? `<div class="alert"><div><b>${r} persona${r === 1 ? '' : 's'} no abrieron el replay</b><p>Ya se lo enviaste hace 24 horas o más y no lo han visto. Pregúntales: «¿Pudiste ver la clase?».</p></div><button class="btn" data-crm-lista="replay">Ver lista</button></div>` : ''].join('');
+  return [avisoSaldos(), f ? `<div class="alert"><div><b>${f} cobro${f === 1 ? '' : 's'} fallido${f === 1 ? '' : 's'}</b><p>Cobro fallido: escribirle hoy. La persona sigue matriculada; solo hay que ayudarle con el pago.</p></div><button class="btn" data-crm-lista="fallido">Ver lista</button></div>` : '', r ? `<div class="alert"><div><b>${r} persona${r === 1 ? '' : 's'} no abrieron el replay</b><p>Ya se lo enviaste hace 24 horas o más y no lo han visto. Pregúntales: «¿Pudiste ver la clase?».</p></div><button class="btn" data-crm-lista="replay">Ver lista</button></div>` : ''].join('');
 };
 const listaSeguimiento = (modo) => {
   const replay = modo === 'replay', filas = replay ? filasReplay() : filasFallidas();
@@ -1383,7 +1474,7 @@ const matriculasHTML = () => {
   const filas = personas().flatMap((p) => p.leads.filter((l) => esClase(l.form) && ['reservo_cupo', 'matriculada'].includes(leadEtapa(l))).map((l) => ({ p, l, t: l.pago?.t || l.saldoFecha || l.reservaFecha || l.updatedAt || l.createdAt || 0 }))).sort((a, b) => b.t - a.t);
   const porCamp = new Map();
   filas.forEach(({ l }) => { const k = `${ofertaDe(claseDeL(l)).nombre} · ${l.utm?.utm_campaign || '(sin campaña)'}`; porCamp.set(k, (porCamp.get(k) || 0) + 1); });
-  const pagado = (l) => { const o = ofertaDe(claseDeL(l)); if (claseDeL(l) === 'tarot') { const n = Math.min(o.cuotas || 2, (l.pagos || []).length || (l.pago ? 1 : 0)); return `Cuotas ${n}/${o.cuotas || 2}`; } return pagoHecho(l) ? 'Pagada completa' : l.reservaPagada ? `Reserva ${clp(l.reservaMonto)}` : '—'; };
+  const pagado = (l) => { const o = ofertaDe(claseDeL(l)); if (claseDeL(l) === 'tarot') { const n = Math.min(o.cuotas || 2, (l.pagos || []).length || (l.pago ? 1 : 0)); return `Cuotas ${n}/${o.cuotas || 2}`; } const rv = reservaDe(l); return pagoHecho(l) ? 'Pagada completa' : rv?.pagada ? `Reserva ${montoReserva(rv.monto, rv.moneda)}` : '—'; };
   return `<section class="card panel"><h3>Origen de las matrículas</h3><p class="muted" style="font-size:.84rem;margin:0">Cada reserva o matrícula con la clase gratis y la campaña de donde llegó.</p>
     ${filas.length ? `<div style="display:flex;gap:6px;flex-wrap:wrap">${[...porCamp.entries()].sort((a, b) => b[1] - a[1]).map(([k, n]) => `<span class="pill pres">${esc(k)}: ${n}</span>`).join('')}</div>
     <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Persona</th><th>Curso</th><th>Estado</th><th>Pagado</th><th>Fecha</th><th>Clase gratis</th><th>Campaña</th><th>Anuncio</th><th>Origen</th></tr></thead><tbody>
@@ -1877,8 +1968,8 @@ document.addEventListener('click', async (e) => {
 document.addEventListener('click', (e) => { document.querySelectorAll('details.menu[open]').forEach((d) => { if (!d.contains(e.target)) d.removeAttribute('open'); }); });
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-copiar]'); if (b) navigator.clipboard?.writeText(b.dataset.copiar).then(() => toast('Copiado.')).catch(() => toast('No se pudo copiar.')); });
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-lead-alumna]'); if (b) { if ($('#dlg').open) $('#dlg').close(); openStudent(b.dataset.leadAlumna); } });
-document.addEventListener('click', (e) => { if (e.target.closest('[data-crm-hoy]')) { Object.assign(S, { crmSeg: true, crmProg: '', crmQ: '', crmOrigen: '', crmSinCuenta: false, crmEtapa: '', crmTag: '', crmVista: 'embudo' }); go('interesadas'); } });
-document.addEventListener('click', (e) => { if (e.target.closest('[data-crm-sincuenta-ya]')) { Object.assign(S, { crmSeg: false, crmProg: '', crmQ: '', crmOrigen: '', crmSinCuenta: true, crmEtapa: 'inscrita', crmTag: '', crmVista: 'tabla' }); go('interesadas'); } });
+document.addEventListener('click', (e) => { if (e.target.closest('[data-crm-hoy]')) { Object.assign(S, { crmSeg: true, crmProg: '', crmQ: '', crmOrigen: '', crmSinCuenta: false, crmEtapa: '', crmReserva: '', crmTag: '', crmVista: 'embudo' }); go('interesadas'); } });
+document.addEventListener('click', (e) => { if (e.target.closest('[data-crm-sincuenta-ya]')) { Object.assign(S, { crmSeg: false, crmProg: '', crmQ: '', crmOrigen: '', crmSinCuenta: true, crmEtapa: 'inscrita', crmReserva: '', crmTag: '', crmVista: 'tabla' }); go('interesadas'); } });
 // Asistencia a una clase gratis: se marcan quienes entraron y pasan juntas a "Tomó la clase"
 document.addEventListener('change', (e) => { const t = e.target.closest('[data-asist-all]'); if (t) document.querySelectorAll('#dlg [data-asist]').forEach((c) => (c.checked = t.checked)); });
 document.addEventListener('click', async (e) => {
@@ -1974,7 +2065,7 @@ function bind() {
   document.querySelectorAll('[data-crm-kpi]').forEach((b) => (b.onclick = () => {
     const k = b.dataset.crmKpi, prog = progDe(S.crmProg), primera = prog && esClase(prog[0]) ? 'registrada' : 'nuevo';
     S.crmLista = k === 'clic' && S.crmLista !== 'clic' ? 'clic' : '';
-    if (k === 'todos') Object.assign(S, { crmQ: '', crmOrigen: '', crmEtapa: '', crmTag: '', crmSeg: false, crmSinCuenta: false });
+    if (k === 'todos') Object.assign(S, { crmQ: '', crmOrigen: '', crmEtapa: '', crmReserva: '', crmTag: '', crmSeg: false, crmSinCuenta: false });
     else if (k === 'nuevas') S.crmEtapa = S.crmEtapa === primera ? '' : primera;
     else if (k === 'seg') S.crmSeg = !S.crmSeg;
     else if (k === 'sin') S.crmSinCuenta = !S.crmSinCuenta;
@@ -2034,6 +2125,7 @@ function bind() {
   }));
   document.querySelectorAll('[data-crm-sincuenta]').forEach((b) => (b.onclick = () => { S.crmSinCuenta = !S.crmSinCuenta; render(false); }));
   const ce = $('#crm-etapa'); if (ce) ce.onchange = () => { S.crmEtapa = ce.value; render(false); };
+  const cres = $('#crm-reserva'); if (cres) cres.onchange = () => { S.crmReserva = cres.value; render(false); };
   document.querySelectorAll('[data-crm-seg]').forEach((b) => (b.onclick = () => { S.crmSeg = !S.crmSeg; render(false); }));
   document.querySelectorAll('[data-crm-desc]').forEach((b) => (b.onclick = () => { S.crmDesc = !S.crmDesc; render(false); }));
   const co = $('#crm-origen'); if (co) co.onchange = () => { S.crmOrigen = co.value; render(false); };

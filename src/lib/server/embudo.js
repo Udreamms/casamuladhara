@@ -28,7 +28,7 @@ export const ETAPA_TXT = {
 export const EVENTOS = ['clic_entrar', 'codigo_asistencia_ok', 'autodeclara_asistio', 'autodeclara_no_asistio', 'vio_replay', 'clic_comprar', 'pago_confirmado', 'pago_fallido', 'lista_espera'];
 // ALCANCE CONGELADO: funciones apagadas (el código sigue aquí, no se borró). Deben coincidir con FUNC en public/assets/js/admin.js.
 //   reserva: reserva del Péndulo y saldo (API /api/embudo).  listaEspera: cupos máximos y lista de espera (evento lista_espera y /api/clases/estado).
-export const FUNCIONES = { reserva: false, listaEspera: false };
+export const FUNCIONES = { reserva: true, listaEspera: false };
 // Palabras con las que alguien pide que no le escribamos más (respuesta «no», «stop», «baja»…). Se compara el mensaje completo, sin tildes ni signos.
 const PARAR = new Set(['no', 'nop', 'stop', 'baja', 'basta', 'parar', 'para', 'no gracias', 'no quiero', 'no quiero mas mensajes', 'no me escribas', 'no me escriban', 'no me escribas mas', 'no mas', 'cancelar', 'desuscribir', 'darme de baja']);
 export const pideParar = (texto) => PARAR.has(String(texto || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9ñ ]/g, ' ').replace(/\s+/g, ' ').trim());
@@ -38,7 +38,7 @@ export const pideParar = (texto) => PARAR.has(String(texto || '').toLowerCase().
 export const OFERTAS = {
   pendulo: { nombre: 'Péndulo Hebreo', claseDia: 'sábado', claseHora: '19:00', cierre: ['2026-11-18', '17:00'], inicio: '2026-11-18', precio: 69900, moneda: 'CLP', reserva: 10000,
     cupos: null, listaEspera: true, palabra: '', ventanaAntes: 10, ventanaDespues: 30, texto: '' },
-  tarot: { nombre: 'Tarot Terapéutico', claseDia: 'martes', claseHora: '19:00', cierre: ['2026-11-26', '17:00'], inicio: '2026-11-26', precio: 70, moneda: 'USD', cuotas: 2,
+  tarot: { nombre: 'Tarot Terapéutico', claseDia: 'martes', claseHora: '19:00', cierre: ['2026-11-26', '17:00'], inicio: '2026-11-26', precio: 70, moneda: 'USD', cuotas: 2, reserva: 10,
     cupos: null, listaEspera: true, palabra: '', ventanaAntes: 10, ventanaDespues: 30, texto: '' },
 };
 export const cierreOferta = (clase) => (OFERTAS[clase] ? chileAUtc(OFERTAS[clase].cierre[0], OFERTAS[clase].cierre[1]) : 0);
