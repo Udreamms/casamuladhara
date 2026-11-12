@@ -169,6 +169,18 @@ async function tarotCuota(inv, meta) {
 }
 const esTarot = (o) => o?.metadata?.kind === 'tarot';
 
+// Reserva de 10 USD del Tarot (Checkout de pago único desde /tarot): el lead pasa a reserva.estado = 'pagada' y cuenta como compra para Meta.
+async function reservaTarotPagada(s) {
+  const ref = db().doc(`leads/${s.metadata?.lead || ''}`), d = await ref.get();
+  if (!d.exists || d.data().form !== 'tarot' || d.data().reserva?.estado === 'pagada') return; // idempotente
+  await ref.update({
+    'reserva.estado': 'pagada', 'reserva.pagadaT': Date.now(), 'reserva.stripeSession': s.id,
+    eventos: FieldValue.arrayUnion({ t: Date.now(), tipo: 'reserva', texto: 'Reservó su cupo con 10 USD (Stripe)' }),
+    updatedAt: FieldValue.serverTimestamp(),
+  });
+  compraMeta({ id: s.id, email: s.customer_details?.email || s.customer_email || d.data().email, valor: 10, moneda: 'usd', creado: s.created });
+}
+
 const subscriptionOf = (inv) => idOf(inv.parent?.subscription_details?.subscription ?? inv.subscription);
 
 export async function POST(request) {
@@ -183,6 +195,7 @@ export async function POST(request) {
     const o = event.data.object;
     switch (event.type) {
       case 'checkout.session.completed':
+        if (o.metadata?.kind === 'tarot_reserva') { if (o.payment_status === 'paid') await reservaTarotPagada(o); break; }
         if (esTarot(o)) break; // el Tarot se registra con la factura (invoice.paid)
         if (o.mode === 'subscription' && o.subscription) await syncSubscription(idOf(o.subscription), o.client_reference_id, true);
         else if (o.mode === 'payment' && o.payment_status === 'paid' && o.metadata?.kind === 'completo') {
