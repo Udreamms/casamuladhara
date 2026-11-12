@@ -19,7 +19,7 @@ export async function GET(request) {
       const s = await stripe().checkout.sessions.retrieve(sesionId);
       if (s.payment_status === 'paid' && s.metadata?.kind === 'tarot_reserva') {
         return pagina('Tu cupo está reservado',
-          `<h1>¡Tu cupo está reservado!</h1><p>Tus 10 USD se descuentan de tu primera cuota: pagas 60 USD antes del miércoles 25 de noviembre y 70 USD el segundo mes.</p>
+          `<h1>¡Tu cupo está reservado!</h1><p>Tus 10 USD se descuentan de tu primera cuota: pagas 60 USD antes del inicio del curso y 70 USD el segundo mes.</p>
            <p>Te escribimos por WhatsApp con el enlace de pago, el calendario y cómo te llega tu mazo.</p>
            <a class="b" href="${esc(WHATSAPP)}">Escribir a Karen por WhatsApp</a>`,
           200, 'Purchase', `compra-${s.id}`, { value: 10, currency: 'USD', content_name: 'Reserva Tarot Terapéutico' });
