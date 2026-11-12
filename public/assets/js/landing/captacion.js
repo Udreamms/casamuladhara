@@ -92,7 +92,7 @@
         action: 'save', form: f.dataset.lead,
         name: val('name'), email: val('email'), whatsapp, country: val('country') || pais,
         interest: val('interest'), date: f.elements.interest?.selectedOptions?.[0]?.dataset.date || '', message: val('message'), web: val('web'),
-        page: location.pathname, utm: origen(), ...(f.dataset.montoReserva === '10000' ? { reserva: true } : {}),
+        page: location.pathname, utm: origen(), ...(f.dataset.montoReserva ? { reserva: true } : {}),
         eventId: crypto.randomUUID?.() || String(Date.now()) + Math.random().toString(36).slice(2, 10), // mismo id en el Píxel y en la API de conversiones
       };
       f.dataset.sending = '1'; err.hidden = true;
@@ -103,7 +103,7 @@
         if (!r.ok) throw new Error(out.error || 'No pudimos enviar tus datos.');
         if (!out.repetida) fbq('track', 'Lead', {}, { eventID: body.eventId }); // quien repite el formulario no cuenta otro Lead en las campañas
         // Reserva con pago (Péndulo): los datos quedan en el CRM y de ahí pasa al pago. La breve espera deja que el Píxel alcance a enviar el Lead.
-        if (f.dataset.destino && /^\/[a-z]/.test(f.dataset.destino)) { setTimeout(() => { location.href = f.dataset.destino; }, 600); return; }
+        if (f.dataset.destino && /^\/[a-z]/.test(f.dataset.destino)) { setTimeout(() => { location.href = f.dataset.destino + (out.id ? `&lead=${encodeURIComponent(out.id)}` : ''); }, 600); return; }
         // Clase gratis: pasa a su página de gracias (video de Karen y pasos). La breve espera deja que el Píxel alcance a enviar el Lead.
         if (GRACIAS_PAGINA && out.codigo && f.dataset.clase && ['clase-pendulo', 'clase-tarot'].includes(f.dataset.lead)) {
           setTimeout(() => { location.href = `/${f.dataset.lead}/gracias?l=${encodeURIComponent(out.codigo)}`; }, 500);

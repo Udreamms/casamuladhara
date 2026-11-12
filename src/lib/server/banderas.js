@@ -19,3 +19,6 @@ export const PLATAFORMA_URL = '/login?register=true&origen=clase-gratis&ver=grat
 export const reservaPendulo = () => process.env.NODE_ENV !== 'production' || process.env.EMBUDO_RESERVA_PENDULO === '1';
 // Enlaces de Mercado Pago (valor fijo). El saldo de $59.900 (https://mpago.la/29TeLus) NO va en la web: solo lo envía Karen por WhatsApp.
 export const PAGO_RESERVA_PENDULO = 'https://www.mercadopago.cl/checkout/v1/payment/redirect?source=link&preference-id=2117348879-f0dc7d8e-c04d-4af5-8a93-e7629866c6b1'; // link de pago sin vencimiento: «Reserva no reembolsable Péndulo Hebreo», $10.000
+// Reserva de 10 USD del Tarot en /tarot (Checkout de Stripe). Bandera propia: en local siempre visible; en producción y en la vista previa de
+// Vercel se enciende con EMBUDO_RESERVA_TAROT=1 (debe existir en el build, porque /tarot es una página fija).
+export const reservaTarot = () => process.env.NODE_ENV !== 'production' || process.env.EMBUDO_RESERVA_TAROT === '1';
