@@ -79,6 +79,8 @@ export async function POST(request) {
         waKey: waClave(body.whatsapp),
         createdAt: FieldValue.serverTimestamp(),
       };
+      // Reserva del Péndulo iniciada desde /pendulo (aún sin confirmar el pago: Mercado Pago no avisa; Karen la marca a mano)
+      if (form === 'pendulo' && body.reserva === true) lead.reserva = { monto: 10000, moneda: 'CLP', estado: 'iniciada', t: Date.now() };
       const edad = Math.round(Number(body.edad));
       if (Number.isFinite(edad) && edad >= 5 && edad <= 110) lead.edad = edad;
       const consentimiento = Object.fromEntries(['email', 'whatsapp'].map((k) => [k, consentimientoOk(body.consentimiento?.[k])]).filter(([, v]) => v));
@@ -106,7 +108,7 @@ export async function POST(request) {
         if (!snap.exists) { repetida = false; tx.set(ref, lead); return; }
         repetida = true;
         // se conservan la fecha, el origen de la campaña, la etapa y el código personal que ya tenía
-        const { createdAt, utm, status, form: f, clase, codigo, codigoVence, codigoRevocado, enlace_entrada, enlace_replay, email, clases: _c, ...nuevo } = lead;
+        const { createdAt, utm, status, form: f, clase, codigo, codigoVence, codigoRevocado, enlace_entrada, enlace_replay, email, clases: _c, reserva, ...nuevo } = lead;
         if (snap.data().codigo) codigoFinal = snap.data().codigo;
         const vacio = (v) => v === '' || v === undefined;
         // Se inscribe de nuevo, pero a OTRA clase (p. ej. no se convenció con la del 7 y viene a la del 14): la asistencia de la anterior se guarda
@@ -130,6 +132,7 @@ export async function POST(request) {
         tx.update(ref, {
           ...Object.fromEntries(Object.entries(nuevo).filter(([, v]) => !vacio(v))),
           // Un correo distinto del que ya teníamos no lo pisa: queda como correo adicional (así no se pierde el vínculo con su cuenta)
+          ...(reserva && !snap.data().reserva?.estado?.startsWith?.('pag') ? { reserva } : {}), // no pisa una reserva que Karen ya marcó como pagada
           ...(email && !snap.data().email ? { email } : {}),
           ...(email && snap.data().email && snap.data().email !== email ? { emailsExtra: FieldValue.arrayUnion(email) } : {}),
           ...(!snap.data().codigo && codigo ? { clase, codigo, codigoVence, codigoRevocado, ...(enlace_entrada ? { enlace_entrada, enlace_replay } : {}) } : {}),

@@ -13,3 +13,9 @@ export const asistenciaPalabra = () => false;
 export const plataforma = () => process.env.NODE_ENV !== 'production' || process.env.EMBUDO_PLATAFORMA === '1';
 // Dirección donde crean su cuenta gratis en el aula (único lugar; la landing le agrega &l=<codigo> si la persona tiene código).
 export const PLATAFORMA_URL = '/login?register=true&origen=clase-gratis&ver=gratis';
+// Reserva de $10.000 del Péndulo en /pendulo (botón directo a Mercado Pago). Bandera propia, aislada de EMBUDO_EXTRAS:
+// en el computador local se ve siempre; en producción y en la vista previa de Vercel se enciende con EMBUDO_RESERVA_PENDULO=1.
+// /pendulo es una página fija: la variable debe existir cuando se construye el sitio (build).
+export const reservaPendulo = () => process.env.NODE_ENV !== 'production' || process.env.EMBUDO_RESERVA_PENDULO === '1';
+// Enlaces de Mercado Pago (valor fijo). El saldo de $59.900 (https://mpago.la/29TeLus) NO va en la web: solo lo envía Karen por WhatsApp.
+export const PAGO_RESERVA_PENDULO = 'https://www.mercadopago.cl/checkout/v1/payment/redirect?source=link&preference-id=2117348879-f0dc7d8e-c04d-4af5-8a93-e7629866c6b1'; // link de pago sin vencimiento: «Reserva no reembolsable Péndulo Hebreo», $10.000

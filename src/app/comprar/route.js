@@ -2,8 +2,8 @@
 //   Tarot: Stripe Checkout, 2 cuotas mensuales de 70 USD (se detiene solo tras la segunda; ver stripe-webhook).
 //   Péndulo: pago fijo de 69.900 CLP en Mercado Pago. Con EMBUDO_EXTRAS=1: reserva de $10.000 por WhatsApp con el mensaje ya escrito (el saldo de $59.900 se paga antes de la primera clase).
 // Pasa por una página breve para que el Píxel de Meta cuente InitiateCheckout (Tarot) o Contact (Péndulo) antes de salir.
-import { extras } from '@/lib/server/banderas.js';
-import { contactoPorCodigo, primerNombre, registrarEvento } from '@/lib/server/embudo.js';
+import { extras, PAGO_RESERVA_PENDULO, reservaPendulo } from '@/lib/server/banderas.js';
+import { cierreOferta, contactoPorCodigo, primerNombre, registrarEvento } from '@/lib/server/embudo.js';
 import { contexto, enviarDespues, usuario } from '@/lib/server/meta.js';
 import { enlaceInvalido, esc, pagina, WHATSAPP } from '@/lib/server/paginas.js';
 import { appUrl, stripe, tarotPriceId } from '@/lib/server/services.js';
@@ -11,12 +11,19 @@ import { appUrl, stripe, tarotPriceId } from '@/lib/server/services.js';
 // Enlace de pago del Péndulo: Mercado Pago, 69.900 CLP, valor fijo
 const PAGO_PENDULO = 'https://mpago.la/2jXpsgn';
 
-const salida = (url, evento, id) => pagina('Abriendo…', `<h1>Un momento…</h1><p>Te llevamos al siguiente paso.</p><a class="b" href="${esc(url)}">Continuar</a>
-  <script>setTimeout(()=>location.replace(${JSON.stringify(url)}),700)</script>`, 200, evento, id);
+const salida = (url, evento, id, params = null) => pagina('Abriendo…', `<h1>Un momento…</h1><p>Te llevamos al siguiente paso.</p><a class="b" href="${esc(url)}">Continuar</a>
+  <script>setTimeout(()=>location.replace(${JSON.stringify(url)}),700)</script>`, 200, evento, id, params);
 
 export async function GET(request) {
   const q = new URL(request.url).searchParams, codigo = q.get('l') || '';
   try {
+    // Reserva de $10.000 del Péndulo desde /pendulo: directo a Mercado Pago (con el código personal, si viene, se anota el clic). Cerrada la inscripción, vuelve a la página del curso.
+    if (q.get('curso') === 'pendulo' && q.get('pago') === 'reserva' && reservaPendulo()) {
+      const cierre = cierreOferta('pendulo');
+      if (cierre && Date.now() >= cierre) return new Response(null, { status: 302, headers: { Location: '/pendulo' } });
+      if (codigo && await contactoPorCodigo(codigo)) await registrarEvento({ codigo, evento: 'clic_comprar', fechaIso: new Date().toISOString(), origen: 'pendulo' });
+      return salida(PAGO_RESERVA_PENDULO, 'InitiateCheckout', `ic-reserva-${codigo || 'web'}-${Date.now()}`, { value: 10000, currency: 'CLP', content_name: 'Reserva Péndulo Hebreo Nivel 1' });
+    }
     if (!codigo && q.get('curso') === 'pendulo') return salida(PAGO_PENDULO, 'InitiateCheckout', `ic-pendulo-${Date.now()}`);
     const c = await contactoPorCodigo(codigo);
     if (!c) return enlaceInvalido();
