@@ -1298,6 +1298,7 @@ const reservaDe = (l) => {
 };
 // Dinero por moneda, sin mezclar: Péndulo en CLP ($10.000 CLP), Tarot en USD (10 USD)
 const montoReserva = (n, mon) => (mon === 'USD' ? `${Number(n || 0).toLocaleString('es-CL')} USD` : `${clp(n)} CLP`);
+const mejorReserva = (p, linea) => p.leads.filter((l) => claseDeL(l) === linea && reservaDe(l)).sort((a, b) => Number(reservaDe(b).pagada) - Number(reservaDe(a).pagada) || reservaDe(b).t - reservaDe(a).t)[0] || null;
 const reservoLinea = (p, clase) => !!p && p.leads.some((x) => claseDeL(x) === clase && reservaDe(x)?.pagada);
 // '' (sin reserva) | 'iniciada' | 'pagada' (la más avanzada entre sus programas; con linea, solo esa línea: 'pendulo' o 'tarot')
 const reservaPersona = (p, linea = '') => { const rs = p.leads.filter((l) => !linea || claseDeL(l) === linea).map(reservaDe).filter(Boolean); return rs.some((r) => r.pagada) ? 'pagada' : rs.length ? 'iniciada' : ''; };
@@ -1305,22 +1306,22 @@ const reservaPersona = (p, linea = '') => { const rs = p.leads.filter((l) => !li
 const saldoDe = (l) => { const c = claseDeL(l), o = ofertaDe(c), r = reservaDe(l); return { primera: Math.max(0, o.precio - (r?.pagada ? r.monto : 0)), segunda: c === 'tarot' && (o.cuotas || 2) > 1 ? o.precio : 0, moneda: o.moneda }; };
 const saldoTxt = (l) => { const s = saldoDe(l), m = (n) => montoReserva(n, s.moneda); return s.segunda ? `${m(s.primera)} (1.ª cuota) y ${m(s.segunda)} el segundo mes` : m(s.primera); };
 // Reservó y todavía no pagó el saldo (si otro de sus registros de esa línea ya está pagado, tampoco cuenta)
-const saldoPendiente = (l, p) => FUNC.reserva && !!reservaDe(l)?.pagada && !pagoHecho(l) && !(p && p.leads.some((x) => x !== l && claseDeL(x) === claseDeL(l) && pagoHecho(x)));
+const saldoPendiente = (l, p) => FUNC.reserva && !!reservaDe(l)?.pagada && !pagoHecho(l) && !(p && (mejorReserva(p, claseDeL(l)) !== l || p.leads.some((x) => x !== l && claseDeL(x) === claseDeL(l) && pagoHecho(x))));
 const HORA_INICIO_CURSO = '19:00'; // hora de Chile a la que empiezan los cursos
 const inicioCursoMs = (clase) => chileAMs(ofertaDe(clase).inicio, HORA_INICIO_CURSO);
 // «miércoles 18 de noviembre» (día completo, sin abreviar) y dinero corto por moneda: $59.900 (CLP) / 60 USD
 const diaLargoTxt = (f) => { const d = new Date(`${f}T00:00:00Z`); return `${DIAS_L[d.getUTCDay()]} ${d.getUTCDate()} de ${MESES_L[d.getUTCMonth()]}`; };
 const montoCorto = (n, mon) => (mon === 'USD' ? `${Number(n || 0).toLocaleString('es-CL')} USD` : clp(n));
-const clicSinPago = (l) => esClase(l.form) && !!l.compraClicT && !pagoHecho(l) && !reservaDe(l)?.pagada && leadEtapa(l) !== 'descartado';
-const filasClic = () => personas().map((p) => { const ls = p.leads.filter((l) => clicSinPago(l) && !reservoLinea(p, claseDeL(l))).sort((a, b) => b.compraClicT - a.compraClicT); return ls.length ? { p, l: ls[0] } : null; }).filter(Boolean)
+const clicSinPago = (l) => esClase(l.form) && !!l.compraClicT && !pagoHecho(l) && !reservaDe(l) && leadEtapa(l) !== 'descartado';
+const filasClic = () => personas().map((p) => { const ls = p.leads.filter((l) => clicSinPago(l) && !reservaPersona(p, claseDeL(l))).sort((a, b) => b.compraClicT - a.compraClicT); return ls.length ? { p, l: ls[0] } : null; }).filter(Boolean)
   .sort((a, b) => (S.clicOrden === 'antiguos' ? a.l.compraClicT - b.l.compraClicT : b.l.compraClicT - a.l.compraClicT));
 // Ya vio la oferta (replay o clic) y no ha pagado, reservado ni respondido por WhatsApp
 const respondioDespues = (l) => { const n = waNum(l.whatsapp), c = n && A.wa.chats.find((x) => x.id === n); return (c?.lastInboundAt?.toMillis?.() || 0) > (l.replayT || l.compraClicT || 0); };
 const vioOfertaSinRespuesta = (l, p) => esClase(l.form) && (['vio_oferta', 'vio_replay'].includes(leadEtapa(l)) || !!l.replayT || !!l.compraClicT) && !pagoHecho(l) && !reservaDe(l)?.pagada && !reservoLinea(p, claseDeL(l))
   && !['descartado', 'reservo_cupo', 'lista_espera'].includes(leadEtapa(l)) && !(p?.tags || []).includes('No contactar') && !l.noContactar && !respondioDespues(l); // en lista de espera no se les apura: el curso está lleno
-const pagoBadges = (l) => {
+const pagoBadges = (l, p) => {
   const b = [];
-  const rv = FUNC.reserva ? reservaDe(l) : null, prog = (ofertaDe(claseDeL(l))?.nombre || '').replace(' Hebreo', '').replace(' Terapéutico', '');
+  const rv = FUNC.reserva && (!p || mejorReserva(p, claseDeL(l)) === l) ? reservaDe(l) : null, prog = (ofertaDe(claseDeL(l))?.nombre || '').replace(' Hebreo', '').replace(' Terapéutico', '');
   if (rv && rv.pagada) b.push(`<span class="pill done" title="Reserva de ${esc(prog)} pagada${rv.stripe ? ' (Stripe)' : rv.por ? ' (la marcaste a mano)' : ''}">Reservó · ${esc(montoReserva(rv.monto, rv.moneda))}</span>`);
   else if (rv) b.push(`<span class="pill bad" title="Apretó «Reservar» en ${esc(prog)} y todavía no hay pago">Reserva iniciada, sin pago</span>`);
   if (rv && rv.pagada && !pagoHecho(l)) b.push(`<span class="pill pres" title="Debe pagarse antes del inicio del curso">Saldo ${esc(saldoTxt(l))}</span>`);
@@ -1328,7 +1329,7 @@ const pagoBadges = (l) => {
   if (FUNC.cuotas && l.cobroFallido) b.push('<span class="pill bad" title="Un cobro falló: escribirle hoy">Cobro fallido</span>');
   return b.join(' ');
 };
-const pagoPersona = (p) => p.leads.filter((l) => esClase(l.form) || reservaDe(l)).map(pagoBadges).filter(Boolean).join(' ');
+const pagoPersona = (p) => p.leads.filter((l) => esClase(l.form) || reservaDe(l)).map((l) => pagoBadges(l, p)).filter(Boolean).join(' ');
 const origenMatricula = (l) => `Clase gratis de ${(ofertaDe(claseDeL(l))?.nombre || '').replace(' Hebreo', '').replace(' Terapéutico', '')}${l.claseFecha ? ` del ${l.claseFecha}` : ''} · campaña ${l.utm?.utm_campaign || '—'} · anuncio ${l.utm?.utm_content || '—'}`;
 // Bloque de la ficha: reserva y saldo (Péndulo) o cuotas (Tarot)
 const bloquePago = (l) => {
@@ -1599,7 +1600,7 @@ async function guardarClases(form) {
 }
 
 const enSegmento = (l, k, p) => {
-  if (k === 'reserva_sin_pago') { const r = FUNC.reserva && reservaDe(l); return !!r && !r.pagada && !reservoLinea(p, claseDeL(l)) && !(p || { leads: [l] }).leads.some((x) => claseDeL(x) === claseDeL(l) && pagoHecho(x)); }
+  if (k === 'reserva_sin_pago') { const r = FUNC.reserva && reservaDe(l); return !!r && !r.pagada && (!p || mejorReserva(p, claseDeL(l)) === l) && !reservoLinea(p, claseDeL(l)) && !(p || { leads: [l] }).leads.some((x) => claseDeL(x) === claseDeL(l) && pagoHecho(x)); }
   if (k === 'reserva_saldo' || k === 'reserva_recordatorio') return saldoPendiente(l, p);
   return k === 'todas' || (k === 'oferta' ? vioOfertaSinRespuesta(l, p) : segClic(l) === k);
 };
