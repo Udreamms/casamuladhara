@@ -3,7 +3,7 @@
 //   Péndulo: pago fijo de 69.900 CLP en Mercado Pago. Con EMBUDO_EXTRAS=1: reserva de $10.000 por WhatsApp con el mensaje ya escrito (el saldo de $59.900 se paga antes de la primera clase).
 // Pasa por una página breve para que el Píxel de Meta cuente InitiateCheckout (Tarot) o Contact (Péndulo) antes de salir.
 import { FieldValue } from 'firebase-admin/firestore';
-import { extras, PAGO_RESERVA_PENDULO, reservaPendulo, reservaTarot } from '@/lib/server/banderas.js';
+import { extras, PAGO_RESERVA_PENDULO, pagoPorWhatsapp, reservaPendulo, reservaTarot } from '@/lib/server/banderas.js';
 import { cierreOferta, contactoPorCodigo, primerNombre, registrarEvento } from '@/lib/server/embudo.js';
 import { contexto, enviarDespues, usuario } from '@/lib/server/meta.js';
 import { enlaceInvalido, esc, pagina, WHATSAPP } from '@/lib/server/paginas.js';
@@ -62,6 +62,11 @@ export async function GET(request) {
       if (!(tarot ? reservaTarot() : reservaPendulo()) || (cierre && Date.now() >= cierre)) return new Response(null, volver);
       await registrarEvento({ codigo, evento: 'clic_comprar', fechaIso: new Date().toISOString(), origen: 'replay' });
       if (!String(c.reserva?.estado || '').startsWith('pag')) await c.ref.update({ reserva: { monto: tarot ? 10 : 10000, moneda: tarot ? 'USD' : 'CLP', estado: 'iniciada', t: Date.now() }, updatedAt: FieldValue.serverTimestamp() });
+      // Solución rápida: el pago lo coordina Karen por WhatsApp (la reserva ya quedó anotada en su ficha)
+      if (pagoPorWhatsapp(tarot ? 'tarot' : 'pendulo')) {
+        const texto = `Hola Karen, soy ${primerNombre(c.name)}. Quiero reservar mi cupo en el curso de ${tarot ? 'Tarot Terapéutico' : 'Péndulo Hebreo'}. Mi código: ${codigo}`;
+        return salida(`${WHATSAPP}?text=${encodeURIComponent(texto)}`, 'Contact', `ct-reserva-${codigo}-${Date.now()}`);
+      }
       if (tarot) return checkoutReservaTarot(request, c.id, c);
       return salida(PAGO_RESERVA_PENDULO, 'InitiateCheckout', `ic-reserva-${codigo}-${Date.now()}`, { value: 10000, currency: 'CLP', content_name: 'Reserva Péndulo Hebreo Nivel 1' });
     }

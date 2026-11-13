@@ -22,3 +22,7 @@ export const PAGO_RESERVA_PENDULO = 'https://www.mercadopago.cl/checkout/v1/paym
 // Reserva de 10 USD del Tarot en /tarot (Checkout de Stripe). Bandera propia: en local siempre visible; en producción y en la vista previa de
 // Vercel se enciende con EMBUDO_RESERVA_TAROT=1 (debe existir en el build, porque /tarot es una página fija).
 export const reservaTarot = () => process.env.NODE_ENV !== 'production' || process.env.EMBUDO_RESERVA_TAROT === '1';
+// Pago de la reserva por WhatsApp (solución rápida): en la landing del replay el botón de reservar anota la reserva y abre el WhatsApp de Karen
+// con el mensaje ya escrito; ella envía el link de pago. Lista de cursos separados por coma en EMBUDO_PAGO_WHATSAPP (ej. «pendulo,tarot»).
+// Sin la variable, rige solo el Péndulo. Para volver al pago directo: EMBUDO_PAGO_WHATSAPP=ninguno.
+export const pagoPorWhatsapp = (clase) => (process.env.EMBUDO_PAGO_WHATSAPP ?? 'pendulo').split(',').map((x) => x.trim().toLowerCase()).includes(clase);
