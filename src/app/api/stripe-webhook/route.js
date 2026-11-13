@@ -172,7 +172,7 @@ const esTarot = (o) => o?.metadata?.kind === 'tarot';
 // Reserva de 10 USD del Tarot (Checkout de pago único desde /tarot): el lead pasa a reserva.estado = 'pagada' y cuenta como compra para Meta.
 async function reservaTarotPagada(s) {
   const ref = db().doc(`leads/${s.metadata?.lead || ''}`), d = await ref.get();
-  if (!d.exists || d.data().form !== 'tarot' || d.data().reserva?.estado === 'pagada') return; // idempotente
+  if (!d.exists || !['tarot', 'clase-tarot'].includes(d.data().form) || d.data().reserva?.estado === 'pagada') return; // idempotente (el lead viene de /tarot o de la landing del replay)
   await ref.update({
     'reserva.estado': 'pagada', 'reserva.pagadaT': Date.now(), 'reserva.stripeSession': s.id,
     eventos: FieldValue.arrayUnion({ t: Date.now(), tipo: 'reserva', texto: 'Reservó su cupo con 10 USD (Stripe)' }),
