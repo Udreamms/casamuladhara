@@ -31,6 +31,10 @@ a.b{display:inline-flex;justify-content:center;align-items:center;padding:18px 3
 a.b:hover{background:#1f3f32}a.alt{color:#2b5443;font-weight:700}.muted{color:#5d6b63;font-size:.9rem}
 details{background:#fffdf6;border:1px solid #d9d5c3;border-radius:14px;padding:14px 18px;margin-bottom:10px}summary{cursor:pointer;font-weight:700;color:#1f3f32}details p{margin-top:8px}
 .testis{display:grid;gap:12px}.testis blockquote{margin:0;background:#fffdf6;border-left:4px solid #a77a3b;border-radius:10px;padding:14px 18px}
+.social{display:grid;gap:14px;text-align:center}.social h2{margin:0}.social .fotos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.social .fotos img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:14px;display:block}
+.social .mazo{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;align-items:center;text-align:left}.social .mazo img{width:100%;height:auto;border-radius:18px;display:block;box-shadow:0 22px 44px -22px rgba(31,63,50,.55)}.social ul{list-style:none;margin:0;padding:0;display:grid;gap:12px}.social li b{display:block;font:400 1.15rem/1.3 Marcellus,Georgia,serif;color:#1f3f32}.social li span{color:#5d6b63;font-size:.92rem;line-height:1.45}
+.social blockquote{margin:0;text-align:left;background:#fffdf6;border-left:4px solid #a77a3b;border-radius:10px;padding:14px 18px;font:400 1.05rem/1.55 Marcellus,Georgia,serif;color:#1f3f32}.social blockquote small{display:block;margin-top:8px;font:700 .85rem/1.3 Mulish,sans-serif;color:#5d6b63}
+@media (max-width:640px){.social .mazo{grid-template-columns:1fr}}
 footer{text-align:center}`;
 
 const CUENTA = `(()=>{const el=document.querySelector('.cuenta');if(!el)return;const t=+el.dataset.cierre,p=(n)=>String(n).padStart(2,'0');const u=(k)=>el.querySelector('[data-u='+k+']');
@@ -79,6 +83,15 @@ export async function paginaReplay(request, clase) {
       : (process.env.NODE_ENV !== 'production' ? '<div class="marco" style="aspect-ratio:16/9"><div><b>Aquí irá una captura del aula por dentro</b></div></div>' : '');
     const pasosPlat = [['Crea tu cuenta', 'Solo necesitas tu correo y una contraseña. Toma un minuto y no pide tarjeta.'], ['Entra al aula del estudiante', 'Es la plataforma online donde viven las clases de Casa Muladhara.'], [`Mira las 4 clases gratis de ${NOMBRE[clase]}`, 'Velas cuando quieras y las veces que quieras, desde tu celular o tu computador.']];
     const bloquePlat = plat ? `<section class="oferta" id="plataforma" style="justify-items:stretch;text-align:left"><span class="k" style="text-align:center">Gratis · Aula del estudiante</span><h2 style="text-align:center">¿Aún no estás lista? Sigue aprendiendo con 4 clases gratis</h2><p class="muted" style="text-align:center">Entra al aula del estudiante, nuestra plataforma online: ahí están las clases de ${NOMBRE[clase]} para que sigas a tu ritmo, sin costo.</p>${captura}<ol style="list-style:none;margin:6px 0;padding:0;display:grid;gap:10px">${pasosPlat.map(([t, x], i) => `<li style="display:flex;gap:12px;align-items:flex-start"><b style="flex:none;width:30px;height:30px;border-radius:50%;background:#1f3f32;color:#e8c98a;display:grid;place-items:center">${i + 1}</b><span><b>${esc(t)}</b><br><span class="muted">${esc(x)}</span></span></li>`).join('')}</ol><div style="text-align:center"><a class="b" href="${PLATAFORMA_URL}${codigo ? `&l=${encodeURIComponent(codigo)}` : ''}" onclick="window.fbq&&fbq('trackCustom','IrAPlataforma')">Crear mi cuenta gratis</a></div></section>` : '';
+    // Prueba social corta antes de la oferta: solo lo real que ya está en las landings de los cursos (sin testimonios inventados)
+    const img = (f, alt) => `<img loading="lazy" decoding="async" src="/assets/img/${f}.webp" alt="${alt}">`;
+    const social = clase === 'tarot'
+      ? `<section class="social"><span class="k">Por dentro del curso</span><h2>Tu mazo, tu aula y tu grupo</h2>
+         <div class="mazo"><img loading="lazy" decoding="async" src="/assets/img/mazo-tarot-camino-del-ser.jpg" alt="Mazo Tarot Camino del Ser de Casa Muladhara: caja y lomo, 78 cartas">
+         <ul><li><b>Tu mazo Tarot Camino del Ser</b><span>Las 78 cartas, para practicar desde la primera clase.</span></li><li><b>Tu aula virtual</b><span>Las 16 clases grabadas y el material de apoyo.</span></li><li><b>Tu grupo</b><span>Un grupo pequeño, de 20 personas, para que Karen pueda acompañar cada una de tus lecturas.</span></li></ul></div>
+         <blockquote>“Hoy el tarot es una de las herramientas que más me ha enseñado sobre mí misma. Por eso no lo enseño para predecir, sino para conocerte y acompañar a otras personas con respeto.”<small>Karen Oyarce · Maestra Holística, creadora del Método Casa Muladhara</small></blockquote></section>`
+      : `<section class="social"><span class="k">Ellas ya empezaron</span><h2>Alumnas de Péndulo Hebreo con Karen</h2>
+         <div class="fotos">${img('231aa77989', 'Graduación de Péndulo Hebreo Nivel 1')}${img('81f0a09164', 'Karen con una alumna que recibe su certificado de Péndulo Hebreo Nivel 1')}${img('6a5a5d85dd', 'Clase práctica de Péndulo Hebreo')}</div></section>`;
     // Reserva (10.000 CLP el Péndulo, 10 USD el Tarot): botón directo al pago, sin formulario (la persona ya está en el CRM con su código)
     const reserva = clase === 'tarot' ? reservaTarot() : reservaPendulo();
     const RES = {
@@ -109,7 +122,7 @@ export async function paginaReplay(request, clase) {
 <title>Clase grabada · ${NOMBRE[clase]} · Casa Muladhara</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Mulish:wght@400;700&display=swap"><style>${CSS}</style></head><body>
 ${pagado ? '<div class="top" style="background:#2b5443">¡Pago recibido! Gracias por inscribirte. Karen te escribirá con los siguientes pasos.</div>' : ''}${abierta && !pagado ? `<div class="top">Inscripción abierta hasta el <b>${esc(limite)}</b></div>` : ''}
 <main><section class="hero"><span class="k">Casa Muladhara · Clase grabada</span><h1>${titulo}</h1><p>${bajada}</p></section>
-${video}${cta}${bloquePlat}${testis}<section><h2>Preguntas frecuentes</h2>${faq.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('')}</section>
+${video}${social}${cta}${bloquePlat}${testis}<section><h2>Preguntas frecuentes</h2>${faq.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('')}</section>
 <footer class="muted">¿Dudas? <a class="alt" href="${WHATSAPP}">Escríbenos por WhatsApp</a></footer></main>
 <script>${CUENTA}</script>${pixel('ReplayView', '', { segmento: seg })}</body></html>`;
     return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex' } });
