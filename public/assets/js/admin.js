@@ -1064,19 +1064,19 @@ const segmentosEnvio = () => [...SEGMENTOS, ...(FUNC.reserva ? SEG_RESERVA : [])
 // Quiénes pueden estar en el envío: las inscritas a la clase gratis, o (grupos de reserva) las personas de esa línea que tienen reserva
 const universoEnvio = (clase, seg) => (esSegReserva(seg) ? A.leads.filter((l) => claseDeL(l) === clase && (!esClase(l.form) || reservaDe(l))) : A.leads.filter((l) => l.form === `clase-${clase}`));
 // Textos de ejemplo (se usan mientras no guardes uno propio): quien entró recibe gracias + replay + oferta; quien no entró, replay + oferta con tono neutro.
-// Los de reserva son por curso ({ pendulo, tarot }); donde dice [LINK DEL SALDO] Karen pega el link de Stripe o Mercado Pago al enviar (el portal no lo guarda ni lo envía).
+// Los de reserva son por curso ({ pendulo, tarot }) y usan variables ({{curso}}, {{fecha_inicio}}, {{saldo}}…) que salen de «Clases y ofertas»; donde dice [LINK DEL SALDO] Karen pega el link de Stripe o Mercado Pago al enviar (el portal no lo guarda ni lo envía).
 const TEXTO_EJEMPLO = {
   reserva_sin_pago: {
-    pendulo: 'Hola {{nombre}}, soy Karen ♥ Vi que empezaste tu reserva para el curso de Péndulo Hebreo y que el pago quedó a medias. ¿Tuviste algún problema? Si quieres, te ayudo por aquí. Empezamos el miércoles 18 de noviembre.',
-    tarot: 'Hola {{nombre}}, soy Karen ♥ Vi que empezaste tu reserva para el curso de Tarot Terapéutico y que el pago no se completó. ¿Tuviste algún problema con la tarjeta? Si necesitas otra forma de pago, cuéntame y lo resolvemos. Empezamos el jueves 26 de noviembre.',
+    pendulo: 'Hola {{nombre}}, soy Karen ♥ Vi que empezaste tu reserva para el curso de {{curso}} y que el pago quedó a medias. ¿Tuviste algún problema? Si quieres, te ayudo por aquí. Empezamos el {{fecha_inicio}}.',
+    tarot: 'Hola {{nombre}}, soy Karen ♥ Vi que empezaste tu reserva para el curso de {{curso}} y que el pago no se completó. ¿Tuviste algún problema con la tarjeta? Si necesitas otra forma de pago, cuéntame y lo resolvemos. Empezamos el {{fecha_inicio}}.',
   },
   reserva_saldo: {
-    pendulo: 'Hola {{nombre}}, ¡ya tienes tu cupo reservado en Péndulo Hebreo! ♥ El saldo de $59.900 se paga antes del inicio del curso (miércoles 18 de noviembre, 19:00, hora de Chile). Aquí está el link para pagarlo: [LINK DEL SALDO]. Si tienes cualquier duda, me escribes.',
-    tarot: 'Hola {{nombre}}, ¡ya tienes tu cupo reservado en Tarot Terapéutico! ♥ Tus 10 USD se descuentan de tu primera cuota: pagas 60 USD antes del inicio del curso (jueves 26 de noviembre, 19:00, hora de Chile) y 70 USD el segundo mes. Aquí está el link para la primera cuota: [LINK DEL SALDO]. Te escribo también con el calendario y cómo te llega tu mazo.',
+    pendulo: 'Hola {{nombre}}, ¡ya tienes tu cupo reservado en {{curso}}! ♥ El saldo de {{saldo}} se paga antes del inicio del curso ({{fecha_inicio}}, {{hora_inicio}}, hora de Chile). Aquí está el link para pagarlo: [LINK DEL SALDO]. Si tienes cualquier duda, me escribes.',
+    tarot: 'Hola {{nombre}}, ¡ya tienes tu cupo reservado en {{curso}}! ♥ Tus {{reserva}} se descuentan de tu primera cuota: pagas {{saldo}} antes del inicio del curso ({{fecha_inicio}}, {{hora_inicio}}, hora de Chile) y {{segunda_cuota}} el segundo mes. Aquí está el link para la primera cuota: [LINK DEL SALDO]. Te escribo también con el calendario y cómo te llega tu mazo.',
   },
   reserva_recordatorio: {
-    pendulo: 'Hola {{nombre}}, te recuerdo con cariño que el saldo de $59.900 del curso de Péndulo Hebreo se paga antes del inicio, el miércoles 18 de noviembre a las 19:00. Aquí está el link: [LINK DEL SALDO]. Si ya lo pagaste, ignora este mensaje ♥',
-    tarot: 'Hola {{nombre}}, te recuerdo con cariño que los 60 USD de tu primera cuota del curso de Tarot Terapéutico se pagan antes del inicio, el jueves 26 de noviembre a las 19:00 (hora de Chile). Aquí está el link: [LINK DEL SALDO]. Si ya lo pagaste, ignora este mensaje ♥',
+    pendulo: 'Hola {{nombre}}, te recuerdo con cariño que el saldo de {{saldo}} del curso de {{curso}} se paga antes del inicio, el {{fecha_inicio}} a las {{hora_inicio}}. Aquí está el link: [LINK DEL SALDO]. Si ya lo pagaste, ignora este mensaje ♥',
+    tarot: 'Hola {{nombre}}, te recuerdo con cariño que los {{saldo}} de tu primera cuota del curso de {{curso}} se pagan antes del inicio, el {{fecha_inicio}} a las {{hora_inicio}} (hora de Chile). Aquí está el link: [LINK DEL SALDO]. Si ya lo pagaste, ignora este mensaje ♥',
   },
   entro: 'Gracias por estar en la clase, {{nombre}}. Aquí tienes la grabación para repasarla: {{enlace_replay}}\n\nLa inscripción al curso cierra el {{fecha_limite}}.',
   no_entro: 'Hola {{nombre}}, te dejo la grabación de la clase por si no pudiste verla completa: {{enlace_replay}}\n\nLa inscripción al curso cierra el {{fecha_limite}}.',
@@ -1108,10 +1108,16 @@ const variablesDe = (l) => {
     enlace_asistencia: base && l.codigo ? `${base}/asistencia?l=${l.codigo}` : '',
     enlace_gracias: base && l.codigo ? `${base}/clase-${claseDeL(l) || 'pendulo'}/gracias?l=${l.codigo}` : '',
     enlace_calendario: base && l.codigo ? `${base}/calendario?l=${l.codigo}` : '',
+    // Del curso (salen de «Clases y ofertas»: inicio, precio y reserva): así los textos de reserva no llevan fechas ni montos escritos a mano
+    ...((c) => {
+      const o = ofertaDe(c); if (!o || !['pendulo', 'tarot'].includes(c)) return {};
+      const r = reservaDe(l), saldo = Math.max(0, o.precio - (r?.monto || o.reserva || 0));
+      return { curso: o.nombre, fecha_inicio: diaLargoTxt(o.inicio), hora_inicio: HORA_INICIO_CURSO, reserva: montoCorto(r?.monto || o.reserva, r?.moneda || o.moneda), saldo: montoCorto(saldo, o.moneda), segunda_cuota: c === 'tarot' && (o.cuotas || 2) > 1 ? montoCorto(o.precio, o.moneda) : '' };
+    })(claseDeL(l)),
   };
 };
 // Variables que se ofrecen (las de autodeclaración y palabra de asistencia están ocultas con su bandera)
-const varsEnvio = () => [['nombre'], ['clase'], ['enlace_entrada'], ['enlace_replay'], ['enlace_si', 'autodeclaracion'], ['enlace_no', 'autodeclaracion'], ['enlace_asistencia', 'palabraAsistencia'], ['enlace_gracias'], ['enlace_calendario'], ['fecha_limite']].filter(([, f]) => !f || FUNC[f]).map(([k]) => k);
+const varsEnvio = () => [['nombre'], ['clase'], ['enlace_entrada'], ['enlace_replay'], ['enlace_si', 'autodeclaracion'], ['enlace_no', 'autodeclaracion'], ['enlace_asistencia', 'palabraAsistencia'], ['enlace_gracias'], ['enlace_calendario'], ['fecha_limite'], ['curso', 'reserva'], ['fecha_inicio', 'reserva'], ['hora_inicio', 'reserva'], ['reserva', 'reserva'], ['saldo', 'reserva'], ['segunda_cuota', 'reserva']].filter(([, f]) => !f || FUNC[f]).map(([k]) => k);
 const rellenar = (texto, l) => { const v = variablesDe(l); return String(texto || '').replace(/\{\{\s*(\w+)\s*\}\}/g, (m, k) => (k in v ? v[k] : m)); };
 
 V.envios = () => {
@@ -1300,7 +1306,11 @@ const saldoDe = (l) => { const c = claseDeL(l), o = ofertaDe(c), r = reservaDe(l
 const saldoTxt = (l) => { const s = saldoDe(l), m = (n) => montoReserva(n, s.moneda); return s.segunda ? `${m(s.primera)} (1.ª cuota) y ${m(s.segunda)} el segundo mes` : m(s.primera); };
 // Reservó y todavía no pagó el saldo (si otro de sus registros de esa línea ya está pagado, tampoco cuenta)
 const saldoPendiente = (l, p) => FUNC.reserva && !!reservaDe(l)?.pagada && !pagoHecho(l) && !(p && p.leads.some((x) => x !== l && claseDeL(x) === claseDeL(l) && pagoHecho(x)));
-const inicioCursoMs = (clase) => chileAMs(ofertaDe(clase).inicio, '19:00'); // el curso empieza a las 19:00 (Chile)
+const HORA_INICIO_CURSO = '19:00'; // hora de Chile a la que empiezan los cursos
+const inicioCursoMs = (clase) => chileAMs(ofertaDe(clase).inicio, HORA_INICIO_CURSO);
+// «miércoles 18 de noviembre» (día completo, sin abreviar) y dinero corto por moneda: $59.900 (CLP) / 60 USD
+const diaLargoTxt = (f) => { const d = new Date(`${f}T00:00:00Z`); return `${DIAS_L[d.getUTCDay()]} ${d.getUTCDate()} de ${MESES_L[d.getUTCMonth()]}`; };
+const montoCorto = (n, mon) => (mon === 'USD' ? `${Number(n || 0).toLocaleString('es-CL')} USD` : clp(n));
 const clicSinPago = (l) => esClase(l.form) && !!l.compraClicT && !pagoHecho(l) && !reservaDe(l)?.pagada && leadEtapa(l) !== 'descartado';
 const filasClic = () => personas().map((p) => { const ls = p.leads.filter((l) => clicSinPago(l) && !reservoLinea(p, claseDeL(l))).sort((a, b) => b.compraClicT - a.compraClicT); return ls.length ? { p, l: ls[0] } : null; }).filter(Boolean)
   .sort((a, b) => (S.clicOrden === 'antiguos' ? a.l.compraClicT - b.l.compraClicT : b.l.compraClicT - a.l.compraClicT));
@@ -1364,7 +1374,7 @@ const bloqueReserva = (l, p) => {
     <span class="muted" style="font-size:.82rem">${esc(quien)}${r.pagadaT || r.t ? ` el ${esc(fechaCorta(r.pagadaT || r.t))}` : ''}.</span>
     ${ok ? `<label style="display:flex;gap:8px;align-items:center;font-size:.88rem"><input type="checkbox" checked disabled> <b>Saldo pagado</b> · matriculada</label>`
       : `<label style="display:flex;gap:8px;align-items:center;font-size:.88rem"><input type="checkbox" data-saldo="${id}"> <b>Saldo pagado</b></label>
-        <span class="muted" style="font-size:.8rem">Saldo pendiente: ${esc(saldoTxt(l))}. Debe pagarse antes del inicio del curso (${esc(fechaLarga(o.inicio))}, 19:00 hora de Chile). El link de cobro lo envías tú por WhatsApp.</span>
+        <span class="muted" style="font-size:.8rem">Saldo pendiente: ${esc(saldoTxt(l))}. Debe pagarse antes del inicio del curso (${esc(diaLargoTxt(o.inicio))}, ${HORA_INICIO_CURSO} hora de Chile). El link de cobro lo envías tú por WhatsApp.</span>
         <button type="button" class="link" style="color:#b8402f;justify-self:start" data-reserva="${id}|deshacer">Deshacer reserva</button>`}</div>`;
 };
 // Acciones de la ficha: marcar / deshacer la reserva y marcar el saldo. Devuelve true si se guardó.
@@ -1449,7 +1459,7 @@ const filasReplay = () => personas().flatMap((p) => p.leads.filter((l) => replay
 const filasFallidas = () => personas().flatMap((p) => p.leads.filter((l) => esClase(l.form) && l.cobroFallido).map((l) => ({ p, l }))).sort((a, b) => b.l.cobroFallido.t - a.l.cobroFallido.t);
 // Reservaron y todavía no pagan el saldo (plazo: antes del inicio del curso). El cobro lo envía Karen por WhatsApp: aquí solo se lista y se abre la conversación.
 const filasSaldo = () => personas().flatMap((p) => p.leads.filter((l) => saldoPendiente(l, p)).map((l) => ({ p, l }))).sort((a, b) => inicioCursoMs(claseDeL(a.l)) - inicioCursoMs(claseDeL(b.l)) || (a.l.reserva?.pagadaT || a.l.reserva?.t || 0) - (b.l.reserva?.pagadaT || b.l.reserva?.t || 0));
-const plazoSaldo = (clase) => { const o = ofertaDe(clase), ms = inicioCursoMs(clase), d = Math.ceil((ms - Date.now()) / 864e5); return { txt: `${fechaLarga(o.inicio)}, 19:00 (Chile)`, dias: d, vencido: ms < Date.now() }; };
+const plazoSaldo = (clase) => { const o = ofertaDe(clase), ms = inicioCursoMs(clase), d = Math.ceil((ms - Date.now()) / 864e5); return { txt: `${diaLargoTxt(o.inicio)}, ${HORA_INICIO_CURSO} (Chile)`, dias: d, vencido: ms < Date.now() }; };
 const avisoSaldos = () => {
   const f = FUNC.reserva ? filasSaldo() : []; if (!f.length) return '';
   const por = ['pendulo', 'tarot'].map((c) => [c, f.filter(({ l }) => claseDeL(l) === c).length]).filter(([, n]) => n);
