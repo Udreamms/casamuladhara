@@ -1057,8 +1057,27 @@ const diaChile = (ms) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/S
 //   Entró = tiene clic_entrar en la ventana (o la Maestra la marcó con «Clasificar una clase»); No entró = inscrita a esa clase y sin clic.
 //   Solo se calcula cuando la ventana terminó; antes queda «pendiente» y no entra en ningún grupo.
 const SEGMENTOS = [['entro', 'Entró'], ['no_entro', 'No entró'], ['oferta', 'Vieron la oferta, sin respuesta'], ['todas', 'Todas (menos matriculadas)']];
-// Textos de ejemplo (se usan mientras no guardes uno propio): quien entró recibe gracias + replay + oferta; quien no entró, replay + oferta con tono neutro
+// Grupos de seguimiento de la reserva (solo con FUNC.reserva): personas con lead.reserva. Los envía Karen a mano, uno por persona.
+const SEG_RESERVA = [['reserva_sin_pago', 'Reserva iniciada, sin pago'], ['reserva_saldo', 'Reservó: enviar el saldo'], ['reserva_recordatorio', 'Reservó: recordatorio del saldo']];
+const esSegReserva = (k) => SEG_RESERVA.some(([x]) => x === k);
+const segmentosEnvio = () => [...SEGMENTOS, ...(FUNC.reserva ? SEG_RESERVA : [])];
+// Quiénes pueden estar en el envío: las inscritas a la clase gratis, o (grupos de reserva) las personas de esa línea que tienen reserva
+const universoEnvio = (clase, seg) => (esSegReserva(seg) ? A.leads.filter((l) => claseDeL(l) === clase && (!esClase(l.form) || reservaDe(l))) : A.leads.filter((l) => l.form === `clase-${clase}`));
+// Textos de ejemplo (se usan mientras no guardes uno propio): quien entró recibe gracias + replay + oferta; quien no entró, replay + oferta con tono neutro.
+// Los de reserva son por curso ({ pendulo, tarot }); donde dice [LINK DEL SALDO] Karen pega el link de Stripe o Mercado Pago al enviar (el portal no lo guarda ni lo envía).
 const TEXTO_EJEMPLO = {
+  reserva_sin_pago: {
+    pendulo: 'Hola {{nombre}}, soy Karen ♥ Vi que empezaste tu reserva para el curso de Péndulo Hebreo y que el pago quedó a medias. ¿Tuviste algún problema? Si quieres, te ayudo por aquí. Empezamos el miércoles 18 de noviembre.',
+    tarot: 'Hola {{nombre}}, soy Karen ♥ Vi que empezaste tu reserva para el curso de Tarot Terapéutico y que el pago no se completó. ¿Tuviste algún problema con la tarjeta? Si necesitas otra forma de pago, cuéntame y lo resolvemos. Empezamos el jueves 26 de noviembre.',
+  },
+  reserva_saldo: {
+    pendulo: 'Hola {{nombre}}, ¡ya tienes tu cupo reservado en Péndulo Hebreo! ♥ El saldo de $59.900 se paga antes del inicio del curso (miércoles 18 de noviembre, 19:00, hora de Chile). Aquí está el link para pagarlo: [LINK DEL SALDO]. Si tienes cualquier duda, me escribes.',
+    tarot: 'Hola {{nombre}}, ¡ya tienes tu cupo reservado en Tarot Terapéutico! ♥ Tus 10 USD se descuentan de tu primera cuota: pagas 60 USD antes del inicio del curso (jueves 26 de noviembre, 19:00, hora de Chile) y 70 USD el segundo mes. Aquí está el link para la primera cuota: [LINK DEL SALDO]. Te escribo también con el calendario y cómo te llega tu mazo.',
+  },
+  reserva_recordatorio: {
+    pendulo: 'Hola {{nombre}}, te recuerdo con cariño que el saldo de $59.900 del curso de Péndulo Hebreo se paga antes del inicio, el miércoles 18 de noviembre a las 19:00. Aquí está el link: [LINK DEL SALDO]. Si ya lo pagaste, ignora este mensaje ♥',
+    tarot: 'Hola {{nombre}}, te recuerdo con cariño que los 60 USD de tu primera cuota del curso de Tarot Terapéutico se pagan antes del inicio, el jueves 26 de noviembre a las 19:00 (hora de Chile). Aquí está el link: [LINK DEL SALDO]. Si ya lo pagaste, ignora este mensaje ♥',
+  },
   entro: 'Gracias por estar en la clase, {{nombre}}. Aquí tienes la grabación para repasarla: {{enlace_replay}}\n\nLa inscripción al curso cierra el {{fecha_limite}}.',
   no_entro: 'Hola {{nombre}}, te dejo la grabación de la clase por si no pudiste verla completa: {{enlace_replay}}\n\nLa inscripción al curso cierra el {{fecha_limite}}.',
 };
@@ -1099,30 +1118,31 @@ V.envios = () => {
   const head = `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>Envíos de la clase</h1><p>Escribe el texto una vez y envíalo persona por persona, con su enlace personal ya puesto. Cada envío queda anotado en su historial.</p></div></div>`;
   if (!A.leads || !A.plantillas) return `${head}<div class="card empty">Cargando…</div>`;
   const clase = S.envClase || 'pendulo', seg = S.envSeg || 'entro', clave = `${clase}_${seg}`;
-  const texto = textoEnvio(clase, seg), esEjemplo = !A.plantillas[clave] && !!TEXTO_EJEMPLO[seg];
+  const texto = textoEnvio(clase, seg), esEjemplo = !A.plantillas[clave] && !!ejemploDe(clase, seg), deReserva = esSegReserva(seg);
   const chip = (attr, v, t, on) => `<button class="chip" ${attr}="${esc(v)}" aria-pressed="${on}">${t}</button>`;
-  const todos = A.leads.filter((l) => l.form === `clase-${clase}`), porId = new Map(personas().flatMap((p) => p.leads.map((l) => [l.id, p])));
+  const todos = universoEnvio(clase, seg), porId = new Map(personas().flatMap((p) => p.leads.map((l) => [l.id, p])));
   const enSeg = todos.filter((l) => enSegmento(l, seg, porId.get(l.id)));
   const filas = enSeg.map((l) => ({ l, motivo: excluidaDeEnvio(l, porId.get(l.id)) }));
   const aEnviar = filas.filter((f) => !f.motivo), excl = filas.filter((f) => f.motivo);
   const hoy = diaChile(Date.now()), enviadoHoy = (l, canal) => !!l.ultimoEnvio?.[canal] && diaChile(l.ultimoEnvio[canal]) === hoy;
   const fuera = horaChile() < 8 || horaChile() >= 22;
   const aviso = fuera ? '<div class="card" style="padding:12px 14px;font-size:.88rem;border-left:4px solid #b8402f"><b>Es de noche en Chile.</b> No se envía entre las 22:00 y las 8:00: espera a la mañana.</div>' : '';
-  const sinCodigo = aEnviar.filter((f) => !f.l.codigo).length, pendientes = todos.filter((l) => segClic(l) === 'pendiente' && !excluidaDeEnvio(l, porId.get(l.id))).length;
+  const sinCodigo = aEnviar.filter((f) => !f.l.codigo).length, pendientes = deReserva ? 0 : todos.filter((l) => segClic(l) === 'pendiente' && !excluidaDeEnvio(l, porId.get(l.id))).length;
   const fila = ({ l }) => { const msg = rellenar(texto, l), n = waNum(l.whatsapp);
     return `<tr><td><b>${esc(l.name)}</b><br><span class="muted" style="font-size:.8rem">${esc(l.email || '')}${l.email && l.whatsapp ? ' · ' : ''}${esc(l.whatsapp || '')}</span></td>
-      <td>${asistBadges(l) || '<span class="muted" style="font-size:.8rem">—</span>'}${l.consentimiento ? '' : ' <span class="pill lock" title="No hay registro de que haya aceptado recibir mensajes">sin consentimiento registrado</span>'}</td>
+      <td>${(deReserva ? pagoBadges(l) : asistBadges(l)) || '<span class="muted" style="font-size:.8rem">—</span>'}${l.consentimiento ? '' : ' <span class="pill lock" title="No hay registro de que haya aceptado recibir mensajes">sin consentimiento registrado</span>'}</td>
       <td style="white-space:normal">${enviadoHoy(l, 'whatsapp') ? '<span class="pill done">WhatsApp enviado hoy</span> ' : ''}${enviadoHoy(l, 'email') ? '<span class="pill done">Correo enviado hoy</span>' : ''}</td>
       <td style="text-align:right;white-space:nowrap">${n && texto ? `<a class="btn btn-ghost btn-sm" href="https://wa.me/${n}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener" data-env-wa="${esc(l.id)}">WhatsApp</a>` : ''}
-        ${l.email && texto ? `<a class="btn btn-ghost btn-sm" href="mailto:${esc(l.email)}?subject=${encodeURIComponent(`${ofertaDe(clase).nombre}: tu clase y tu lugar`)}&body=${encodeURIComponent(msg)}" data-env-mail="${esc(l.id)}">Correo</a>` : ''}
+        ${l.email && texto ? `<a class="btn btn-ghost btn-sm" href="mailto:${esc(l.email)}?subject=${encodeURIComponent(`${ofertaDe(clase).nombre}: ${deReserva ? 'tu reserva' : 'tu clase y tu lugar'}`)}&body=${encodeURIComponent(msg)}" data-env-mail="${esc(l.id)}">Correo</a>` : ''}
         ${texto ? `<button type="button" class="btn btn-ghost btn-sm" data-env-copy="${esc(l.id)}">Copiar</button>` : ''}
         <button type="button" class="link" style="color:#b8402f;font-size:.78rem" data-env-parar="${esc(l.id)}" title="Respondió «no» o pidió que no le escribamos: sale de todos los envíos">Pidió parar</button></td></tr>`; };
   const ejemplo = aEnviar[0] ? rellenar(texto, aEnviar[0].l) : '';
   return `${head}${aviso}
   <div class="filters">${chip('data-env-clase', 'pendulo', 'Péndulo Hebreo', clase === 'pendulo')}${chip('data-env-clase', 'tarot', 'Tarot Terapéutico', clase === 'tarot')}</div>
-  <div class="filters">${SEGMENTOS.map(([k, t]) => chip('data-env-seg', k, `${t} (${todos.filter((l) => enSegmento(l, k, porId.get(l.id)) && !excluidaDeEnvio(l, porId.get(l.id))).length})`, seg === k)).join('')}</div>
-  <section class="card panel"><h3>Texto para: ${esc(SEGMENTOS.find(([k]) => k === seg)[1].toLowerCase())}</h3>
+  <div class="filters">${segmentosEnvio().map(([k, t]) => chip('data-env-seg', k, `${t} (${todos.filter((l) => enSegmento(l, k, porId.get(l.id)) && !excluidaDeEnvio(l, porId.get(l.id))).length})`, seg === k)).join('')}</div>
+  <section class="card panel"><h3>Texto para: ${esc((segmentosEnvio().find(([k]) => k === seg) || SEGMENTOS[0])[1].toLowerCase())}</h3>
     <p class="muted" style="font-size:.84rem;margin:0">Variables: ${varsEnvio().map((k) => `<code>{{${k}}}</code>`).join(' ')}. Cada una se reemplaza con los datos de la persona.</p>
+    ${deReserva && texto.includes(LINK_SALDO) ? `<p style="font-size:.84rem;margin:0;color:#b8402f"><b>Donde dice ${LINK_SALDO}</b> pega tú el link de Stripe o Mercado Pago antes de enviar. El portal no guarda ni envía links de pago.</p>` : ''}${deReserva && seg === 'reserva_recordatorio' ? '<p class="muted" style="font-size:.82rem;margin:0">Úsalo cuando falten pocos días para el inicio del curso y la persona no haya pagado.</p>' : ''}
     ${pendientes ? `<p class="muted" style="font-size:.82rem;margin:0">Hay ${pendientes} inscrita${pendientes === 1 ? '' : 's'} cuya clase aún no termina: se clasifican como «Entró» o «No entró» cuando pasa la ventana (30 minutos después del inicio).</p>` : ''}
     <textarea id="env-texto" rows="7" maxlength="3000" placeholder="Hola {{nombre}}, te dejo el replay de la clase: {{enlace_replay}}&#10;&#10;La inscripción cierra el {{fecha_limite}}." aria-label="Texto del mensaje">${esc(texto)}</textarea>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn btn-primary btn-sm" data-env-guardar>Guardar texto</button><span class="muted" style="font-size:.8rem">${esEjemplo ? 'Es un texto de ejemplo: edítalo si quieres y guárdalo para dejarlo fijo.' : 'Se guarda para esta clase y este grupo.'}</span></div>
@@ -1130,7 +1150,7 @@ V.envios = () => {
   <section class="card panel"><div class="panel-h"><h3>${aEnviar.length} persona${aEnviar.length === 1 ? '' : 's'} para escribir</h3><button class="btn btn-ghost btn-sm" data-env-csv>Exportar para correo masivo</button></div>
     ${sinCodigo ? `<p style="font-size:.84rem;color:#b8402f;margin:0"><b>${sinCodigo}</b> no tienen código personal todavía: usa «Preparar contactos» en Interesadas.</p>` : ''}
     <p class="muted" style="font-size:.8rem;margin:0">Reglas: máximo un mensaje por canal por persona al día, nada entre las 22:00 y las 8:00 (Chile), y quien responde «no» o pide parar sale de los envíos. ${excl.length ? `Se dejan fuera ${excl.length} (ya compraron, pidieron no recibir mensajes o no aceptaron).` : ''}</p>
-    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Persona</th><th>Asistencia</th><th>Hoy</th><th></th></tr></thead><tbody>${aEnviar.map(fila).join('') || '<tr><td colspan="4" class="muted">No hay personas en este grupo.</td></tr>'}</tbody></table></div></section>`;
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Persona</th><th>${deReserva ? 'Reserva' : 'Asistencia'}</th><th>Hoy</th><th></th></tr></thead><tbody>${aEnviar.map(fila).join('') || '<tr><td colspan="4" class="muted">No hay personas en este grupo.</td></tr>'}</tbody></table></div></section>`;
 };
 // Las plantillas viven en config/plantillas (solo la Maestra las escribe, ver firestore.rules)
 data.plantillas = async () => { A.plantillas = (await getDoc(doc(db, 'config', 'plantillas'))).data() || {}; return A.plantillas; };
@@ -1148,7 +1168,7 @@ async function envioMarcar(l, canal) {
 function exportarEnvioCsv() {
   const clase = S.envClase || 'pendulo', seg = S.envSeg || 'entro', texto = textoEnvio(clase, seg);
   const porId = new Map(personas().flatMap((p) => p.leads.map((l) => [l.id, p])));
-  const lista = A.leads.filter((l) => l.form === `clase-${clase}` && enSegmento(l, seg, porId.get(l.id)) && !excluidaDeEnvio(l, porId.get(l.id)));
+  const lista = universoEnvio(clase, seg).filter((l) => enSegmento(l, seg, porId.get(l.id)) && !excluidaDeEnvio(l, porId.get(l.id)));
   const cols = varsEnvio(), cab = ['Nombre', 'Correo', 'WhatsApp', ...cols, 'Mensaje'];
   const fila = (l) => { const v = variablesDe(l); return [l.name, l.email, l.whatsapp, ...cols.map((k) => v[k]), rellenar(texto, l)]; };
   const celda = (x) => { let t = String(x ?? ''); if (/^[=@]|^[+\-](?![\d\s])/.test(t)) t = `'${t}`; return `"${t.replace(/"/g, '""')}"`; };
@@ -1568,9 +1588,15 @@ async function guardarClases(form) {
   try { await data.saveClases(d); render(false); toast('Clases y ofertas guardadas.'); } catch (e) { fail(e); }
 }
 
-const enSegmento = (l, k, p) => k === 'todas' || (k === 'oferta' ? vioOfertaSinRespuesta(l, p) : segClic(l) === k);
+const enSegmento = (l, k, p) => {
+  if (k === 'reserva_sin_pago') { const r = FUNC.reserva && reservaDe(l); return !!r && !r.pagada && !reservoLinea(p, claseDeL(l)) && !(p || { leads: [l] }).leads.some((x) => claseDeL(x) === claseDeL(l) && pagoHecho(x)); }
+  if (k === 'reserva_saldo' || k === 'reserva_recordatorio') return saldoPendiente(l, p);
+  return k === 'todas' || (k === 'oferta' ? vioOfertaSinRespuesta(l, p) : segClic(l) === k);
+};
 // Texto de un grupo: el guardado, o el de ejemplo mientras no haya uno guardado
-const textoEnvio = (clase, seg) => (A.plantillas || {})[`${clase}_${seg}`] || TEXTO_EJEMPLO[seg] || '';
+const ejemploDe = (clase, seg) => { const e = TEXTO_EJEMPLO[seg]; return typeof e === 'object' ? e?.[clase] || '' : e || ''; };
+const textoEnvio = (clase, seg) => (A.plantillas || {})[`${clase}_${seg}`] || ejemploDe(clase, seg);
+const LINK_SALDO = '[LINK DEL SALDO]';
 // ---------- Inicio: lo importante del día a mano ----------
 V.inicio = () => {
   const hoy = ymd(hoyCL()), nombre = (A.me?.displayName || '').split(' ')[0] || 'Karen';
@@ -2108,6 +2134,7 @@ function bind() {
     if (horaChile() < 8 || horaChile() >= 22) { e.preventDefault(); return toast('No se envía entre las 22:00 y las 8:00 (hora de Chile).'); }
     if (l.ultimoEnvio?.[canal] && diaChile(l.ultimoEnvio[canal]) === diaChile(Date.now())) { e.preventDefault(); return toast(`Ya le escribiste hoy por ${canal === 'whatsapp' ? 'WhatsApp' : 'correo'}: máximo un mensaje por canal al día. Mañana puedes volver a escribirle.`); }
     if (l.noContactar || (personaDe(l.id)?.tags || []).includes('No contactar')) { e.preventDefault(); return toast('Pidió que no le escribamos.'); }
+    if (textoEnvio(S.envClase || 'pendulo', S.envSeg || 'entro').includes(LINK_SALDO) && !confirm(`El mensaje trae ${LINK_SALDO}: pega tú el link del saldo en ${canal === 'whatsapp' ? 'WhatsApp' : 'el correo'} antes de enviarlo.\n\n¿Abrir ahora?`)) { e.preventDefault(); return; }
     envioMarcar(l, canal);
   });
   document.querySelectorAll('[data-env-wa]').forEach(envCanal('whatsapp'));
