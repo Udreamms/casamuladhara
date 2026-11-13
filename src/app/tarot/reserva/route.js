@@ -28,7 +28,7 @@ export async function GET(request) {
     // Sin pago: el lead queda «Reserva iniciada, sin pago» (nunca pisa una reserva ya pagada)
     if (lead) {
       const ref = db().doc(`leads/${lead}`), d = await ref.get();
-      if (d.exists && d.data().form === 'tarot' && d.data().reserva?.estado === 'iniciada') await ref.update({ 'reserva.estado': 'sin_pago', updatedAt: FieldValue.serverTimestamp() });
+      if (d.exists && ['tarot', 'clase-tarot'].includes(d.data().form) && d.data().reserva?.estado === 'iniciada') await ref.update({ 'reserva.estado': 'sin_pago', updatedAt: FieldValue.serverTimestamp() });
     }
   } catch (e) {
     console.error('tarot/reserva', e);

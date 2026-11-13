@@ -4,7 +4,7 @@ import { join } from 'node:path';
 // mientras no esté cargado), cuenta regresiva al cierre de la inscripción, el botón de inscripción, preguntas frecuentes y testimonios.
 import { OFERTAS, cierreOferta, configClases, contactoPorCodigo, primerNombre, registrarEvento } from '@/lib/server/embudo.js';
 import { chileAUtc, utcAChile } from '@/lib/server/agenda.js';
-import { extras, plataforma, PLATAFORMA_URL } from '@/lib/server/banderas.js';
+import { extras, plataforma, PLATAFORMA_URL, reservaPendulo, reservaTarot } from '@/lib/server/banderas.js';
 import { enlaceInvalido, esc, pagina, pixel, reproductor, WHATSAPP } from '@/lib/server/paginas.js';
 
 const DIAS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
@@ -79,15 +79,27 @@ export async function paginaReplay(request, clase) {
       : (process.env.NODE_ENV !== 'production' ? '<div class="marco" style="aspect-ratio:16/9"><div><b>Aquí irá una captura del aula por dentro</b></div></div>' : '');
     const pasosPlat = [['Crea tu cuenta', 'Solo necesitas tu correo y una contraseña. Toma un minuto y no pide tarjeta.'], ['Entra al aula del estudiante', 'Es la plataforma online donde viven las clases de Casa Muladhara.'], [`Mira las 4 clases gratis de ${NOMBRE[clase]}`, 'Velas cuando quieras y las veces que quieras, desde tu celular o tu computador.']];
     const bloquePlat = plat ? `<section class="oferta" id="plataforma" style="justify-items:stretch;text-align:left"><span class="k" style="text-align:center">Gratis · Aula del estudiante</span><h2 style="text-align:center">¿Aún no estás lista? Sigue aprendiendo con 4 clases gratis</h2><p class="muted" style="text-align:center">Entra al aula del estudiante, nuestra plataforma online: ahí están las clases de ${NOMBRE[clase]} para que sigas a tu ritmo, sin costo.</p>${captura}<ol style="list-style:none;margin:6px 0;padding:0;display:grid;gap:10px">${pasosPlat.map(([t, x], i) => `<li style="display:flex;gap:12px;align-items:flex-start"><b style="flex:none;width:30px;height:30px;border-radius:50%;background:#1f3f32;color:#e8c98a;display:grid;place-items:center">${i + 1}</b><span><b>${esc(t)}</b><br><span class="muted">${esc(x)}</span></span></li>`).join('')}</ol><div style="text-align:center"><a class="b" href="${PLATAFORMA_URL}${codigo ? `&l=${encodeURIComponent(codigo)}` : ''}" onclick="window.fbq&&fbq('trackCustom','IrAPlataforma')">Crear mi cuenta gratis</a></div></section>` : '';
-    const cta = abierta
+    // Reserva (10.000 CLP el Péndulo, 10 USD el Tarot): botón directo al pago, sin formulario (la persona ya está en el CRM con su código)
+    const reserva = clase === 'tarot' ? reservaTarot() : reservaPendulo();
+    const RES = {
+      pendulo: { precio: '$69.900 CLP · curso completo', linea: 'Hoy reservas tu cupo con $10.000 · el saldo de $59.900 se paga antes del inicio del curso', boton: 'Reservar mi cupo por $10.000', pasarela: 'Mercado Pago', total: '¿Prefieres pagar el total? Paga $69.900' },
+      tarot: { precio: '140 USD · curso completo · 2 cuotas de 70 USD', linea: 'Hoy reservas tu cupo con 10 USD. Se descuentan de tu primera cuota: pagas 60 USD antes del inicio del curso y 70 USD el segundo mes.', boton: 'Reservar mi cupo por 10 USD', pasarela: 'tarjeta, con Stripe', total: '¿Prefieres pagar las 2 cuotas de 70 USD? Inscríbete aquí' },
+    }[clase];
+    const ctaReserva = `<section class="oferta" id="oferta"><span class="k">Inscripciones abiertas</span><h2>Curso de ${NOMBRE[clase]}</h2><div class="precio">${RES.precio}</div><p class="muted" style="font-weight:700;color:#1f3f32">${esc(RES.linea)}</p>
+         <div class="cuenta" data-cierre="${cierre}" aria-label="Tiempo para el cierre"><div><b data-u="d">--</b><small>días</small></div><div><b data-u="h">--</b><small>horas</small></div><div><b data-u="m">--</b><small>min</small></div><div><b data-u="s">--</b><small>seg</small></div></div>
+         <p class="muted">La inscripción cierra el <b>${esc(limite)}</b>.</p><a class="b" href="/comprar?l=${esc(codigo)}&amp;pago=reserva">${RES.boton}</a>
+         <p class="muted" style="font-size:.82rem">La reserva no es reembolsable, pero si no puedes asistir, la usas en el próximo grupo. Pago seguro con ${RES.pasarela}.</p>
+         <p class="muted" style="font-size:.85rem"><a class="alt" href="/comprar?l=${esc(codigo)}">${RES.total}</a></p></section>`;
+    const cta = abierta && reserva ? ctaReserva : abierta
       ? `<section class="oferta" id="oferta"><span class="k">Inscripciones abiertas</span><h2>Curso de ${NOMBRE[clase]}</h2><div class="precio">${PRECIO[clase]}</div>
          <div class="cuenta" data-cierre="${cierre}" aria-label="Tiempo para el cierre"><div><b data-u="d">--</b><small>días</small></div><div><b data-u="h">--</b><small>horas</small></div><div><b data-u="m">--</b><small>min</small></div><div><b data-u="s">--</b><small>seg</small></div></div>
          <p class="muted">La inscripción cierra el <b>${esc(limite)}</b>.</p><a class="b" href="/comprar?l=${esc(codigo)}">${clase === 'tarot' ? 'Quiero inscribirme' : extras() ? 'Reservar mi cupo por WhatsApp' : 'Quiero inscribirme'}</a></section>`
       : `<section class="oferta"><h2>La inscripción ya cerró</h2><p class="muted">Escríbenos y te avisamos de la próxima fecha.</p><a class="b" href="${WHATSAPP}">Escribir por WhatsApp</a></section>`;
     const faq = [
       ['¿Hasta cuándo puedo inscribirme?', oferta ? `La inscripción cierra el ${limite}.` : 'Escríbenos y te avisamos.'],
-      ['¿Cuánto cuesta?', clase === 'tarot' ? 'Son 2 cuotas mensuales de 70 USD (140 USD en total), con tarjeta.' : (extras() ? 'El curso cuesta $69.900 CLP. Reservas tu cupo con $10.000 por WhatsApp y esa reserva se descuenta: el saldo de $59.900 se paga antes de la primera clase.' : 'El curso cuesta $69.900 CLP.')],
+      ['¿Cuánto cuesta?', reserva ? (clase === 'tarot' ? 'El curso cuesta 140 USD, en 2 cuotas de 70 USD. Reservas tu cupo con 10 USD con tarjeta, por Stripe: se descuentan de tu primera cuota (60 USD antes del inicio del curso y 70 USD el segundo mes).' : 'El curso cuesta $69.900 CLP. Reservas tu cupo con $10.000 por Mercado Pago y pagas el saldo de $59.900 antes del inicio del curso.') : clase === 'tarot' ? 'Son 2 cuotas mensuales de 70 USD (140 USD en total), con tarjeta.' : (extras() ? 'El curso cuesta $69.900 CLP. Reservas tu cupo con $10.000 por WhatsApp y esa reserva se descuenta: el saldo de $59.900 se paga antes de la primera clase.' : 'El curso cuesta $69.900 CLP.')],
       ...(clase === 'tarot' ? [['¿Cómo se cobran las cuotas?', 'Pagas la primera cuota hoy y la segunda un mes después, con la misma tarjeta. Después de la segunda no se cobra nada más.']] : (extras() ? [['¿Cómo reservo mi cupo?', 'Pulsa «Reservar mi cupo por WhatsApp»: se abre un chat con Karen con el mensaje ya escrito y ella te indica cómo pagar los $10.000.']] : [])),
+      ...(reserva ? [['¿Y si después no puedo asistir?', 'La reserva no es reembolsable, pero no la pierdes: la usas en el próximo grupo. Avísanos por WhatsApp antes del inicio.']] : []),
       ['¿Y si no pude ver la clase en vivo?', 'No pasa nada: esta página tiene la clase completa y puedes verla las veces que quieras.'],
       ['¿Tengo dudas antes de inscribirme?', 'Escríbenos por WhatsApp y Karen o su equipo te responde.'],
     ];
