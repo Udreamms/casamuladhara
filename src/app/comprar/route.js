@@ -50,7 +50,9 @@ export async function GET(request) {
       const cierre = cierreOferta('pendulo');
       if (cierre && Date.now() >= cierre) return new Response(null, { status: 302, headers: { Location: '/pendulo' } });
       if (codigo && await contactoPorCodigo(codigo)) await registrarEvento({ codigo, evento: 'clic_comprar', fechaIso: new Date().toISOString(), origen: 'pendulo' });
-      return salida(PAGO_RESERVA_PENDULO, 'InitiateCheckout', `ic-reserva-${codigo || 'web'}-${Date.now()}`, { value: 10000, currency: 'CLP', content_name: 'Reserva Péndulo Hebreo Nivel 1' });
+      // Sin link de pago vigente (o con el WhatsApp activado), la reserva se coordina por WhatsApp de Karen; el Píxel sigue contando InitiateCheckout
+      const destino = pagoPorWhatsapp('pendulo') || !PAGO_RESERVA_PENDULO ? `${WHATSAPP}?text=${encodeURIComponent('Hola! Me gustaría hacer mi reserva de $10.000 para la clase de Péndulo Hebreo')}` : PAGO_RESERVA_PENDULO;
+      return salida(destino, 'InitiateCheckout', `ic-reserva-${codigo || 'web'}-${Date.now()}`, { value: 10000, currency: 'CLP', content_name: 'Reserva Péndulo Hebreo Nivel 1' });
     }
     // Reserva desde la landing del replay (la persona ya tiene su código y su ficha en el CRM: no hay formulario):
     // se anota «reserva iniciada» en su ficha y va directo a Mercado Pago (Péndulo, 10.000 CLP) o a Stripe (Tarot, 10 USD).
@@ -63,7 +65,7 @@ export async function GET(request) {
       await registrarEvento({ codigo, evento: 'clic_comprar', fechaIso: new Date().toISOString(), origen: 'replay' });
       if (!String(c.reserva?.estado || '').startsWith('pag')) await c.ref.update({ reserva: { monto: tarot ? 10 : 10000, moneda: tarot ? 'USD' : 'CLP', estado: 'iniciada', t: Date.now() }, updatedAt: FieldValue.serverTimestamp() });
       // Solución rápida: el pago lo coordina Karen por WhatsApp (la reserva ya quedó anotada en su ficha)
-      if (pagoPorWhatsapp(tarot ? 'tarot' : 'pendulo')) {
+      if (pagoPorWhatsapp(tarot ? 'tarot' : 'pendulo') || (!tarot && !PAGO_RESERVA_PENDULO)) {
         const texto = `Hola Karen, soy ${primerNombre(c.name)}. Quiero reservar mi cupo en el curso de ${tarot ? 'Tarot Terapéutico' : 'Péndulo Hebreo'}. Mi código: ${codigo}`;
         return salida(`${WHATSAPP}?text=${encodeURIComponent(texto)}`, 'Contact', `ct-reserva-${codigo}-${Date.now()}`);
       }
