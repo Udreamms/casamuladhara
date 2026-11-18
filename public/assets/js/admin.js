@@ -417,12 +417,12 @@ const esPago = (f) => ['pendulo', 'tarot', 'formacion'].includes(f);
 // En un curso pago la primera etapa es "Interesada"; en una clase gratis, "Inscrita" quiere decir inscrita a un curso
 // ---------- PIPELINES (CRM → Interesadas): cada landing tiene el suyo. Las columnas son etapas guardadas en status; unas pocas se calculan a la vista (no se escribe nada):
 //   clase gratis: Se registró → Ingresó / No ingresó → Replay enviado → Seguimiento → Vendido → Remarketing  (Ingresó y No ingresó son excluyentes)
-//   curso Péndulo: Interesada → Reservó $10.000 → Pagó completo → Nueva estudiante → Remarketing;  curso Tarot: igual, con 10 USD y «Pagó 1.ª cuota»
+//   curso Péndulo: Interesada → Reservó $10.000 → Pagó completo → Inició programa → Remarketing;  curso Tarot: igual, con 10 USD y «Pagó 1.ª cuota»
 // Quien ya estaba en el CRM no se pierde: cada etapa antigua se muestra en la columna más parecida (PIPE_MAPA).
 const PIPES = {
   clase: [['registrada', 'Se registró'], ['entro', 'Ingresó a la clase'], ['no_asistio', 'No ingresó'], ['replay_enviado', 'Replay enviado'], ['seguimiento', 'Seguimiento'], ['matriculada', 'Inició programa'], ['remarketing', 'Remarketing']],
-  pendulo: [['nuevo', 'Interesada'], ['reservo_cupo', 'Reservó $10.000'], ['pago_completo', 'Pagó completo'], ['inscrita', 'Nueva estudiante'], ['remarketing', 'Remarketing']],
-  tarot: [['nuevo', 'Interesada'], ['reservo_cupo', 'Reservó 10 USD'], ['pago_completo', 'Pagó 1.ª cuota'], ['inscrita', 'Nueva estudiante'], ['remarketing', 'Remarketing']],
+  pendulo: [['nuevo', 'Interesada'], ['reservo_cupo', 'Reservó $10.000'], ['pago_completo', 'Pagó completo'], ['inscrita', 'Inició programa'], ['remarketing', 'Remarketing']],
+  tarot: [['nuevo', 'Interesada'], ['reservo_cupo', 'Reservó 10 USD'], ['pago_completo', 'Pagó 1.ª cuota'], ['inscrita', 'Inició programa'], ['remarketing', 'Remarketing']],
   // Formación: la landing guarda la postulación (lead.postulacion) y la llamada de orientación que agenda la persona (lead.llamada)
   formacion: [['nuevo', 'Postulante'], ['llamada_agendada', 'Llamada agendada'], ['entro', 'Ingresó a la llamada'], ['no_asistio', 'No ingresó · reagendar'], ['seguimiento', 'Seguimiento'], ['inscrita', 'Inició formación'], ['remarketing', 'Remarketing']],
 };
@@ -632,7 +632,7 @@ const EMBUDO_PASOS = {
   clase: [['Se registraron', () => true], ['Ingresaron a la clase', (l) => asistioL(l) || etapaPipe(l) === 'entro'],
     ['Recibieron el replay', (l) => !!l.replayEnviadoT || !!l.replayT || ['replay_enviado', 'seguimiento', 'matriculada', 'remarketing'].includes(etapaPipe(l))],
     ['Pasaron a seguimiento', (l) => ['seguimiento', 'matriculada', 'remarketing'].includes(etapaPipe(l))], ['Iniciaron el programa', (l) => etapaPipe(l) === 'matriculada']],
-  curso: [['Se interesaron', () => true], ['Reservaron', (l) => ['reservo_cupo', 'pago_completo', 'inscrita'].includes(etapaPipe(l))], ['Pagaron completo', (l) => ['pago_completo', 'inscrita'].includes(etapaPipe(l))], ['Empezaron (nueva estudiante)', (l) => etapaPipe(l) === 'inscrita']],
+  curso: [['Se interesaron', () => true], ['Reservaron', (l) => ['reservo_cupo', 'pago_completo', 'inscrita'].includes(etapaPipe(l))], ['Pagaron completo', (l) => ['pago_completo', 'inscrita'].includes(etapaPipe(l))], ['Iniciaron el programa', (l) => etapaPipe(l) === 'inscrita']],
   formacion: [['Postularon', () => true], ['Agendaron su llamada', (l) => !!l.llamada || ['llamada_agendada', 'entro', 'no_asistio', 'seguimiento', 'inscrita'].includes(etapaPipe(l))], ['Ingresaron a la llamada', (l) => ['entro', 'inscrita'].includes(etapaPipe(l))], ['Iniciaron la formación', (l) => etapaPipe(l) === 'inscrita']],
 };
 const pasosDe = (prog) => EMBUDO_PASOS[tipoPipe(prog[0]) === 'clase' ? 'clase' : tipoPipe(prog[0]) === 'formacion' ? 'formacion' : 'curso'];
