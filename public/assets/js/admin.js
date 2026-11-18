@@ -1756,49 +1756,72 @@ const LINK_SALDO = '[LINK DEL SALDO]';
 const PIPE_TITULO = { 'clase-pendulo': 'Clase gratis · Péndulo Hebreo', 'clase-tarot': 'Clase gratis · Tarot Terapéutico', pendulo: 'Curso · Péndulo Hebreo', tarot: 'Curso · Tarot Terapéutico', formacion: 'Formación' };
 V.inicio = () => {
   const hoy = ymd(hoyCL()), ahora = Date.now(), nombre = (A.me?.displayName || '').split(' ')[0] || 'Karen', per = personas();
+  const hora = Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'America/Santiago', hour: '2-digit', hour12: false }).format(new Date())) % 24;
+  const saludo = hora < 12 ? 'Buenos días' : hora < 20 ? 'Buenas tardes' : 'Buenas noches';
   const porContactar = nuevasLeads().length, sinLeer = A.wa.chats.reduce((n, c) => n + (c.unread || 0), 0);
   const saldos = FUNC.reserva && A.leads ? filasSaldo().length : 0;
+  const ico = (k) => `<svg viewBox="0 0 24 24" aria-hidden="true">${(NAV.find((n) => n[0] === k) || [])[2] || ''}</svg>`;
+  const leads = A.leads || [];
+  // Últimos 14 días, día por día (para la línea de cada tarjeta)
+  const porDia = (ts) => { const a = Array(14).fill(0); ts.forEach((t) => { const d = Math.floor((ahora - t) / 864e5); if (d >= 0 && d < 14) a[13 - d]++; }); return a; };
+  const spark = (a) => { const w = 120, h = 36, m = Math.max(...a, 1); return `<svg class="ini-spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><polyline points="${a.map((v, i) => `${((i / (a.length - 1)) * w).toFixed(1)},${(h - 3 - (v / m) * (h - 8)).toFixed(1)}`).join(' ')}" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>`; };
+  const delta = (a) => { const ahora7 = a.slice(7).reduce((x, y) => x + y, 0), antes = a.slice(0, 7).reduce((x, y) => x + y, 0); if (!antes) return ''; const p = Math.round(((ahora7 - antes) / antes) * 100); return `<span class="ini-delta ${p < 0 ? 'baja' : ''}">${p < 0 ? '↓' : '↑'} ${Math.abs(p)}%</span>`; };
+  const nuevasDia = porDia(leads.map((l) => l.createdAt || 0)), nuevas7 = nuevasDia.slice(7).reduce((x, y) => x + y, 0);
+  const mesIni = new Date(ahora); mesIni.setDate(1); mesIni.setHours(0, 0, 0, 0);
+  const pagadas = leads.filter((l) => l.reserva?.estado === 'pagada' && (l.reserva.pagadaT || l.reserva.t || 0) >= mesIni.getTime());
+  const pagDia = porDia(leads.filter((l) => l.reserva?.estado === 'pagada').map((l) => l.reserva.pagadaT || l.reserva.t || 0));
+  const stat = (icono, n, titulo, extra, attr, alerta) => `<button type="button" class="card ini-stat" ${attr}>${alerta ? '<i class="ini-punto"></i>' : ''}<span class="ini-ico">${icono}</span><span class="ini-stat-t"><b>${n}</b><span>${titulo}</span></span>${extra}</button>`;
+  // Accesos rápidos
+  const rapido = (k, t, attr) => `<button type="button" class="ini-rapido" ${attr}>${ico(k)}<span>${t}</span></button>`;
+  // Tareas que requieren atención (de lo más urgente a lo menos). Cada una lleva su número y abre lo que hay que hacer.
+  const pend = [];
+  const add = (n, icono, titulo, det, attr) => { if (n) pend.push(`<li><button type="button" class="ini-tarea" ${attr}><span class="ini-ico">${ico(icono)}</span><span class="ini-tarea-t"><b>${titulo}</b><small>${det}</small></span><span class="ini-n">${n}</span><span class="ini-flecha" aria-hidden="true">›</span></button></li>`); };
+  add(saldos, 'pagos', 'Saldos por cobrar', `${saldos} reservaron y no han pagado el saldo`, 'data-crm-lista="saldo"');
+  (A.leads ? ofertasPorCerrar() : []).forEach((o) => add(o.filas.length, 'clases', `La oferta del ${esc(ofertaDe(o.clase).nombre)} cierra en ${o.horas} hora${o.horas === 1 ? '' : 's'}`, 'Vieron la oferta y no han respondido', `data-crm-lista="oferta:${o.clase}"`));
+  const llamadasPasadas = leads.filter((l) => l.form === 'formacion' && etapaPipe(l) === 'llamada_agendada' && llamadaMs(l) && llamadaMs(l) + 20 * 6e4 < ahora).length;
+  add(llamadasPasadas, 'calendario', 'Llamadas de la Formación que ya pasaron', 'Márcalas como «Ingresó» o «No ingresó»', 'data-inicio-etapa="formacion|llamada_agendada"');
+  const clic = A.leads ? filasClic().length : 0;
+  add(clic, 'interesadas', 'Hicieron clic en inscribirse y no pagaron', 'Escríbeles mientras la oferta sigue abierta', 'data-crm-lista="clic"');
+  const replay = A.leads ? filasReplay().length : 0;
+  add(replay, 'gratis', 'No abrieron el replay', 'Pregúntales si pudieron ver la clase', 'data-crm-lista="replay"');
+  const sinCuenta = per.filter((q) => esInscrita(etapaDe(q)) && !q.alumna).length;
+  add(sinCuenta, 'alumnas', 'Inscritas sin cuenta en el aula', 'Ya pagaron pero aún no crean su cuenta', 'data-crm-sincuenta-ya');
+  const atrasadas = A.students.filter((u) => u.paymentStatus === 'overdue');
+  add(atrasadas.length, 'pagos', 'Cuotas atrasadas', esc(atrasadas.slice(0, 3).map(nameOf).join(', ')) + (atrasadas.length > 3 ? '…' : ''), 'data-go="pagos"');
+  add(A.questions.length, 'preguntas', 'Preguntas sin responder', 'Preguntas nuevas de clase', 'data-go="preguntas"');
+  add(A.tickets.length, 'ayuda', 'Mensajes de ayuda', 'De las alumnas del aula', 'data-go="ayuda"');
+  const paraHoy = FUNC.tareas ? per.filter(seguimientoHoyP).length : 0;
+  add(paraHoy, 'interesadas', 'Seguimientos para hoy', 'Los que fijaste en el CRM', 'data-crm-hoy');
+  // Actividad reciente: lo último que pasó en el CRM
+  const hace = (t) => { const m = Math.max(0, Math.round((ahora - t) / 6e4)); return m < 1 ? 'Ahora' : m < 60 ? `Hace ${m} min` : m < 1440 ? `Hace ${Math.round(m / 60)} h` : `Hace ${Math.round(m / 1440)} d`; };
+  const act = [];
+  leads.forEach((l) => {
+    if (l.createdAt) act.push({ t: l.createdAt, icono: 'interesadas', titulo: 'Nueva interesada', det: `${l.name || 'Sin nombre'} · ${PROG_CORTO[l.form] || l.form}` });
+    if (l.reserva?.estado === 'pagada') act.push({ t: l.reserva.pagadaT || l.reserva.t || 0, icono: 'pagos', titulo: 'Reserva pagada', det: `${l.name || 'Sin nombre'} · ${montoCorto(l.reserva.monto, l.reserva.moneda)}` });
+    if (l.llamada?.t) act.push({ t: l.llamada.t, icono: 'calendario', titulo: 'Llamada agendada', det: `${l.name || 'Sin nombre'} · ${l.llamada.fecha || ''} ${l.llamada.hora || ''}` });
+  });
+  const recientes = act.filter((x) => x.t).sort((x, y) => y.t - x.t).slice(0, 5);
   // Próximas clases gratis (con cuántas inscritas) y llamadas de la Formación
   const clases = (A.cal || []).filter((e) => ['clase-pendulo', 'clase-tarot'].includes(e.type) && e.date >= hoy && !e.tentative)
-    .map((e) => ({ t: chileAMs(e.date, e.time || '00:00'), tipo: CAL_TYPES[e.type]?.[0] || e.type, fecha: e.date, hora: e.time || '', det: `${(A.leads || []).filter((l) => l.claseEvento === e.id).length} inscritas` }));
-  const llamadas = (A.leads || []).filter((l) => l.form === 'formacion' && llamadaMs(l) > ahora - 36e5).map((l) => ({ t: llamadaMs(l), tipo: 'Llamada de la Formación', fecha: l.llamada.fecha, hora: l.llamada.hora || '', det: l.name }));
-  const proximas = [...clases, ...llamadas].sort((x, y) => x.t - y.t).slice(0, 6), deHoy = [...clases, ...llamadas].filter((x) => x.fecha === hoy).length;
-  const tarjeta = (n, titulo, sub, attr) => `<button type="button" class="ini-hoy ${n ? 'on' : ''}" ${attr}><b>${n}</b><span>${titulo}</span><small>${sub}</small></button>`;
-  // Un cuadro por pipeline: cuántas personas hay en cada columna (al tocar una, se abre esa columna en Interesadas)
-  const pipe = ([k, , fs]) => {
-    const prog = progDe(k), cols = PIPES[tipoPipe(k)], cuenta = Object.fromEntries(cols.map(([c]) => [c, 0]));
-    const ps = per.filter((q) => tieneProg(q, prog)); ps.forEach((q) => { const e = etapaPipeEn(q, prog); if (e in cuenta) cuenta[e]++; });
-    const total = Object.values(cuenta).reduce((x, y) => x + y, 0);
-    return `<section class="card ini-pipe ${cols.length > 5 ? 'ancha' : ''}"><div class="panel-h"><h3>${esc(PIPE_TITULO[k] || prog[1])}</h3><span class="muted" style="font-size:.84rem">${total} persona${total === 1 ? '' : 's'}</span></div>
-      <div class="ini-cols" style="--n:${cols.length}">${cols.map(([c, t]) => `<button type="button" class="ini-col ${cuenta[c] ? '' : 'vacia'}" data-inicio-etapa="${esc(k)}|${c}" title="Ver «${esc(t)}» en Interesadas"><b>${cuenta[c]}</b><span>${esc(t)}</span></button>`).join('')}</div></section>`;
-  };
-  // Pendientes, ordenados: lo que se pierde primero va arriba. Cada uno lleva su botón.
-  const pend = [];
-  const add = (n, titulo, det, boton, attr) => { if (n) pend.push(`<li><div><b>${titulo}</b><small>${det}</small></div><button type="button" class="btn btn-ghost btn-sm" ${attr}>${boton}</button></li>`); };
-  add(saldos, `${saldos} reservaron y no han pagado el saldo`, 'Se paga antes del inicio del curso', 'Ver lista', 'data-crm-lista="saldo"');
-  (A.leads ? ofertasPorCerrar() : []).forEach((o) => add(1, `La oferta del ${esc(ofertaDe(o.clase).nombre)} cierra en ${o.horas} hora${o.horas === 1 ? '' : 's'}`, `${o.filas.length} persona${o.filas.length === 1 ? '' : 's'} vieron la oferta y no han respondido`, 'Ver lista', `data-crm-lista="oferta:${o.clase}"`));
-  const llamadasPasadas = (A.leads || []).filter((l) => l.form === 'formacion' && etapaPipe(l) === 'llamada_agendada' && llamadaMs(l) && llamadaMs(l) + 20 * 6e4 < ahora).length;
-  add(llamadasPasadas, `${llamadasPasadas} llamada${llamadasPasadas === 1 ? '' : 's'} de la Formación ya ${llamadasPasadas === 1 ? 'pasó' : 'pasaron'}`, 'Márcalas como «Ingresó» o «No ingresó»', 'Abrir', 'data-inicio-etapa="formacion|llamada_agendada"');
-  const clic = A.leads ? filasClic().length : 0;
-  add(clic, `${clic} hicieron clic en inscribirse y no pagaron`, 'Escríbeles mientras la oferta sigue abierta', 'Ver lista', 'data-crm-lista="clic"');
-  const replay = A.leads ? filasReplay().length : 0;
-  add(replay, `${replay} no abrieron el replay`, 'Pregúntales si pudieron ver la clase', 'Ver lista', 'data-crm-lista="replay"');
-  const sinCuenta = per.filter((q) => esInscrita(etapaDe(q)) && !q.alumna).length;
-  add(sinCuenta, `${sinCuenta} inscrita${sinCuenta === 1 ? '' : 's'} sin cuenta en el aula`, 'Ya pagaron pero aún no crean su cuenta', 'Ver quiénes', 'data-crm-sincuenta-ya');
-  const atrasadas = A.students.filter((u) => u.paymentStatus === 'overdue');
-  add(atrasadas.length, `${atrasadas.length} cuota${atrasadas.length === 1 ? '' : 's'} atrasada${atrasadas.length === 1 ? '' : 's'}`, esc(atrasadas.slice(0, 3).map(nameOf).join(', ')) + (atrasadas.length > 3 ? '…' : ''), 'Ver pagos', 'data-go="pagos"');
-  add(A.questions.length, `${A.questions.length} pregunta${A.questions.length === 1 ? '' : 's'} de clase sin responder`, 'De las alumnas del aula', 'Responder', 'data-go="preguntas"');
-  add(A.tickets.length, `${A.tickets.length} mensaje${A.tickets.length === 1 ? '' : 's'} de ayuda`, 'De las alumnas del aula', 'Abrir', 'data-go="ayuda"');
-  const paraHoy = FUNC.tareas ? per.filter(seguimientoHoyP).length : 0;
-  add(paraHoy, `${paraHoy} seguimiento${paraHoy === 1 ? '' : 's'} para hoy`, 'Los que fijaste en el CRM', 'Ver', 'data-crm-hoy');
-  const fila = (x) => `<li><div><b>${esc(x.tipo)}</b><small>${esc(x.det)}</small></div><div class="ini-cuando"><b>${x.fecha === hoy ? 'Hoy' : esc(diaLargoTxt(x.fecha))}</b><small>${esc(x.hora)}</small></div></li>`;
+    .map((e) => ({ t: chileAMs(e.date, e.time || '00:00'), tipo: CAL_TYPES[e.type]?.[0] || e.type, fecha: e.date, hora: e.time || '', det: `${leads.filter((l) => l.claseEvento === e.id).length} inscritas` }));
+  const llamadas = leads.filter((l) => l.form === 'formacion' && llamadaMs(l) > ahora - 36e5).map((l) => ({ t: llamadaMs(l), tipo: 'Llamada de la Formación', fecha: l.llamada.fecha, hora: l.llamada.hora || '', det: l.name }));
+  const todas = [...clases, ...llamadas].sort((x, y) => x.t - y.t), proximas = todas.slice(0, 3), deHoy = todas.filter((x) => x.fecha === hoy).length;
+  const bloqueDia = (f) => { const d = new Date(`${f}T12:00:00`), p = (o) => new Intl.DateTimeFormat('es-CL', o).format(d).replace('.', ''); return `<span class="ini-dia"><small>${esc(p({ weekday: 'short' }))}</small><b>${d.getDate()}</b><small>${esc(p({ month: 'short' }))}</small></span>`; };
+  const fila = (x) => `<li class="ini-cal"><button type="button" data-go="calendario">${bloqueDia(x.fecha)}<span class="ini-tarea-t"><b>${esc(x.tipo)}</b><small>${esc(x.det)}</small></span><span class="ini-cuando"><b>${x.fecha === hoy ? 'Hoy' : esc(diaLargoTxt(x.fecha))}</b><small>${esc(x.hora)}</small></span></button></li>`;
+  // Un renglón por pipeline (al tocarlo se abre ese programa en Interesadas)
+  const pipe = ([k]) => { const prog = progDe(k), cols = PIPES[tipoPipe(k)], ps = per.filter((q) => tieneProg(q, prog)), cuenta = {}; ps.forEach((q) => { const e = etapaPipeEn(q, prog); cuenta[e] = (cuenta[e] || 0) + 1; }); const top = cols.map(([c, t]) => [t, cuenta[c] || 0]).sort((x, y) => y[1] - x[1])[0];
+    return `<li><button type="button" class="ini-tarea" data-inicio-etapa="${esc(k)}|"><span class="ini-tarea-t"><b>${esc(PIPE_TITULO[k] || prog[1])}</b><small>${top && top[1] ? `Más gente en «${esc(top[0])}» (${top[1]})` : 'Todavía sin personas'}</small></span><span class="ini-n suave">${ps.length}</span><span class="ini-flecha" aria-hidden="true">›</span></button></li>`; };
   const fechaHoy = diaLargoTxt(hoy);
-  return `<div class="ini"><header class="ini-head"><span class="eyebrow">Portal de la Maestra</span><h1>Hola, ${esc(nombre)}</h1><p class="muted">${esc(fechaHoy.charAt(0).toUpperCase() + fechaHoy.slice(1))}. Esto es lo que toca hoy.</p></header>
-    <section class="ini-hoys">${tarjeta(porContactar, 'Por contactar', 'interesadas nuevas', 'data-go="interesadas"')}${tarjeta(sinLeer, 'WhatsApp', 'mensajes sin leer', 'data-go="whatsapp"')}${FUNC.reserva ? tarjeta(saldos, 'Saldos', 'por cobrar', 'data-crm-lista="saldo"') : ''}${tarjeta(deHoy, 'Hoy', 'clases y llamadas', 'data-go="calendario"')}</section>
-    <section style="display:grid;gap:14px"><h2 class="ini-h">Tus pipelines</h2><div class="ini-pipes">${LEAD_PROGS.filter(([k]) => tipoPipe(k)).map(pipe).join('')}</div></section>
+  return `<div class="ini"><header class="ini-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>¡${saludo}, ${esc(nombre)}!</h1><p class="muted">Aquí tienes el resumen de tu academia.</p></div><span class="ini-fecha">${ico('calendario')}${esc(fechaHoy.charAt(0).toUpperCase() + fechaHoy.slice(1))}</span></header>
+    <section class="ini-stats">${stat(ico('alumnas'), A.students.length, 'Alumnas activas', '', 'data-go="alumnas"')}${stat(ico('interesadas'), A.leads ? nuevas7 : '…', 'Interesadas nuevas · 7 días', `${delta(nuevasDia)}${spark(nuevasDia)}`, 'data-go="interesadas"')}${FUNC.reserva ? stat(ico('pagos'), A.leads ? pagadas.length : '…', 'Reservas pagadas del mes', spark(pagDia), 'data-go="interesadas"') : stat(ico('interesadas'), porContactar, 'Por contactar', '', 'data-go="interesadas"')}${stat(ico('whatsapp'), sinLeer, 'Mensajes pendientes', '', 'data-go="whatsapp"', sinLeer > 0)}</section>
+    <section class="ini-bloque"><h2 class="ini-h"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3 5 14h6l-1 7 8-11h-6z"/></svg>Accesos rápidos</h2><div class="ini-rapidos">${rapido('interesadas', 'Ver interesadas', 'data-go="interesadas"')}${rapido('envios', 'Enviar mensaje', 'data-go="envios"')}${rapido('calendario', 'Programar clase', 'data-go="calendario"')}${rapido('clases', 'Crear oferta', 'data-go="clases"')}${rapido('whatsapp', 'Abrir WhatsApp', 'data-go="whatsapp"')}${rapido('gratis', 'Clases gratis del aula', 'data-go="gratis"')}</div></section>
     <div class="ini-dos">
-      <section class="card panel"><div class="panel-h"><h3>Pendientes</h3></div>${!A.leads ? '<p class="muted">Cargando…</p>' : pend.length ? `<ul class="ini-lista">${pend.join('')}</ul>` : '<p class="muted" style="margin:0">Todo al día. No hay nada urgente por atender.</p>'}</section>
-      <section class="card panel"><div class="panel-h"><h3>Próximas clases y llamadas</h3><button class="link" data-go="calendario">Calendario</button></div>${proximas.length ? `<ul class="ini-lista">${proximas.map(fila).join('')}</ul>` : '<p class="muted" style="margin:0">No hay clases ni llamadas programadas.</p>'}</section>
+      <section class="card panel"><div class="panel-h"><h3>Tareas que requieren tu atención</h3></div>${!A.leads ? '<p class="muted">Cargando…</p>' : pend.length ? `<ul class="ini-lista">${pend.join('')}</ul>` : '<p class="muted" style="margin:0">Todo al día. No hay nada urgente por atender.</p>'}</section>
+      <section class="card panel"><div class="panel-h"><h3>Actividad reciente</h3><button class="link" data-go="interesadas">Ver interesadas</button></div>${recientes.length ? `<ul class="ini-act">${recientes.map((x) => `<li><span class="ini-ico">${ico(x.icono)}</span><span class="ini-tarea-t"><b>${x.titulo}</b><small>${esc(x.det)}</small></span><span class="ini-hace">${hace(x.t)}</span></li>`).join('')}</ul>` : '<p class="muted" style="margin:0">Cuando lleguen interesadas, reservas o llamadas, las verás aquí.</p>'}</section>
+    </div>
+    <div class="ini-dos ini-dos-b">
+      <section class="card panel"><div class="panel-h"><h3>Tu calendario</h3><button class="link" data-go="calendario">Ver calendario</button></div>${proximas.length ? `<ul class="ini-lista">${proximas.map(fila).join('')}</ul>` : '<p class="muted" style="margin:0">No hay clases ni llamadas programadas.</p>'}${deHoy ? `<p class="muted" style="margin:0;font-size:.84rem">Hoy tienes ${deHoy} ${deHoy === 1 ? 'clase o llamada' : 'clases o llamadas'}.</p>` : ''}</section>
+      <section class="card panel ini-banner"><div class="panel-h"><h3>Cómo van tus pipelines</h3><button class="link" data-go="interesadas">Ver todos</button></div><ul class="ini-lista">${LEAD_PROGS.filter(([k]) => tipoPipe(k)).map(pipe).join('')}</ul></section>
     </div></div>`;
 };
 // ---------- Chat de WhatsApp Business (número de Karen, src/app/api/whatsapp) ----------
