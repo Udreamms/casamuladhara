@@ -26,3 +26,9 @@ export const reservaTarot = () => process.env.NODE_ENV !== 'production' || proce
 // con el mensaje ya escrito; ella envía el link de pago. Lista de cursos separados por coma en EMBUDO_PAGO_WHATSAPP (ej. «pendulo,tarot»).
 // Sin la variable, rige solo el Péndulo. Para volver al pago directo: EMBUDO_PAGO_WHATSAPP=ninguno.
 export const pagoPorWhatsapp = (clase) => (process.env.EMBUDO_PAGO_WHATSAPP ?? 'pendulo').split(',').map((x) => x.trim().toLowerCase()).includes(clase);
+// Postulación a la Formación de Terapeuta Holístico Integral (/formacion/postular): llamada de orientación de 20 minutos.
+// AGENDA_FORMACION_URL: pegar aquí el enlace de la agenda de Google Calendar (https://calendar.app.google/… o la página de citas). ÚNICO lugar.
+// Mientras esté vacío, el botón «Elegir día y hora» abre el WhatsApp de Karen (nunca un enlace roto).
+export const AGENDA_FORMACION_URL = '';
+export const CIERRE_FORMACION = '2026-12-08T17:30:00-03:00'; // cierre de inscripción: 8 de diciembre 17:30, hora de Chile
+export const WA_FORMACION = 'Hola Karen, postulé a la Formación de Terapeuta Holístico y quiero agendar mi llamada.';

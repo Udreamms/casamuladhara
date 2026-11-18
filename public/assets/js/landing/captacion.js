@@ -92,6 +92,8 @@
         action: 'save', form: f.dataset.lead,
         name: val('name'), email: val('email'), whatsapp, country: val('country') || pais,
         interest: val('interest'), date: f.elements.interest?.selectedOptions?.[0]?.dataset.date || '', message: val('message'), web: val('web'),
+        ...(f.dataset.postulacion ? { postulacion: Object.fromEntries(['objetivo', 'experiencia', 'inicio', 'inversion'].map((k) => [k, f.querySelector(`input[name="${k}"]:checked`)?.value || ''])) } : {}),
+        ...(f.dataset.consentimiento ? { consentimiento: Object.fromEntries(['email', 'whatsapp'].map((c) => [c, { aceptado: true, fecha: new Date().toISOString(), texto: f.dataset.consentimiento, origen: f.dataset.lead }])) } : {}),
         page: location.pathname, utm: origen(), ...(f.dataset.montoReserva ? { reserva: true } : {}),
         eventId: crypto.randomUUID?.() || String(Date.now()) + Math.random().toString(36).slice(2, 10), // mismo id en el Píxel y en la API de conversiones
       };
@@ -101,7 +103,9 @@
         const r = await fetch('/api/leads', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
         const out = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(out.error || 'No pudimos enviar tus datos.');
-        if (!out.repetida) fbq('track', 'Lead', {}, { eventID: body.eventId }); // quien repite el formulario no cuenta otro Lead en las campañas
+        if (!out.repetida) fbq('track', 'Lead', f.dataset.contentName ? { content_name: f.dataset.contentName } : {}, { eventID: body.eventId }); // quien repite el formulario no cuenta otro Lead en las campañas
+        // Postulación a la Formación: pasa a la página de gracias para agendar la llamada
+        if (f.dataset.gracias && out.codigo) { setTimeout(() => { location.href = `${f.dataset.gracias}?l=${encodeURIComponent(out.codigo)}`; }, 500); return; }
         // Reserva con pago (Péndulo): los datos quedan en el CRM y de ahí pasa al pago. La breve espera deja que el Píxel alcance a enviar el Lead.
         if (f.dataset.destino && /^\/[a-z]/.test(f.dataset.destino)) { setTimeout(() => { location.href = f.dataset.destino + (out.id ? `&lead=${encodeURIComponent(out.id)}` : ''); }, 600); return; }
         // Clase gratis: pasa a su página de gracias (video de Karen y pasos). La breve espera deja que el Píxel alcance a enviar el Lead.
