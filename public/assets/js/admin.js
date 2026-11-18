@@ -406,7 +406,8 @@ const esNueva = (k) => k === 'nuevo' || k === 'registrada';
 const esInscrita = (k) => k === 'inscrita' || k === 'matriculada' || k === 'pago_completo';
 // Programas para filtrar: las dos clases gratis, los dos cursos, la formación completa y el resto de formularios
 const LEAD_PROGS = [['clase-pendulo', 'Clase gratis Péndulo', ['clase-pendulo']], ['clase-tarot', 'Clase gratis Tarot', ['clase-tarot']], ['pendulo', 'Curso Péndulo', ['pendulo']],
-  ['tarot', 'Tarot Terapéutico', ['tarot']], ['formacion', 'Formación completa', ['formacion']], ['otros', 'Otros', ['sala', 'terapias', 'meditacion', 'regalo']]];
+  ['tarot', 'Tarot Terapéutico', ['tarot']], ['formacion', 'Formación completa', ['formacion']]];
+// (La pestaña «Otros» se quitó: las personas de Sala Abierta, Terapias, Meditación y Portada siguen en «Todos».)
 // Programas pagos (se pagan por fuera con Karen, salvo la Formación completa, que también se detecta por Stripe) y los que se pueden sumar a una persona
 const PROG_PAGOS = [['pendulo', 'Curso Péndulo'], ['tarot', 'Curso Tarot'], ['formacion', 'Formación completa']];
 const PROG_AGREGAR = [['clase-pendulo', 'Clase gratis Péndulo'], ['clase-tarot', 'Clase gratis Tarot'], ...PROG_PAGOS];
@@ -419,7 +420,7 @@ const esPago = (f) => ['pendulo', 'tarot', 'formacion'].includes(f);
 //   curso Péndulo: Interesada → Reservó $10.000 → Pagó completo → Nueva estudiante → Remarketing;  curso Tarot: igual, con 10 USD y «Pagó 1.ª cuota»
 // Quien ya estaba en el CRM no se pierde: cada etapa antigua se muestra en la columna más parecida (PIPE_MAPA).
 const PIPES = {
-  clase: [['registrada', 'Se registró'], ['entro', 'Ingresó a la clase'], ['no_asistio', 'No ingresó'], ['replay_enviado', 'Replay enviado'], ['seguimiento', 'Seguimiento'], ['matriculada', 'Vendido'], ['remarketing', 'Remarketing']],
+  clase: [['registrada', 'Se registró'], ['entro', 'Ingresó a la clase'], ['no_asistio', 'No ingresó'], ['replay_enviado', 'Replay enviado'], ['seguimiento', 'Seguimiento'], ['matriculada', 'Inició programa'], ['remarketing', 'Remarketing']],
   pendulo: [['nuevo', 'Interesada'], ['reservo_cupo', 'Reservó $10.000'], ['pago_completo', 'Pagó completo'], ['inscrita', 'Nueva estudiante'], ['remarketing', 'Remarketing']],
   tarot: [['nuevo', 'Interesada'], ['reservo_cupo', 'Reservó 10 USD'], ['pago_completo', 'Pagó 1.ª cuota'], ['inscrita', 'Nueva estudiante'], ['remarketing', 'Remarketing']],
   // Formación: la landing guarda la postulación (lead.postulacion) y la llamada de orientación que agenda la persona (lead.llamada)
