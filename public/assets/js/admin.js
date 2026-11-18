@@ -1752,29 +1752,54 @@ const ejemploDe = (clase, seg) => { const e = TEXTO_EJEMPLO[seg]; return typeof 
 const textoEnvio = (clase, seg) => (A.plantillas || {})[`${clase}_${seg}`] || ejemploDe(clase, seg);
 const LINK_SALDO = '[LINK DEL SALDO]';
 // ---------- Inicio: lo importante del día a mano ----------
+// ---------- Inicio: lo que toca hoy, cómo van los pipelines y lo pendiente (de lo más urgente a lo menos) ----------
+const PIPE_TITULO = { 'clase-pendulo': 'Clase gratis · Péndulo Hebreo', 'clase-tarot': 'Clase gratis · Tarot Terapéutico', pendulo: 'Curso · Péndulo Hebreo', tarot: 'Curso · Tarot Terapéutico', formacion: 'Formación' };
 V.inicio = () => {
-  const hoy = ymd(hoyCL()), nombre = (A.me?.displayName || '').split(' ')[0] || 'Karen';
-  const nuevas = nuevasLeads(), sinLeer = A.wa.chats.reduce((n, c) => n + (c.unread || 0), 0);
+  const hoy = ymd(hoyCL()), ahora = Date.now(), nombre = (A.me?.displayName || '').split(' ')[0] || 'Karen', per = personas();
+  const porContactar = nuevasLeads().length, sinLeer = A.wa.chats.reduce((n, c) => n + (c.unread || 0), 0);
+  const saldos = FUNC.reserva && A.leads ? filasSaldo().length : 0;
+  // Próximas clases gratis (con cuántas inscritas) y llamadas de la Formación
   const clases = (A.cal || []).filter((e) => ['clase-pendulo', 'clase-tarot'].includes(e.type) && e.date >= hoy && !e.tentative)
-    .sort((a, b) => `${a.date} ${a.time || ''}`.localeCompare(`${b.date} ${b.time || ''}`)).slice(0, 5);
+    .map((e) => ({ t: chileAMs(e.date, e.time || '00:00'), tipo: CAL_TYPES[e.type]?.[0] || e.type, fecha: e.date, hora: e.time || '', det: `${(A.leads || []).filter((l) => l.claseEvento === e.id).length} inscritas` }));
+  const llamadas = (A.leads || []).filter((l) => l.form === 'formacion' && llamadaMs(l) > ahora - 36e5).map((l) => ({ t: llamadaMs(l), tipo: 'Llamada de la Formación', fecha: l.llamada.fecha, hora: l.llamada.hora || '', det: l.name }));
+  const proximas = [...clases, ...llamadas].sort((x, y) => x.t - y.t).slice(0, 6), deHoy = [...clases, ...llamadas].filter((x) => x.fecha === hoy).length;
+  const tarjeta = (n, titulo, sub, attr) => `<button type="button" class="ini-hoy ${n ? 'on' : ''}" ${attr}><b>${n}</b><span>${titulo}</span><small>${sub}</small></button>`;
+  // Un cuadro por pipeline: cuántas personas hay en cada columna (al tocar una, se abre esa columna en Interesadas)
+  const pipe = ([k, , fs]) => {
+    const prog = progDe(k), cols = PIPES[tipoPipe(k)], cuenta = Object.fromEntries(cols.map(([c]) => [c, 0]));
+    const ps = per.filter((q) => tieneProg(q, prog)); ps.forEach((q) => { const e = etapaPipeEn(q, prog); if (e in cuenta) cuenta[e]++; });
+    const total = Object.values(cuenta).reduce((x, y) => x + y, 0);
+    return `<section class="card ini-pipe ${cols.length > 5 ? 'ancha' : ''}"><div class="panel-h"><h3>${esc(PIPE_TITULO[k] || prog[1])}</h3><span class="muted" style="font-size:.84rem">${total} persona${total === 1 ? '' : 's'}</span></div>
+      <div class="ini-cols" style="--n:${cols.length}">${cols.map(([c, t]) => `<button type="button" class="ini-col ${cuenta[c] ? '' : 'vacia'}" data-inicio-etapa="${esc(k)}|${c}" title="Ver «${esc(t)}» en Interesadas"><b>${cuenta[c]}</b><span>${esc(t)}</span></button>`).join('')}</div></section>`;
+  };
+  // Pendientes, ordenados: lo que se pierde primero va arriba. Cada uno lleva su botón.
+  const pend = [];
+  const add = (n, titulo, det, boton, attr) => { if (n) pend.push(`<li><div><b>${titulo}</b><small>${det}</small></div><button type="button" class="btn btn-ghost btn-sm" ${attr}>${boton}</button></li>`); };
+  add(saldos, `${saldos} reservaron y no han pagado el saldo`, 'Se paga antes del inicio del curso', 'Ver lista', 'data-crm-lista="saldo"');
+  (A.leads ? ofertasPorCerrar() : []).forEach((o) => add(1, `La oferta del ${esc(ofertaDe(o.clase).nombre)} cierra en ${o.horas} hora${o.horas === 1 ? '' : 's'}`, `${o.filas.length} persona${o.filas.length === 1 ? '' : 's'} vieron la oferta y no han respondido`, 'Ver lista', `data-crm-lista="oferta:${o.clase}"`));
+  const llamadasPasadas = (A.leads || []).filter((l) => l.form === 'formacion' && etapaPipe(l) === 'llamada_agendada' && llamadaMs(l) && llamadaMs(l) + 20 * 6e4 < ahora).length;
+  add(llamadasPasadas, `${llamadasPasadas} llamada${llamadasPasadas === 1 ? '' : 's'} de la Formación ya ${llamadasPasadas === 1 ? 'pasó' : 'pasaron'}`, 'Márcalas como «Ingresó» o «No ingresó»', 'Abrir', 'data-inicio-etapa="formacion|llamada_agendada"');
+  const clic = A.leads ? filasClic().length : 0;
+  add(clic, `${clic} hicieron clic en inscribirse y no pagaron`, 'Escríbeles mientras la oferta sigue abierta', 'Ver lista', 'data-crm-lista="clic"');
+  const replay = A.leads ? filasReplay().length : 0;
+  add(replay, `${replay} no abrieron el replay`, 'Pregúntales si pudieron ver la clase', 'Ver lista', 'data-crm-lista="replay"');
+  const sinCuenta = per.filter((q) => esInscrita(etapaDe(q)) && !q.alumna).length;
+  add(sinCuenta, `${sinCuenta} inscrita${sinCuenta === 1 ? '' : 's'} sin cuenta en el aula`, 'Ya pagaron pero aún no crean su cuenta', 'Ver quiénes', 'data-crm-sincuenta-ya');
   const atrasadas = A.students.filter((u) => u.paymentStatus === 'overdue');
-  const kpi = (n, t, ir) => `<div data-go="${ir}" role="button" tabindex="0" style="cursor:pointer"><b>${n}</b><span>${t}</span></div>`;
-  const fila = (l) => `<tr><td><b>${esc(l.name)}</b><br><span class="muted" style="font-size:.84rem">${esc(LEAD_FORMS[l.form] || l.form)} · ${fdateMs(l.createdAt)}</span></td><td style="text-align:right">${l.whatsapp ? `<a class="btn btn-ghost btn-sm" href="${waLink(l.whatsapp)}" data-wa-open="${esc(waNum(l.whatsapp))}" data-wa-name="${esc(l.name)}">Escribir</a>` : ''}</td></tr>`;
-  const clase = (e) => { const n = (A.leads || []).filter((l) => l.claseEvento === e.id).length; return `<tr data-go="calendario" style="cursor:pointer"><td><b>${esc(CAL_TYPES[e.type]?.[0] || e.type)}</b><br><span class="muted" style="font-size:.84rem">${e.date === hoy ? 'Hoy' : fechaLarga(e.date)}${e.time ? ` · ${esc(e.time)}` : ''}</span></td><td style="text-align:right"><span class="pill ${n ? 'done' : 'lock'}">${n} inscrita${n === 1 ? '' : 's'}</span></td></tr>`; };
-  return `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>Hola, ${esc(nombre)}</h1><p>Lo que necesita tu atención hoy.</p></div></div>
-  <div class="kpis">${kpi(nuevas.length, 'interesadas nuevas', 'interesadas')}${kpi(sinLeer, 'WhatsApp sin leer', 'whatsapp')}${kpi(A.questions.length, 'preguntas de clase', 'preguntas')}${kpi(A.tickets.length, 'mensajes de ayuda', 'ayuda')}</div>
-  ${(() => { const t = personas().filter(seguimientoHoyP).sort((a, b) => a.followUp.localeCompare(b.followUp)), hoyS = ymd(hoyCL()); return t.length ? `<section class="card panel"><div class="panel-h"><h3>Para hoy (${t.length})</h3><button class="link" data-crm-hoy>Ver en el CRM</button></div><div class="tbl-wrap"><table class="tbl"><tbody>${t.slice(0, 8).map((q) => `<tr><td><button class="link" data-lead-open="${esc(q.id)}" style="font-weight:700">${esc(q.nombre)}</button><br><span class="muted" style="font-size:.84rem">${q.followUp < hoyS ? `Vencido el ${esc(fechaLarga(q.followUp))}` : 'Hoy'} · ${esc(q.leads.map((l) => PROG_CORTO[l.form] || l.form).join(', '))}</span></td><td style="text-align:right">${q.whatsapp ? `<a class="btn btn-ghost btn-sm" href="${waLink(q.whatsapp)}" data-wa-open="${esc(waNum(q.whatsapp))}" data-wa-name="${esc(q.nombre)}">WhatsApp</a>` : ''}</td></tr>`).join('')}</tbody></table></div>${t.length > 8 ? `<p class="muted" style="font-size:.84rem;margin:0">Y ${t.length - 8} más en el CRM.</p>` : ''}</section>` : ''; })()}
-  ${personas().filter((p) => esInscrita(etapaDe(p)) && !p.alumna).length ? `<div class="alert"><div><b>${personas().filter((p) => esInscrita(etapaDe(p)) && !p.alumna).length} inscrita${personas().filter((p) => esInscrita(etapaDe(p)) && !p.alumna).length === 1 ? '' : 's'} sin cuenta en el aula</b><p>Ya están inscritas pero no crearon su cuenta. Escríbeles para que la creen con su correo.</p></div><button class="btn" data-crm-sincuenta-ya>Ver</button></div>` : ''}
-  ${atrasadas.length ? `<div class="alert"><div><b>${atrasadas.length} cuota${atrasadas.length === 1 ? '' : 's'} atrasada${atrasadas.length === 1 ? '' : 's'}</b><p>${esc(atrasadas.slice(0, 3).map(nameOf).join(', '))}${atrasadas.length > 3 ? '…' : ''}</p></div><button class="btn" data-go="pagos">Ver pagos</button></div>` : ''}
-  ${ofertaBanner()}
-  ${filasClic().length ? `<div class="alert"><div><b>${filasClic().length} persona${filasClic().length === 1 ? '' : 's'} hicieron clic en «inscribirme» y no pagaron</b><p>Escríbeles mientras la oferta sigue abierta.</p></div><button class="btn" data-crm-lista="clic">Ver lista</button></div>` : ''}
-  ${cuposHTML() ? `<div class="cupos">${cuposHTML()}</div>` : ''}
-  <div class="cols">
-    <section class="card panel"><div class="panel-h"><h3>Interesadas por contactar</h3><button class="link" data-go="interesadas">Ver todas</button></div>
-      ${!A.leads ? '<p class="muted">Cargando…</p>' : nuevas.length ? `<div class="tbl-wrap"><table class="tbl"><tbody>${nuevas.slice(0, 6).map(fila).join('')}</tbody></table></div>` : '<p class="muted">No hay interesadas nuevas. Todo al día.</p>'}</section>
-    <section class="card panel"><div class="panel-h"><h3>Próximas clases gratis</h3><button class="link" data-go="calendario">Calendario</button></div>
-      ${!A.cal ? '<p class="muted">Cargando…</p>' : clases.length ? `<div class="tbl-wrap"><table class="tbl"><tbody>${clases.map(clase).join('')}</tbody></table></div>` : '<p class="muted">No hay clases gratis programadas en el Calendario.</p>'}</section>
-  </div>`;
+  add(atrasadas.length, `${atrasadas.length} cuota${atrasadas.length === 1 ? '' : 's'} atrasada${atrasadas.length === 1 ? '' : 's'}`, esc(atrasadas.slice(0, 3).map(nameOf).join(', ')) + (atrasadas.length > 3 ? '…' : ''), 'Ver pagos', 'data-go="pagos"');
+  add(A.questions.length, `${A.questions.length} pregunta${A.questions.length === 1 ? '' : 's'} de clase sin responder`, 'De las alumnas del aula', 'Responder', 'data-go="preguntas"');
+  add(A.tickets.length, `${A.tickets.length} mensaje${A.tickets.length === 1 ? '' : 's'} de ayuda`, 'De las alumnas del aula', 'Abrir', 'data-go="ayuda"');
+  const paraHoy = FUNC.tareas ? per.filter(seguimientoHoyP).length : 0;
+  add(paraHoy, `${paraHoy} seguimiento${paraHoy === 1 ? '' : 's'} para hoy`, 'Los que fijaste en el CRM', 'Ver', 'data-crm-hoy');
+  const fila = (x) => `<li><div><b>${esc(x.tipo)}</b><small>${esc(x.det)}</small></div><div class="ini-cuando"><b>${x.fecha === hoy ? 'Hoy' : esc(diaLargoTxt(x.fecha))}</b><small>${esc(x.hora)}</small></div></li>`;
+  const fechaHoy = diaLargoTxt(hoy);
+  return `<div class="ini"><header class="ini-head"><span class="eyebrow">Portal de la Maestra</span><h1>Hola, ${esc(nombre)}</h1><p class="muted">${esc(fechaHoy.charAt(0).toUpperCase() + fechaHoy.slice(1))}. Esto es lo que toca hoy.</p></header>
+    <section class="ini-hoys">${tarjeta(porContactar, 'Por contactar', 'interesadas nuevas', 'data-go="interesadas"')}${tarjeta(sinLeer, 'WhatsApp', 'mensajes sin leer', 'data-go="whatsapp"')}${FUNC.reserva ? tarjeta(saldos, 'Saldos', 'por cobrar', 'data-crm-lista="saldo"') : ''}${tarjeta(deHoy, 'Hoy', 'clases y llamadas', 'data-go="calendario"')}</section>
+    <section style="display:grid;gap:14px"><h2 class="ini-h">Tus pipelines</h2><div class="ini-pipes">${LEAD_PROGS.filter(([k]) => tipoPipe(k)).map(pipe).join('')}</div></section>
+    <div class="ini-dos">
+      <section class="card panel"><div class="panel-h"><h3>Pendientes</h3></div>${!A.leads ? '<p class="muted">Cargando…</p>' : pend.length ? `<ul class="ini-lista">${pend.join('')}</ul>` : '<p class="muted" style="margin:0">Todo al día. No hay nada urgente por atender.</p>'}</section>
+      <section class="card panel"><div class="panel-h"><h3>Próximas clases y llamadas</h3><button class="link" data-go="calendario">Calendario</button></div>${proximas.length ? `<ul class="ini-lista">${proximas.map(fila).join('')}</ul>` : '<p class="muted" style="margin:0">No hay clases ni llamadas programadas.</p>'}</section>
+    </div></div>`;
 };
 // ---------- Chat de WhatsApp Business (número de Karen, src/app/api/whatsapp) ----------
 // Las conversaciones llegan en vivo desde Firestore; enviar y marcar como leído pasa por el servidor, que es quien habla con Meta.
@@ -2148,6 +2173,7 @@ document.addEventListener('click', async (e) => {
 document.addEventListener('click', (e) => { document.querySelectorAll('details.menu[open]').forEach((d) => { if (!d.contains(e.target)) d.removeAttribute('open'); }); });
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-copiar]'); if (b) navigator.clipboard?.writeText(b.dataset.copiar).then(() => toast('Copiado.')).catch(() => toast('No se pudo copiar.')); });
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-lead-alumna]'); if (b) { if ($('#dlg').open) $('#dlg').close(); openStudent(b.dataset.leadAlumna); } });
+document.addEventListener('click', (e) => { const b = e.target.closest('[data-inicio-etapa]'); if (!b) return; const [prog, etapa] = b.dataset.inicioEtapa.split('|'); Object.assign(S, { crmProg: prog, crmEtapa: etapa, crmVista: 'embudo', crmQ: '', crmOrigen: '', crmReserva: '', crmPost: false, crmSeg: false, crmSinCuenta: false, crmLista: '' }); S.leadSel = new Set(); go('interesadas'); });
 document.addEventListener('click', (e) => { if (e.target.closest('[data-crm-hoy]')) { Object.assign(S, { crmSeg: true, crmProg: '', crmQ: '', crmOrigen: '', crmSinCuenta: false, crmEtapa: '', crmReserva: '', crmTag: '', crmVista: 'embudo' }); go('interesadas'); } });
 document.addEventListener('click', (e) => { if (e.target.closest('[data-crm-sincuenta-ya]')) { Object.assign(S, { crmSeg: false, crmProg: '', crmQ: '', crmOrigen: '', crmSinCuenta: true, crmEtapa: 'inscrita', crmReserva: '', crmTag: '', crmVista: 'tabla' }); go('interesadas'); } });
 // Asistencia a una clase gratis: se marcan quienes entraron y pasan juntas a "Tomó la clase"
