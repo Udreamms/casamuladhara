@@ -88,7 +88,11 @@
         document.querySelectorAll('[data-next-start]').forEach((el) => (el.textContent = inicio));
         document.querySelectorAll('[data-next-detalle]').forEach((el) => (el.textContent = detalle));
         document.querySelectorAll('[data-next-wrap]').forEach((el) => (el.hidden = false));
+        // Cada encuentro por separado (Péndulo): <span data-sesion="0|1|2"> recibe «Día d de mes · hora a hora · nota»
+        if (yo.curso === 'pendulo') document.querySelectorAll('[data-sesion]').forEach((el) => { const x = g.sesiones[Number(el.dataset.sesion)]; if (x) el.textContent = `${may(fecha(x.fecha))} · ${rango(x.hora, x.fin)}${x.nota ? ` · ${x.nota}` : ''}`; });
       }
+      // Aviso a la página: el grupo que viene (con el cierre = 17:00 de Chile del día de la primera clase) o null si no hay ninguno abierto
+      if (yo.curso === 'pendulo') document.dispatchEvent(new CustomEvent('cm-grupo', { detail: g ? { inicio: g.sesiones[0].fecha, cierre: chileAUtc(g.sesiones[0].fecha, '17:00') } : null }));
     }
   }).catch(() => { /* quedan los textos fijos de la página, sin fechas */ });
 

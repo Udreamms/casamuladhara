@@ -80,8 +80,8 @@ export async function POST(request) {
         createdAt: FieldValue.serverTimestamp(),
       };
       // Reserva del Péndulo iniciada desde /pendulo (aún sin confirmar el pago: Mercado Pago no avisa; Karen la marca a mano)
-      if (form === 'pendulo' && body.reserva === true) lead.reserva = { monto: 10000, moneda: 'CLP', estado: 'iniciada', t: Date.now() };
-      if (form === 'tarot' && body.reserva === true) lead.reserva = { monto: 10, moneda: 'USD', estado: 'iniciada', t: Date.now() }; // el pago lo confirma el webhook de Stripe
+      if (form === 'pendulo' && body.reserva === true) lead.reserva = { monto: 35000, moneda: 'CLP', estado: 'iniciada', t: Date.now() }; // la «reserva» ahora es la primera cuota (2 de $35.000)
+      if (form === 'tarot' && body.reserva === true) lead.reserva = { monto: 35, moneda: 'USD', estado: 'iniciada', t: Date.now() }; // la «reserva» ahora es la primera cuota (4 de 35 USD)
       const edad = Math.round(Number(body.edad));
       if (Number.isFinite(edad) && edad >= 5 && edad <= 110) lead.edad = edad;
       const consentimiento = Object.fromEntries(['email', 'whatsapp'].map((k) => [k, consentimientoOk(body.consentimiento?.[k])]).filter(([, v]) => v));
