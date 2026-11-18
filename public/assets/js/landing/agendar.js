@@ -46,6 +46,7 @@
   .ag-go,.ag-btn{display:inline-flex;justify-content:center;align-items:center;font:600 .8rem/1 "Josefin Sans",system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;padding:1.05em 1.5em;border-radius:999px;border:0;background:#2b5443;color:#ece7d3;text-decoration:none;cursor:pointer}
   .ag-go[disabled]{opacity:.5;cursor:default}.ag-btn.alt{background:#e9e4d0;color:#1f3f32}
   .ag-ok{display:grid;gap:12px}.ag-ok dl{margin:0;display:grid;gap:4px;background:#f0ede1;border-radius:14px;padding:14px 16px}.ag-ok dt{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#a77a3b}.ag-ok dd{margin:0 0 6px}
+  .ag [hidden]{display:none!important}
   .ag-hp{position:absolute!important;left:-9999px!important;opacity:0!important;height:0!important;overflow:hidden!important}`;
   document.head.appendChild(css);
 
