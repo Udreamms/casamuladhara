@@ -43,6 +43,8 @@ export async function GET(request) {
       const leadId = /^[A-Za-z0-9]{1,40}$/.test(q.get('lead') || '') ? q.get('lead') : '';
       const d = leadId ? await db().doc(`leads/${leadId}`).get() : null;
       if (!d?.exists || d.data().form !== 'tarot') return new Response(null, { status: 302, headers: { Location: '/tarot#oferta' } });
+      // Por ahora la reserva se coordina por WhatsApp de Karen (EMBUDO_PAGO_WHATSAPP); el lead ya quedó guardado y el Píxel sigue contando InitiateCheckout
+      if (pagoPorWhatsapp('tarot')) return salida(`${WHATSAPP}?text=${encodeURIComponent('Hola! Me gustaría hacer mi reserva de 10 USD para el curso de Tarot Terapéutico')}`, 'InitiateCheckout', `ic-reserva-tarot-${leadId}-${Date.now()}`, { value: 10, currency: 'USD', content_name: 'Reserva Tarot Terapéutico' });
       return checkoutReservaTarot(request, leadId, d.data());
     }
     // Reserva de $10.000 del Péndulo desde /pendulo: directo a Mercado Pago (con el código personal, si viene, se anota el clic). Cerrada la inscripción, vuelve a la página del curso.
