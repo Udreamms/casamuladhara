@@ -15,18 +15,18 @@ export const esClaseGratis = (form) => form === 'clase-pendulo' || form === 'cla
 export const ETAPAS_CLASE = ['registrada', 'confirmada', 'entro', 'asistio_confirmado', 'vio_oferta', 'reservo_cupo', 'matriculada', 'no_asistio', 'no_identificada', 'vio_replay', 'sin_respuesta', 'lista_espera'];
 // Etapas de siempre (cursos y formación) más las del embudo de clases. Todas se guardan en el campo status.
 // Etapas de los pipelines nuevos (CRM): replay_enviado, seguimiento y remarketing (clases gratis y cursos) y pago_completo (cursos: «Pagó completo» / «Pagó 1.ª cuota»). Las mueve la Maestra a mano.
-export const ETAPAS_PIPELINE = ['replay_enviado', 'seguimiento', 'remarketing', 'pago_completo'];
+export const ETAPAS_PIPELINE = ['replay_enviado', 'seguimiento', 'remarketing', 'pago_completo', 'llamada_agendada'];
 export const ETAPAS = ['nuevo', 'contactado', 'clase', 'conversando', 'inscrita', 'descartado', ...ETAPAS_CLASE, ...ETAPAS_PIPELINE];
 // Para que una etapa solo avance (nunca retroceda por un evento): mayor número = más avanzada
 export const RANGO = {
   descartado: -1, nuevo: 0, registrada: 0, lista_espera: 0, contactado: 1, confirmada: 1, sin_respuesta: 1, no_asistio: 1, no_identificada: 1,
-  entro: 2, vio_replay: 2, clase: 3, asistio_confirmado: 3, replay_enviado: 3, conversando: 4, vio_oferta: 4, seguimiento: 4, remarketing: 4, reservo_cupo: 4.5, inscrita: 5, matriculada: 5, pago_completo: 5,
+  entro: 2, vio_replay: 2, llamada_agendada: 1, clase: 3, asistio_confirmado: 3, replay_enviado: 3, conversando: 4, vio_oferta: 4, seguimiento: 4, remarketing: 4, reservo_cupo: 4.5, inscrita: 5, matriculada: 5, pago_completo: 5,
 };
 export const ETAPA_TXT = {
   nuevo: 'Nueva', contactado: 'Contactada', clase: 'Tomó la clase', conversando: 'En conversación', inscrita: 'Inscrita', descartado: 'Descartada',
   registrada: 'Registrada', confirmada: 'Confirmada', entro: 'Entró', asistio_confirmado: 'Asistió confirmado', vio_oferta: 'Vio la oferta', reservo_cupo: 'Reservó cupo', matriculada: 'Matriculada',
   no_asistio: 'No asistió', no_identificada: 'No identificada', vio_replay: 'Vio el replay', sin_respuesta: 'Sin respuesta', lista_espera: 'Lista de espera',
-  replay_enviado: 'Replay enviado', seguimiento: 'Seguimiento', remarketing: 'Remarketing', pago_completo: 'Pagó completo',
+  replay_enviado: 'Replay enviado', seguimiento: 'Seguimiento', remarketing: 'Remarketing', pago_completo: 'Pagó completo', llamada_agendada: 'Llamada agendada',
 };
 export const EVENTOS = ['clic_entrar', 'codigo_asistencia_ok', 'autodeclara_asistio', 'autodeclara_no_asistio', 'vio_replay', 'clic_comprar', 'pago_confirmado', 'pago_fallido', 'lista_espera'];
 // ALCANCE CONGELADO: funciones apagadas (el código sigue aquí, no se borró). Deben coincidir con FUNC en public/assets/js/admin.js.
