@@ -391,17 +391,19 @@ const etapasOcultas = () => ['reservo_cupo',  ...(FUNC.listaEspera ? [] : ['list
 const etapasClaseDe = (form) => ETAPAS_CLASE.filter(([k]) => !etapasOcultas().includes(k) && (form !== 'clase-tarot' || k !== 'reservo_cupo'));
 // Quien ya estaba en una etapa oculta se ve en la etapa visible más cercana (el dato no se toca)
 const etapaVisible = (k) => (k === 'reservo_cupo' ? 'vio_oferta' : k === 'lista_espera' && !FUNC.listaEspera ? 'registrada' : k === 'no_identificada' && !FUNC.autodeclaracion ? 'no_asistio' : k);
-const ETAPA_NOMBRE = Object.fromEntries([...LEAD_STATES, ...ETAPAS_CLASE]);
+// Etapas de los pipelines nuevos (las mueve la Maestra a mano; el servidor las acepta en ETAPAS_PIPELINE)
+const ETAPAS_PIPELINE = [['replay_enviado', 'Replay enviado'], ['seguimiento', 'Seguimiento'], ['remarketing', 'Remarketing'], ['pago_completo', 'Pagó completo']];
+const ETAPA_NOMBRE = Object.fromEntries([...LEAD_STATES, ...ETAPAS_CLASE, ...ETAPAS_PIPELINE]);
 // ALCANCE CONGELADO: funciones ocultas con bandera apagada (el código sigue aquí, no se borró). Para volver a mostrar una, ponla en true.
 // El servidor tiene sus propias banderas para reserva y lista de espera (FUNCIONES en src/lib/server/embudo.js): deben coincidir.
 const FUNC = { autodeclaracion: false, palabraAsistencia: false, fichaCompleta: false, etiquetas: false, tareas: false, metricas: false, deshacer: false, reserva: true, cuotas: false, listaEspera: false };
-const RANGO_ETAPA = { descartado: -1, nuevo: 0, registrada: 0, lista_espera: 0, contactado: 1, confirmada: 1, sin_respuesta: 1, no_asistio: 1, no_identificada: 1, entro: 2, vio_replay: 2, clase: 3, asistio_confirmado: 3, conversando: 4, vio_oferta: 4, reservo_cupo: 4.5, inscrita: 5, matriculada: 5 };
+const RANGO_ETAPA = { descartado: -1, nuevo: 0, registrada: 0, lista_espera: 0, contactado: 1, confirmada: 1, sin_respuesta: 1, no_asistio: 1, no_identificada: 1, entro: 2, vio_replay: 2, clase: 3, asistio_confirmado: 3, replay_enviado: 3, conversando: 4, vio_oferta: 4, seguimiento: 4, remarketing: 4, reservo_cupo: 4.5, inscrita: 5, matriculada: 5, pago_completo: 5 };
 // En una clase gratis, las etapas de antes se leen como las del embudo nuevo
 const CLASE_ANTIGUA = { nuevo: 'registrada', contactado: 'confirmada', clase: 'asistio_confirmado', conversando: 'vio_oferta', inscrita: 'matriculada' };
 // Vista "Todos los programas": las etapas del embudo de clases se agrupan en las columnas de siempre
-const bucketEtapa = (k) => ({ registrada: 'nuevo', lista_espera: 'nuevo', no_asistio: 'nuevo', no_identificada: 'nuevo', sin_respuesta: 'nuevo', confirmada: 'contactado', entro: 'clase', vio_replay: 'clase', asistio_confirmado: 'clase', vio_oferta: 'conversando', reservo_cupo: 'conversando', matriculada: 'inscrita' })[k] || k;
+const bucketEtapa = (k) => ({ registrada: 'nuevo', lista_espera: 'nuevo', no_asistio: 'nuevo', no_identificada: 'nuevo', sin_respuesta: 'nuevo', confirmada: 'contactado', entro: 'clase', vio_replay: 'clase', asistio_confirmado: 'clase', vio_oferta: 'conversando', reservo_cupo: 'conversando', matriculada: 'inscrita', replay_enviado: 'clase', seguimiento: 'conversando', remarketing: 'descartado', pago_completo: 'inscrita' })[k] || k;
 const esNueva = (k) => k === 'nuevo' || k === 'registrada';
-const esInscrita = (k) => k === 'inscrita' || k === 'matriculada';
+const esInscrita = (k) => k === 'inscrita' || k === 'matriculada' || k === 'pago_completo';
 // Programas para filtrar: las dos clases gratis, los dos cursos, la formación completa y el resto de formularios
 const LEAD_PROGS = [['clase-pendulo', 'Clase gratis Péndulo', ['clase-pendulo']], ['clase-tarot', 'Clase gratis Tarot', ['clase-tarot']], ['pendulo', 'Curso Péndulo', ['pendulo']],
   ['tarot', 'Tarot Terapéutico', ['tarot']], ['formacion', 'Formación completa', ['formacion']], ['otros', 'Otros', ['sala', 'terapias', 'meditacion', 'regalo']]];
@@ -412,7 +414,23 @@ const PROG_CORTO = { 'clase-pendulo': 'Clase Péndulo', 'clase-tarot': 'Clase Ta
 const esClase = (f) => f === 'clase-pendulo' || f === 'clase-tarot';
 const esPago = (f) => ['pendulo', 'tarot', 'formacion'].includes(f);
 // En un curso pago la primera etapa es "Interesada"; en una clase gratis, "Inscrita" quiere decir inscrita a un curso
-const etapaTxt = (form, k) => (k === 'nuevo' && esPago(form) ? 'Interesada' : ETAPA_NOMBRE[k] || k);
+// ---------- PIPELINES (CRM → Interesadas): cada landing tiene el suyo. Las columnas son etapas guardadas en status; unas pocas se calculan a la vista (no se escribe nada):
+//   clase gratis: Se registró → Ingresó / No ingresó → Replay enviado → Seguimiento → Vendido → Remarketing  (Ingresó y No ingresó son excluyentes)
+//   curso Péndulo: Interesada → Reservó $10.000 → Pagó completo → Nueva estudiante → Remarketing;  curso Tarot: igual, con 10 USD y «Pagó 1.ª cuota»
+// Quien ya estaba en el CRM no se pierde: cada etapa antigua se muestra en la columna más parecida (PIPE_MAPA).
+const PIPES = {
+  clase: [['registrada', 'Se registró'], ['entro', 'Ingresó a la clase'], ['no_asistio', 'No ingresó'], ['replay_enviado', 'Replay enviado'], ['seguimiento', 'Seguimiento'], ['matriculada', 'Vendido'], ['remarketing', 'Remarketing']],
+  pendulo: [['nuevo', 'Interesada'], ['reservo_cupo', 'Reservó $10.000'], ['pago_completo', 'Pagó completo'], ['inscrita', 'Nueva estudiante'], ['remarketing', 'Remarketing']],
+  tarot: [['nuevo', 'Interesada'], ['reservo_cupo', 'Reservó 10 USD'], ['pago_completo', 'Pagó 1.ª cuota'], ['inscrita', 'Nueva estudiante'], ['remarketing', 'Remarketing']],
+};
+const PIPE_TXT = Object.fromEntries(Object.entries(PIPES).map(([t, cols]) => [t, Object.fromEntries(cols)]));
+const tipoPipe = (form) => (esClase(form) ? 'clase' : form === 'pendulo' ? 'pendulo' : form === 'tarot' ? 'tarot' : '');
+const PIPE_MAPA = {
+  clase: { nuevo: 'registrada', registrada: 'registrada', contactado: 'registrada', confirmada: 'registrada', lista_espera: 'registrada', entro: 'entro', asistio_confirmado: 'entro', clase: 'entro', no_asistio: 'no_asistio', no_identificada: 'no_asistio',
+    vio_replay: 'replay_enviado', vio_oferta: 'replay_enviado', replay_enviado: 'replay_enviado', seguimiento: 'seguimiento', sin_respuesta: 'seguimiento', conversando: 'seguimiento', reservo_cupo: 'seguimiento', matriculada: 'matriculada', inscrita: 'matriculada', remarketing: 'remarketing', descartado: 'descartado' },
+  curso: { reservo_cupo: 'reservo_cupo', pago_completo: 'pago_completo', inscrita: 'inscrita', matriculada: 'inscrita', remarketing: 'remarketing', descartado: 'remarketing' }, // todo lo demás = Interesada
+};
+const etapaTxt = (form, k) => PIPE_TXT[tipoPipe(form)]?.[k] ?? (k === 'nuevo' && esPago(form) ? 'Interesada' : ETAPA_NOMBRE[k] || k);
 // Mismo criterio que src/lib/server/whatsapp.js: solo dígitos con código de país (un celular chileno de 9 dígitos que empieza en 9 se toma como +56)
 const waNum = (n) => { let d = String(n || '').replace(/\D/g, '').replace(/^00/, ''); if (d.length === 9 && d[0] === '9') d = `56${d}`; return d.length >= 8 && d.length <= 15 ? d : ''; };
 const waLink = (n) => { const d = String(n || '').replace(/\D/g, ''); return d ? `https://wa.me/${d}` : ''; };
@@ -437,6 +455,30 @@ const leadEtapa = (l) => {
   if (esClase(l.form) && CLASE_ANTIGUA[e]) e = CLASE_ANTIGUA[e];
   if (esNueva(e)) { const u = alumnaDe(l); if (u && pagoOAbierto(u)) return esClase(l.form) ? 'matriculada' : 'inscrita'; }
   return e;
+};
+
+// Columna del pipeline en la que está un registro. Lo guardado manda; solo se calcula (sin escribir) lo que el sistema ya sabe:
+//   clase gratis: sin etapa movida a mano → «Ingresó» (clic en su link o informe de Meet) / «No ingresó» (la clase terminó sin clic) / «Replay enviado» (se le envió el replay desde Envíos)
+//   curso: «Reservó» cuando su reserva está pagada, «Pagó completo» cuando el saldo está pagado
+const etapaPipe = (l) => {
+  const tipo = tipoPipe(l.form); if (!tipo) return leadEtapa(l);
+  const e = leadEtapa(l);
+  if (tipo === 'clase') {
+    let k = l.status === 'conversando' ? 'seguimiento' : PIPE_MAPA.clase[e] || 'registrada'; // «En conversación» de antes = Seguimiento
+    if (k === 'registrada') { const sc = segClic(l); if (sc === 'entro') k = 'entro'; else if (sc === 'no_entro') k = 'no_asistio'; }
+    if (['registrada', 'entro', 'no_asistio'].includes(k) && l.replayEnviadoT) k = 'replay_enviado';
+    return k;
+  }
+  let k = PIPE_MAPA.curso[e] || 'nuevo';
+  if (k === 'nuevo' && reservaDe(l)?.pagada) k = 'reservo_cupo';
+  if (['nuevo', 'reservo_cupo'].includes(k) && l.saldoPagado) k = 'pago_completo';
+  return k;
+};
+const etapaActual = (l) => (tipoPipe(l.form) ? etapaPipe(l) : leadEtapa(l));
+// Etapa de una persona en un programa con pipeline: la más avanzada entre sus registros de ese programa
+const etapaPipeEn = (p, prog) => {
+  const ord = PIPES[tipoPipe(prog[0])].map(([k]) => k), v = tracksEn(p, prog).map(etapaPipe).filter((k) => k !== 'descartado');
+  return v.length ? v.reduce((a, b) => (ord.indexOf(b) > ord.indexOf(a) ? b : a)) : 'descartado';
 };
 
 // ---------- Personas: una tarjeta por persona, con un recorrido por cada programa ----------
@@ -472,7 +514,7 @@ const mejorDe = (es) => { const v = es.filter((k) => k !== 'descartado'); return
 const etapaDe = (p) => mejorDe(p.leads.map(leadEtapa));
 // Etapa en un programa; quien ya paga la Formación completa figura Inscrita aunque no tenga registro en ese formulario
 const etapaEn = (p, prog) => (prog[0] === 'formacion' && formacionPagada(p) ? 'inscrita' : mejorDe(tracksEn(p, prog).map(leadEtapa)));
-const etapaVista = (p) => { const prog = progDe(S.crmProg); if (!prog) return bucketEtapa(etapaDe(p)); const e = etapaEn(p, prog); return esClase(prog[0]) ? etapaVisible(e) : bucketEtapa(e); };
+const etapaVista = (p) => { const prog = progDe(S.crmProg); if (!prog) return bucketEtapa(etapaDe(p)); if (tipoPipe(prog[0])) return etapaPipeEn(p, prog); const e = etapaEn(p, prog); return esClase(prog[0]) ? etapaVisible(e) : bucketEtapa(e); };
 const ultimaActividad = (p) => Math.max(...p.leads.map((l) => l.createdAt || 0));
 const seguimientoHoyP = (p) => FUNC.tareas && !!p.followUp && p.followUp <= ymd(hoyCL()) && !esInscrita(etapaDe(p)) && etapaDe(p) !== 'descartado';
 // Repetidas: la misma persona (correo o WhatsApp) en el mismo formulario con menos de 24 horas entre un envío y otro (doble envío por accidente).
@@ -505,7 +547,7 @@ const personasFiltradas = () => {
     && (!S.crmSeg || seguimientoHoyP(p))
     && (!S.crmSinCuenta || !p.alumna)
     && (!S.crmTag || p.tags.includes(S.crmTag))
-    && (!S.crmEtapa || etapaVista(p) === S.crmEtapa)
+    && (!S.crmEtapa || !prog || etapaVista(p) === S.crmEtapa)
     && (!FUNC.reserva || !S.crmReserva || ((x) => (S.crmReserva === 'sin' ? !x : x === S.crmReserva))(reservaPersona(p, prog ? claseDeForm(prog[0]) : '')))
     && (!q || [p.nombre, p.email, p.whatsapp, p.note, ...p.leads.map((l) => `${l.interest} ${l.message}`)].join(' ').toLowerCase().includes(q)))
     .sort((a, b) => ultimaActividad(b) - ultimaActividad(a));
@@ -531,7 +573,7 @@ const asistBadges = (l) => { const a = asistenciaActual(l); return [
   FUNC.autodeclaracion && a.autodeclarada ? `<span class="pill lock" title="Lo dijo ella en el mensaje; no está verificado">Autodeclarada: ${a.autodeclarada === 'si' ? 'sí' : 'no'}</span>` : ''].filter(Boolean).join(' '); };
 const asistPersona = (p) => p.leads.filter((l) => esClase(l.form)).map(asistBadges).filter(Boolean).join(' ');
 const segBadge = (p) => (FUNC.tareas && p.followUp ? `<span class="pill ${seguimientoHoyP(p) ? 'bad' : 'lock'}" title="Próximo seguimiento">${seguimientoHoyP(p) ? 'Seguimiento hoy' : `Seguir ${fechaLarga(p.followUp)}`}</span>` : '');
-const progPills = (p) => `${p.leads.map((l) => `<span class="pill lock" title="${esc(LEAD_FORMS[l.form] || l.form)}">${esc(PROG_CORTO[l.form] || l.form)} · ${esc(etapaTxt(l.form, leadEtapa(l)))}</span>`).join(' ')}${formacionPagada(p) && !p.leads.some((l) => l.form === 'formacion') ? ' <span class="pill done">Formación · Inscrita</span>' : ''}`;
+const progPills = (p) => `${p.leads.map((l) => `<span class="pill lock" title="${esc(LEAD_FORMS[l.form] || l.form)}">${esc(PROG_CORTO[l.form] || l.form)} · ${esc(etapaTxt(l.form, etapaPipe(l)))}</span>`).join(' ')}${formacionPagada(p) && !p.leads.some((l) => l.form === 'formacion') ? ' <span class="pill done">Formación · Inscrita</span>' : ''}`;
 
 // Resumen por origen de campaña, por programa y por motivo de descarte (se calcula con las personas, desde su primer registro)
 const metricasHTML = () => {
@@ -566,7 +608,7 @@ const metricasHTML = () => {
 function exportarCsv() {
   const lista = personasFiltradas();
   const cab = ['Nombre', 'Correo', 'WhatsApp', 'País', 'Programas y etapa', 'Etapa más avanzada', 'Origen', 'Campaña', 'Cuenta en el aula', 'Etiquetas', 'Seguimiento', 'Última nota', 'Primer registro'];
-  const fila = (p) => [p.nombre, p.email, p.whatsapp, p.country, p.leads.map((l) => `${PROG_CORTO[l.form] || l.form}: ${etapaTxt(l.form, leadEtapa(l))}`).join(' | '), etapaTxt('', etapaDe(p)),
+  const fila = (p) => [p.nombre, p.email, p.whatsapp, p.country, p.leads.map((l) => `${PROG_CORTO[l.form] || l.form}: ${etapaTxt(l.form, etapaPipe(l))}`).join(' | '), etapaTxt('', etapaDe(p)),
     p.leads[0].utm?.utm_source || 'directo', p.leads[0].utm?.utm_campaign || '', p.alumna ? 'Sí' : 'No', p.tags.join(' | '), p.followUp, p.note, ymd(p.leads[0].createdAt || Date.now())];
   // Una celda que empieza como fórmula (=, @, o + / - seguido de otra cosa que un número) se neutraliza para que Excel no la ejecute
   const celda = (v) => { let t = String(v ?? ''); if (/^[=@]|^[+\-](?![\d\s])/.test(t)) t = `'${t}`; return `"${t.replace(/"/g, '""')}"`; };
@@ -587,24 +629,24 @@ V.interesadas = () => {
   if (!A.leads) return `${head}<div class="card empty">Cargando interesadas…</div>`;
   const sinLink = [['enlacePendulo', 'Péndulo'], ['enlaceTarot', 'Tarot'], ['enlaceTerapias', 'terapias online']].filter(([k]) => !A.clases?.[k]).map(([, n]) => n);
   const aviso = sinLink.length ? `<div class="card" style="padding:12px 14px;font-size:.88rem;border-left:4px solid #b8402f"><b>Falta el enlace de Google Meet de ${sinLink.join(', ')}.</b> Sin él, el enlace personal de la clase no tiene a dónde llevar. Cárgalo en <button class="link" data-go="clases">Clases y ofertas</button> (Péndulo y Tarot) o en <button class="link" data-go="ajustes">Ajustes del aula</button> (terapias).</div>` : '';
-  const prog = progDe(S.crmProg), lista = personasFiltradas(), vista = S.crmVista === 'metricas' && !FUNC.metricas ? 'embudo' : S.crmVista || 'embudo', todas = personas();
+  const prog = progDe(S.crmProg), lista = personasFiltradas(), vista = S.crmVista === 'metricas' ? (FUNC.metricas ? 'metricas' : !progDe(S.crmProg) ? 'tabla' : 'embudo') : !progDe(S.crmProg) ? 'tabla' : S.crmVista || 'embudo', todas = personas();
   const chip = (attr, v, t, on) => `<button class="chip" ${attr}="${esc(v)}" aria-pressed="${on}">${t}</button>`;
   const seg = (attr, items, actual) => `<div class="seg" role="group">${items.map(([v, t]) => `<button type="button" ${attr}="${v}" aria-pressed="${actual === v}">${t}</button>`).join('')}</div>`;
-  const vistas = seg('data-crm-vista', [['embudo', 'Embudo'], ['tabla', 'Tabla'], ...(FUNC.metricas ? [['metricas', 'Métricas']] : [])], vista);
+  const vistas = !prog && !FUNC.metricas ? '<span class="muted" style="font-size:.84rem;align-self:center">Todas las personas, con su etapa en cada programa. Para mover etapas, elige un programa.</span>' : seg('data-crm-vista', [['embudo', 'Embudo'], ['tabla', 'Tabla'], ...(FUNC.metricas ? [['metricas', 'Métricas']] : [])], vista);
   if (S.crmLista) return `${head}${aviso}${ofertaBanner()}${listaMatricula()}`;
   if (vista === 'metricas') return `${head}${aviso}<div class="crm-bar">${vistas}</div>${metricasHTML()}`;
   const origenes = [...new Set(A.leads.map(leadOrigen))].sort(), tags = [...new Set(todas.flatMap((p) => p.tags))].sort();
   const base = prog ? todas.filter((p) => tieneProg(p, prog)) : todas;
   const primera = prog && esClase(prog[0]) ? 'registrada' : 'nuevo';
   const nSeg = base.filter(seguimientoHoyP).length, nSin = base.filter((p) => !p.alumna).length, nNuevas = base.filter((p) => etapaVista(p) === primera).length;
-  const etapasProg = prog && esClase(prog[0]) ? [...etapasClaseDe(prog[0]), ['descartado', 'Descartada']] : LEAD_STATES.filter(([k]) => !(prog && esPago(prog[0]) && k === 'clase'));
-  const hayFiltro = !!(S.crmQ || S.crmOrigen || S.crmEtapa || (FUNC.reserva && S.crmReserva) || S.crmTag || S.crmSeg || S.crmSinCuenta);
+  const etapasProg = prog && tipoPipe(prog[0]) ? [...PIPES[tipoPipe(prog[0])], ...(esClase(prog[0]) ? [['descartado', 'Descartada']] : [])] : LEAD_STATES.filter(([k]) => !(prog && esPago(prog[0]) && k === 'clase'));
+  const hayFiltro = !!(S.crmQ || S.crmOrigen || (prog && S.crmEtapa) || (FUNC.reserva && S.crmReserva) || S.crmTag || S.crmSeg || S.crmSinCuenta);
   const kpi = (k, n, t, on) => `<button type="button" class="crm-kpi" data-crm-kpi="${k}" aria-pressed="${on}"><b>${n}</b><span>${t}</span></button>`;
   const kpis = `<div class="crm-kpis">${kpi('todos', base.length, prog ? 'en este programa' : 'personas', !hayFiltro)}${kpi('nuevas', nNuevas, 'por contactar', S.crmEtapa === primera)}${FUNC.tareas ? kpi('seg', nSeg, 'seguimientos hoy', !!S.crmSeg) : ''}${kpi('sin', nSin, 'sin cuenta en el aula', !!S.crmSinCuenta)}${kpi('clic', filasClic().length, 'clic sin pagar', S.crmLista === 'clic')}</div>`;
   const barra = `<div class="crm-bar">${vistas}
     <input type="text" id="crm-q" placeholder="Buscar por nombre, correo, WhatsApp o nota" value="${esc(S.crmQ || '')}" aria-label="Buscar">
     <select id="crm-origen" aria-label="Origen"><option value="">Origen: todos</option>${origenes.map((o) => `<option value="${esc(o)}" ${S.crmOrigen === o ? 'selected' : ''}>${esc(o === 'directo' ? 'Directo' : o)}</option>`).join('')}</select>
-    <select id="crm-etapa" aria-label="Etapa"><option value="">Etapa: todas</option>${etapasProg.map(([k]) => `<option value="${k}" ${S.crmEtapa === k ? 'selected' : ''}>${esc(etapaTxt(prog?.[0], k))}</option>`).join('')}</select>
+    ${prog ? `<select id="crm-etapa" aria-label="Etapa"><option value="">Etapa: todas</option>${etapasProg.map(([k]) => `<option value="${k}" ${S.crmEtapa === k ? 'selected' : ''}>${esc(etapaTxt(prog[0], k))}</option>`).join('')}</select>` : ''}
     ${FUNC.reserva ? `<select id="crm-reserva" aria-label="Reserva"><option value="">Reserva: todas</option>${[['sin', 'Sin etiqueta'], ['iniciada', 'Reserva iniciada, sin pago'], ['pagada', 'Reservó']].map(([k, t]) => `<option value="${k}" ${S.crmReserva === k ? 'selected' : ''}>${t}</option>`).join('')}</select>` : ''}
     ${FUNC.etiquetas && tags.length ? `<select id="crm-tag" aria-label="Etiqueta"><option value="">Etiqueta: todas</option>${tags.map((t) => `<option ${S.crmTag === t ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select>` : ''}
     ${hayFiltro ? '<button type="button" class="link" data-crm-kpi="todos">Quitar filtros</button>' : ''}</div>`;
@@ -619,7 +661,7 @@ V.interesadas = () => {
       ${FUNC.etiquetas ? `<input id="bulk-tag" list="tags-lista" placeholder="Etiqueta" maxlength="30" style="border-radius:999px;max-width:160px"><datalist id="tags-lista">${tags.map((t) => `<option value="${esc(t)}">`).join('')}</datalist><button class="btn btn-ghost btn-sm" data-bulk-tag>Etiquetar</button>` : ''}
       <button class="btn btn-ghost btn-sm" style="color:#b8402f" data-leads-del>Eliminar seleccionadas</button><button class="link" data-leads-clear>Quitar selección</button></div>` : '';
     return `${head}${aviso}${controles}
-    <section class="card panel">${barra}<div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:32px"><input type="checkbox" data-lead-all aria-label="Seleccionar todas" ${lista.length && lista.every((p) => sel.has(p.id)) ? 'checked' : ''}></th><th>Persona</th><th>Programas</th><th>Origen</th><th>Registro</th><th>Cuenta y seguimiento</th><th>Etapa${prog ? ` en ${esc(prog[1])}` : ''}</th></tr></thead><tbody>
+    <section class="card panel">${barra}<div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:32px"><input type="checkbox" data-lead-all aria-label="Seleccionar todas" ${lista.length && lista.every((p) => sel.has(p.id)) ? 'checked' : ''}></th><th>Persona</th><th>Programas</th><th>Origen</th><th>Registro</th><th>Cuenta y seguimiento</th>${prog ? `<th>Etapa en ${esc(prog[1])}</th>` : ''}</tr></thead><tbody>
     ${lista.map((p) => { const trk = prog ? tracksEn(p, prog)[0] : null; return `<tr>
       <td><input type="checkbox" data-lead-sel="${esc(p.id)}" aria-label="Seleccionar a ${esc(p.nombre)}" ${sel.has(p.id) ? 'checked' : ''}></td>
       <td class="persona"><button class="link nom" data-lead-open="${esc(p.id)}">${esc(p.nombre)}</button><br><span class="muted" style="font-size:.84rem">${contactoDe(p)}</span>${p.note ? `<br><span class="muted" style="font-size:.84rem">📝 ${esc(p.note.slice(0, 80))}${p.note.length > 80 ? '…' : ''}</span>` : ''}</td>
@@ -627,7 +669,7 @@ V.interesadas = () => {
       <td class="muted" style="font-size:.84rem">${esc(leadOrigenTxt(p.leads[0]))}</td>
       <td class="muted" style="font-size:.84rem">${fdateMs(p.leads[0].createdAt)}</td>
       <td>${cuentaBadge(p)} ${segBadge(p)} ${pagoPersona(p)}</td>
-      <td>${trk ? `<select data-lead-status="${esc(trk.id)}" aria-label="Etapa">${etapasProg.map(([k]) => `<option value="${k}" ${(esClase(trk.form) ? etapaVisible(leadEtapa(trk)) : leadEtapa(trk)) === k ? 'selected' : ''}>${esc(etapaTxt(prog[0], k))}</option>`).join('')}</select>` : `<span class="pill lock">${esc(etapaTxt(prog?.[0], etapaVista(p)))}</span>`}</td></tr>`; }).join('') || '<tr><td colspan="7" class="muted">No hay personas con estos filtros.</td></tr>'}
+      ${prog ? `<td>${trk ? `<select data-lead-status="${esc(trk.id)}" aria-label="Etapa">${etapasProg.map(([k]) => `<option value="${k}" ${etapaActual(trk) === k ? 'selected' : ''}>${esc(etapaTxt(prog[0], k))}</option>`).join('')}</select>` : `<span class="pill lock">${esc(etapaTxt(prog[0], etapaVista(p)))}</span>`}</td>` : ''}</tr>`; }).join('') || `<tr><td colspan="${prog ? 7 : 6}" class="muted">No hay personas con estos filtros.</td></tr>`}
     </tbody></table></div></section>`;
   }
 
@@ -692,9 +734,24 @@ function pedirMotivo(p) {
 }
 // Después de que alguien toma la clase queda una tarea para el día siguiente (ofrecerle el curso), si no tenía un seguimiento pendiente
 const seguimientoAuto = (p) => (FUNC.tareas && (!p.followUp || p.followUp < ymd(hoyCL()) ? ymd(hoyCL() + 864e5) : null));
-const etapaNombre = (k) => LEAD_STATES.find(([x]) => x === k)?.[1] || k;
+const etapaNombre = (k) => ETAPA_NOMBRE[k] || k;
 
 // Cambia la etapa de una persona en un programa (un registro). Devuelve true si cambió.
+// Mover un registro de columna. En el curso, pasar a «Reservó» marca la reserva como pagada (pide confirmar) y volver a «Interesada» la deshace; lo demás es solo cambiar la etapa.
+async function moverEtapa(id, key) {
+  const l = (A.leads || []).find((x) => x.id === id); if (!l) return false;
+  if (['pendulo', 'tarot'].includes(l.form)) {
+    const r = reservaDe(l);
+    if (key === 'reservo_cupo' && !r?.pagada) { const ok = await reservaAccion(id, 'pagar'); if (ok) { A._per = null; paintNav(); render(false); } return ok; }
+    if (key === 'nuevo' && r?.pagada && !pagoHecho(l)) {
+      const ok = await reservaAccion(id, 'deshacer');
+      if (ok && l.status === 'reservo_cupo') await leadMover(id, 'nuevo');
+      if (ok) { A._per = null; paintNav(); render(false); }
+      return ok;
+    }
+  }
+  return leadMover(id, key);
+}
 async function leadMover(id, status) {
   const l = (A.leads || []).find((x) => x.id === id); if (!l) return false;
   if (l.status === status && leadEtapa(l) === status) return false;
@@ -786,8 +843,8 @@ function leadFichaSimple(id) {
   const fila = (ok, txt, t) => `<li style="display:flex;gap:8px;align-items:center"><span class="pill ${ok ? 'done' : 'lock'}" style="min-width:2.4rem;text-align:center">${ok ? 'Sí' : 'No'}</span><span>${txt}</span>${ok && t ? `<span class="muted" style="font-size:.78rem">${esc(fechaCorta(t))}</span>` : ''}</li>`;
   const registro = (l) => { const a = asistenciaActual(l), e = leadEtapa(l);
     return `<ul class="reg" style="list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:.88rem">${fila(!!a.entro, 'Entró a la clase (clic en su enlace)', a.entro)}${fila(!!a.confirmada, 'Asistió confirmado', a.confirmada)}${FUNC.autodeclaracion ? fila(a.autodeclarada === 'si', `Asistencia autodeclarada${a.autodeclarada === 'no' ? ' (dijo que no pudo entrar)' : ''}`, a.autodeclaradaT) : ''}${fila(!!l.replayT || e === 'vio_replay', 'Vio el replay', l.replayT)}${fila(!!l.compraClicT, 'Hizo clic en comprar', l.compraClicT)}${fila(esInscrita(e) || !!l.pago?.t, 'Matriculada', l.pago?.t)}</ul>`; };
-  const opciones = (l) => (esClase(l.form) ? [...etapasClaseDe(l.form), ['descartado', 'Descartada']] : LEAD_STATES.filter(([k]) => !(esPago(l.form) && k === 'clase')));
-  const tarjeta = (l) => { const act = esClase(l.form) ? etapaVisible(leadEtapa(l)) : leadEtapa(l);
+  const opciones = (l) => (tipoPipe(l.form) ? [...PIPES[tipoPipe(l.form)], ...(esClase(l.form) ? [['descartado', 'Descartada']] : [])] : LEAD_STATES.filter(([k]) => !(esPago(l.form) && k === 'clase')));
+  const tarjeta = (l) => { const act = etapaActual(l);
     return `<div class="pg"><div class="pg-top"><b>${esc(LEAD_FORMS[l.form] || l.form)}</b></div>
       <span class="muted" style="font-size:.78rem">${fdateMs(l.createdAt)}${l.claseFecha ? ` · clase ${esc(fechaLarga(l.claseFecha))}` : ''}${l.status === 'descartado' && l.motivo ? ` · motivo: ${esc(l.motivo)}` : ''}</span>
       <label style="display:grid;gap:4px;font-size:.8rem">Etapa<select data-fs-etapa="${esc(l.id)}">${opciones(l).map(([k, t]) => `<option value="${k}" ${act === k ? 'selected' : ''}>${esc(etapaTxt(l.form, k))}</option>`).join('')}</select></label>
@@ -841,7 +898,7 @@ function leadFichaSimple(id) {
     const contacto = Object.fromEntries(campos.map((c) => [c.dataset.ct, c.value.trim()])), b = $('#ct-save'); b.disabled = true;
     try { await data.leads({ action: 'update', ids, contacto }); p.leads.forEach((l) => Object.assign(l, contacto, { email: contacto.email.toLowerCase() })); refrescar(); leadFichaSimple(id); toast('Cambios guardados.'); } catch (err) { fail(err); b.disabled = false; }
   };
-  document.querySelectorAll('#dlg [data-fs-etapa]').forEach((s) => (s.onchange = async () => { const cambio = await leadMover(s.dataset.fsEtapa, s.value); if (cambio) toast('Guardado.'); leadFichaSimple(id); }));
+  document.querySelectorAll('#dlg [data-fs-etapa]').forEach((s) => (s.onchange = async () => { const cambio = await moverEtapa(s.dataset.fsEtapa, s.value); if (cambio) toast('Guardado.'); leadFichaSimple(id); }));
   document.querySelectorAll('#dlg [data-reserva]').forEach((b) => (b.onclick = async () => {
     const [tid, accion] = b.dataset.reserva.split('|');
     if (await reservaAccion(tid, accion)) { refrescar(); leadFichaSimple(id); toast('Guardado.'); }
@@ -1096,7 +1153,7 @@ const segClic = (l) => {
   return !fin ? 'sin_dato' : Date.now() <= fin ? 'pendiente' : 'no_entro';
 };
 // Quién no debe recibir mensajes de venta: ya compró, se descartó, pidió que no le escribamos, o rechazó el consentimiento
-const excluidaDeEnvio = (l, p) => (['matriculada', 'descartado', 'lista_espera'].includes(leadEtapa(l)) ? 'Ya compró o está fuera'
+const excluidaDeEnvio = (l, p) => (['matriculada', 'pago_completo', 'descartado', 'lista_espera'].includes(leadEtapa(l)) ? 'Ya compró o está fuera'
   : l.secuenciasVenta === false ? 'Ya compró' : ((p?.tags || []).includes('No contactar') || l.noContactar) ? 'Pidió que no le escribamos' : l.consentimiento?.whatsapp?.aceptado === false ? 'No aceptó que le escribamos' : '');
 // Variables que se reemplazan en los textos con los datos de cada persona
 const variablesDe = (l) => {
@@ -1284,7 +1341,7 @@ const embApi = async (body) => {
 };
 
 // ----- Pagos
-const pagoHecho = (l) => !!(l.pago?.t || (l.pagos || []).length || l.saldoPagado) || esInscrita(leadEtapa(l));
+const pagoHecho = (l) => !!(l.pago?.t || (l.pagos || []).length || l.saldoPagado || l.status === 'pago_completo') || esInscrita(leadEtapa(l));
 // Reserva: la guarda la landing en lead.reserva = { monto, moneda, estado: 'iniciada' | 'sin_pago' | 'pagada', t, pagadaT?, stripeSession?, marcadaPor? }.
 // Las reservas del Péndulo anotadas antes (reservaPagada / reservaMonto / reservaFecha) se leen igual. Devuelve null si no hay reserva.
 const reservaDe = (l) => {
@@ -1317,8 +1374,8 @@ const filasClic = () => personas().map((p) => { const ls = p.leads.filter((l) =>
   .sort((a, b) => (S.clicOrden === 'antiguos' ? a.l.compraClicT - b.l.compraClicT : b.l.compraClicT - a.l.compraClicT));
 // Ya vio la oferta (replay o clic) y no ha pagado, reservado ni respondido por WhatsApp
 const respondioDespues = (l) => { const n = waNum(l.whatsapp), c = n && A.wa.chats.find((x) => x.id === n); return (c?.lastInboundAt?.toMillis?.() || 0) > (l.replayT || l.compraClicT || 0); };
-const vioOfertaSinRespuesta = (l, p) => esClase(l.form) && (['vio_oferta', 'vio_replay'].includes(leadEtapa(l)) || !!l.replayT || !!l.compraClicT) && !pagoHecho(l) && !reservaDe(l)?.pagada && !reservoLinea(p, claseDeL(l))
-  && !['descartado', 'reservo_cupo', 'lista_espera'].includes(leadEtapa(l)) && !(p?.tags || []).includes('No contactar') && !l.noContactar && !respondioDespues(l); // en lista de espera no se les apura: el curso está lleno
+const vioOfertaSinRespuesta = (l, p) => esClase(l.form) && (['vio_oferta', 'vio_replay', 'replay_enviado', 'seguimiento'].includes(leadEtapa(l)) || !!l.replayT || !!l.compraClicT) && !pagoHecho(l) && !reservaDe(l)?.pagada && !reservoLinea(p, claseDeL(l))
+  && !['descartado', 'reservo_cupo', 'lista_espera', 'remarketing'].includes(leadEtapa(l)) && !(p?.tags || []).includes('No contactar') && !l.noContactar && !respondioDespues(l); // en lista de espera no se les apura: el curso está lleno
 const pagoBadges = (l, p) => {
   const b = [];
   const rv = FUNC.reserva && (!p || mejorReserva(p, claseDeL(l)) === l) ? reservaDe(l) : null, prog = (ofertaDe(claseDeL(l))?.nombre || '').replace(' Hebreo', '').replace(' Terapéutico', '');
@@ -1455,7 +1512,7 @@ const listaMatricula = () => {
 
 // ----- Seguimiento: «No abrió el replay» (24 h o más después de enviárselo) y «Cobro fallido» (cuota del Tarot que no se pudo cobrar)
 const replaySinAbrir = (l, p) => esClase(l.form) && !!l.replayEnviadoT && Date.now() - l.replayEnviadoT >= 24 * 36e5 && !l.replayT && leadEtapa(l) !== 'vio_replay'
-  && !pagoHecho(l) && !reservaDe(l)?.pagada && !reservoLinea(p, claseDeL(l)) && !['descartado', 'reservo_cupo', 'lista_espera'].includes(leadEtapa(l)) && !(p?.tags || []).includes('No contactar') && !l.noContactar && !(l.seguimientoReplayT > l.replayEnviadoT);
+  && !pagoHecho(l) && !reservaDe(l)?.pagada && !reservoLinea(p, claseDeL(l)) && !['descartado', 'reservo_cupo', 'lista_espera', 'remarketing'].includes(leadEtapa(l)) && !(p?.tags || []).includes('No contactar') && !l.noContactar && !(l.seguimientoReplayT > l.replayEnviadoT);
 const filasReplay = () => personas().flatMap((p) => p.leads.filter((l) => replaySinAbrir(l, p)).map((l) => ({ p, l }))).sort((a, b) => a.l.replayEnviadoT - b.l.replayEnviadoT);
 const filasFallidas = () => personas().flatMap((p) => p.leads.filter((l) => esClase(l.form) && l.cobroFallido).map((l) => ({ p, l }))).sort((a, b) => b.l.cobroFallido.t - a.l.cobroFallido.t);
 // Reservaron y todavía no pagan el saldo (plazo: antes del inicio del curso). El cobro lo envía Karen por WhatsApp: aquí solo se lista y se abre la conversación.
@@ -2072,7 +2129,7 @@ function bind() {
   document.querySelectorAll('[data-ans-reload]').forEach((b) => (b.onclick = () => { b.disabled = true; loadAnswers(true).then(() => render(false)).catch(fail); }));
   if (S.view === 'whatsapp') waBind();
   document.querySelectorAll('[data-crm-vista]').forEach((b) => (b.onclick = () => { S.crmVista = b.dataset.crmVista; render(false); }));
-  document.querySelectorAll('[data-crm-prog]').forEach((b) => (b.onclick = () => { S.crmProg = b.dataset.crmProg; S.leadSel = new Set(); render(false); }));
+  document.querySelectorAll('[data-crm-prog]').forEach((b) => (b.onclick = () => { S.crmProg = b.dataset.crmProg; S.crmEtapa = ''; S.leadSel = new Set(); render(false); }));
   document.querySelectorAll('[data-crm-metrica]').forEach((b) => (b.onclick = () => { S.crmMetrica = b.dataset.crmMetrica; render(false); }));
   document.querySelectorAll('[data-crm-csv]').forEach((b) => (b.onclick = () => exportarCsv()));
   const cr = $('#crm-rango'); if (cr) cr.onchange = () => { S.crmRango = cr.value; render(false); };
@@ -2173,7 +2230,7 @@ function bind() {
   document.querySelectorAll('[data-kb-col]').forEach((col) => {
     col.ondragover = (e) => { e.preventDefault(); col.classList.add('over'); };
     col.ondragleave = () => col.classList.remove('over');
-    col.ondrop = (e) => { e.preventDefault(); col.classList.remove('over'); const id = e.dataTransfer.getData('text/plain'); if (id) leadMover(id, col.dataset.kbCol); };
+    col.ondrop = (e) => { e.preventDefault(); col.classList.remove('over'); const id = e.dataTransfer.getData('text/plain'); if (id) moverEtapa(id, col.dataset.kbCol); };
   });
   document.querySelectorAll('[data-lead-sel]').forEach((cb) => (cb.onchange = () => { cb.checked ? S.leadSel.add(cb.dataset.leadSel) : S.leadSel.delete(cb.dataset.leadSel); render(false); }));
   document.querySelectorAll('[data-lead-all]').forEach((cb) => (cb.onchange = () => { S.leadSel = cb.checked ? new Set(personasFiltradas().map((p) => p.id)) : new Set(); render(false); }));
@@ -2219,7 +2276,7 @@ function bind() {
   }));
   document.querySelectorAll('[data-cal-dia]').forEach((b) => (b.onclick = () => { S.calRef = tOf(b.dataset.calDia); S.calVista = 'dia'; render(false); }));
   document.querySelectorAll('[data-cal-mes-ir]').forEach((b) => (b.onclick = () => { S.calRef = tOf(b.dataset.calMesIr); S.calVista = 'mes'; render(false); }));
-  document.querySelectorAll('[data-lead-status]').forEach((s) => (s.onchange = () => leadMover(s.dataset.leadStatus, s.value)));
+  document.querySelectorAll('[data-lead-status]').forEach((s) => (s.onchange = () => moverEtapa(s.dataset.leadStatus, s.value)));
   const aw = $('#ans-who'); if (aw) aw.onchange = () => { S.ansWho = aw.value; render(false); };
   document.querySelectorAll('[data-lvopen]').forEach((b) => (b.onclick = () => { S.lvOpen[b.dataset.lvopen] = !S.lvOpen[b.dataset.lvopen]; render(false); }));
   document.querySelectorAll('[data-cls]').forEach((b) => (b.onclick = () => { const [id, i, j] = b.dataset.cls.split(','); S.cls = [id, +i, +j]; go('clase'); }));

@@ -4,7 +4,7 @@
 //   action 'reserva' -> { id, pagada, forzar? }   pagada:true  = «Marcar reserva pagada»: reserva.estado = 'pagada', con su monto, moneda, fecha y quién la marcó (queda en el historial).
 //                       Si hay un máximo de cupos y están llenos (solo con la lista de espera encendida) responde 409 { error: 'cupos_llenos' }; con forzar:true se da el cupo igual.
 //                       pagada:false = «Deshacer»: vuelve a 'iniciada'. Sirve para el Péndulo (Mercado Pago) y para el Tarot si alguien paga por otra vía.
-//   action 'saldo'   -> { id }   «Saldo pagado»: la persona queda Matriculada (en una clase gratis, 'matriculada'; en la tarjeta del curso, 'inscrita': la etapa equivalente que ya tiene ese programa)
+//   action 'saldo'   -> { id }   «Saldo pagado»: en una clase gratis queda 'matriculada' («Vendido»); en la tarjeta del curso queda 'pago_completo' («Pagó completo»; «Nueva estudiante» la marca la Maestra a mano)
 //                       y su curso inscrito. Sale de las secuencias de venta. El cobro del saldo lo envía Karen por WhatsApp: aquí solo se anota que se pagó.
 // Las reservas del Péndulo anotadas antes con reservaPagada / reservaMonto / reservaFecha se siguen leyendo; lo nuevo se guarda solo en lead.reserva.
 import { FieldValue } from 'firebase-admin/firestore';
@@ -64,10 +64,10 @@ export async function POST(request) {
     const reservaPagada = String(r.estado || '').startsWith('pag') || l.reservaPagada === true;
     const pagadoReserva = reservaPagada ? (Number(r.monto) || Number(l.reservaMonto) || monto) : 0, saldo = Math.max(0, o.precio - pagadoReserva);
     await ref.update({
-      status: esClaseGratis(l.form) ? 'matriculada' : 'inscrita', saldoPagado: true, saldoFecha: ahora, secuenciasVenta: false, followUp: '',
+      status: esClaseGratis(l.form) ? 'matriculada' : 'pago_completo', saldoPagado: true, saldoFecha: ahora, secuenciasVenta: false, followUp: '',
       pago: { t: ahora, monto: o.precio, moneda: o.moneda },
       pagos: FieldValue.arrayUnion({ t: ahora, monto: saldo, moneda: o.moneda, tipo: 'saldo' }),
-      eventos: FieldValue.arrayUnion(ev('etapa', `Saldo pagado (${dinero(saldo, o.moneda)}) · marcado por ${quien}: matriculada`, quien)), updatedAt: FieldValue.serverTimestamp(),
+      eventos: FieldValue.arrayUnion(ev('etapa', `Saldo pagado (${dinero(saldo, o.moneda)}) · marcado por ${quien}: ${esClaseGratis(l.form) ? 'vendido' : 'pagó completo'}`, quien)), updatedAt: FieldValue.serverTimestamp(),
     });
     try { await asegurarCurso(l, clase); } catch (e) { console.error('embudo curso', e); }
     return json({ ok: true });
