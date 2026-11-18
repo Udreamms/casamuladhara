@@ -6,7 +6,8 @@
 import { FieldValue } from 'firebase-admin/firestore';
 import { db, json } from '@/lib/server/services.js';
 import { contexto, enviarDespues, idValido, usuario } from '@/lib/server/meta.js';
-import { TERAPIAS, LIMPIEZA, ZONAS_CHILE, DURACION, TZ, horasLibres, utcAChile } from '@/lib/server/agenda.js';
+import { TERAPIAS, LIMPIEZA, ORIENTACION, DURACION_ORIENTACION, ZONAS_CHILE, DURACION, TZ, horasLibres, utcAChile } from '@/lib/server/agenda.js';
+import { contactoPorCodigo } from '@/lib/server/embudo.js';
 
 const str = (v, max) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -14,10 +15,12 @@ const HTTPS = /^https:\/\/[^\s"'<>]+$/i;
 const zonaValida = (z) => { try { new Intl.DateTimeFormat('en', { timeZone: z }); return true; } catch { return false; } };
 const eventos = (snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 
-export async function GET() {
+export async function GET(request) {
   try {
-    const libres = horasLibres(eventos(await db().collection('calendario').get()));
-    return json({ slots: libres, tz: TZ, duracion: DURACION });
+    const orientacion = new URL(request.url).searchParams.get('tipo') === 'orientacion'; // la llamada de orientación de la Formación dura 20 minutos
+    const dur = orientacion ? DURACION_ORIENTACION : DURACION;
+    const libres = horasLibres(eventos(await db().collection('calendario').get()), Date.now(), dur);
+    return json({ slots: libres, tz: TZ, duracion: dur });
   } catch (e) {
     console.error('terapias GET', e);
     return json({ error: 'No pudimos cargar los horarios. Inténtalo de nuevo en un momento.' }, 500);
@@ -30,8 +33,10 @@ export async function POST(request) {
   if (str(b.web, 200)) return json({ ok: true });
   const ANTIGUOS = { 'Sanando Niño Interior': 'Niño Interior', 'Radiestesia y Sanación del Alma': 'Radiestesia' }; // nombres de antes del cambio
   const nombreTerapia = ANTIGUOS[b.terapia] || b.terapia;
-  const terapia = TERAPIAS.includes(nombreTerapia) ? nombreTerapia : null;
-  const modalidad = ['online', 'presencial'].includes(b.modalidad) ? b.modalidad : null;
+  const esOrient = nombreTerapia === ORIENTACION;
+  const terapia = TERAPIAS.includes(nombreTerapia) || esOrient ? nombreTerapia : null;
+  const modalidad = esOrient ? 'online' : ['online', 'presencial'].includes(b.modalidad) ? b.modalidad : null;
+  const dur = esOrient ? DURACION_ORIENTACION : DURACION;
   const start = Number(b.start);
   const tz = zonaValida(str(b.tz, 60)) ? str(b.tz, 60) : '';
   const name = str(b.name, 120), email = str(b.email, 160).toLowerCase(), whatsapp = str(b.whatsapp, 40), direccion = str(b.direccion, 240);
@@ -51,21 +56,23 @@ export async function POST(request) {
     const dig = whatsapp.replace(/\D/g, '');
     const cita = await firestore.runTransaction(async (tx) => {
       const todos = eventos(await tx.get(firestore.collection('calendario')));
-      if (!horasLibres(todos).includes(start)) return null; // ya no está libre (o está fuera de horario)
+      if (!horasLibres(todos, Date.now(), dur).includes(start)) return null; // ya no está libre (o está fuera de horario)
       const { fecha, hora } = utcAChile(start);
       // Para que nadie llene el calendario: máximo 3 sesiones futuras por WhatsApp o correo
       const hoy = utcAChile(Date.now()).fecha;
       const mias = todos.filter((e) => e.type === 'terapia' && e.date >= hoy && (e.email === email || String(e.whatsapp || '').replace(/\D/g, '') === dig));
       if (mias.length >= 3) return 'limite';
+      if (esOrient && mias.some((e) => e.terapia === ORIENTACION)) return 'ya_orientacion'; // una sola llamada de orientación pendiente por persona
       const nota = [`Reservó en la web`, modalidad === 'online' ? 'Online' : `Presencial${direccion ? ` · ${direccion}` : ''}`, `WhatsApp ${whatsapp}`, email, tz && `Zona de la persona: ${tz}`].filter(Boolean).join(' · ');
       tx.set(ref, {
-        type: 'terapia', title: `${terapia} · ${name}`, date: fecha, time: hora, endDate: '', note: nota, duration: DURACION,
+        type: 'terapia', title: `${terapia} · ${name}`, date: fecha, time: hora, endDate: '', note: nota, duration: dur,
         terapia, name, email, whatsapp, modalidad, direccion, clientTz: tz, start, source: 'web', createdAt: FieldValue.serverTimestamp(),
       });
       return { fecha, hora };
     });
     if (cita === null) return json({ error: 'Ese horario ya no está disponible. Elige otro, por favor.', refrescar: true }, 409);
     if (cita === 'limite') return json({ error: 'Ya tienes varias sesiones agendadas. Escríbenos por WhatsApp si necesitas otra.' }, 429);
+    if (cita === 'ya_orientacion') return json({ error: 'Ya tienes una llamada de orientación agendada. Escríbenos por WhatsApp si necesitas cambiarla.' }, 429);
     // API de conversiones de Meta: el mismo Schedule que registra el Píxel, con el mismo id para que no se cuente doble
     const ctx = contexto(request);
     enviarDespues({ nombre: 'Schedule', id: idValido(b.eventId) || `terapia-${ref.id}`, url: ctx.url, user: usuario({ email, phone: whatsapp, nombre: name }, ctx) });
@@ -74,7 +81,14 @@ export async function POST(request) {
       const g = ((await firestore.doc('config/clases').get()).data() || {}).enlaceTerapias;
       if (typeof g === 'string' && HTTPS.test(g.trim())) enlace = g.trim();
     }
-    return json({ ok: true, id: ref.id, start, fecha: cita.fecha, hora: cita.hora, duracion: DURACION, modalidad, ...(enlace ? { enlace } : {}) });
+    // Llamada de orientación de la Formación: la cita queda también en la ficha de la postulante (CRM), identificada por su código personal
+    if (esOrient) {
+      try {
+        const c = await contactoPorCodigo(str(b.codigo, 40));
+        if (c) await c.ref.update({ llamada: { evento: ref.id, start, fecha: cita.fecha, hora: cita.hora, t: Date.now() }, eventos: FieldValue.arrayUnion({ t: Date.now(), tipo: 'llamada_agendada', texto: `Agendó su llamada de orientación: ${cita.fecha} ${cita.hora} (hora de Chile)` }), updatedAt: FieldValue.serverTimestamp() });
+      } catch (e) { console.error('terapias llamada', e); }
+    }
+    return json({ ok: true, id: ref.id, start, fecha: cita.fecha, hora: cita.hora, duracion: dur, modalidad, ...(enlace ? { enlace } : {}) });
   } catch (e) {
     console.error('terapias POST', e);
     return json({ error: 'No pudimos agendar tu sesión. Escríbenos por WhatsApp y te ayudamos.' }, 500);

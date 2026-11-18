@@ -6,6 +6,9 @@ export const TERAPIAS = [
   'Niño Interior', 'Terapia Transgeneracional', 'Tarot Terapéutico y Evolutivo', 'Limpieza energética de espacios',
 ];
 export const LIMPIEZA = 'Limpieza energética de espacios';
+// Llamada de orientación de la Formación (gratis, 20 minutos, siempre online): usa el mismo calendario y los mismos horarios de Karen
+export const ORIENTACION = 'Llamada de orientación de la Formación';
+export const DURACION_ORIENTACION = 20;
 export const HORA_INICIO = 9; // atiende de 9:00 a 18:00 (Chile)
 export const HORA_FIN = 18;
 export const DIAS = [1, 2, 3, 4, 5]; // lunes a viernes (0 = domingo)
@@ -51,14 +54,14 @@ export function ocupado(eventos) {
 }
 
 // Horas de inicio libres (ms UTC), de hora en hora, dentro del horario de Karen, con 4 horas de anticipación y hasta un mes
-export function horasLibres(eventos, ahora = Date.now()) {
+export function horasLibres(eventos, ahora = Date.now(), duracion = DURACION) {
   const tramos = ocupado(eventos), libres = [];
   const hoy = utcAChile(ahora).fecha;
   for (let i = 0; i <= DIAS_ADELANTE + 1; i++) {
     const dia = masDias(hoy, i);
     if (!DIAS.includes(diaSemana(dia))) continue;
-    for (let h = HORA_INICIO; h * 60 + DURACION <= HORA_FIN * 60; h++) {
-      const desde = chileAUtc(dia, `${pad(h)}:00`), hasta = desde + DURACION * 6e4;
+    for (let h = HORA_INICIO; h * 60 + duracion <= HORA_FIN * 60; h++) {
+      const desde = chileAUtc(dia, `${pad(h)}:00`), hasta = desde + duracion * 6e4;
       if (desde < ahora + ANTICIPACION_H * 36e5 || desde > ahora + DIAS_ADELANTE * 864e5) continue;
       if (tramos.some(([a, b]) => desde < b && hasta > a)) continue;
       libres.push(desde);
