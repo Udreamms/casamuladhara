@@ -626,6 +626,61 @@ const metricasHTML = () => {
   <section class="card panel"><h3>Por qué se descartan</h3>${motivos.size ? `<div class="tbl-wrap"><table class="tbl"><tbody>${[...motivos.entries()].sort((a, b) => b[1] - a[1]).map(([m, n]) => `<tr><td>${esc(m)}</td><td style="text-align:right"><b>${n}</b></td></tr>`).join('')}</tbody></table></div>` : '<p class="muted">Todavía no hay descartadas. Al descartar a alguien, el portal te pregunta el motivo.</p>'}</section>`;
 };
 
+// ---------- Resultados de cada pipeline: cuántas personas llegan a cada paso, por campaña / anuncio / origen ----------
+// Cada paso cuenta a las personas que ya lo alcanzaron (no solo a las que están ahí hoy). Se calcula con lo que el CRM sabe; lo que moviste a mano también cuenta.
+const EMBUDO_PASOS = {
+  clase: [['Se registraron', () => true], ['Ingresaron a la clase', (l) => asistioL(l) || etapaPipe(l) === 'entro'],
+    ['Recibieron el replay', (l) => !!l.replayEnviadoT || !!l.replayT || ['replay_enviado', 'seguimiento', 'matriculada', 'remarketing'].includes(etapaPipe(l))],
+    ['Pasaron a seguimiento', (l) => ['seguimiento', 'matriculada', 'remarketing'].includes(etapaPipe(l))], ['Iniciaron el programa', (l) => etapaPipe(l) === 'matriculada']],
+  curso: [['Se interesaron', () => true], ['Reservaron', (l) => ['reservo_cupo', 'pago_completo', 'inscrita'].includes(etapaPipe(l))], ['Pagaron completo', (l) => ['pago_completo', 'inscrita'].includes(etapaPipe(l))], ['Empezaron (nueva estudiante)', (l) => etapaPipe(l) === 'inscrita']],
+  formacion: [['Postularon', () => true], ['Agendaron su llamada', (l) => !!l.llamada || ['llamada_agendada', 'entro', 'no_asistio', 'seguimiento', 'inscrita'].includes(etapaPipe(l))], ['Ingresaron a la llamada', (l) => ['entro', 'inscrita'].includes(etapaPipe(l))], ['Iniciaron la formación', (l) => etapaPipe(l) === 'inscrita']],
+};
+const pasosDe = (prog) => EMBUDO_PASOS[tipoPipe(prog[0]) === 'clase' ? 'clase' : tipoPipe(prog[0]) === 'formacion' ? 'formacion' : 'curso'];
+const resultadosHTML = (prog) => {
+  const dias = Number(S.crmRango) || 0, desde = dias ? Date.now() - dias * 864e5 : 0, pasos = pasosDe(prog), por = S.crmMetrica || 'campania';
+  const ls = (A.leads || []).filter((l) => prog[2].includes(l.form) && l.status !== 'descartado' && (l.createdAt || 0) >= desde);
+  const clave = { origen: (l) => l.utm?.utm_source || 'directo', campania: (l) => l.utm?.utm_campaign || '(sin campaña)', anuncio: (l) => l.utm?.utm_content || '(sin anuncio)' }[por] || ((l) => l.utm?.utm_campaign || '(sin campaña)');
+  const pct = (a, b) => (b ? `${Math.round((a / b) * 100)}%` : '—');
+  const cuenta = (arr, i) => arr.filter(pasos[i][1]).length;
+  const n = pasos.map((_, i) => cuenta(ls, i));
+  const chip = (attr, v, t, on) => `<button class="chip" ${attr}="${esc(v)}" aria-pressed="${on}">${t}</button>`;
+  const grupos = new Map(); ls.forEach((l) => { const k = clave(l); (grupos.get(k) || grupos.set(k, []).get(k)).push(l); });
+  const ult = pasos.length - 1;
+  const filas = [...grupos.entries()].map(([k, arr]) => ({ k, t: arr.length, b: cuenta(arr, 1), z: cuenta(arr, ult) })).sort((a, b) => b.t - a.t);
+  return `<div class="filters">${chip('data-crm-metrica', 'campania', 'Por campaña', por === 'campania')}${chip('data-crm-metrica', 'anuncio', 'Por anuncio', por === 'anuncio')}${chip('data-crm-metrica', 'origen', 'Por origen', por === 'origen')}
+    <select id="crm-rango" aria-label="Periodo" style="border-radius:999px"><option value="">Todo el tiempo</option><option value="30" ${S.crmRango === '30' ? 'selected' : ''}>Últimos 30 días</option><option value="7" ${S.crmRango === '7' ? 'selected' : ''}>Últimos 7 días</option></select></div>
+  <section class="card panel"><h3>${esc(prog[1])}: hasta dónde llega la gente</h3><p class="muted" style="font-size:.84rem;margin:0">Cada paso cuenta a quienes ya lo alcanzaron. Las descartadas no se cuentan.</p>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Paso</th><th>Personas</th><th>Del paso anterior</th><th>Del total</th></tr></thead><tbody>
+    ${pasos.map(([t], i) => `<tr><td><b>${esc(t)}</b></td><td>${n[i]}</td><td class="muted">${i ? pct(n[i], n[i - 1]) : '—'}</td><td class="muted">${pct(n[i], n[0])}</td></tr>`).join('')}</tbody></table></div></section>
+  <section class="card panel"><h3>De dónde llegan y cuántas avanzan</h3><div class="tbl-wrap"><table class="tbl"><thead><tr><th>${por === 'origen' ? 'Origen' : por === 'campania' ? 'Campaña' : 'Anuncio'}</th><th>${esc(pasos[0][0])}</th><th>${esc(pasos[1][0])}</th><th>${esc(pasos[ult][0])}</th></tr></thead><tbody>
+    ${filas.map((g) => `<tr><td><b>${esc(g.k)}</b></td><td>${g.t}</td><td>${g.b} <span class="muted" style="font-size:.78rem">${pct(g.b, g.t)}</span></td><td>${g.z} <span class="muted" style="font-size:.78rem">${pct(g.z, g.t)}</span></td></tr>`).join('') || '<tr><td colspan="4" class="muted">Todavía no hay datos en este periodo.</td></tr>'}</tbody></table></div></section>`;
+};
+// Exporta la lista de Remarketing (para audiencias de Meta o un mensaje especial). Con un programa elegido, solo ese; en «Todos», todos los programas.
+// Columnas email, phone, fn y ln como las pide Meta; se dejan fuera a quienes pidieron no recibir mensajes o rechazaron que les escribamos.
+function exportarRemarketingCsv() {
+  const prog = progDe(S.crmProg), formas = prog ? prog[2] : null;
+  const filas = [], vistos = new Set();
+  personas().forEach((p) => {
+    if ((p.tags || []).includes('No contactar') || p.leads.some((l) => l.noContactar)) return;
+    p.leads.forEach((l) => {
+      if (formas && !formas.includes(l.form)) return;
+      if (!tipoPipe(l.form) || etapaPipe(l) !== 'remarketing') return;
+      if (l.consentimiento?.whatsapp?.aceptado === false && l.consentimiento?.email?.aceptado === false) return;
+      const llave = `${p.id}|${l.form}`; if (vistos.has(llave)) return; vistos.add(llave);
+      const [fn, ...resto] = String(p.nombre || '').trim().split(/\s+/);
+      filas.push([p.email, waNum(p.whatsapp), fn || '', resto.join(' '), PROG_CORTO[l.form] || l.form, l.utm?.utm_campaign || '', l.utm?.utm_content || '', leadOrigen(l), ymd(l.createdAt || Date.now())]);
+    });
+  });
+  if (!filas.length) return toast('Todavía no hay nadie en Remarketing en esta vista.');
+  const cab = ['email', 'phone', 'fn', 'ln', 'programa', 'campana', 'anuncio', 'origen', 'registro'];
+  const celda = (v) => { let t = String(v ?? ''); if (/^[=@]|^[+\-](?![\d\s])/.test(t)) t = `'${t}`; return `"${t.replace(/"/g, '""')}"`; };
+  const csv = `﻿${[cab, ...filas].map((r) => r.map(celda).join(',')).join('\r\n')}`;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' })); a.download = `remarketing-${prog ? prog[0] : 'todos'}-${ymd(Date.now())}.csv`;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+  toast(`Exportadas ${filas.length} personas de Remarketing.`);
+}
+
 // Exporta a Excel (CSV) las personas que se ven con los filtros actuales. Sirve también como respaldo.
 function exportarCsv() {
   const lista = personasFiltradas();
@@ -646,17 +701,18 @@ function exportarCsv() {
 V.interesadas = () => {
   const head = `<div class="crm-head"><div><span class="eyebrow">CRM</span><h1>Interesadas</h1></div><div class="crm-acciones"><button class="btn btn-primary btn-sm" data-go="envios">Envíos</button>
     <details class="menu"><summary class="btn btn-ghost btn-sm">Herramientas ▾</summary><div class="menu-lista">
-      <button type="button" data-crm-preparar title="Crea el código personal y los enlaces de cada contacto">Preparar contactos</button><button type="button" data-crm-clasificar>Clasificar una clase</button><button type="button" data-crm-csv>Exportar a Excel</button>
+      <button type="button" data-crm-preparar title="Crea el código personal y los enlaces de cada contacto">Preparar contactos</button><button type="button" data-crm-clasificar>Clasificar una clase</button><button type="button" data-crm-csv>Exportar a Excel</button><button type="button" data-crm-remarketing title="Lista de Remarketing (correo y WhatsApp) para audiencias de Meta o un mensaje especial">Exportar Remarketing</button>
       ${A.leads && repetidasPorLimpiar().length ? `<button type="button" data-leads-dedup>Limpiar repetidas (${repetidasPorLimpiar().length})</button>` : ''}<button type="button" data-leads-reload>Actualizar la lista</button></div></details></div></div>`;
   if (!A.leads) return `${head}<div class="card empty">Cargando interesadas…</div>`;
   const sinLink = [['enlacePendulo', 'Péndulo'], ['enlaceTarot', 'Tarot'], ['enlaceTerapias', 'terapias online']].filter(([k]) => !A.clases?.[k]).map(([, n]) => n);
   const aviso = sinLink.length ? `<div class="card" style="padding:12px 14px;font-size:.88rem;border-left:4px solid #b8402f"><b>Falta el enlace de Google Meet de ${sinLink.join(', ')}.</b> Sin él, el enlace personal de la clase no tiene a dónde llevar. Cárgalo en <button class="link" data-go="clases">Clases y ofertas</button> (Péndulo y Tarot) o en <button class="link" data-go="ajustes">Ajustes del aula</button> (terapias).</div>` : '';
-  const prog = progDe(S.crmProg), lista = personasFiltradas(), vista = S.crmVista === 'metricas' ? (FUNC.metricas ? 'metricas' : !progDe(S.crmProg) ? 'tabla' : 'embudo') : !progDe(S.crmProg) ? 'tabla' : S.crmVista || 'embudo', todas = personas();
+  const prog = progDe(S.crmProg), lista = personasFiltradas(), vista = S.crmVista === 'metricas' ? (FUNC.metricas ? 'metricas' : !progDe(S.crmProg) ? 'tabla' : 'embudo') : !progDe(S.crmProg) ? 'tabla' : S.crmVista === 'resultados' && tipoPipe(progDe(S.crmProg)[0]) ? 'resultados' : S.crmVista === 'resultados' ? 'embudo' : S.crmVista || 'embudo', todas = personas();
   const chip = (attr, v, t, on) => `<button class="chip" ${attr}="${esc(v)}" aria-pressed="${on}">${t}</button>`;
   const seg = (attr, items, actual) => `<div class="seg" role="group">${items.map(([v, t]) => `<button type="button" ${attr}="${v}" aria-pressed="${actual === v}">${t}</button>`).join('')}</div>`;
-  const vistas = !prog && !FUNC.metricas ? '<span class="muted" style="font-size:.84rem;align-self:center">Todas las personas, con su etapa en cada programa. Para mover etapas, elige un programa.</span>' : seg('data-crm-vista', [['embudo', 'Embudo'], ['tabla', 'Tabla'], ...(FUNC.metricas ? [['metricas', 'Métricas']] : [])], vista);
+  const vistas = !prog && !FUNC.metricas ? '<span class="muted" style="font-size:.84rem;align-self:center">Todas las personas, con su etapa en cada programa. Para mover etapas, elige un programa.</span>' : seg('data-crm-vista', [['embudo', 'Embudo'], ['tabla', 'Tabla'], ...(prog && tipoPipe(prog[0]) ? [['resultados', 'Resultados']] : []), ...(FUNC.metricas ? [['metricas', 'Métricas']] : [])], vista);
   if (S.crmLista) return `${head}${aviso}${ofertaBanner()}${listaMatricula()}`;
   if (vista === 'metricas') return `${head}${aviso}<div class="crm-bar">${vistas}</div>${metricasHTML()}`;
+  if (vista === 'resultados') return `${head}${aviso}<div class="crm-bar">${vistas}</div>${resultadosHTML(prog)}`;
   const origenes = [...new Set(A.leads.map(leadOrigen))].sort(), tags = [...new Set(todas.flatMap((p) => p.tags))].sort();
   const base = prog ? todas.filter((p) => tieneProg(p, prog)) : todas;
   const primera = prog && esClase(prog[0]) ? 'registrada' : 'nuevo';
@@ -2162,6 +2218,7 @@ function bind() {
   document.querySelectorAll('[data-crm-prog]').forEach((b) => (b.onclick = () => { S.crmProg = b.dataset.crmProg; S.crmEtapa = ''; S.leadSel = new Set(); render(false); }));
   document.querySelectorAll('[data-crm-metrica]').forEach((b) => (b.onclick = () => { S.crmMetrica = b.dataset.crmMetrica; render(false); }));
   document.querySelectorAll('[data-crm-csv]').forEach((b) => (b.onclick = () => exportarCsv()));
+  document.querySelectorAll('[data-crm-remarketing]').forEach((b) => (b.onclick = () => exportarRemarketingCsv()));
   const cr = $('#crm-rango'); if (cr) cr.onchange = () => { S.crmRango = cr.value; render(false); };
   const ct = $('#crm-tag'); if (ct) ct.onchange = () => { S.crmTag = ct.value; render(false); };
   const be = $('#bulk-etapa');
