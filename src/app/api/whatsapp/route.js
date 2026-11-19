@@ -1,4 +1,4 @@
-// /api/whatsapp  · chat de WhatsApp Business dentro del portal de la Maestra (número de Karen, API oficial de Meta)
+// /api/whatsapp  · chat de WhatsApp Business dentro del portal de la Maestra (número +56 9 7280 3407, API oficial de Meta)
 //   GET                      verificación del webhook que pide Meta al configurarlo (hub.verify_token = WHATSAPP_VERIFY_TOKEN)
 //   POST (con firma de Meta) avisos de Meta: mensajes que llegan, estados de entrega y los que Karen escribe desde la app de WhatsApp Business
 //   POST (Authorization: Bearer <token de la Maestra>, cuerpo { action, ... }):

@@ -1,7 +1,7 @@
-// WhatsApp Business (API oficial de Meta, "Cloud API") con el número de Karen.
+// WhatsApp Business (API oficial de Meta, "Cloud API") con el número +56 9 7280 3407 (el de las landings, +56 9 4004 4528, es otro y no pasa por aquí).
 // Variables de entorno en Vercel:
 //   WHATSAPP_TOKEN         token permanente del usuario del sistema (Meta Business → Usuarios del sistema → Generar token, permiso whatsapp_business_messaging)
-//   WHATSAPP_PHONE_ID      "Identificador del número de teléfono" de +56 9 4004 4528 (Meta for Developers → WhatsApp → Configuración de la API)
+//   WHATSAPP_PHONE_ID      "Identificador del número de teléfono" de +56 9 7280 3407 (Meta for Developers → WhatsApp → Configuración de la API)
 //   WHATSAPP_VERIFY_TOKEN  una frase cualquiera que tú inventas; se pega igual al configurar el webhook en Meta
 //   WHATSAPP_APP_SECRET    "Clave secreta de la app" (Configuración de la app → Básica); con ella se comprueba que los avisos vienen de Meta
 //   WHATSAPP_TEMPLATE_NAME opcional: plantilla aprobada para escribirle primero a alguien (por defecto hello_world, la que trae Meta)
