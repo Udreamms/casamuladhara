@@ -438,8 +438,9 @@ const etapaTxt = (form, k) => PIPE_TXT[tipoPipe(form)]?.[k] ?? (k === 'nuevo' &&
 // Mismo criterio que src/lib/server/whatsapp.js: solo dígitos con código de país (un celular chileno de 9 dígitos que empieza en 9 se toma como +56)
 const waNum = (n) => { let d = String(n || '').replace(/\D/g, '').replace(/^00/, ''); if (d.length === 9 && d[0] === '9') d = `56${d}`; return d.length >= 8 && d.length <= 15 ? d : ''; };
 const waLink = (n) => { const d = String(n || '').replace(/\D/g, ''); return d ? `https://wa.me/${d}` : ''; };
-const leadOrigen = (l) => l.utm?.utm_source || 'directo';
-const leadOrigenTxt = (l) => [l.utm?.utm_source && l.utm?.utm_medium ? `${l.utm.utm_source} / ${l.utm.utm_medium}` : l.utm?.utm_source, l.utm?.utm_campaign, l.utm?.utm_content].filter(Boolean).join(' · ') || (l.origen ? `Cuenta del aula (${l.origen})` : 'Directo');
+// Origen de cada registro: lo que trae el enlace del anuncio (utm_source / utm_campaign / utm_content / fbclid). Sin nada de eso = orgánico.
+const leadOrigen = (l) => l.utm?.utm_source || (l.utm?.fbclid ? 'meta' : 'orgánico');
+const leadOrigenTxt = (l) => [l.utm?.utm_source && l.utm?.utm_medium ? `${l.utm.utm_source} / ${l.utm.utm_medium}` : l.utm?.utm_source, l.utm?.utm_campaign, l.utm?.utm_content].filter(Boolean).join(' · ') || (l.utm?.fbclid ? 'Anuncio de Meta' : l.origen ? `Cuenta del aula (${l.origen})` : 'Orgánico');
 // Vínculos: una interesada y una alumna son la misma persona si comparten correo o WhatsApp
 const llavesDe = (x) => [String(x.email || '').trim().toLowerCase(), ...(x.emailsExtra || []).map((e) => String(e).trim().toLowerCase()), waNum(x.whatsapp || x.phone)].filter(Boolean);
 const vinculos = () => {
@@ -602,7 +603,7 @@ const metricasHTML = () => {
   const dias = Number(S.crmRango) || 0, desde = dias ? Date.now() - dias * 864e5 : 0;
   const ps = personas().filter((p) => (p.leads[0].createdAt || 0) >= desde);
   const por = S.crmMetrica || 'origen';
-  const clave = { origen: (l) => l.utm?.utm_source || 'directo', campania: (l) => l.utm?.utm_campaign || '(sin campaña)', anuncio: (l) => l.utm?.utm_content || '(sin anuncio)' }[por];
+  const clave = { origen: (l) => leadOrigen(l), campania: (l) => l.utm?.utm_campaign || (l.utm?.fbclid ? '(sin campaña)' : 'orgánico'), anuncio: (l) => l.utm?.utm_content || (l.utm?.fbclid ? '(sin anuncio)' : 'orgánico') }[por];
   const R = { nuevo: 0, contactado: 1, clase: 2, conversando: 3, inscrita: 4 };
   const alcanzo = (p, n) => { const e = bucketEtapa(etapaDe(p)); return e !== 'descartado' && R[e] >= n; };
   const grupos = new Map();
@@ -639,7 +640,7 @@ const pasosDe = (prog) => EMBUDO_PASOS[tipoPipe(prog[0]) === 'clase' ? 'clase' :
 const resultadosHTML = (prog) => {
   const dias = Number(S.crmRango) || 0, desde = dias ? Date.now() - dias * 864e5 : 0, pasos = pasosDe(prog), por = S.crmMetrica || 'campania';
   const ls = (A.leads || []).filter((l) => prog[2].includes(l.form) && l.status !== 'descartado' && (l.createdAt || 0) >= desde);
-  const clave = { origen: (l) => l.utm?.utm_source || 'directo', campania: (l) => l.utm?.utm_campaign || '(sin campaña)', anuncio: (l) => l.utm?.utm_content || '(sin anuncio)' }[por] || ((l) => l.utm?.utm_campaign || '(sin campaña)');
+  const clave = { origen: (l) => leadOrigen(l), campania: (l) => l.utm?.utm_campaign || (l.utm?.fbclid ? '(sin campaña)' : 'orgánico'), anuncio: (l) => l.utm?.utm_content || (l.utm?.fbclid ? '(sin anuncio)' : 'orgánico') }[por] || ((l) => l.utm?.utm_campaign || '(sin campaña)');
   const pct = (a, b) => (b ? `${Math.round((a / b) * 100)}%` : '—');
   const cuenta = (arr, i) => arr.filter(pasos[i][1]).length;
   const n = pasos.map((_, i) => cuenta(ls, i));
@@ -649,12 +650,57 @@ const resultadosHTML = (prog) => {
   const filas = [...grupos.entries()].map(([k, arr]) => ({ k, t: arr.length, b: cuenta(arr, 1), z: cuenta(arr, ult) })).sort((a, b) => b.t - a.t);
   return `<div class="filters">${chip('data-crm-metrica', 'campania', 'Por campaña', por === 'campania')}${chip('data-crm-metrica', 'anuncio', 'Por anuncio', por === 'anuncio')}${chip('data-crm-metrica', 'origen', 'Por origen', por === 'origen')}
     <select id="crm-rango" aria-label="Periodo" style="border-radius:999px"><option value="">Todo el tiempo</option><option value="30" ${S.crmRango === '30' ? 'selected' : ''}>Últimos 30 días</option><option value="7" ${S.crmRango === '7' ? 'selected' : ''}>Últimos 7 días</option></select></div>
+  ${tipoPipe(prog[0]) === 'clase' ? clasesHTML(prog) : ''}
   <section class="card panel"><h3>${esc(prog[1])}: hasta dónde llega la gente</h3><p class="muted" style="font-size:.84rem;margin:0">Cada paso cuenta a quienes ya lo alcanzaron. Las descartadas no se cuentan.</p>
     <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Paso</th><th>Personas</th><th>Del paso anterior</th><th>Del total</th></tr></thead><tbody>
     ${pasos.map(([t], i) => `<tr><td><b>${esc(t)}</b></td><td>${n[i]}</td><td class="muted">${i ? pct(n[i], n[i - 1]) : '—'}</td><td class="muted">${pct(n[i], n[0])}</td></tr>`).join('')}</tbody></table></div></section>
   <section class="card panel"><h3>De dónde llegan y cuántas avanzan</h3><div class="tbl-wrap"><table class="tbl"><thead><tr><th>${por === 'origen' ? 'Origen' : por === 'campania' ? 'Campaña' : 'Anuncio'}</th><th>${esc(pasos[0][0])}</th><th>${esc(pasos[1][0])}</th><th>${esc(pasos[ult][0])}</th></tr></thead><tbody>
     ${filas.map((g) => `<tr><td><b>${esc(g.k)}</b></td><td>${g.t}</td><td>${g.b} <span class="muted" style="font-size:.78rem">${pct(g.b, g.t)}</span></td><td>${g.z} <span class="muted" style="font-size:.78rem">${pct(g.z, g.t)}</span></td></tr>`).join('') || '<tr><td colspan="4" class="muted">Todavía no hay datos en este periodo.</td></tr>'}</tbody></table></div></section>`;
 };
+// ---------- Embudo por clase: una fila por clase gratis, de cuántas se registraron a cuántas compraron ----------
+const csvCelda = (v) => { let t = String(v ?? ''); if (/^[=@]|^[+\-](?![\d\s])/.test(t)) t = `'${t}`; return `"${t.replace(/"/g, '""')}"`; };
+const escribioWA = (l) => { if (l.waEscribioT) return true; const n = waNum(l.whatsapp), c = n && (A.wa?.chats || []).find((x) => x.id === n); return !!(c?.lastInboundAt?.toMillis?.() || c?.lastInboundAt); };
+function embudoPorClase(prog) {
+  const ls = (A.leads || []).filter((l) => prog[2].includes(l.form) && l.status !== 'descartado');
+  const grupos = new Map(), vistos = new Set();
+  const compro = (p, l) => etapaPipe(l) === 'matriculada' || p.leads.some((x) => esPago(x.form) && claseDeL(x) === claseDeL(l) && pagoHecho(x));
+  const terapia = (p) => p.leads.some((x) => (x.pagos || []).some((g) => g.producto === 'terapia'));
+  [...ls].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).forEach((l) => {
+    const ev = l.claseEvento ? (A.cal || []).find((e) => e.id === l.claseEvento) : null, fecha = ev?.date || l.claseFecha || '', hora = ev?.time || '19:00';
+    const k = l.claseEvento || `${l.form}|${fecha}`, p = personaDe(l.id) || { id: l.id, leads: [l] };
+    if (!grupos.has(k)) grupos.set(k, { k, fecha, ms: fecha ? chileAMs(fecha, hora) : 0, form: l.form, n: 0, wa: 0, entro: 0, replay: 0, comprar: 0, curso: 0, terapia: 0, ing: { CLP: 0, USD: 0 }, dias: [] });
+    const g = grupos.get(k); g.n++; if (escribioWA(l)) g.wa++; if (asistioL(l)) g.entro++; if (l.replayT) g.replay++; if (l.compraClicT) g.comprar++;
+    if (compro(p, l)) g.curso++; if (terapia(p)) g.terapia++;
+    if (g.ms && l.createdAt) g.dias.push(Math.max(0, (g.ms - l.createdAt) / 864e5));
+    if (!vistos.has(p.id)) { vistos.add(p.id); p.leads.forEach((x) => (x.pagos || []).forEach((q) => { if (q.monto != null && g.ing[q.moneda] != null) g.ing[q.moneda] += Number(q.monto) || 0; })); }
+  });
+  const filas = [...grupos.values()].sort((a, b) => b.ms - a.ms);
+  const prom = (g) => (g.dias.length ? Math.round((g.dias.reduce((x, y) => x + y, 0) / g.dias.length) * 10) / 10 : null);
+  return { filas, prom };
+}
+const ingTxt = (g) => [g.ing.CLP ? `${clp(g.ing.CLP)} CLP` : '', g.ing.USD ? `${g.ing.USD.toLocaleString('es-CL')} USD` : ''].filter(Boolean).join(' + ') || '—';
+const clasesHTML = (prog) => {
+  const { filas, prom } = embudoPorClase(prog), pct = (a, b) => (b ? ` <span class="muted" style="font-size:.76rem">${Math.round((a / b) * 100)}%</span>` : '');
+  const tot = filas.reduce((t, g) => { ['n', 'wa', 'entro', 'replay', 'comprar', 'curso', 'terapia'].forEach((k) => (t[k] += g[k])); t.ing.CLP += g.ing.CLP; t.ing.USD += g.ing.USD; return t; }, { n: 0, wa: 0, entro: 0, replay: 0, comprar: 0, curso: 0, terapia: 0, ing: { CLP: 0, USD: 0 } });
+  const celdas = (g) => ['wa', 'entro', 'replay', 'comprar', 'curso', 'terapia'].map((k) => `<td>${g[k]}${pct(g[k], g.n)}</td>`).join('');
+  return `<section class="card panel"><div class="panel-h"><h3>Embudo de cada clase</h3><button type="button" class="btn btn-ghost btn-sm" data-crm-clases-csv>Descargar CSV</button></div>
+    <p class="muted" style="font-size:.84rem;margin:0">Una fila por clase: cuántas personas se registraron y cuántas llegaron a cada paso. Los % son sobre los registros de esa clase. «Escribieron» cuenta a quienes mandaron un WhatsApp; «Compraron» incluye los pagos que anotaste a mano. Los ingresos salen de los pagos anotados en cada ficha.</p>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Clase</th><th>Registros</th><th>Escribieron por WhatsApp</th><th>Entraron</th><th>Vieron replay</th><th>Pulsaron comprar</th><th>Compraron curso</th><th>Compraron terapia</th><th>Ingresos</th><th>Días registro → clase</th></tr></thead><tbody>
+    ${filas.map((g) => `<tr><td><b>${esc(g.fecha ? diaLargoTxt(g.fecha) : 'Sin clase asignada')}</b></td><td>${g.n}</td>${celdas(g)}<td>${esc(ingTxt(g))}</td><td>${prom(g) ?? '—'}</td></tr>`).join('') || '<tr><td colspan="10" class="muted">Todavía no hay registros.</td></tr>'}
+    ${filas.length > 1 ? `<tr style="font-weight:700"><td>Total</td><td>${tot.n}</td>${celdas(tot)}<td>${esc(ingTxt(tot))}</td><td></td></tr>` : ''}</tbody></table></div></section>`;
+};
+function exportarClasesCsv(prog) {
+  const { filas, prom } = embudoPorClase(prog);
+  if (!filas.length) return toast('Todavía no hay registros para exportar.');
+  const cab = ['clase', 'tipo', 'registros', 'escribieron_whatsapp', 'entraron', 'vieron_replay', 'pulsaron_comprar', 'compraron_curso', 'compraron_terapia', 'ingresos_clp', 'ingresos_usd', 'dias_registro_a_clase'];
+  const filasCsv = filas.map((g) => [g.fecha || 'sin clase', PROG_CORTO[g.form] || g.form, g.n, g.wa, g.entro, g.replay, g.comprar, g.curso, g.terapia, g.ing.CLP, g.ing.USD, prom(g) ?? '']);
+  const csv = `\ufeff${[cab, ...filasCsv].map((r) => r.map(csvCelda).join(',')).join('\r\n')}`;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' })); a.download = `embudo-por-clase-${prog[0]}-${ymd(Date.now())}.csv`;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+  toast('Descargado el embudo por clase.');
+}
+document.addEventListener('click', (e) => { if (e.target.closest('[data-crm-clases-csv]')) exportarClasesCsv(progDe(S.crmProg)); });
 // Exporta la lista de Remarketing (para audiencias de Meta o un mensaje especial). Con un programa elegido, solo ese; en «Todos», todos los programas.
 // Columnas email, phone, fn y ln como las pide Meta; se dejan fuera a quienes pidieron no recibir mensajes o rechazaron que les escribamos.
 function exportarRemarketingCsv() {
@@ -686,7 +732,7 @@ function exportarCsv() {
   const lista = personasFiltradas();
   const cab = ['Nombre', 'Correo', 'WhatsApp', 'País', 'Programas y etapa', 'Etapa más avanzada', 'Origen', 'Campaña', 'Cuenta en el aula', 'Etiquetas', 'Seguimiento', 'Última nota', 'Primer registro'];
   const fila = (p) => [p.nombre, p.email, p.whatsapp, p.country, p.leads.map((l) => `${PROG_CORTO[l.form] || l.form}: ${etapaTxt(l.form, etapaPipe(l))}`).join(' | '), etapaTxt('', etapaDe(p)),
-    p.leads[0].utm?.utm_source || 'directo', p.leads[0].utm?.utm_campaign || '', p.alumna ? 'Sí' : 'No', p.tags.join(' | '), p.followUp, p.note, ymd(p.leads[0].createdAt || Date.now())];
+    leadOrigen(p.leads[0]), p.leads[0].utm?.utm_campaign || '', p.alumna ? 'Sí' : 'No', p.tags.join(' | '), p.followUp, p.note, ymd(p.leads[0].createdAt || Date.now())];
   // Una celda que empieza como fórmula (=, @, o + / - seguido de otra cosa que un número) se neutraliza para que Excel no la ejecute
   const celda = (v) => { let t = String(v ?? ''); if (/^[=@]|^[+\-](?![\d\s])/.test(t)) t = `'${t}`; return `"${t.replace(/"/g, '""')}"`; };
   const csv = `﻿${[cab, ...lista.map(fila)].map((r) => r.map(celda).join(',')).join('\r\n')}`;
@@ -934,7 +980,7 @@ function leadFichaSimple(id) {
     return `<div class="pg"><div class="pg-top"><b>${esc(LEAD_FORMS[l.form] || l.form)}</b></div>
       <span class="muted" style="font-size:.78rem">${fdateMs(l.createdAt)}${l.claseFecha ? ` · clase ${esc(fechaLarga(l.claseFecha))}` : ''}${l.status === 'descartado' && l.motivo ? ` · motivo: ${esc(l.motivo)}` : ''}</span>
       <label style="display:grid;gap:4px;font-size:.8rem">Etapa<select data-fs-etapa="${esc(l.id)}">${opciones(l).map(([k, t]) => `<option value="${k}" ${act === k ? 'selected' : ''}>${esc(etapaTxt(l.form, k))}</option>`).join('')}</select></label>
-      ${esClase(l.form) ? registro(l) : ''}${bloqueReserva(l, p)}${bloquePostulacion(l)}</div>`; };
+      ${esClase(l.form) ? registro(l) : ''}${bloqueReserva(l, p)}${bloquePostulacion(l)}${bloquePagos(l)}</div>`; };
   const n = waNum(p.whatsapp), c = A.wa.chats.find((x) => x.id === n), libre = waLibre(c);
   const chat = !n ? '<div class="wa-empty" style="flex:1;border:1px dashed var(--line);border-radius:12px">Esta persona no dejó WhatsApp.</div>' : `<div class="alert" id="wf-aviso" ${A.wa.on === false ? '' : 'hidden'}><div><b>WhatsApp todavía no está conectado</b><p>Cuando esté el número definitivo y las llaves de Meta, aquí podrás conversar uno a uno. Mientras tanto el chat no envía ni recibe.</p></div></div>
       <div class="wa-msgs" id="wf-msgs" style="flex:1;min-height:260px;border:1px solid var(--line);border-radius:12px"><div class="wa-empty">Cargando conversación…</div></div>
@@ -1521,6 +1567,40 @@ const bloqueReserva = (l, p) => {
         <span class="muted" style="font-size:.8rem">Saldo pendiente: ${esc(saldoTxt(l))}. Debe pagarse antes del inicio del curso (${esc(diaLargoTxt(o.inicio))}, ${HORA_INICIO_CURSO} hora de Chile). El link de cobro lo envías tú por WhatsApp.</span>
         <button type="button" class="link" style="color:#b8402f;justify-self:start" data-reserva="${id}|deshacer">Deshacer reserva</button>`}</div>`;
 };
+// ---------- Registrar pago (Mercado Pago y terapias no avisan solas): queda anotado y se manda la compra a Meta ----------
+const PAGO_PRODUCTOS = [['curso-pendulo', 'Curso Péndulo Hebreo', 'CLP', 69900], ['curso-tarot', 'Curso Tarot Terapéutico', 'USD', 140], ['terapia', 'Sesión de terapia con Karen', 'USD', 35], ['formacion', 'Formación', 'USD', ''], ['otro', 'Otro pago', 'CLP', '']];
+const bloquePagos = (l) => {
+  const pagos = [...(l.pagos || [])].filter((g) => g.monto != null).sort((a, b) => (a.t || 0) - (b.t || 0));
+  const nom = (g) => (PAGO_PRODUCTOS.find((x) => x[0] === g.producto) || [])[1] || (g.tipo === 'saldo' ? 'Saldo' : 'Pago');
+  return `<div class="pg-pago"><b>Pagos</b>${pagos.length ? `<ul style="list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:.84rem">${pagos.map((g) => `<li>${esc(nom(g))} · <b>${esc(montoCorto(g.monto, g.moneda))}</b> <span class="muted">· ${esc(fechaCorta(g.t))}${g.tipo === 'manual' ? ' · anotado a mano' : ''}</span></li>`).join('')}</ul>` : '<span class="muted" style="font-size:.82rem">Sin pagos anotados.</span>'}
+    <button type="button" class="btn btn-ghost btn-sm" data-pago-abrir="${esc(l.id)}">Registrar pago</button></div>`;
+};
+function abrirPago(tid) {
+  const l = (A.leads || []).find((x) => x.id === tid); if (!l) return;
+  const def = l.form === 'terapias' ? 'terapia' : l.clase === 'tarot' ? 'curso-tarot' : 'curso-pendulo', clave = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+  const d0 = PAGO_PRODUCTOS.find((x) => x[0] === def);
+  dialog(`<h3>Registrar pago</h3><p class="muted" style="font-size:.88rem">Para pagos de Mercado Pago, transferencias o terapias, que no avisan solos. Queda anotado y se informa la compra a Meta (una sola vez).</p>
+    <form id="pg-form" style="display:grid;gap:12px;margin-top:10px"><label style="display:grid;gap:4px;font-size:.85rem">Producto<select id="pg-prod">${PAGO_PRODUCTOS.map(([k, t]) => `<option value="${k}" ${k === def ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select></label>
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:10px"><label style="display:grid;gap:4px;font-size:.85rem">Monto pagado<input type="number" id="pg-monto" min="1" step="any" value="${d0[3]}" inputmode="decimal"></label>
+    <label style="display:grid;gap:4px;font-size:.85rem">Moneda<select id="pg-mon"><option value="CLP" ${d0[2] === 'CLP' ? 'selected' : ''}>CLP</option><option value="USD" ${d0[2] === 'USD' ? 'selected' : ''}>USD</option></select></label></div>
+    <p class="muted" style="font-size:.8rem;margin:0">Si es un curso, la persona pasa a «Pagó completo» (en una clase gratis, a «Inició programa»).</p>
+    <button class="btn btn-primary" id="pg-go" type="submit">Registrar pago de ${esc(l.name || 'la persona')}</button></form>`);
+  $('#pg-prod').onchange = () => { const d = PAGO_PRODUCTOS.find((x) => x[0] === $('#pg-prod').value); $('#pg-monto').value = d[3]; $('#pg-mon').value = d[2]; };
+  $('#pg-form').onsubmit = async (e) => {
+    e.preventDefault(); const monto = Number($('#pg-monto').value), moneda = $('#pg-mon').value, producto = $('#pg-prod').value, b = $('#pg-go');
+    if (!(monto > 0)) return toast('Escribe el monto pagado.');
+    const nombre = PAGO_PRODUCTOS.find((x) => x[0] === producto)[1];
+    if (!confirm(`¿Registrar ${montoCorto(monto, moneda)} por «${nombre}» de ${l.name || 'esta persona'}?\n\nSe anota a tu nombre y se informa la compra a Meta.`)) return;
+    b.disabled = true;
+    try {
+      await embApi({ action: 'pago', id: tid, producto, monto, moneda, clave });
+      l.pagos = [...(l.pagos || []), { t: Date.now(), monto, moneda, tipo: 'manual', producto, clave }];
+      if (producto.startsWith('curso-')) l.status = esClase(l.form) ? 'matriculada' : l.status === 'inscrita' ? l.status : 'pago_completo';
+      A._per = null; paintNav(); render(false); leadFicha(tid); toast('Pago registrado.');
+    } catch (err) { fail(err); b.disabled = false; }
+  };
+}
+document.addEventListener('click', (e) => { const b = e.target.closest('[data-pago-abrir]'); if (b) abrirPago(b.dataset.pagoAbrir); });
 // Acciones de la ficha: marcar / deshacer la reserva y marcar el saldo. Devuelve true si se guardó.
 async function reservaAccion(tid, accion) {
   const l = A.leads.find((x) => x.id === tid); if (!l) return false;
@@ -1652,7 +1732,7 @@ const matriculasHTML = () => {
   return `<section class="card panel"><h3>Origen de las matrículas</h3><p class="muted" style="font-size:.84rem;margin:0">Cada reserva o matrícula con la clase gratis y la campaña de donde llegó.</p>
     ${filas.length ? `<div style="display:flex;gap:6px;flex-wrap:wrap">${[...porCamp.entries()].sort((a, b) => b[1] - a[1]).map(([k, n]) => `<span class="pill pres">${esc(k)}: ${n}</span>`).join('')}</div>
     <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Persona</th><th>Curso</th><th>Estado</th><th>Pagado</th><th>Fecha</th><th>Clase gratis</th><th>Campaña</th><th>Anuncio</th><th>Origen</th></tr></thead><tbody>
-    ${filas.map(({ p, l, t }) => `<tr><td><button class="link nom" data-lead-open="${esc(p.id)}">${esc(p.nombre)}</button></td><td>${esc(ofertaDe(claseDeL(l)).nombre)}</td><td>${esc(etapaTxt(l.form, leadEtapa(l)))}</td><td>${esc(pagado(l))}</td><td class="muted">${esc(fechaCorta(t))}</td><td class="muted">${esc(l.claseFecha || '—')}</td><td>${esc(l.utm?.utm_campaign || '—')}</td><td>${esc(l.utm?.utm_content || '—')}</td><td>${esc(l.utm?.utm_source || 'directo')}</td></tr>`).join('')}</tbody></table></div>` : '<p class="muted">Todavía no hay reservas ni matrículas.</p>'}</section>`;
+    ${filas.map(({ p, l, t }) => `<tr><td><button class="link nom" data-lead-open="${esc(p.id)}">${esc(p.nombre)}</button></td><td>${esc(ofertaDe(claseDeL(l)).nombre)}</td><td>${esc(etapaTxt(l.form, leadEtapa(l)))}</td><td>${esc(pagado(l))}</td><td class="muted">${esc(fechaCorta(t))}</td><td class="muted">${esc(l.claseFecha || '—')}</td><td>${esc(l.utm?.utm_campaign || '—')}</td><td>${esc(l.utm?.utm_content || '—')}</td><td>${esc(leadOrigen(l))}</td></tr>`).join('')}</tbody></table></div>` : '<p class="muted">Todavía no hay reservas ni matrículas.</p>'}</section>`;
 };
 
 // ----- Clases gratis del aula: las ve toda cuenta (pagada o no) en /aula, sección «Clases gratis». Se guardan en config/clasesGratis.clases
