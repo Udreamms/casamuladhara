@@ -8,6 +8,7 @@
 <style>html,body{margin:0}body{font-size:16px}img{max-width:100%}[hidden]{display:none!important}
 /* Color del programa: la Formación usa café/bronce con dorado en toda la página (menú, pie y secciones oscuras) */:root,:root:not([data-theme="light"]),:root[data-theme="dark"]{--forest:#6b4f2e;--forest-deep:#33251a;--on-brand-muted:#d9cbb4}.lp-form .btn{background:#f2c66d;color:#33251a}.tone-dark{--surface:#4a3624;--muted:#d9cbb4;--line:rgba(236,231,211,.16);background:#3b2b1e}
 /* Bloque de dolores: una tarjeta por ángulo (data-angulo) para probar cuál resuena en anuncios */.dolores{display:flex;flex-wrap:wrap;justify-content:center;gap:16px;margin-top:8px}.dolores article{flex:1 1 280px;max-width:360px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px 22px 20px}.dolores .q{display:block;font:400 1.22rem/1.3 var(--f-display);color:#f2c66d;margin-bottom:10px}.dolores p{margin:0;color:var(--muted);font-size:.98rem;line-height:1.55}.puente{max-width:720px;margin:34px auto 0;text-align:center}.puente p{font:400 clamp(1.25rem,2.6vw,1.6rem)/1.4 var(--f-display);margin:0 0 20px;color:var(--fg)}
+/* El camino, quién te forma y alumnas (mismos estilos que /formacion) */.levels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.levels>div{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px;display:grid;gap:8px;align-content:start}.levels .n{font:600 .62rem/1 var(--f-caps);letter-spacing:.16em;text-transform:uppercase;color:var(--brass)}.levels b{font:400 1.25rem/1.25 var(--f-display)}.levels p{color:var(--muted);font-size:.92rem;margin:0}.levels .goal{background:var(--forest);color:var(--on-brand);border-color:var(--forest)}.levels .goal p{color:var(--on-brand-muted)}.levels .goal .n{color:var(--sun)}.camino-nota{max-width:720px;margin:26px auto 0;text-align:center;color:var(--muted)}.students{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:34px}.students img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:18px;display:block}.students-note{color:var(--muted);font-size:.9rem;margin-top:14px}@media (max-width:860px){.levels{grid-template-columns:1fr}.students{grid-template-columns:1fr 1fr}}
 /* Hero claro: crema de la marca, texto oscuro y formulario en tarjeta blanca */
 .lp-hero.hero-cream{background:var(--linen);color:var(--fg)}
 .hero-cream .hero-motif{color:var(--forest);opacity:.06}
@@ -86,6 +87,18 @@
   </div>
   <div class="puente"><p>No te falta capacidad: te falta un método y alguien que te acompañe paso a paso. Para eso creamos la Formación de Terapeuta Holístico Integral.</p><a class="btn btn-sun" href="#postular">Quiero conversarlo con Karen</a></div>
 </div></section>
+<section class="section tone-light" id="camino"><div class="wrap">
+  <div class="section-head"><span class="eyebrow">El camino</span><h2>Un método claro: cinco formaciones que se suben como una escalera</h2></div>
+  <div class="levels">
+    <div><span class="n">Nivel 1</span><b>Péndulo Hebreo</b><p>Limpieza, protección y armonización energética con las etiquetas hebreas.</p></div>
+    <div><span class="n">Nivel 2</span><b>Limpieza energética de casas y espacios</b><p>Armonizar los lugares donde vives y trabajas.</p></div>
+    <div><span class="n">Nivel 3</span><b>Radiestesia</b><p>Profundiza en la radiestesia como herramienta de acompañamiento.</p></div>
+    <div><span class="n">Nivel 4</span><b>Cuatro especializaciones</b><p>Niño interior, Vidas pasadas, Terapia transgeneracional y Limpieza uterina.</p></div>
+    <div><span class="n">Nivel 5</span><b>Tarot Terapéutico</b><p>El tarot como herramienta de autoconocimiento y acompañamiento.</p></div>
+    <div class="goal"><span class="n">Al terminar</span><b>Terapeuta Holístico Integral</b><p>Recibes el certificado de Terapeuta Holístico Integral de Casa Muladhara.</p></div>
+  </div>
+  <p class="camino-nota">Ya no son cursos sueltos: cada nivel se apoya en el anterior, con práctica supervisada en cada etapa, hasta que puedas acompañar a otras personas con seguridad.</p>
+</div></section>
 <section class="section tone-light"><div class="wrap" style="max-width:760px">
   <div class="section-head"><span class="eyebrow">Qué incluye</span><h2>Todo lo que necesitas para formarte</h2></div>
   <ul class="incl">
@@ -96,6 +109,34 @@
     <li>Lo que ya pagaste por Péndulo Hebreo Nivel 1 o Tarot Terapéutico se descuenta de la Formación.</li>
   </ul>
   <p class="precio-p">Desde 55 USD al mes (9 cuotas) o 449 USD al contado. Cupos: 20. Inicio: 8 de diciembre.</p>
+</div></section>
+<section class="section tone-light" id="karen"><div class="wrap">
+  <div class="kit">
+    <img class="lp-photo" src="/assets/img/e2ec26d75a.webp" alt="Karen Oyarce Sáez, Maestra Holística" loading="lazy" decoding="async">
+    <div><span class="eyebrow">Quién te forma</span><h2 style="font-size:clamp(1.8rem,3.6vw,2.6rem);margin-block:12px">Karen Oyarce Sáez, Maestra Holística</h2><p style="color:var(--muted)">Creadora del Método Casa Muladhara y de su metodología El Camino del Ser. Más de 5 años acompañando procesos y formando terapeutas, certificada por la Escuela Argentina de Terapias Complementarias.</p><p style="color:var(--muted)">En la Formación no aprendes sola: Karen te acompaña en vivo, revisa tu práctica y te guía en cada nivel.</p></div>
+  </div>
+  <div class="students">
+    <img loading="lazy" decoding="async" src="/assets/img/231aa77989.webp" alt="Alumnas de Casa Muladhara con sus certificados en la graduación de Péndulo Hebreo Nivel 1">
+    <img loading="lazy" decoding="async" src="/assets/img/292ddf3bf0.webp" alt="Alumnas de Casa Muladhara en la certificación de Péndulo Hebreo Nivel I y II">
+    <img loading="lazy" decoding="async" src="/assets/img/37953e38df.webp" alt="Alumna de Casa Muladhara junto a Karen en la graduación de Péndulo Hebreo Nivel 1">
+    <img loading="lazy" decoding="async" src="/assets/img/81f0a09164.webp" alt="Alumna de Casa Muladhara con su certificado de Péndulo Hebreo Nivel 1">
+    <img loading="lazy" decoding="async" src="/assets/img/41a246e938.webp" alt="Alumnas de Casa Muladhara practicando con el péndulo hebreo en clase">
+    <img loading="lazy" decoding="async" src="/assets/img/6a5a5d85dd.webp" alt="Clase práctica de Péndulo Hebreo en Casa Muladhara">
+  </div>
+  <p class="students-note">Alumnas de Casa Muladhara en sus graduaciones y clases prácticas.</p>
+</div></section>
+<section class="section tone-light" id="preguntas" style="padding-top:0"><div class="wrap" style="max-width:860px">
+  <div class="section-head"><span class="eyebrow">Preguntas frecuentes</span><h2>Lo que muchas se preguntan antes de postular</h2></div>
+  <div class="faq">
+    <details><summary>¿Necesito experiencia previa?</summary><p>No. La formación empieza desde cero con el Nivel 1, Péndulo Hebreo.</p></details>
+    <details><summary>¿Y si no sé si sirvo para esto?</summary><p>No necesitas un don especial: se aprende con método, práctica y acompañamiento. Justamente para eso es la llamada de orientación: conversamos con calma y vemos juntas si la Formación es para ti.</p></details>
+    <details><summary>No tengo mucho tiempo, ¿puedo hacerla igual?</summary><p>Son 2 clases por semana de 2 horas. Todas quedan grabadas en el aula virtual, para que las veas cuando puedas si un día no alcanzas a conectarte.</p></details>
+    <details><summary>¿Cuánto cuesta y cómo se paga?</summary><p>449 USD al contado o 9 cuotas de 55 USD, una al mes. Lo que ya pagaste por Péndulo Hebreo Nivel 1 o Tarot Terapéutico se descuenta.</p></details>
+    <details><summary>¿Puedo tomarla desde otro país?</summary><p>Sí. Las clases son online en vivo, en horario de Chile. Tenemos alumnas en Chile, Colombia y Australia.</p></details>
+    <details><summary>¿El certificado es oficial?</summary><p>Es el certificado de Terapeuta Holístico Integral de Casa Muladhara. Es un certificado de nuestra escuela, no un título oficial.</p></details>
+    <details><summary>¿Qué pasa en la llamada de orientación?</summary><p>Son 20 minutos online con Karen o su equipo. Te escuchamos, resolvemos tus dudas y, si decides entrar, te contamos cómo inscribirte.</p></details>
+  </div>
+  <p style="text-align:center;margin-top:28px"><a class="btn btn-sun" href="#postular">Postula a tu llamada de orientación</a></p>
 </div></section>
 <section class="section tone-light" id="postular" style="background:#efe8d4"><div class="wrap">
   <div class="section-head" style="margin-inline:auto;text-align:center"><span class="eyebrow">Llamada de orientación gratuita</span><h2>Cuéntanos un poco de ti</h2><p>Es una llamada de 20 minutos con Karen o su equipo para resolver tus dudas y ver si la Formación es para ti.</p></div>
