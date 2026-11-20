@@ -4,12 +4,16 @@
 //   action 'reserva' -> { id, pagada, forzar? }   pagada:true  = «Marcar reserva pagada»: reserva.estado = 'pagada', con su monto, moneda, fecha y quién la marcó (queda en el historial).
 //                       Si hay un máximo de cupos y están llenos (solo con la lista de espera encendida) responde 409 { error: 'cupos_llenos' }; con forzar:true se da el cupo igual.
 //                       pagada:false = «Deshacer»: vuelve a 'iniciada'. Sirve para el Péndulo (Mercado Pago) y para el Tarot si alguien paga por otra vía.
-//   action 'saldo'   -> { id }   «Saldo pagado»: la persona queda Matriculada (en una clase gratis, 'matriculada'; en la tarjeta del curso, 'inscrita': la etapa equivalente que ya tiene ese programa)
+//   action 'pago'    -> { id, producto, monto, moneda, clave }   «Registrar pago» (Mercado Pago o una terapia, que no avisan solas): anota el pago en lead.pagos y manda el evento Purchase a Meta (API de conversiones)
+//                       con el mismo event_id siempre (`compra-man-<id>-<clave>`), así un doble clic no cuenta dos veces. producto: curso-pendulo | curso-tarot | terapia | formacion | otro.
+//                       En un curso, además, la persona pasa a «Pagó completo» (en una clase gratis, a «Inició programa»), como al marcar el saldo. No depende de la reserva.
+//   action 'saldo'   -> { id }   «Saldo pagado»: en una clase gratis queda 'matriculada' («Vendido»); en la tarjeta del curso queda 'pago_completo' («Pagó completo»; «Nueva estudiante» la marca la Maestra a mano)
 //                       y su curso inscrito. Sale de las secuencias de venta. El cobro del saldo lo envía Karen por WhatsApp: aquí solo se anota que se pagó.
 // Las reservas del Péndulo anotadas antes con reservaPagada / reservaMonto / reservaFecha se siguen leyendo; lo nuevo se guarda solo en lead.reserva.
 import { FieldValue } from 'firebase-admin/firestore';
 import { FUNCIONES, OFERTAS, asegurarCurso, configClases, esClaseGratis, estadoCupos } from '@/lib/server/embudo.js';
 import { auth, db, json } from '@/lib/server/services.js';
+import { enviarDespues, usuario } from '@/lib/server/meta.js';
 
 const ID = /^[A-Za-z0-9]{1,40}$/;
 const ev = (tipo, texto, por) => ({ t: Date.now(), tipo, texto: String(texto).slice(0, 300), ...(por ? { por: String(por).slice(0, 120) } : {}) });
@@ -25,6 +29,7 @@ export async function POST(request) {
   if (user.admin !== true) return json({ error: 'Esta acción es solo para la Maestra.' }, 403);
   const body = await request.json().catch(() => ({}));
   try {
+    if (body.action === 'pago') return await registrarPago(body, user);
     if (!['reserva', 'saldo'].includes(body.action)) return json({ error: 'Acción desconocida.' }, 400);
     if (!FUNCIONES.reserva) return json({ error: 'La reserva y el saldo están desactivados por ahora.' }, 409);
     if (typeof body.id !== 'string' || !ID.test(body.id)) return json({ error: 'Datos no válidos.' }, 400);
@@ -64,10 +69,10 @@ export async function POST(request) {
     const reservaPagada = String(r.estado || '').startsWith('pag') || l.reservaPagada === true;
     const pagadoReserva = reservaPagada ? (Number(r.monto) || Number(l.reservaMonto) || monto) : 0, saldo = Math.max(0, o.precio - pagadoReserva);
     await ref.update({
-      status: esClaseGratis(l.form) ? 'matriculada' : 'inscrita', saldoPagado: true, saldoFecha: ahora, secuenciasVenta: false, followUp: '',
+      status: esClaseGratis(l.form) ? 'matriculada' : 'pago_completo', saldoPagado: true, saldoFecha: ahora, secuenciasVenta: false, followUp: '',
       pago: { t: ahora, monto: o.precio, moneda: o.moneda },
       pagos: FieldValue.arrayUnion({ t: ahora, monto: saldo, moneda: o.moneda, tipo: 'saldo' }),
-      eventos: FieldValue.arrayUnion(ev('etapa', `Saldo pagado (${dinero(saldo, o.moneda)}) · marcado por ${quien}: matriculada`, quien)), updatedAt: FieldValue.serverTimestamp(),
+      eventos: FieldValue.arrayUnion(ev('etapa', `Saldo pagado (${dinero(saldo, o.moneda)}) · marcado por ${quien}: ${esClaseGratis(l.form) ? 'vendido' : 'pagó completo'}`, quien)), updatedAt: FieldValue.serverTimestamp(),
     });
     try { await asegurarCurso(l, clase); } catch (e) { console.error('embudo curso', e); }
     return json({ ok: true });
@@ -75,4 +80,41 @@ export async function POST(request) {
     console.error('api/embudo', e);
     return json({ error: 'No se pudo completar la acción. Inténtalo de nuevo.' }, 500);
   }
+}
+
+// ---------- Registrar pago a mano (Mercado Pago y terapias) ----------
+const PRODUCTOS = { 'curso-pendulo': ['Curso Péndulo Hebreo', 'pendulo'], 'curso-tarot': ['Curso Tarot Terapéutico', 'tarot'], terapia: ['Sesión de terapia con Karen', ''], formacion: ['Formación', ''], otro: ['Otro pago', ''] };
+async function registrarPago(body, user) {
+  const [nombre, curso] = PRODUCTOS[body.producto] || [];
+  const monto = Number(body.monto), moneda = body.moneda === 'USD' ? 'USD' : body.moneda === 'CLP' ? 'CLP' : '';
+  if (!nombre || !moneda || !Number.isFinite(monto) || monto <= 0 || monto > 100000000) return json({ error: 'Elige el producto e indica un monto y una moneda válidos.' }, 400);
+  if (typeof body.id !== 'string' || !ID.test(body.id) || typeof body.clave !== 'string' || !/^[A-Za-z0-9_-]{6,40}$/.test(body.clave)) return json({ error: 'Datos no válidos.' }, 400);
+  const ref = db().doc(`leads/${body.id}`), quien = user.email || user.uid, ahora = Date.now(), eventId = `compra-man-${body.id}-${body.clave}`;
+  let lead = null, repetido = false;
+  await db().runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists) return;
+    lead = snap.data();
+    if ((lead.pagos || []).some((x) => x.clave === body.clave)) { repetido = true; return; }
+    const cambios = {
+      pagos: FieldValue.arrayUnion({ t: ahora, monto, moneda, tipo: 'manual', producto: body.producto, clave: body.clave, por: String(quien).slice(0, 120) }),
+      eventos: FieldValue.arrayUnion(ev('pago', `Pago registrado por ${quien}: ${nombre}, ${dinero(monto, moneda)}`, quien)), updatedAt: FieldValue.serverTimestamp(),
+    };
+    if (curso) { // un curso pagado: sale de las secuencias de venta y queda en su etapa
+      cambios.status = esClaseGratis(lead.form) ? 'matriculada' : 'pago_completo'; cambios.secuenciasVenta = false; cambios.followUp = '';
+      if (!esClaseGratis(lead.form) && ['inscrita'].includes(lead.status)) delete cambios.status; // no retroceder a quien ya empezó
+    }
+    tx.update(ref, cambios);
+  });
+  if (!lead) return json({ error: 'Esa persona ya no existe. Actualiza la lista.' }, 404);
+  if (repetido) return json({ ok: true, repetido: true });
+  if (curso) { try { await asegurarCurso(lead, curso); } catch (e) { console.error('embudo curso', e); } }
+  // Purchase para Meta (sin cookies del navegador: el identificador del clic del anuncio, si lo hay, ayuda a reconocer a la persona)
+  const fbclid = lead.utm?.fbclid;
+  enviarDespues({
+    nombre: 'Purchase', id: eventId, tiempo: ahora,
+    user: usuario({ email: lead.email, phone: lead.whatsapp, nombre: lead.name, uid: lead.codigo || body.id }, fbclid ? { fbc: `fb.1.${lead.createdAt?.toMillis?.() || ahora}.${fbclid}` } : {}),
+    custom: { value: monto, currency: moneda, content_name: nombre },
+  });
+  return json({ ok: true, eventId });
 }

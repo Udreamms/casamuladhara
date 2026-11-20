@@ -14,16 +14,19 @@ export const esClaseGratis = (form) => form === 'clase-pendulo' || form === 'cla
 // Etapas del embudo de una clase gratis. Las seis primeras son el camino; las demás, alternativas.
 export const ETAPAS_CLASE = ['registrada', 'confirmada', 'entro', 'asistio_confirmado', 'vio_oferta', 'reservo_cupo', 'matriculada', 'no_asistio', 'no_identificada', 'vio_replay', 'sin_respuesta', 'lista_espera'];
 // Etapas de siempre (cursos y formación) más las del embudo de clases. Todas se guardan en el campo status.
-export const ETAPAS = ['nuevo', 'contactado', 'clase', 'conversando', 'inscrita', 'descartado', ...ETAPAS_CLASE];
+// Etapas de los pipelines nuevos (CRM): replay_enviado, seguimiento y remarketing (clases gratis y cursos) y pago_completo (cursos: «Pagó completo» / «Pagó 1.ª cuota»). Las mueve la Maestra a mano.
+export const ETAPAS_PIPELINE = ['replay_enviado', 'seguimiento', 'remarketing', 'pago_completo', 'llamada_agendada'];
+export const ETAPAS = ['nuevo', 'contactado', 'clase', 'conversando', 'inscrita', 'descartado', ...ETAPAS_CLASE, ...ETAPAS_PIPELINE];
 // Para que una etapa solo avance (nunca retroceda por un evento): mayor número = más avanzada
 export const RANGO = {
   descartado: -1, nuevo: 0, registrada: 0, lista_espera: 0, contactado: 1, confirmada: 1, sin_respuesta: 1, no_asistio: 1, no_identificada: 1,
-  entro: 2, vio_replay: 2, clase: 3, asistio_confirmado: 3, conversando: 4, vio_oferta: 4, reservo_cupo: 4.5, inscrita: 5, matriculada: 5,
+  entro: 2, vio_replay: 2, llamada_agendada: 1, clase: 3, asistio_confirmado: 3, replay_enviado: 3, conversando: 4, vio_oferta: 4, seguimiento: 4, remarketing: 4, reservo_cupo: 4.5, inscrita: 5, matriculada: 5, pago_completo: 5,
 };
 export const ETAPA_TXT = {
   nuevo: 'Nueva', contactado: 'Contactada', clase: 'Tomó la clase', conversando: 'En conversación', inscrita: 'Inscrita', descartado: 'Descartada',
   registrada: 'Registrada', confirmada: 'Confirmada', entro: 'Entró', asistio_confirmado: 'Asistió confirmado', vio_oferta: 'Vio la oferta', reservo_cupo: 'Reservó cupo', matriculada: 'Matriculada',
   no_asistio: 'No asistió', no_identificada: 'No identificada', vio_replay: 'Vio el replay', sin_respuesta: 'Sin respuesta', lista_espera: 'Lista de espera',
+  replay_enviado: 'Replay enviado', seguimiento: 'Seguimiento', remarketing: 'Remarketing', pago_completo: 'Pagó completo', llamada_agendada: 'Llamada agendada',
 };
 export const EVENTOS = ['clic_entrar', 'codigo_asistencia_ok', 'autodeclara_asistio', 'autodeclara_no_asistio', 'vio_replay', 'clic_comprar', 'pago_confirmado', 'pago_fallido', 'lista_espera'];
 // ALCANCE CONGELADO: funciones apagadas (el código sigue aquí, no se borró). Deben coincidir con FUNC en public/assets/js/admin.js.
@@ -143,7 +146,7 @@ const DIAS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', '
 const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 export const diaLargo = (fecha) => { const d = new Date(`${fecha}T12:00:00Z`); return Number.isNaN(d.getTime()) ? String(fecha) : `${DIAS[d.getUTCDay()]} ${d.getUTCDate()} de ${MESES[d.getUTCMonth()]}`; };
 // Al inscribirse a otra clase, estas etapas eran de la clase anterior y vuelven a «Registrada» (el resto —matriculada, inscrita, reservó cupo, en conversación— se conserva)
-export const ETAPAS_DE_LA_CLASE = ['nuevo', 'contactado', 'confirmada', 'entro', 'asistio_confirmado', 'clase', 'vio_replay', 'vio_oferta', 'no_asistio', 'no_identificada', 'sin_respuesta', 'lista_espera', 'descartado'];
+export const ETAPAS_DE_LA_CLASE = ['nuevo', 'contactado', 'confirmada', 'entro', 'asistio_confirmado', 'clase', 'vio_replay', 'vio_oferta', 'replay_enviado', 'seguimiento', 'remarketing', 'no_asistio', 'no_identificada', 'sin_respuesta', 'lista_espera', 'descartado'];
 
 // Sin tildes, minúsculas y sin signos: para comparar palabras y nombres
 export const normaliza = (t) => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9ñ ]/g, ' ').replace(/\s+/g, ' ').trim();
@@ -237,15 +240,16 @@ export async function registrarEvento({ codigo, evento, fechaIso, origen = '', e
 }
 
 // Quien paga el curso queda también inscrita en el programa de curso (para que aparezca en su pipeline)
-export async function asegurarCurso(previo, clase) {
+// Quien paga el curso queda en «Pagó completo» (Tarot: «Pagó 1.ª cuota»); pasarla a «Nueva estudiante» lo hace la Maestra a mano.
+export async function asegurarCurso(previo, clase, estado = 'pago_completo') {
   const form = clase === 'tarot' ? 'tarot' : clase === 'pendulo' ? 'pendulo' : '';
   if (!form || !previo.email) return;
   const q = await db().collection('leads').where('email', '==', previo.email).where('form', '==', form).limit(1).get();
-  if (!q.empty) { if ((RANGO[q.docs[0].data().status] ?? 0) < RANGO.inscrita) await q.docs[0].ref.update({ status: 'inscrita', updatedAt: FieldValue.serverTimestamp() }); return; }
+  if (!q.empty) { if ((RANGO[q.docs[0].data().status] ?? 0) < RANGO[estado]) await q.docs[0].ref.update({ status: estado, updatedAt: FieldValue.serverTimestamp() }); return; }
   await db().collection('leads').add({
     form, clase, name: previo.name || '', email: previo.email || '', whatsapp: previo.whatsapp || '', waKey: previo.waKey || '', country: previo.country || '',
-    interest: '', message: '', page: 'embudo', utm: {}, status: 'inscrita', desdeForm: previo.form || '',
-    eventos: [{ t: Date.now(), tipo: 'programa', texto: 'Pagó el curso: inscrita automáticamente' }],
+    interest: '', message: '', page: 'embudo', utm: {}, status: estado, desdeForm: previo.form || '',
+    eventos: [{ t: Date.now(), tipo: 'programa', texto: `Pagó el curso: quedó en «${ETAPA_TXT[estado] || estado}»` }],
     createdAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp(),
   });
 }
