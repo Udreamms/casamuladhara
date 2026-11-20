@@ -1909,14 +1909,44 @@ V.inicio = () => {
 // ---------- Chat de WhatsApp Business (número de Karen, src/app/api/whatsapp) ----------
 // Las conversaciones llegan en vivo desde Firestore; enviar y marcar como leído pasa por el servidor, que es quien habla con Meta.
 const waApi = async (body) => {
+  const form = body instanceof FormData;
   const r = await fetch('/api/whatsapp', {
-    method: 'POST', headers: { Authorization: `Bearer ${await auth.currentUser.getIdToken()}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+    method: 'POST', headers: { Authorization: `Bearer ${await auth.currentUser.getIdToken()}`, ...(form ? {} : { 'Content-Type': 'application/json' }) },
+    body: form ? body : JSON.stringify(body),
   });
   const out = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(out.error || 'No se pudo enviar por WhatsApp.');
   return out;
 };
+// Fotos, audios y documentos: se piden al servidor con la sesión de la Maestra y se guardan como enlaces temporales del navegador
+const waBlobs = new Map();
+async function waArchivo(id) {
+  if (waBlobs.has(id)) return waBlobs.get(id);
+  const r = await fetch(`/api/whatsapp?media=${encodeURIComponent(id)}`, { headers: { Authorization: `Bearer ${await auth.currentUser.getIdToken()}` } });
+  if (!r.ok) throw new Error('archivo');
+  const url = URL.createObjectURL(await r.blob());
+  waBlobs.set(id, url);
+  return url;
+}
+const waMediaHTML = (m) => {
+  if (m.loc) return `<a class="wa-loc" href="https://www.google.com/maps?q=${m.loc.lat},${m.loc.lng}" target="_blank" rel="noopener">📍 ${esc(m.loc.name || 'Ver ubicación en el mapa')}</a>`;
+  if (!m.media) return '';
+  const { id, kind, filename } = m.media, url = waBlobs.get(id);
+  const cuerpo = !url ? '<span class="muted">Cargando archivo…</span>'
+    : kind === 'image' || kind === 'sticker' ? `<a href="${url}" target="_blank" rel="noopener"><img src="${url}" alt="Imagen" loading="lazy"></a>`
+    : kind === 'audio' ? `<audio controls preload="none" src="${url}"></audio>`
+    : kind === 'video' ? `<video controls preload="metadata" src="${url}"></video>`
+    : `<a class="wa-doc" href="${url}" download="${esc(filename || 'documento')}">📎 ${esc(filename || 'Abrir documento')}</a>`;
+  return `<div class="wa-media" data-wa-media="${esc(id)}">${cuerpo}</div>`;
+};
+// Después de pintar: baja los archivos que aún no están y los muestra
+function waCargarArchivos() {
+  document.querySelectorAll('#wa-msgs [data-wa-media]').forEach((el) => {
+    const id = el.dataset.waMedia; if (waBlobs.has(id) || el.dataset.waPidio) return;
+    el.dataset.waPidio = '1';
+    waArchivo(id).then(() => { if (S.view === 'whatsapp') waRepaint(true); }).catch(() => { el.innerHTML = '<span class="muted">No se pudo cargar el archivo.</span>'; });
+  });
+}
 const waNameOf = (n, chat) => chat?.name || A.leads?.find((l) => waNum(l.whatsapp) === n)?.name || A.students.find((u) => waNum(u.phone) === n)?.displayName || `+${n}`;
 const waHora = (ms) => { const d = new Date(ms); return d.toDateString() === new Date().toDateString() ? d.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' }) : d.toLocaleDateString('es', { day: 'numeric', month: 'short' }); };
 const waChats = () => {
@@ -1932,11 +1962,23 @@ const waChatHTML = () => {
   const c = A.wa.chats.find((x) => x.id === n), libre = waLibre(c);
   const estado = (m) => (m.dir !== 'out' ? '' : { read: ' ✓✓ leído', delivered: ' ✓✓', failed: ' · no se pudo entregar' }[m.status] || ' ✓');
   return `<div class="wa-chat"><div class="wa-top"><div><b>${esc(waNameOf(n, c))}</b><br><span class="muted" style="font-size:.84rem">+${esc(n)}</span></div></div>
-    <div class="wa-msgs" id="wa-msgs">${A.wa.msgs.map((m) => `<div class="wa-m ${m.dir === 'out' ? 'out' : ''}">${esc(m.text)}<small class="${m.status === 'failed' ? 'bad' : ''}">${m.ts?.toMillis ? waHora(m.ts.toMillis()) : ''}${estado(m)}</small></div>`).join('') || '<div class="wa-empty">Aún no hay mensajes. Empieza con la plantilla.</div>'}</div>
-    ${libre ? '<form class="wa-send" id="wa-form"><textarea id="wa-text" rows="1" placeholder="Escribe un mensaje…" aria-label="Mensaje"></textarea><button class="btn btn-primary btn-sm">Enviar</button></form>'
-    : `<div class="wa-note"><span>${c?.lastInboundAt ? 'Pasaron más de 24 horas desde su último mensaje.' : 'Esta persona aún no te ha escrito.'} WhatsApp solo permite empezar con un mensaje de plantilla; cuando responda podrás escribirle libremente.</span><button class="btn btn-primary btn-sm" data-wa-plantilla>Enviar plantilla</button></div>`}</div>`;
+    <div class="wa-msgs" id="wa-msgs">${A.wa.msgs.map((m) => { const txt = m.media || m.loc ? String(m.text || '').replace(/^\[[^\]]+\]\s?/, '') : m.text; return `<div class="wa-m ${m.dir === 'out' ? 'out' : ''}">${waMediaHTML(m)}${txt ? esc(txt) : ''}${m.error ? `<span class="bad"> ${esc(m.error)}</span>` : ''}<small class="${m.status === 'failed' ? 'bad' : ''}">${m.ts?.toMillis ? waHora(m.ts.toMillis()) : ''}${estado(m)}</small></div>`; }).join('') || '<div class="wa-empty">Aún no hay mensajes. Empieza con la plantilla.</div>'}</div>
+    ${libre ? '<form class="wa-send" id="wa-form"><label class="btn btn-ghost btn-sm wa-clip" title="Enviar foto, audio, video o documento (hasta 4 MB)">📎<input type="file" id="wa-file" hidden accept="image/jpeg,image/png,audio/aac,audio/mp4,audio/mpeg,audio/amr,audio/ogg,video/mp4,video/3gpp,application/pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"></label><textarea id="wa-text" rows="1" placeholder="Escribe un mensaje…" aria-label="Mensaje"></textarea><button class="btn btn-primary btn-sm">Enviar</button></form>'
+    : `<div class="wa-note"><span>${c?.lastInboundAt ? 'Pasaron más de 24 horas desde su último mensaje.' : 'Esta persona aún no te ha escrito.'} WhatsApp solo permite empezar con un mensaje de plantilla; cuando responda podrás escribirle libremente.</span><span class="wa-pl">${waPlantillasHTML()}<button class="btn btn-primary btn-sm" data-wa-plantilla>Enviar plantilla</button></span></div>`}</div>`;
 };
-V.whatsapp = () => `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>WhatsApp</h1><p>Conversaciones desde el WhatsApp Business de Karen (+56 9 4004 4528). Lo que escribas aquí sale con ese número.</p></div></div>
+// Lista de plantillas aprobadas por Meta (se pide una vez); si no está disponible, se usa la plantilla por defecto del servidor
+const waPlantillasHTML = () => {
+  const l = (A.wa.plantillas || []).filter((p) => p.usable);
+  if (!l.length) return '';
+  return `<select id="wa-pl" aria-label="Plantilla">${l.map((p, i) => `<option value="${i}" title="${esc(p.texto)}">${esc(p.name)} (${esc(p.lang)})</option>`).join('')}</select>`;
+};
+async function waCargarPlantillas() {
+  if (A.wa.plantillas !== undefined) return;
+  A.wa.plantillas = null;
+  try { A.wa.plantillas = (await waApi({ action: 'plantillas' })).plantillas || null; } catch (e) { console.warn('plantillas', e.message); }
+  if (S.view === 'whatsapp') waRepaint(true);
+}
+V.whatsapp = () => `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>WhatsApp</h1><p>Conversaciones desde el WhatsApp Business de Karen (+56 9 7280 3407). Lo que escribas aquí sale con ese número.</p></div></div>
   ${A.wa.on === false ? '<div class="card empty">WhatsApp todavía no está conectado: faltan las llaves de Meta en Vercel (WHATSAPP_TOKEN y WHATSAPP_PHONE_ID). Los pasos están en el README.</div>' : ''}
   <section class="card wa"><div class="wa-list" id="wa-list">${waListHTML()}</div><div id="wa-pane" style="display:grid;min-width:0;min-height:0">${waChatHTML()}</div></section>`;
 let waMsgsOff = null, waChatsOff = null;
@@ -1944,10 +1986,12 @@ function waRepaint(soloMensajes = false) {
   if (S.view !== 'whatsapp') return paintNav();
   const l = $('#wa-list'); if (l && !soloMensajes) l.innerHTML = waListHTML();
   const p = $('#wa-pane'); if (!p) return;
-  const t = $('#wa-text'), borrador = t?.value || '', foco = document.activeElement === t;
+  const t = $('#wa-text'), borrador = t?.value || '', foco = document.activeElement === t, plSel = $('#wa-pl')?.value;
   const m0 = $('#wa-msgs'), abajo = !m0 || m0.scrollHeight - m0.scrollTop - m0.clientHeight < 80;
-  p.innerHTML = waChatHTML(); waBind();
+  p.innerHTML = waChatHTML(); waBind(); waCargarArchivos();
+  if (S.waOpen && !waLibre(A.wa.chats.find((x) => x.id === S.waOpen))) waCargarPlantillas();
   const t2 = $('#wa-text'); if (t2) { t2.value = borrador; if (foco) t2.focus(); }
+  const pl2 = $('#wa-pl'); if (pl2 && plSel != null && [...pl2.options].some((o) => o.value === plSel)) pl2.value = plSel;
   const m = $('#wa-msgs'); if (m && abajo) m.scrollTop = m.scrollHeight;
 }
 function waWatch() {
@@ -1983,10 +2027,19 @@ function waBind() {
       b.disabled = false;
     };
   }
+  const fi = $('#wa-file');
+  if (fi) fi.onchange = async () => {
+    const f = fi.files[0]; fi.value = ''; if (!f) return;
+    if (f.size > 4 * 1024 * 1024) return fail(new Error('El archivo pesa más de 4 MB. Envía uno más liviano.'));
+    const fd = new FormData();
+    fd.append('action', 'archivo'); fd.append('to', S.waOpen); fd.append('name', S.waName || ''); fd.append('text', $('#wa-text')?.value.trim() || ''); fd.append('file', f);
+    try { await waApi(fd); if ($('#wa-text')) $('#wa-text').value = ''; toast('Archivo enviado.'); } catch (err) { fail(err); }
+  };
   const pl = $('[data-wa-plantilla]');
   if (pl) pl.onclick = async () => {
     pl.disabled = true;
-    try { await waApi({ action: 'plantilla', to: S.waOpen, name: S.waName || waNameOf(S.waOpen) }); toast('Plantilla enviada. Cuando responda podrás escribirle aquí.'); } catch (err) { fail(err); pl.disabled = false; }
+    const sel = $('#wa-pl'), p = sel ? (A.wa.plantillas || []).filter((x) => x.usable)[Number(sel.value)] : null;
+    try { await waApi({ action: 'plantilla', to: S.waOpen, name: S.waName || waNameOf(S.waOpen), ...(p ? { plantilla: { name: p.name, lang: p.lang, vars: p.vars } } : {}) }); toast('Plantilla enviada. Cuando responda podrás escribirle aquí.'); } catch (err) { fail(err); pl.disabled = false; }
   };
 }
 // ---------- Calendario de la Maestra ----------

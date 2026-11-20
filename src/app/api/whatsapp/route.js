@@ -4,16 +4,22 @@
 //   POST (Authorization: Bearer <token de la Maestra>, cuerpo { action, ... }):
 //     'estado'                      -> { configurado }
 //     'enviar'   { to, text, name } -> escribe un mensaje (solo dentro de las 24 h desde que la persona escribió)
-//     'plantilla' { to, name }      -> abre la conversación con la plantilla aprobada (cuando pasaron más de 24 h o aún no ha escrito)
+//     'plantilla' { to, name, plantilla? } -> abre la conversación con una plantilla aprobada (cuando pasaron más de 24 h o aún no ha escrito)
+//     'plantillas'                  -> lista las plantillas aprobadas en Meta (necesita WHATSAPP_WABA_ID)
+//     'archivo'  (formulario: to, name, text = pie de foto, file) -> foto, audio, video o documento de hasta 4 MB, también solo dentro de las 24 h
+//   GET ?media=<id> (Authorization: Bearer <token de la Maestra>) -> el archivo de un mensaje, para verlo en el portal
 //     'leido'    { to }             -> marca la conversación como leída
 // Se guarda en wa_chats/{número} y wa_chats/{número}/messages/{id}; el portal los lee en vivo (solo la Maestra, ver firestore.rules).
 import crypto from 'node:crypto';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { auth, db, json } from '@/lib/server/services.js';
-import { configurado, enviarPlantilla, enviarTexto, normalizar } from '@/lib/server/whatsapp.js';
+import { bajarArchivo, configurado, enviarArchivo, enviarPlantilla, enviarTexto, normalizar, plantillasAprobadas, TIPO_ARCHIVO } from '@/lib/server/whatsapp.js';
 import { pideParar } from '@/lib/server/embudo.js';
 
 const VENTANA = 24 * 60 * 60 * 1000;
+const LIMITE_ARCHIVO = 4 * 1024 * 1024; // Vercel no deja pasar cuerpos de más de ~4,5 MB
+const AVISO_VENTANA = { error: 'Pasaron más de 24 horas desde su último mensaje. WhatsApp solo permite abrir la conversación con la plantilla.', plantilla: true };
+const fueraDeVentana = async (numero) => Date.now() - ((await db().doc(`wa_chats/${numero}`).get()).data()?.lastInboundAt?.toMillis?.() || 0) > VENTANA;
 const TIPOS = { image: 'Imagen', audio: 'Audio', voice: 'Nota de voz', video: 'Video', document: 'Documento', sticker: 'Sticker', location: 'Ubicación', contacts: 'Contacto', button: '', interactive: '', reaction: 'Reacción' };
 
 // Texto que se muestra de cada mensaje (los archivos se ven en la app de WhatsApp; aquí queda el aviso y el pie de foto)
@@ -26,6 +32,18 @@ function textoDe(m) {
   return `[${TIPOS[m.type] || 'Mensaje'}]${pie ? ` ${pie}` : ''}`;
 }
 
+// Datos extra para mostrar el mensaje en el portal: el archivo (se descarga aparte con su id) o la ubicación
+function extraDe(m) {
+  if (['image', 'audio', 'voice', 'video', 'document', 'sticker'].includes(m.type)) {
+    const f = m[m.type] || m.audio || {};
+    return f.id ? { media: { id: f.id, mime: f.mime_type || '', kind: m.type === 'voice' ? 'audio' : m.type, ...(f.filename ? { filename: f.filename } : {}) } } : {};
+  }
+  if (m.type === 'location' && m.location) {
+    return { loc: { lat: Number(m.location.latitude), lng: Number(m.location.longitude), ...(m.location.name ? { name: m.location.name } : {}) } };
+  }
+  return {};
+}
+
 function firmaValida(cuerpo, firma) {
   const secreto = process.env.WHATSAPP_APP_SECRET?.trim();
   if (!secreto || !firma) return false;
@@ -34,7 +52,7 @@ function firmaValida(cuerpo, firma) {
   return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
-async function guardar(numero, { dir, id, text, nombre, ms, status }) {
+async function guardar(numero, { dir, id, text, nombre, ms, status, extra }) {
   const chat = db().doc(`wa_chats/${numero}`);
   const ts = Timestamp.fromMillis(ms || Date.now());
   const previo = (await chat.get()).data() || {};
@@ -47,7 +65,7 @@ async function guardar(numero, { dir, id, text, nombre, ms, status }) {
     lastAt: ts,
     ...(entrante ? { lastInboundAt: ts, unread: FieldValue.increment(1) } : {}),
   }, { merge: true });
-  await chat.collection('messages').doc(id).set({ dir, text: text.slice(0, 4000), ts, ...(status ? { status } : {}) }, { merge: true });
+  await chat.collection('messages').doc(id).set({ dir, text: text.slice(0, 4000), ts, ...(status ? { status } : {}), ...(extra || {}) }, { merge: true });
 }
 
 // Quien responde «no» (o «stop», «baja»…) no recibe más mensajes: se marca en todos sus registros y sale de los envíos del portal
@@ -66,13 +84,13 @@ async function aviso(payload) {
       const nombres = Object.fromEntries((v.contacts || []).map((c) => [c.wa_id, c.profile?.name || '']));
       for (const m of v.messages || []) {
         const numero = normalizar(m.from);
-        if (numero) await guardar(numero, { dir: 'in', id: m.id, text: textoDe(m), nombre: nombres[m.from], ms: Number(m.timestamp) * 1000 });
+        if (numero) await guardar(numero, { dir: 'in', id: m.id, text: textoDe(m), nombre: nombres[m.from], ms: Number(m.timestamp) * 1000, extra: extraDe(m) });
         if (numero && pideParar(textoDe(m))) await noContactar(numero);
       }
       // Lo que Karen escribe desde la app de WhatsApp Business en su teléfono también queda en el chat del portal
       for (const m of v.message_echoes || []) {
         const numero = normalizar(m.to);
-        if (numero) await guardar(numero, { dir: 'out', id: m.id, text: textoDe(m), ms: Number(m.timestamp) * 1000, status: 'sent' });
+        if (numero) await guardar(numero, { dir: 'out', id: m.id, text: textoDe(m), ms: Number(m.timestamp) * 1000, status: 'sent', extra: extraDe(m) });
       }
       for (const s of v.statuses || []) {
         const numero = normalizar(s.recipient_id);
@@ -84,8 +102,32 @@ async function aviso(payload) {
   }
 }
 
+// Solo la Maestra: devuelve su usuario o una respuesta de error
+async function soloMaestra(request) {
+  let user;
+  try {
+    user = await auth().verifyIdToken((request.headers.get('authorization') || '').replace(/^Bearer\s+/i, ''));
+  } catch (e) {
+    return { error: json({ error: 'Tu sesión expiró. Vuelve a entrar al portal.' }, 401) };
+  }
+  if (user.admin !== true) return { error: json({ error: 'Esta acción es solo para la Maestra.' }, 403) };
+  return { user };
+}
+
+// Fotos, audios y documentos de las conversaciones: el portal los pide aquí (con la sesión de la Maestra) y Meta los entrega con la llave del servidor
+async function verArchivo(request, id) {
+  const { error } = await soloMaestra(request);
+  if (error) return error;
+  if (!configurado()) return json({ error: 'WhatsApp todavía no está conectado.' }, 503);
+  try {
+    const { cuerpo, mime } = await bajarArchivo(id);
+    return new Response(cuerpo, { status: 200, headers: { 'Content-Type': mime, 'Cache-Control': 'private, max-age=3600', 'X-Content-Type-Options': 'nosniff' } });
+  } catch (e) { return json({ error: e.message }, 404); }
+}
+
 export async function GET(request) {
   const q = new URL(request.url).searchParams;
+  if (q.get('media')) return verArchivo(request, q.get('media'));
   const clave = process.env.WHATSAPP_VERIFY_TOKEN?.trim();
   if (clave && q.get('hub.mode') === 'subscribe' && q.get('hub.verify_token') === clave) {
     return new Response(q.get('hub.challenge') || '', { status: 200, headers: { 'Content-Type': 'text/plain' } });
@@ -94,28 +136,37 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
-  const crudo = await request.text();
+  // Los archivos que sube el portal llegan como formulario; todo lo demás como JSON
+  const conArchivo = (request.headers.get('content-type') || '').includes('multipart/form-data');
   const firma = request.headers.get('x-hub-signature-256');
-  let body = {};
-  try { body = JSON.parse(crudo); } catch { /* cuerpo vacío o roto */ }
+  let crudo = '', body = {}, archivo = null;
+  if (conArchivo) {
+    try {
+      const fd = await request.formData();
+      body = Object.fromEntries([...fd.entries()].filter(([, v]) => typeof v === 'string'));
+      archivo = fd.get('file');
+    } catch { return json({ error: 'No se pudo leer el archivo.' }, 400); }
+  } else {
+    crudo = await request.text();
+    try { body = JSON.parse(crudo); } catch { /* cuerpo vacío o roto */ }
+  }
 
   // Aviso de Meta: se comprueba la firma antes de guardar nada
-  if (firma) {
+  if (firma && !conArchivo) {
     if (!firmaValida(crudo, firma)) return new Response('Firma no válida', { status: 401 });
     try { await aviso(body); } catch (e) { console.error('whatsapp webhook', e); return new Response('Error', { status: 500 }); }
     return new Response('ok', { status: 200 });
   }
 
-  let user;
-  try {
-    user = await auth().verifyIdToken((request.headers.get('authorization') || '').replace(/^Bearer\s+/i, ''));
-  } catch (e) {
-    return json({ error: 'Tu sesión expiró. Vuelve a entrar al portal.' }, 401);
-  }
-  if (user.admin !== true) return json({ error: 'Esta acción es solo para la Maestra.' }, 403);
+  const { error } = await soloMaestra(request);
+  if (error) return error;
 
-  if (body.action === 'estado') return json({ configurado: configurado() });
+  if (body.action === 'estado') return json({ configurado: configurado(), plantillas: !!process.env.WHATSAPP_WABA_ID?.trim() });
   if (!configurado()) return json({ error: 'WhatsApp todavía no está conectado: faltan WHATSAPP_TOKEN y WHATSAPP_PHONE_ID en Vercel.' }, 503);
+
+  if (body.action === 'plantillas') {
+    try { return json({ plantillas: await plantillasAprobadas() }); } catch (e) { return json({ error: e.message }, 502); }
+  }
 
   const numero = normalizar(body.to);
   if (!numero) return json({ error: 'El número de WhatsApp no es válido. Debe llevar el código de país.' }, 400);
@@ -129,17 +180,31 @@ export async function POST(request) {
     if (body.action === 'enviar') {
       const texto = typeof body.text === 'string' ? body.text.trim().slice(0, 4000) : '';
       if (!texto) return json({ error: 'Escribe el mensaje.' }, 400);
-      const ultimo = (await db().doc(`wa_chats/${numero}`).get()).data()?.lastInboundAt?.toMillis?.() || 0;
-      if (Date.now() - ultimo > VENTANA) {
-        return json({ error: 'Pasaron más de 24 horas desde su último mensaje. WhatsApp solo permite abrir la conversación con la plantilla.', plantilla: true }, 409);
-      }
+      if (await fueraDeVentana(numero)) return json(AVISO_VENTANA, 409);
       const id = await enviarTexto(numero, texto);
       await guardar(numero, { dir: 'out', id: id || `out-${Date.now()}`, text: texto, nombre, status: 'sent' });
       return json({ ok: true });
     }
+    if (body.action === 'archivo') {
+      if (!archivo || typeof archivo === 'string' || !archivo.size) return json({ error: 'Elige un archivo.' }, 400);
+      if (archivo.size > LIMITE_ARCHIVO) return json({ error: 'El archivo pesa más de 4 MB. Envía uno más liviano.' }, 413);
+      const mime = (archivo.type || '').split(';')[0].toLowerCase();
+      if (!TIPO_ARCHIVO(mime)) return json({ error: 'No se reconoce el tipo de archivo.' }, 400);
+      if (await fueraDeVentana(numero)) return json(AVISO_VENTANA, 409);
+      const caption = typeof body.text === 'string' ? body.text.trim().slice(0, 1000) : '';
+      const filename = String(archivo.name || 'archivo').slice(0, 120);
+      const r = await enviarArchivo(numero, { buffer: Buffer.from(await archivo.arrayBuffer()), mime, filename, caption });
+      const etiqueta = { image: 'Imagen', audio: 'Audio', video: 'Video', document: 'Documento' }[r.tipo];
+      await guardar(numero, {
+        dir: 'out', id: r.id || `out-${Date.now()}`, text: `[${etiqueta}]${caption ? ` ${caption}` : r.tipo === 'document' ? ` ${filename}` : ''}`, nombre, status: 'sent',
+        extra: { media: { id: r.mediaId, mime, kind: r.tipo, ...(r.tipo === 'document' ? { filename } : {}) } },
+      });
+      return json({ ok: true });
+    }
     if (body.action === 'plantilla') {
-      const id = await enviarPlantilla(numero, nombre.split(/\s+/)[0]);
-      const t = process.env.WHATSAPP_TEMPLATE_NAME?.trim() || 'hello_world';
+      const elegida = body.plantilla?.name ? { name: String(body.plantilla.name), lang: String(body.plantilla.lang || 'es'), vars: Number(body.plantilla.vars) || 0 } : null;
+      const id = await enviarPlantilla(numero, nombre.split(/\s+/)[0], elegida);
+      const t = elegida?.name || process.env.WHATSAPP_TEMPLATE_NAME?.trim() || 'hello_world';
       await guardar(numero, { dir: 'out', id: id || `out-${Date.now()}`, text: `[Plantilla ${t}]`, nombre, status: 'sent' });
       return json({ ok: true });
     }

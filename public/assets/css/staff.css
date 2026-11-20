@@ -293,7 +293,9 @@ dialog input[type=checkbox]{width:auto;padding:0;accent-color:var(--accent)}
 .wa-m.out{align-self:flex-end;background:color-mix(in srgb,var(--ok) 18%,var(--surface))}
 .wa-m small{display:block;text-align:right;color:var(--muted);font-size:.7rem;margin-top:2px}
 .wa-m small.bad{color:var(--live)}
-.wa-send{display:grid;grid-template-columns:1fr auto;gap:8px;padding:10px 12px;border-top:1px solid var(--line);align-items:end}
+.wa-m .wa-media{margin-bottom:4px}.wa-m img,.wa-m video{display:block;max-width:100%;max-height:300px;border-radius:10px}.wa-m audio{max-width:100%}
+.wa-doc,.wa-loc{font-weight:700}.wa-clip{cursor:pointer;align-self:end;min-height:42px;display:inline-flex;align-items:center}.wa-pl{display:inline-flex;gap:8px;align-items:center;flex-wrap:wrap}.wa-pl select{max-width:200px}
+.wa-send{display:grid;grid-template-columns:auto 1fr auto;gap:8px;padding:10px 12px;border-top:1px solid var(--line);align-items:end}
 .wa-send textarea{resize:none;min-height:42px;max-height:140px;border-radius:14px}
 .wa-note{padding:10px 14px;font-size:.84rem;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:color-mix(in srgb,var(--sun) 22%,var(--surface))}
 .wa-empty{display:grid;place-items:center;color:var(--muted);padding:24px;text-align:center}
