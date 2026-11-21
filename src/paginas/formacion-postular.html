@@ -77,7 +77,7 @@
 </div></section>
 <section class="section tone-light" id="pasos"><div class="wrap">
   <div class="section-head"><h2>Cómo es el proceso</h2></div>
-  <ol class="pasos3"><li>Completas una postulación corta, de 3 minutos.</li><li>Una persona del equipo de Casa Muladhara te llama para conocerte y resolver tus dudas.</li><li>Si sientes que es tu momento, reservas tu lugar.</li></ol>
+  <ol class="pasos3"><li>Completas una postulación corta, de 3 minutos.</li><li>Agendas una llamada con alguien del equipo de Casa Muladhara para conocerte y resolver tus dudas.</li><li>Si sientes que es tu momento, reservas tu lugar.</li></ol>
   <p style="margin:22px 0 0;color:var(--muted)">Todos los grupos parten en el Nivel 2. Si no tienes el Nivel 1, haces el próximo curso de Péndulo Hebreo (incluido en el precio) y entras al grupo siguiente.</p>
 </div></section>
 <section class="section tone-light" id="postular" style="background:#efe8d4"><div class="wrap">
@@ -106,9 +106,20 @@
 </div></section>
 <footer style="padding-block:28px"><div class="wrap"><p style="margin:0 0 14px;font-size:.82rem;line-height:1.5;color:var(--on-brand-muted)">Las terapias holísticas acompañan tu bienestar y no reemplazan la atención médica ni psicológica.</p><div class="legal" style="margin:0;padding-top:14px"><span>© Casa Muladhara</span><span>Instagram @casa.muladhara</span></div></div></footer>
 <script src="/assets/js/landing/petalos.js"></script>
-<script>/* Próximo grupo: fecha del Calendario (/api/formacion). Sin fecha, la barra queda oculta (nunca «Próximo grupo: .»). */(()=>{const D=["domingo","lunes","martes","miércoles","jueves","viernes","sábado"],M=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];fetch("/api/formacion").then(r=>r.ok?r.json():Promise.reject()).then(({nextStart:n})=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(n||"");if(!m)return;const d=new Date(Date.UTC(+m[1],+m[2]-1,+m[3]));const f=D[d.getUTCDay()]+" "+d.getUTCDate()+" de "+M[d.getUTCMonth()];document.querySelectorAll("[data-next-start]").forEach(e=>e.textContent=f);document.querySelectorAll("[data-next-wrap]").forEach(e=>e.hidden=false)}).catch(()=>{})})()</script>
+<script>/* Próximo grupo y cierre, desde el Calendario (/api/formacion), sin fechas escritas a mano:
+   - Barra «Próximo grupo: martes 15 de diciembre». Sin fecha, la barra queda oculta (nunca «Próximo grupo: .»).
+   - La postulación cierra 2 días antes del inicio, a las 23:59 de Chile (inicio martes 15 → cierra el domingo 13 a medianoche).
+     Pasado el cierre, el formulario se cambia por el aviso. Sin fecha en el Calendario, el formulario queda abierto. */
+(()=>{const D=["domingo","lunes","martes","miércoles","jueves","viernes","sábado"],M=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"],CIERRE_DIAS_ANTES=2;
+const hoyChile=new Intl.DateTimeFormat("en-CA",{timeZone:"America/Santiago"}).format(new Date());
+fetch("/api/formacion").then(r=>r.ok?r.json():Promise.reject()).then(({nextStart:n})=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(n||"");if(!m)return;
+const d=new Date(Date.UTC(+m[1],+m[2]-1,+m[3]));const f=D[d.getUTCDay()]+" "+d.getUTCDate()+" de "+M[d.getUTCMonth()];
+document.querySelectorAll("[data-next-start]").forEach(e=>e.textContent=f);document.querySelectorAll("[data-next-wrap]").forEach(e=>e.hidden=false);
+const c=new Date(d.getTime()-CIERRE_DIAS_ANTES*864e5).toISOString().slice(0,10);if(hoyChile<=c)return;
+const wa="https://wa.me/56940044528?text=Hola%20Karen%2C%20quiero%20m%C3%A1s%20informaci%C3%B3n%20de%20la%20Formaci%C3%B3n%20de%20Terapeuta";
+const msg='<p style="font-size:1.1rem;font-weight:700">Las postulaciones para el grupo del '+f+' cerraron. Escríbenos y te avisamos del próximo.</p><p style="margin-top:14px"><a class="btn" href="'+wa+'" target="_blank" rel="noopener">Escribir por WhatsApp</a></p>';
+const s=document.getElementById("postular");if(s)s.innerHTML='<div class="wrap" style="text-align:center">'+msg+'</div>'}).catch(()=>{})})()</script>
 <script src="/assets/js/landing/menu.js"></script>
-<script>/* Cierre: 8 dic 2026 17:30 (hora de Chile). Pasada la hora, el botón y el formulario se cambian por el aviso. */(()=>{if(Date.now()<Date.parse("2026-12-08T17:30:00-03:00"))return;const wa="https://wa.me/56940044528?text=Hola%20Karen%2C%20quiero%20m%C3%A1s%20informaci%C3%B3n%20de%20la%20Formaci%C3%B3n%20de%20Terapeuta";const msg='<p style="font-size:1.1rem;font-weight:700">Las inscripciones de este grupo cerraron. Escríbenos y te avisamos del próximo.</p><p style="margin-top:14px"><a class="btn" href="'+wa+'" target="_blank" rel="noopener">Escribir por WhatsApp</a></p>';const c=document.getElementById("cta-hero");if(c)c.innerHTML=msg;const s=document.getElementById("postular");if(s)s.innerHTML='<div class="wrap" style="text-align:center">'+msg+'</div>'})()</script>
 <script src="/assets/js/landing/captacion.js"></script>
 <script>try{fbq("track","ViewContent",{content_name:"Formación Terapeuta Holístico",content_type:"product"})}catch(e){}</script>
 <script src="/assets/js/landing/agendar.js" defer></script>

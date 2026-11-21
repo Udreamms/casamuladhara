@@ -28,5 +28,4 @@ export const reservaTarot = () => process.env.NODE_ENV !== 'production' || proce
 export const pagoPorWhatsapp = (clase) => (process.env.EMBUDO_PAGO_WHATSAPP ?? 'pendulo').split(',').map((x) => x.trim().toLowerCase()).includes(clase);
 // Postulación a la Formación de Terapeuta Holístico Integral (/formacion/postular): llamada de orientación de 20 minutos,
 // que se agenda con el mismo calendario de la web (agendar.js → /api/terapias).
-export const CIERRE_FORMACION = '2026-12-08T17:30:00-03:00'; // cierre de inscripción: 8 de diciembre 17:30, hora de Chile
 export const WA_FORMACION = 'Hola Karen, postulé a la Formación de Terapeuta Holístico y quiero agendar mi llamada.';
