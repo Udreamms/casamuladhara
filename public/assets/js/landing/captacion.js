@@ -102,6 +102,8 @@
         const out = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(out.error || 'No pudimos enviar tus datos.');
         if (!out.repetida) fbq('track', 'Lead', {}, { eventID: body.eventId }); // quien repite el formulario no cuenta otro Lead en las campañas
+        // Venta por WhatsApp (Semana Black Friday de la Formación): los datos quedan en el CRM y se abre el chat con Karen con el plan elegido
+        if (f.dataset.waTexto && window.CM_WA_NUM) { const t = f.dataset.waTexto.replace('{plan}', val('interest')).replace('{nombre}', val('name').trim()); setTimeout(() => { location.href = `https://wa.me/${window.CM_WA_NUM}?text=${encodeURIComponent(t)}`; }, 500); return; }
         // Reserva con pago (Péndulo): los datos quedan en el CRM y de ahí pasa al pago. La breve espera deja que el Píxel alcance a enviar el Lead.
         if (f.dataset.destino && /^\/[a-z]/.test(f.dataset.destino)) { setTimeout(() => { location.href = f.dataset.destino + (out.id ? `&lead=${encodeURIComponent(out.id)}` : ''); }, 600); return; }
         // Clase gratis: pasa a su página de gracias (video de Karen y pasos). La breve espera deja que el Píxel alcance a enviar el Lead.
