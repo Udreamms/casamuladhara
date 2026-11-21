@@ -103,6 +103,8 @@
         if (!r.ok) throw new Error(out.error || 'No pudimos enviar tus datos.');
         if (!out.repetida) fbq('track', 'Lead', {}, { eventID: body.eventId }); // quien repite el formulario no cuenta otro Lead en las campañas
         // Venta por WhatsApp (Semana Black Friday de la Formación): los datos quedan en el CRM y se abre el chat con Karen con el plan elegido
+        // Black Friday: avisa a Meta que quiere comprar (InitiateCheckout) con el monto del plan elegido (data-valor del plan, en CLP)
+        if (f.dataset.waTexto) { const v = Number(f.querySelector('input[name="interest"]:checked')?.dataset.valor || 0); if (v) fbq('track', 'InitiateCheckout', { value: v, currency: 'CLP', content_name: f.dataset.contentName || '' }); }
         if (f.dataset.waTexto && window.CM_WA_NUM) { const t = f.dataset.waTexto.replace('{plan}', val('interest')).replace('{nombre}', val('name').trim()); setTimeout(() => { location.href = `https://wa.me/${window.CM_WA_NUM}?text=${encodeURIComponent(t)}`; }, 500); return; }
         // Reserva con pago (Péndulo): los datos quedan en el CRM y de ahí pasa al pago. La breve espera deja que el Píxel alcance a enviar el Lead.
         if (f.dataset.destino && /^\/[a-z]/.test(f.dataset.destino)) { setTimeout(() => { location.href = f.dataset.destino + (out.id ? `&lead=${encodeURIComponent(out.id)}` : ''); }, 600); return; }
