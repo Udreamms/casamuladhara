@@ -92,6 +92,9 @@
         action: 'save', form: f.dataset.lead,
         name: val('name'), email: val('email'), whatsapp, country: val('country') || pais,
         interest: val('interest'), date: f.elements.interest?.selectedOptions?.[0]?.dataset.date || '', message: val('message'), web: val('web'),
+        // Postulación a la Formación: «¿Qué te mueve?» (respuesta corta) y 2 preguntas de opción única
+        ...(f.dataset.postulacion ? { postulacion: Object.fromEntries(['motivo', 'experiencia', 'horas'].map((k) => [k, (f.querySelector(`input[name="${k}"]:checked`)?.value ?? (f.elements[k]?.type === 'text' ? f.elements[k].value : '')).trim()])) } : {}),
+        ...(f.dataset.consentimiento ? { consentimiento: Object.fromEntries(['email', 'whatsapp'].map((c) => [c, { aceptado: true, fecha: new Date().toISOString(), texto: f.dataset.consentimiento, origen: f.dataset.lead }])) } : {}),
         page: location.pathname, utm: origen(), ...(f.dataset.montoReserva ? { reserva: true } : {}),
         eventId: crypto.randomUUID?.() || String(Date.now()) + Math.random().toString(36).slice(2, 10), // mismo id en el Píxel y en la API de conversiones
       };
@@ -101,7 +104,9 @@
         const r = await fetch('/api/leads', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
         const out = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(out.error || 'No pudimos enviar tus datos.');
-        if (!out.repetida) fbq('track', 'Lead', {}, { eventID: body.eventId }); // quien repite el formulario no cuenta otro Lead en las campañas
+        if (!out.repetida) fbq('track', 'Lead', f.dataset.contentName ? { content_name: f.dataset.contentName } : {}, { eventID: body.eventId }); // quien repite el formulario no cuenta otro Lead en las campañas
+        // Postulación a la Formación: pasa a la página de gracias para agendar la llamada
+        if (f.dataset.gracias && out.codigo) { setTimeout(() => { location.href = `${f.dataset.gracias}?l=${encodeURIComponent(out.codigo)}`; }, 500); return; }
         // Venta por WhatsApp (Semana Black Friday de la Formación): los datos quedan en el CRM y se abre el chat con Karen con el plan elegido
         // Black Friday: avisa a Meta que quiere comprar (InitiateCheckout) con el monto del plan elegido (data-valor del plan, en CLP)
         if (f.dataset.waTexto) { const v = Number(f.querySelector('input[name="interest"]:checked')?.dataset.valor || 0); if (v) fbq('track', 'InitiateCheckout', { value: v, currency: 'CLP', content_name: f.dataset.contentName || '' }); }

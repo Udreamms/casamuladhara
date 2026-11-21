@@ -26,3 +26,6 @@ export const reservaTarot = () => process.env.NODE_ENV !== 'production' || proce
 // con el mensaje ya escrito; ella envía el link de pago. Lista de cursos separados por coma en EMBUDO_PAGO_WHATSAPP (ej. «pendulo,tarot»).
 // Sin la variable, rigen el Péndulo y el Tarot. Para volver al pago directo: EMBUDO_PAGO_WHATSAPP=ninguno.
 export const pagoPorWhatsapp = (clase) => (process.env.EMBUDO_PAGO_WHATSAPP ?? 'pendulo,tarot').split(',').map((x) => x.trim().toLowerCase()).includes(clase);
+// Postulación a la Formación de Terapeuta Holístico Integral (/formacion/postular): llamada de orientación de 20 minutos,
+// que se agenda con el mismo calendario de la web (agendar.js → /api/terapias).
+export const WA_FORMACION = 'Hola Karen, postulé a la Formación de Terapeuta Holístico y quiero agendar mi llamada.';
