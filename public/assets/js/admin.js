@@ -738,17 +738,20 @@ function descargarCsvPublico(filas, nombre) {
 }
 function exportarPublicosMeta(que) {
   if (!A.leads) return toast('Todavía están cargando las interesadas.');
-  const r = construirPublicos(personas(), { pagoHecho, etapaDe: leadEtapa, niveles: (p) => (p.alumna ? ownedOf(p.alumna) : []), pagaAula: (p) => !!p.alumna && paying(p.alumna) });
+  // Alumnas del aula sin ficha de interesada: se suman como personas aparte (si ninguna llave coincide con una ficha)
+  const per = personas(), llaves = new Set(per.flatMap((p) => p.leads.flatMap(llavesDe)));
+  const soloAula = A.students.filter((u) => !llavesDe(u).some((k) => llaves.has(k))).map((u) => ({ id: `aula-${u.id}`, nombre: u.displayName || '', email: u.email || '', whatsapp: u.phone || '', leads: [], alumna: u }));
+  const r = construirPublicos([...per, ...soloAula], { pagoHecho, etapaDe: leadEtapa, niveles: (p) => (p.alumna ? ownedOf(p.alumna) : []), pagaAula: (p) => !!p.alumna && paying(p.alumna) });
   const av = r.avisos, avisoTxt = `${av.telefonosMalos.length ? ` ${av.telefonosMalos.length} teléfono(s) no se pudieron normalizar y van sin teléfono: ${av.telefonosMalos.slice(0, 5).map((x) => `${x.nombre || 'sin nombre'} (${x.telefono})`).join(', ')}${av.telefonosMalos.length > 5 ? '…' : ''}.` : ''}${av.sinContacto ? ` ${av.sinContacto} sin correo ni teléfono válidos quedaron fuera.` : ''}`;
   if (que === 'bf') {
     if (!r.compradorasBF.length) return toast('Todavía no hay compradoras de Black Friday.');
     descargarCsvPublico(r.compradorasBF, 'meta-compradoras-black-friday');
     return toast(`Descargadas ${r.compradorasBF.length} compradoras de Black Friday.${avisoTxt}`);
   }
-  if (!r.alumnas.length && !r.manoLevantada.length) return toast('Todavía no hay personas para estos públicos.');
-  descargarCsvPublico(r.alumnas, 'meta-alumnas');
-  setTimeout(() => descargarCsvPublico(r.manoLevantada, 'meta-levantaron-la-mano'), 400);
-  toast(`Descargados 2 archivos: ${r.alumnas.length} alumnas y ${r.manoLevantada.length} que levantaron la mano.${avisoTxt}`);
+  const grupos = [['alumnas', 'meta-alumnas', 'alumnas'], ['manoLevantada', 'meta-levantaron-la-mano', 'que levantaron la mano'], ['registradas', 'meta-dejaron-sus-datos', 'que dejaron sus datos']].filter(([k]) => r[k].length);
+  if (!grupos.length) return toast('Todavía no hay personas para estos públicos.');
+  grupos.forEach(([k, nombre], i) => setTimeout(() => descargarCsvPublico(r[k], nombre), i * 400));
+  toast(`Descargados ${grupos.length} archivo(s): ${grupos.map(([k, , t]) => `${r[k].length} ${t}`).join(', ')}.${avisoTxt}`);
 }
 
 // Exporta a Excel (CSV) las personas que se ven con los filtros actuales. Sirve también como respaldo.
@@ -771,7 +774,7 @@ function exportarCsv() {
 V.interesadas = () => {
   const head = `<div class="crm-head"><div><span class="eyebrow">CRM</span><h1>Interesadas</h1></div><div class="crm-acciones"><button class="btn btn-primary btn-sm" data-go="envios">Envíos</button>
     <details class="menu"><summary class="btn btn-ghost btn-sm">Herramientas ▾</summary><div class="menu-lista">
-      <button type="button" data-crm-preparar title="Crea el código personal y los enlaces de cada contacto">Preparar contactos</button><button type="button" data-crm-clasificar>Clasificar una clase</button><button type="button" data-crm-csv>Exportar a Excel</button><button type="button" data-crm-remarketing title="Lista de Remarketing (correo y WhatsApp) para audiencias de Meta o un mensaje especial">Exportar Remarketing</button><button type="button" data-crm-publicos-meta title="Baja 2 CSV (Alumnas y Levantaron la mano) para crear públicos en Meta. Solo lee lo que ya está cargado.">Descargar públicos para Meta</button><button type="button" data-crm-compradoras-bf title="CSV de las inscritas de Black Friday que ya pagaron, para excluirlas de las campañas en Meta">Descargar compradoras de Black Friday</button>
+      <button type="button" data-crm-preparar title="Crea el código personal y los enlaces de cada contacto">Preparar contactos</button><button type="button" data-crm-clasificar>Clasificar una clase</button><button type="button" data-crm-csv>Exportar a Excel</button><button type="button" data-crm-remarketing title="Lista de Remarketing (correo y WhatsApp) para audiencias de Meta o un mensaje especial">Exportar Remarketing</button><button type="button" data-crm-publicos-meta title="Baja hasta 3 CSV (Alumnas, Levantaron la mano y Dejaron sus datos) para crear públicos en Meta. Solo lee lo que ya está cargado.">Descargar públicos para Meta</button><button type="button" data-crm-compradoras-bf title="CSV de las inscritas de Black Friday que ya pagaron, para excluirlas de las campañas en Meta">Descargar compradoras de Black Friday</button>
       ${A.leads && repetidasPorLimpiar().length ? `<button type="button" data-leads-dedup>Limpiar repetidas (${repetidasPorLimpiar().length})</button>` : ''}<button type="button" data-leads-reload>Actualizar la lista</button></div></details></div></div>`;
   if (!A.leads) return `${head}<div class="card empty">Cargando interesadas…</div>`;
   const sinLink = [['enlacePendulo', 'Péndulo'], ['enlaceTarot', 'Tarot'], ['enlaceTerapias', 'terapias online']].filter(([k]) => !A.clases?.[k]).map(([, n]) => n);

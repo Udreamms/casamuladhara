@@ -49,6 +49,13 @@ assert.ok(!em(r.alumnas).includes('alu@x.cl') && !em(r.manoLevantada).includes('
 // Ninguna persona pagada sale en «Levantaron la mano»
 const pagadas = new Set(r.alumnas.map((f) => f.email));
 assert.ok(r.manoLevantada.every((f) => !pagadas.has(f.email)));
+// Dejaron sus datos: clase gratis sin pago ni postulación; sin duplicar con alumnas ni con levantaron la mano
+assert.deepEqual(em(r.registradas), ['sola@x.cl']);
+const todas = new Set([...r.alumnas, ...r.manoLevantada].map((f) => f.email));
+assert.ok(r.registradas.every((f) => !todas.has(f.email)));
+// Alumna del aula sin ficha (persona sin leads) entra a Alumnas
+const rr = construirPublicos([{ id: 'aula-1', nombre: '', email: 'SoloAula@X.cl', whatsapp: '911112222', leads: [] }], { ...ctx, pagaAula: () => true });
+assert.deepEqual(rr.alumnas, [{ email: 'soloaula@x.cl', phone: '+56911112222', fn: '', country: 'cl' }]);
 // Compradoras BF: ficha con blackFriday y pago
 assert.deepEqual(em(r.compradorasBF), ['fabi@x.cl']);
 // Formato

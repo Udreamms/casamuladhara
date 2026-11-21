@@ -29,8 +29,8 @@ export const primerNombre = (n) => String(n ?? '').replace(/^[\s=+\-@\t\r]+/, ''
 // ctx: { pagoHecho(lead), etapaDe(lead), niveles(persona) -> [1,5..], pagaAula(persona) -> bool, formacionPagada(persona) -> bool }
 export const construirPublicos = (personas = [], ctx) => {
   const { pagoHecho = () => false, etapaDe = (l) => l.status, niveles = () => [], pagaAula = () => false } = ctx || {};
-  const salida = { alumnas: [], manoLevantada: [], compradorasBF: [], avisos: { telefonosMalos: [], sinContacto: 0, correosMalos: [] } };
-  const vistos = { alumnas: { e: new Set(), t: new Set() }, manoLevantada: { e: new Set(), t: new Set() }, compradorasBF: { e: new Set(), t: new Set() } };
+  const salida = { alumnas: [], manoLevantada: [], registradas: [], compradorasBF: [], avisos: { telefonosMalos: [], sinContacto: 0, correosMalos: [] } };
+  const vistos = { alumnas: { e: new Set(), t: new Set() }, manoLevantada: { e: new Set(), t: new Set() }, registradas: { e: new Set(), t: new Set() }, compradorasBF: { e: new Set(), t: new Set() } };
   const avisados = new Set();
   const agrega = (aud, p) => {
     const em = normalizaEmail(p.email), tel = normalizaTel(p.whatsapp);
@@ -55,6 +55,7 @@ export const construirPublicos = (personas = [], ctx) => {
     const alumna = esExalumna(activos, pagoHecho, lv) || pagoFormacion || pagaAula(p) || lv.length > 0;
     if (alumna) agrega('alumnas', p);
     else if (activos.some((l) => l.postulacion || l.blackFriday && typeof l.blackFriday === 'object')) agrega('manoLevantada', p);
+    else if (activos.length) agrega('registradas', p); // dejaron sus datos (p. ej. clase gratis) y no pagaron ni postularon
     // Compradora de Black Friday: ficha con blackFriday y pago registrado (en la ficha o en su cuenta del aula)
     if (activos.some((l) => l.blackFriday && typeof l.blackFriday === 'object') && (pagoFormacion || pagaAula(p))) agrega('compradorasBF', p);
   });
