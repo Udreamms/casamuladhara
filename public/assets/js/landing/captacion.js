@@ -92,7 +92,8 @@
         action: 'save', form: f.dataset.lead,
         name: val('name'), email: val('email'), whatsapp, country: val('country') || pais,
         interest: val('interest'), date: f.elements.interest?.selectedOptions?.[0]?.dataset.date || '', message: val('message'), web: val('web'),
-        ...(f.dataset.postulacion ? { postulacion: Object.fromEntries(['objetivo', 'experiencia', 'inicio', 'inversion'].map((k) => [k, f.querySelector(`input[name="${k}"]:checked`)?.value || ''])) } : {}),
+        // Postulación a la Formación: «¿Qué te mueve?» (respuesta corta) y 2 preguntas de opción única
+        ...(f.dataset.postulacion ? { postulacion: Object.fromEntries(['motivo', 'experiencia', 'horas'].map((k) => [k, (f.querySelector(`input[name="${k}"]:checked`)?.value ?? (f.elements[k]?.type === 'text' ? f.elements[k].value : '')).trim()])) } : {}),
         ...(f.dataset.consentimiento ? { consentimiento: Object.fromEntries(['email', 'whatsapp'].map((c) => [c, { aceptado: true, fecha: new Date().toISOString(), texto: f.dataset.consentimiento, origen: f.dataset.lead }])) } : {}),
         page: location.pathname, utm: origen(), ...(f.dataset.montoReserva ? { reserva: true } : {}),
         eventId: crypto.randomUUID?.() || String(Date.now()) + Math.random().toString(36).slice(2, 10), // mismo id en el Píxel y en la API de conversiones

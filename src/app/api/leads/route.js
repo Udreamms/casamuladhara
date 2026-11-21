@@ -21,12 +21,10 @@ import { ETAPAS, ETAPAS_DE_LA_CLASE, ETAPA_TXT, RANGO, anotarAsistencia, asisten
 import { auth, db, json } from '@/lib/server/services.js';
 import { contexto, enviarDespues, idValido, usuario } from '@/lib/server/meta.js';
 
-// Opciones permitidas de la postulación a la Formación (mismo texto que en /formacion/postular)
+// Opciones permitidas de la postulación a la Formación (mismo texto que en /formacion/postular). «motivo» es respuesta corta libre.
 const POSTULACION = {
-  objetivo: ['Trabajar como terapeuta', 'Acompañar a mi familia y cercanos', 'Sanarme y crecer', 'Complementar mi trabajo actual'],
-  experiencia: ['Sí, con Karen', 'Sí, en otro lugar', 'No, sería mi primera vez'],
-  inicio: ['El 8 de diciembre', 'Más adelante', 'Solo quiero información'],
-  inversion: ['Sí', 'Necesito conversarlo', 'Por ahora no'],
+  experiencia: ['Sí, con Karen', 'Sí, en otro lugar', 'No, empiezo desde cero'],
+  horas: ['Menos de 4', '4 o más'],
 };
 const FORMS = ['pendulo', 'clase-pendulo', 'tarot', 'clase-tarot', 'formacion', 'sala', 'terapias', 'meditacion', 'regalo'];
 // Clases gratis: al registrarse, la respuesta trae el enlace de Google Meet guardado por la Maestra en config/clases (nunca va en el HTML)
@@ -86,11 +84,12 @@ export async function POST(request) {
         waKey: waClave(body.whatsapp),
         createdAt: FieldValue.serverTimestamp(),
       };
-      // Postulación a la Formación (/formacion/postular): 4 preguntas de opción única, validadas contra las opciones permitidas
+      // Postulación a la Formación (/formacion/postular): «¿Qué te mueve a formarte?» (texto corto) y 2 preguntas de opción única,
+      // validadas contra las opciones permitidas. Queda en la ficha: lead.postulacion = { motivo, experiencia, horas, t }
       if (form === 'formacion' && body.postulacion) {
         const p = body.postulacion, ok = (k) => (POSTULACION[k].includes(str(p[k], 80)) ? str(p[k], 80) : '');
-        const resp = Object.fromEntries(Object.keys(POSTULACION).map((k) => [k, ok(k)]));
-        if (Object.values(resp).some((v) => !v)) return json({ error: 'Responde las 4 preguntas para postular.' }, 400);
+        const resp = { motivo: str(p.motivo, 300), ...Object.fromEntries(Object.keys(POSTULACION).map((k) => [k, ok(k)])) };
+        if (Object.values(resp).some((v) => !v)) return json({ error: 'Responde las 3 preguntas para postular.' }, 400);
         lead.postulacion = { ...resp, t: Date.now() };
         lead.origen = 'formacion-postulacion';
       }
