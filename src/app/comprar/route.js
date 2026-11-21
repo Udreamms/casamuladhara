@@ -43,16 +43,18 @@ export async function GET(request) {
       const leadId = /^[A-Za-z0-9]{1,40}$/.test(q.get('lead') || '') ? q.get('lead') : '';
       const d = leadId ? await db().doc(`leads/${leadId}`).get() : null;
       if (!d?.exists || d.data().form !== 'tarot') return new Response(null, { status: 302, headers: { Location: '/tarot#oferta' } });
+      // Por ahora la reserva se coordina por WhatsApp de Karen (EMBUDO_PAGO_WHATSAPP); el lead ya quedó guardado y el Píxel sigue contando InitiateCheckout
+      if (pagoPorWhatsapp('tarot')) return salida(`${WHATSAPP}?text=${encodeURIComponent('Hola! Me gustaría inscribirme en el curso de Tarot Terapéutico (4 cuotas de 35 USD)')}`, 'InitiateCheckout', `ic-reserva-tarot-${leadId}-${Date.now()}`, { value: 35, currency: 'USD', content_name: 'Tarot Terapéutico' });
       return checkoutReservaTarot(request, leadId, d.data());
     }
     // Reserva de $10.000 del Péndulo desde /pendulo: directo a Mercado Pago (con el código personal, si viene, se anota el clic). Cerrada la inscripción, vuelve a la página del curso.
     if (q.get('curso') === 'pendulo' && q.get('pago') === 'reserva' && reservaPendulo()) {
       const cierre = cierreOferta('pendulo');
-      if (cierre && Date.now() >= cierre) return new Response(null, { status: 302, headers: { Location: '/pendulo' } });
+      // (el cierre de cada grupo lo maneja la propia página con el Calendario; aquí ya no se redirige)
       if (codigo && await contactoPorCodigo(codigo)) await registrarEvento({ codigo, evento: 'clic_comprar', fechaIso: new Date().toISOString(), origen: 'pendulo' });
       // Sin link de pago vigente (o con el WhatsApp activado), la reserva se coordina por WhatsApp de Karen; el Píxel sigue contando InitiateCheckout
-      const destino = pagoPorWhatsapp('pendulo') || !PAGO_RESERVA_PENDULO ? `${WHATSAPP}?text=${encodeURIComponent('Hola! Me gustaría hacer mi reserva de $10.000 para la clase de Péndulo Hebreo')}` : PAGO_RESERVA_PENDULO;
-      return salida(destino, 'InitiateCheckout', `ic-reserva-${codigo || 'web'}-${Date.now()}`, { value: 10000, currency: 'CLP', content_name: 'Reserva Péndulo Hebreo Nivel 1' });
+      const destino = pagoPorWhatsapp('pendulo') || !PAGO_RESERVA_PENDULO ? `${WHATSAPP}?text=${encodeURIComponent('Hola! Me gustaría inscribirme en el curso de Péndulo Hebreo (2 cuotas de $35.000)')}` : PAGO_RESERVA_PENDULO;
+      return salida(destino, 'InitiateCheckout', `ic-reserva-${codigo || 'web'}-${Date.now()}`, { value: 35000, currency: 'CLP', content_name: 'Péndulo Hebreo Nivel 1' });
     }
     // Reserva desde la landing del replay (la persona ya tiene su código y su ficha en el CRM: no hay formulario):
     // se anota «reserva iniciada» en su ficha y va directo a Mercado Pago (Péndulo, 10.000 CLP) o a Stripe (Tarot, 10 USD).
@@ -63,14 +65,14 @@ export async function GET(request) {
       const cierre = cierreOferta(tarot ? 'tarot' : 'pendulo');
       if (!(tarot ? reservaTarot() : reservaPendulo()) || (cierre && Date.now() >= cierre)) return new Response(null, volver);
       await registrarEvento({ codigo, evento: 'clic_comprar', fechaIso: new Date().toISOString(), origen: 'replay' });
-      if (!String(c.reserva?.estado || '').startsWith('pag')) await c.ref.update({ reserva: { monto: tarot ? 10 : 10000, moneda: tarot ? 'USD' : 'CLP', estado: 'iniciada', t: Date.now() }, updatedAt: FieldValue.serverTimestamp() });
+      if (!String(c.reserva?.estado || '').startsWith('pag')) await c.ref.update({ reserva: { monto: tarot ? 35 : 35000, moneda: tarot ? 'USD' : 'CLP', estado: 'iniciada', t: Date.now() }, updatedAt: FieldValue.serverTimestamp() });
       // Solución rápida: el pago lo coordina Karen por WhatsApp (la reserva ya quedó anotada en su ficha)
       if (pagoPorWhatsapp(tarot ? 'tarot' : 'pendulo') || (!tarot && !PAGO_RESERVA_PENDULO)) {
-        const texto = `Hola Karen, soy ${primerNombre(c.name)}. Quiero reservar mi cupo en el curso de ${tarot ? 'Tarot Terapéutico' : 'Péndulo Hebreo'}. Mi código: ${codigo}`;
+        const texto = `Hola Karen, soy ${primerNombre(c.name)}. Quiero inscribirme en el curso de ${tarot ? 'Tarot Terapéutico (4 cuotas de 35 USD)' : 'Péndulo Hebreo (2 cuotas de $35.000)'}. Mi código: ${codigo}`;
         return salida(`${WHATSAPP}?text=${encodeURIComponent(texto)}`, 'Contact', `ct-reserva-${codigo}-${Date.now()}`);
       }
       if (tarot) return checkoutReservaTarot(request, c.id, c);
-      return salida(PAGO_RESERVA_PENDULO, 'InitiateCheckout', `ic-reserva-${codigo}-${Date.now()}`, { value: 10000, currency: 'CLP', content_name: 'Reserva Péndulo Hebreo Nivel 1' });
+      return salida(PAGO_RESERVA_PENDULO, 'InitiateCheckout', `ic-reserva-${codigo}-${Date.now()}`, { value: 35000, currency: 'CLP', content_name: 'Péndulo Hebreo Nivel 1' });
     }
     if (!codigo && q.get('curso') === 'pendulo') return salida(PAGO_PENDULO, 'InitiateCheckout', `ic-pendulo-${Date.now()}`);
     const c = await contactoPorCodigo(codigo);
