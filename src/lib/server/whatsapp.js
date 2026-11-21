@@ -1,4 +1,4 @@
-// WhatsApp Business (API oficial de Meta, "Cloud API") con el número +56 9 7280 3407 (el de las landings, +56 9 4004 4528, es otro y no pasa por aquí).
+// WhatsApp Business (API oficial de Meta, "Cloud API") con el número +56 9 7280 3407 (desde el 21 nov 2026 es también el número de las landings: src/lib/whatsapp.js).
 // Variables de entorno en Vercel:
 //   WHATSAPP_TOKEN         token permanente del usuario del sistema (Meta Business → Usuarios del sistema → Generar token, permiso whatsapp_business_messaging)
 //   WHATSAPP_PHONE_ID      "Identificador del número de teléfono" de +56 9 7280 3407 (Meta for Developers → WhatsApp → Configuración de la API)
