@@ -1,10 +1,11 @@
 <!doctype html>
 <html lang="es" data-theme="light"><head><meta charset="utf-8"><meta name="color-scheme" content="light"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Casa Muladhara · Karen Oyarce</title><meta name="description" content="Clases gratis, formación de terapeutas y terapias holísticas con Karen Oyarce, Casa Muladhara.">
+<title>Casa Muladhara · Karen Oyarce</title><meta name="description" content="Masterclass gratis, formación de terapeutas y terapias holísticas con Karen Oyarce, Casa Muladhara.">
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#fffdf6"><link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Josefin+Sans:wght@300;400;600&family=Mulish:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="/assets/css/landing.css">
 <style>
 html,body{margin:0}body{font-size:16px;background:#fffdf6}img{max-width:100%}[hidden]{display:none!important}
@@ -24,21 +25,43 @@ html,body{margin:0}body{font-size:16px;background:#fffdf6}img{max-width:100%}[hi
 .lk-vio{background:#4e3a5e;color:#fff}.lk-vio .lk-tag{background:rgba(255,255,255,.2);color:#fff}
 .lk-forest{background:var(--forest);color:#ece7d3}
 .lk-white{background:#fff;color:var(--fg);border-color:var(--line)}
+/* Letra de las landings */:root{--f-body:"Google Sans Flex",system-ui,sans-serif;--f-display:"Google Sans Flex",system-ui,sans-serif;--f-caps:"Google Sans Flex",system-ui,sans-serif}body{font-family:var(--f-body)}.lk h1{font-weight:600}
+/* Semana Black Friday: tarjeta destacada arriba (se muestra sola del 21 al 30 de noviembre) */
+.lk-bf{position:relative;display:block;text-decoration:none;text-align:left;border-radius:24px;padding:22px 20px 20px;background:radial-gradient(120% 120% at 100% 0%,#5a4127 0%,#2a1d12 55%,#140e09 100%);color:#f3e7d3;box-shadow:0 22px 40px -22px rgba(20,14,9,.9);overflow:hidden;animation:lkLatido 2.6s ease-in-out infinite}
+.lk-bf::after{content:"";position:absolute;inset:-40% -60%;background:linear-gradient(110deg,transparent 40%,rgba(255,231,180,.16) 50%,transparent 60%);animation:lkBrillo 3.2s ease-in-out infinite;pointer-events:none}
+@keyframes lkBrillo{0%{transform:translateX(-60%)}60%,100%{transform:translateX(60%)}}
+@keyframes lkLatido{0%,100%{transform:scale(1)}50%{transform:scale(1.015)}}
+@media (prefers-reduced-motion:reduce){.lk-bf,.lk-bf::after{animation:none}}
+.lk-bf-tag{display:inline-block;background:#f2c66d;color:#1d1209;font:800 .72rem/1 var(--f-body);letter-spacing:.08em;text-transform:uppercase;padding:7px 11px;border-radius:999px}
+.lk-bf-50{position:absolute;top:14px;right:16px;font:800 2.6rem/1 var(--f-body);color:#f2c66d;letter-spacing:-.02em}
+.lk-bf b{display:block;margin:12px 0 6px;font:700 1.3rem/1.2 var(--f-body);color:#fff;max-width:15em}
+.lk-bf .px{display:block;font-size:.95rem;color:#f3e7d3}.lk-bf .px s{opacity:.6;margin-right:4px}.lk-bf .px strong{color:#f2c66d}
+.lk-bf .chile{display:block;margin-top:4px;font-size:.78rem;opacity:.75}
+.lk-bf .cta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:16px;background:#f2c66d;color:#1d1209;border-radius:14px;padding:13px 16px;font:700 1rem/1 var(--f-body)}
+.lk-bf .cta i{font-style:normal;font-weight:600;font-size:.8rem;opacity:.8}
 .lk-pie{margin:14px 0 0;font-size:.74rem;letter-spacing:.08em;color:var(--muted)}
 </style></head><body>
 <main class="lk">
-  <img class="lk-foto" src="/assets/img/e2ec26d75a.webp" alt="Karen Oyarce Sáez, Maestra Holística" width="116" height="116">
+  <img class="lk-foto" style="object-position:50% 25%" src="/assets/img/karen-retrato-3.webp" alt="Karen Oyarce Sáez, Maestra Holística" width="116" height="116">
   <div>
     <h1>Casa Muladhara</h1>
     <p class="lk-sub">Karen Oyarce · Terapias holísticas y formación de terapeutas</p>
   </div>
 
+  <a class="lk-bf" id="lk-bf" hidden href="/formacion/black-friday?utm_source=links&amp;utm_medium=whatsapp&amp;utm_content=black-friday">
+    <span class="lk-bf-tag">Semana Black Friday</span><span class="lk-bf-50">-50%</span>
+    <b>Formación de Terapeuta Holística Integral</b>
+    <span class="px"><s>$449.000</s> <strong>$224.000</strong> al contado · o 9 cuotas de <strong>$39.000</strong></span>
+    <span class="chile">Solo para Chile · El grupo parte el 8 de diciembre</span>
+    <span class="cta">Ver la oferta <i id="lk-bf-cuenta">Termina el lunes 30</i></span>
+  </a>
+
   <p class="lk-rotulo">Empieza aquí · gratis</p>
   <a class="lk-btn lk-sun" href="/clase-pendulo?utm_source=instagram&amp;utm_medium=bio&amp;utm_content=pendulo">
-    <span><b>Clase gratis de Péndulo Hebreo</b><small>Sábados 19:00 (Chile) · 30 min en vivo</small></span><span class="lk-tag">Gratis</span>
+    <span><b>Masterclass gratis de Péndulo Hebreo</b><small>Sábados 19:00 (Chile) · 30 min en vivo</small></span><span class="lk-tag">Gratis</span>
   </a>
   <a class="lk-btn lk-vio" href="/clase-tarot?utm_source=instagram&amp;utm_medium=bio&amp;utm_content=tarot">
-    <span><b>Clase gratis de Tarot Terapéutico</b><small>Martes 19:00 (Chile) · desde cualquier país</small></span><span class="lk-tag">Gratis</span>
+    <span><b>Masterclass gratis de Tarot Terapéutico</b><small>Martes 19:00 (Chile) · desde cualquier país</small></span><span class="lk-tag">Gratis</span>
   </a>
 
   <p class="lk-rotulo">Cursos y formación</p>
@@ -72,8 +95,21 @@ html,body{margin:0}body{font-size:16px;background:#fffdf6}img{max-width:100%}[hi
     const t = Date.UTC(+m[1], +m[2] - 1, +m[3]), hoy = hoyChile(); if (t < hoy) return;
     const d = new Date(t), anioHoy = new Date(hoy).getUTCFullYear();
     const sinAnio = d.getUTCFullYear() === anioHoy || (d.getUTCFullYear() === anioHoy + 1 && t - hoy < 183 * 864e5);
-    document.getElementById('lk-formacion').textContent = `Próximo grupo: ${DIAS[d.getUTCDay()]} ${d.getUTCDate()} de ${MESES[d.getUTCMonth()]}${sinAnio ? '' : ` de ${d.getUTCFullYear()}`} · cupos limitados`;
+    document.getElementById('lk-formacion').textContent = `Próximo grupo: ${DIAS[d.getUTCDay()]} ${d.getUTCDate()} de ${MESES[d.getUTCMonth()]}${sinAnio ? '' : ` de ${d.getUTCFullYear()}`}`;
   }).catch(() => { /* queda "Inscripciones abiertas" */ });
+})();
+</script>
+<script>
+/* Tarjeta Black Friday: visible del sábado 21 de noviembre 00:00 al lunes 30 de noviembre 23:59 (hora de Chile). En el computador local se ve siempre con ?vista=bf */
+(() => {
+  const INICIO = Date.parse('2026-11-21T00:00:00-03:00'), FIN = Date.parse('2026-11-30T23:59:59-03:00'), t = Date.now();
+  const vista = location.hostname === 'localhost' && new URLSearchParams(location.search).get('vista') === 'bf';
+  if (!vista && (t < INICIO || t > FIN)) return;
+  const el = document.getElementById('lk-bf'); if (!el) return; el.hidden = false;
+  const c = document.getElementById('lk-bf-cuenta');
+  const tick = () => { const s = Math.max(0, Math.floor((FIN - Date.now()) / 1000)), d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60);
+    c.textContent = d > 0 ? `Termina en ${d}d ${h}h` : `Termina en ${h}h ${m}m`; };
+  tick(); setInterval(tick, 30000);
 })();
 </script>
 <script src="/assets/js/landing/captacion.js"></script>
