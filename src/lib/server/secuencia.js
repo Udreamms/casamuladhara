@@ -4,7 +4,7 @@
 // Qué hace
 //   1. Responder a quien escribe («Mi código: XXXX», o por su número, o pidiendo el correo): le entrega su enlace personal /entrar/<código> (nunca el Meet directo). Ver responderEntrante.
 //   2. Cada 5 minutos (GET /api/secuencia con CRON_SECRET) revisa las clases de hoy, ayer y mañana y manda al que corresponda:
-//        link       al registrarse (clase_link_personal)           · diaAntes  24 h antes (clase_recordatorio_dia_antes)
+//        link       al registrarse (clase_link_personal)           · diaAntes  24 h antes (clase_recordatorio_dia_antes_2)
 //        unaHora    1 h antes (clase_recordatorio_1h)             · post      30 min después del fin: clase_gracias_asistio (entró) o clase_replay_no_asistio
 //
 // Reglas que siempre se cumplen
@@ -25,7 +25,7 @@ export const LANG = 'es_CL';
 // Plantillas (español de Chile). Mientras Meta no las apruebe, aprobadas[nombre] queda en false y no se usan.
 export const PLANTILLAS = {
   clase_link_personal: { paso: 'link', uso: 'Al registrarse: enlace personal a la clase' },
-  clase_recordatorio_dia_antes: { paso: 'diaAntes', uso: '24 horas antes de la clase' },
+  clase_recordatorio_dia_antes_2: { paso: 'diaAntes', uso: '24 horas antes de la clase' },
   clase_recordatorio_1h: { paso: 'unaHora', uso: '1 hora antes de la clase' },
   clase_gracias_asistio: { paso: 'gracias', uso: 'Después de la clase, a quien entró (con la grabación)' },
   clase_replay_no_asistio: { paso: 'replay', uso: 'Después de la clase, a quien no entró (con la grabación)' },
@@ -43,7 +43,6 @@ export async function leerConfig() {
   return {
     activa: d.activa === true,
     aprobadas: Object.fromEntries(Object.keys(PLANTILLAS).map((n) => [n, d.aprobadas?.[n] === true])),
-    videoUrl: typeof d.videoUrl === 'string' ? d.videoUrl : '',
   };
 }
 export async function guardarConfig(c, por = '') {
@@ -51,11 +50,10 @@ export async function guardarConfig(c, por = '') {
   const sig = {
     activa: typeof c.activa === 'boolean' ? c.activa : actual.activa,
     aprobadas: { ...actual.aprobadas, ...Object.fromEntries(Object.keys(PLANTILLAS).filter((n) => typeof c.aprobadas?.[n] === 'boolean').map((n) => [n, c.aprobadas[n]])) },
-    videoUrl: typeof c.videoUrl === 'string' ? (/^https:\/\/[^\s"'<>]+$/i.test(c.videoUrl.trim()) ? c.videoUrl.trim().slice(0, 300) : '') : actual.videoUrl,
     actualizado: Date.now(), por: String(por || '').slice(0, 120),
   };
   await db().doc(CFG).set(sig, { merge: true });
-  return { activa: sig.activa, aprobadas: sig.aprobadas, videoUrl: sig.videoUrl };
+  return { activa: sig.activa, aprobadas: sig.aprobadas };
 }
 
 // ---------- Reglas de envío ----------
@@ -85,17 +83,16 @@ export function pasoDebido({ l, ev, ahora }) {
 }
 
 // Texto libre (dentro de las 24 h) y plantilla de cada paso. boton = el código personal, que va en el botón de enlace (…/entrar/{{1}}) de clase_link_personal,
-// clase_recordatorio_dia_antes y clase_recordatorio_1h; gracias y replay no llevan botón (los de respuesta rápida tampoco llevan parámetros).
+// clase_recordatorio_dia_antes_2 y clase_recordatorio_1h; gracias y replay no llevan botón (los de respuesta rápida tampoco llevan parámetros).
 function armar(paso, { l, ev, cfg, replay }) {
   const n = primerNombre(l.name) || 'hola', nombre = (OFERTAS[ev.clase] || {}).nombre || (ev.clase === 'tarot' ? 'Tarot Terapéutico' : 'Péndulo Hebreo');
   const dia = diaLargo(ev.fecha), enlace = `${base()}/entrar/${l.codigo}`;
-  const video = cfg.videoUrl || `${base()}/clase-${ev.clase}/gracias`;
   const grabacion = `${base()}/clase-${ev.clase}/replay?l=${l.codigo}`;
   const T = {
     link: { nombre: 'clase_link_personal', vars: [n, nombre, dia, ev.hora], boton: l.codigo,
       texto: `Hola ${n} 🌿 Este es tu enlace personal para entrar a la clase gratuita de ${nombre}, el ${dia} a las ${ev.hora}: ${enlace}\n\nEs solo tuyo: no lo compartas.` },
-    diaAntes: { nombre: 'clase_recordatorio_dia_antes', vars: [n, nombre, ev.hora, video], boton: l.codigo,
-      texto: `Hola ${n} 🌿 Mañana a las ${ev.hora} es tu clase gratuita de ${nombre} con Karen. Tu enlace para entrar: ${enlace}\n\nTe dejo un video para ir preparándote: ${video}` },
+    diaAntes: { nombre: 'clase_recordatorio_dia_antes_2', vars: [n, nombre, ev.hora], boton: l.codigo,
+      texto: `Hola ${n} 🌿 Mañana a las ${ev.hora} es tu clase gratuita de ${nombre} con Karen. Tu enlace para entrar: ${enlace}` },
     unaHora: { nombre: 'clase_recordatorio_1h', vars: [n, nombre, ev.hora], boton: l.codigo,
       texto: `Hola ${n} 🌿 En una hora (${ev.hora}) empieza tu clase gratuita de ${nombre}. Entra con tu enlace personal: ${enlace}` },
     gracias: { nombre: 'clase_gracias_asistio', vars: [n, nombre, grabacion],

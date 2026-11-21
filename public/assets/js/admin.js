@@ -1996,8 +1996,7 @@ const secHTML = () => {
     ${c.activa && !c.conectado ? '<p class="muted" style="margin:8px 0 0;font-size:.84rem">WhatsApp aún no está conectado: no saldrá nada hasta conectarlo.</p>' : ''}${c.activa && !c.cron ? '<p class="muted" style="margin:8px 0 0;font-size:.84rem">Falta CRON_SECRET en Vercel y el cron de cada 5 minutos: sin eso solo funciona la respuesta a quien escribe.</p>' : ''}
     <details style="margin-top:10px"><summary style="cursor:pointer;font-weight:600;font-size:.9rem">Plantillas aprobadas por Meta (${nAprob} de ${c.plantillas.length})</summary>
       <div style="display:grid;gap:6px;margin-top:8px">${c.plantillas.map((p) => `<label style="display:flex;gap:8px;align-items:flex-start;font-size:.86rem"><input type="checkbox" data-sec-pl="${esc(p.nombre)}" ${c.aprobadas[p.nombre] ? 'checked' : ''}><span><b>${esc(p.nombre)}</b> <span class="muted">· ${esc(p.uso)}</span></span></label>`).join('')}
-      <label style="display:grid;gap:4px;font-size:.86rem"><b>Enlace del video de la clase (para el recordatorio de 24 h)</b><input id="sec-video" type="url" placeholder="https://…" value="${esc(c.videoUrl || '')}"><span class="muted" style="font-size:.78rem">Si lo dejas vacío se usa la página de gracias de la clase.</span></label>
-      <div><button class="btn btn-ghost btn-sm" data-sec="video">Guardar enlace</button></div></div>
+      </div>
       <p class="muted" style="font-size:.8rem;margin:8px 0 0">Marca una plantilla solo cuando Meta la haya aprobado. Una plantilla sin marcar no se usa; si la persona escribió en las últimas 24 horas se le escribe con texto libre.</p></details>
     <div style="margin-top:10px"><button class="btn btn-ghost btn-sm" data-sec="simular">Ver qué saldría ahora (sin enviar)</button> <span id="sec-sim" class="muted" style="font-size:.84rem"></span></div>`;
 };
@@ -2018,8 +2017,8 @@ document.addEventListener('click', async (e) => {
       return;
     }
     if (b.dataset.sec === 'encender' && !confirm('¿Encender la secuencia? Desde ahora enviará WhatsApp automáticos a quienes se registran en las clases gratis. Solo usa las plantillas que marcaste como aprobadas.')) return;
-    const cuerpo = b.dataset.sec === 'video' ? { action: 'guardar', videoUrl: ($('#sec-video').value || '').trim() } : { action: 'guardar', activa: b.dataset.sec === 'encender' };
-    A.sec = await secApi(cuerpo); secPintar(); toast(b.dataset.sec === 'video' ? 'Enlace guardado.' : b.dataset.sec === 'encender' ? 'Secuencia encendida.' : 'Secuencia apagada.');
+    const cuerpo = { action: 'guardar', activa: b.dataset.sec === 'encender' };
+    A.sec = await secApi(cuerpo); secPintar(); toast(b.dataset.sec === 'encender' ? 'Secuencia encendida.' : 'Secuencia apagada.');
   } catch (err) { toast(err.message); }
 });
 document.addEventListener('change', async (e) => {
