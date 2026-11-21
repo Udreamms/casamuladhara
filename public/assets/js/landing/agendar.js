@@ -4,6 +4,7 @@
   const CL = 'America/Santiago';
   const CHILE = [CL, 'America/Punta_Arenas', 'Pacific/Easter'];
   const LIMPIEZA = 'Limpieza energética de espacios';
+  const ORIENTACION = 'Llamada de orientación de la Formación'; // gratis, 20 minutos, online (se abre desde /formacion/gracias)
   const TERAPIAS = ['Reiki', 'Radiestesia', 'Péndulo Hebreo', 'Registros Akáshicos', 'Vidas Pasadas', 'Niño Interior',
     'Terapia Transgeneracional', 'Tarot Terapéutico y Evolutivo', LIMPIEZA];
   const miTz = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || CL; } catch { return CL; } })();
@@ -45,10 +46,11 @@
   .ag-go,.ag-btn{display:inline-flex;justify-content:center;align-items:center;font:600 .8rem/1 "Josefin Sans",system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;padding:1.05em 1.5em;border-radius:999px;border:0;background:#2b5443;color:#ece7d3;text-decoration:none;cursor:pointer}
   .ag-go[disabled]{opacity:.5;cursor:default}.ag-btn.alt{background:#e9e4d0;color:#1f3f32}
   .ag-ok{display:grid;gap:12px}.ag-ok dl{margin:0;display:grid;gap:4px;background:#f0ede1;border-radius:14px;padding:14px 16px}.ag-ok dt{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#a77a3b}.ag-ok dd{margin:0 0 6px}
+  .ag [hidden]{display:none!important}
   .ag-hp{position:absolute!important;left:-9999px!important;opacity:0!important;height:0!important;overflow:hidden!important}`;
   document.head.appendChild(css);
 
-  let dlg, slots = [], cargado = 0;
+  let dlg, slots = [], cargado = 0, modo = '', datos = {}; // modo: '' (terapia) o 'orientacion'
   const q = (s) => dlg.querySelector(s);
 
   function construir() {
@@ -57,9 +59,9 @@
     dlg.setAttribute('aria-label', 'Agendar una terapia');
     dlg.innerHTML = `<div class="ag-in"><button type="button" class="ag-x" aria-label="Cerrar">×</button>
     <form id="ag-form" novalidate style="display:grid;gap:14px">
-      <div><span class="ag-eyebrow">Agendar sesión</span><h3>Reserva tu hora con Karen</h3></div>
-      <label>Terapia<select name="terapia"><option value="" disabled selected>Elige tu terapia</option>${TERAPIAS.map((t) => `<option>${t}</option>`).join('')}</select></label>
-      <fieldset class="ag-mod"><legend>Modalidad</legend>
+      <div><span class="ag-eyebrow" data-eyebrow>Agendar sesión</span><h3 data-titulo>Reserva tu hora con Karen</h3></div>
+      <label data-terapia-l>Terapia<select name="terapia"><option value="" disabled selected>Elige tu terapia</option>${TERAPIAS.map((t) => `<option>${t}</option>`).join('')}<option hidden>${ORIENTACION}</option></select></label>
+      <fieldset class="ag-mod" data-mod><legend>Modalidad</legend>
         <label><input type="radio" name="modalidad" value="online" checked> Online</label>
         <label data-pres><input type="radio" name="modalidad" value="presencial"> Presencial · Calle Mosqueto #459, piso 3, oficina 301 (salida metro Bellas Artes)</label>
       </fieldset>
@@ -67,13 +69,13 @@
       <p class="ag-tz" data-tz></p>
       <div><b style="font-size:.82rem">Elige el día</b><div class="ag-cal" data-cal style="margin-top:6px"></div></div>
       <div><p class="ag-note" data-horas-t style="margin-bottom:6px"></p><div class="ag-horas" data-horas role="group" aria-label="Horas disponibles"></div></div>
-      <p class="ag-note">Cada sesión dura entre 1 y 2 horas, según la terapia. Reservamos 2 horas para que Karen no se apure.</p>
+      <p class="ag-note" data-dur>Cada sesión dura entre 1 y 2 horas, según la terapia. Reservamos 2 horas para que Karen no se apure.</p>
       <label>Tu nombre<input name="name" autocomplete="name" maxlength="120" required></label>
       <label>WhatsApp (con código de país)<input name="whatsapp" type="tel" autocomplete="tel" placeholder="+56 9 1234 5678" maxlength="40" required></label>
       <label>Correo<input name="email" type="email" autocomplete="email" maxlength="160" required></label>
       <label data-dir hidden>Dirección del lugar a limpiar (Chile)<input name="direccion" maxlength="240" placeholder="Calle, número, comuna"></label>
       <div class="ag-hp" aria-hidden="true"><label>Web<input name="web" tabindex="-1" autocomplete="off"></label></div>
-      <p class="ag-note">Las terapias holísticas acompañan tu bienestar y no reemplazan la atención médica ni psicológica.</p>
+      <p class="ag-note" data-aviso>Las terapias holísticas acompañan tu bienestar y no reemplazan la atención médica ni psicológica.</p>
       <p class="ag-err" data-err role="alert" hidden></p>
       <button class="ag-go" type="submit">Confirmar mi sesión</button>
     </form>
@@ -91,7 +93,7 @@
 
   // Modalidad y dirección según la terapia y el país de la persona
   function ajustar() {
-    const limpieza = q('[name=terapia]').value === LIMPIEZA;
+    const orient = modo === 'orientacion', limpieza = !orient && q('[name=terapia]').value === LIMPIEZA;
     const pres = q('[data-pres]'), radioP = pres.querySelector('input'), radioO = q('[name=modalidad][value=online]');
     const nota = q('[data-pres-note]');
     nota.hidden = true;
@@ -100,6 +102,7 @@
     radioO.disabled = limpieza;
     q('[data-dir]').hidden = !(limpieza && enChile);
     if (limpieza) { radioP.checked = enChile; nota.hidden = false; nota.textContent = enChile ? 'La limpieza de espacios es presencial: Karen va al lugar que nos indiques.' : 'La limpieza de espacios es presencial y solo está disponible en Chile.'; }
+    else if (orient) { radioO.checked = true; radioP.disabled = true; }
     else if (!enChile) { radioO.checked = true; nota.hidden = false; nota.textContent = 'Desde fuera de Chile las sesiones son online.'; }
     q('.ag-go').disabled = limpieza && !enChile;
   }
@@ -151,7 +154,7 @@
     if (!forzar && slots.length && Date.now() - cargado < 60000) return pintarCal();
     q('[data-cal]').textContent = 'Cargando horarios…';
     try {
-      const r = await fetch('/api/terapias', { cache: 'no-store' });
+      const r = await fetch('/api/terapias' + (modo === 'orientacion' ? '?tipo=orientacion' : ''), { cache: 'no-store' });
       const d = await r.json();
       if (!r.ok) throw new Error(d.error);
       slots = d.slots || []; cargado = Date.now(); diaSel = ''; mes = '';
@@ -164,9 +167,9 @@
     ev.preventDefault();
     error('');
     const f = new FormData(q('#ag-form')), elegido = q('[data-horas] [aria-pressed=true]');
-    if (!f.get('terapia')) return error('Elige la terapia.');
+    if (!f.get('terapia') && modo !== 'orientacion') return error('Elige la terapia.');
     if (!elegido) return error('Elige el día y la hora de tu sesión.');
-    const body = { terapia: f.get('terapia'), modalidad: f.get('modalidad'), start: Number(elegido.dataset.ts), name: f.get('name'), whatsapp: f.get('whatsapp'), email: f.get('email'), direccion: f.get('direccion'), tz: miTz, web: f.get('web'), eventId: crypto.randomUUID?.() || String(Date.now()) + Math.random().toString(36).slice(2, 10) };
+    const body = { codigo: datos.codigo || '', terapia: f.get('terapia'), modalidad: f.get('modalidad'), start: Number(elegido.dataset.ts), name: f.get('name'), whatsapp: f.get('whatsapp'), email: f.get('email'), direccion: f.get('direccion'), tz: miTz, web: f.get('web'), eventId: crypto.randomUUID?.() || String(Date.now()) + Math.random().toString(36).slice(2, 10) };
     if (String(body.name).trim().length < 2) return error('Escribe tu nombre.');
     if (String(body.whatsapp).replace(/\D/g, '').length < 8) return error('Escribe tu WhatsApp con el código de país.');
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(body.email).trim())) return error('Revisa tu correo.');
@@ -178,7 +181,7 @@
       if (!r.ok) { if (d.refrescar) await cargar(true); throw new Error(d.error || 'No pudimos agendar tu sesión.'); }
       if (window.fbq) fbq('track', 'Schedule', {}, { eventID: body.eventId });
       gracias(body, d);
-    } catch (e) { error(e.message); } finally { go.disabled = false; go.textContent = 'Confirmar mi sesión'; }
+    } catch (e) { error(e.message); } finally { go.disabled = false; go.textContent = modo === 'orientacion' ? 'Confirmar mi llamada' : 'Confirmar mi sesión'; }
   }
 
   function gracias(b, d) {
@@ -200,10 +203,21 @@
     slots = slots.filter((t) => !(t < fin && t + d.duracion * 6e4 > d.start));
   }
 
-  function abrir(terapia) {
+  function abrir(terapia, d = {}) {
     if (!dlg) construir();
+    const orient = terapia === ORIENTACION;
+    if ((orient ? 'orientacion' : '') !== modo) { slots = []; cargado = 0; } // otro tipo de sesión: otras horas libres
+    modo = orient ? 'orientacion' : ''; datos = orient ? d : {};
     q('#ag-form').hidden = false; q('[data-ok]').hidden = true; error('');
-    q('[name=terapia]').value = TERAPIAS.includes(terapia) ? terapia : '';
+    q('[name=terapia]').value = orient ? ORIENTACION : TERAPIAS.includes(terapia) ? terapia : '';
+    // Llamada de orientación: sin elegir terapia ni modalidad (siempre online), con los datos de la postulante ya escritos
+    q('[data-terapia-l]').hidden = orient; q('[data-mod]').hidden = orient;
+    q('[data-eyebrow]').textContent = orient ? 'Formación de Terapeuta Holístico' : 'Agendar sesión';
+    q('[data-titulo]').textContent = orient ? 'Agenda tu llamada de orientación' : 'Reserva tu hora con Karen';
+    q('[data-dur]').textContent = orient ? 'La llamada dura 20 minutos y es online, por Google Meet.' : 'Cada sesión dura entre 1 y 2 horas, según la terapia. Reservamos 2 horas para que Karen no se apure.';
+    q('[data-aviso]').hidden = orient;
+    q('.ag-go').textContent = orient ? 'Confirmar mi llamada' : 'Confirmar mi sesión';
+    if (orient) { q('[name=name]').value = d.nombre || ''; q('[name=whatsapp]').value = d.whatsapp || ''; q('[name=email]').value = d.correo || ''; }
     diaSel = ''; mes = '';
     ajustar();
     dlg.showModal();
@@ -216,6 +230,6 @@
     document.querySelectorAll('.dd[open]').forEach((d) => d.removeAttribute('open'));
     const nav = document.getElementById('nav') || document.getElementById('menu'), mb = document.getElementById('menu-btn');
     if (nav) nav.classList.remove('open'); if (mb) mb.setAttribute('aria-expanded', 'false');
-    abrir(a.dataset.agendar);
+    abrir(a.dataset.agendar, a.dataset);
   });
 })();

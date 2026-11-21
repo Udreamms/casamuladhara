@@ -21,6 +21,11 @@ import { ETAPAS, ETAPAS_DE_LA_CLASE, ETAPA_TXT, RANGO, anotarAsistencia, asisten
 import { auth, db, json } from '@/lib/server/services.js';
 import { contexto, enviarDespues, idValido, usuario } from '@/lib/server/meta.js';
 
+// Opciones permitidas de la postulación a la Formación (mismo texto que en /formacion/postular). «motivo» es respuesta corta libre.
+const POSTULACION = {
+  experiencia: ['Sí, con Karen', 'Sí, en otro lugar', 'No, empiezo desde cero'],
+  horas: ['Menos de 4', '4 o más'],
+};
 const FORMS = ['pendulo', 'clase-pendulo', 'tarot', 'clase-tarot', 'formacion', 'sala', 'terapias', 'meditacion', 'regalo'];
 // Clases gratis: al registrarse, la respuesta trae el enlace de Google Meet guardado por la Maestra en config/clases (nunca va en el HTML)
 const ENLACE = { 'clase-pendulo': 'enlacePendulo', 'clase-tarot': 'enlaceTarot' };
@@ -79,6 +84,15 @@ export async function POST(request) {
         waKey: waClave(body.whatsapp),
         createdAt: FieldValue.serverTimestamp(),
       };
+      // Postulación a la Formación (/formacion/postular): «¿Qué te mueve a formarte?» (texto corto) y 2 preguntas de opción única,
+      // validadas contra las opciones permitidas. Queda en la ficha: lead.postulacion = { motivo, experiencia, horas, t }
+      if (form === 'formacion' && body.postulacion) {
+        const p = body.postulacion, ok = (k) => (POSTULACION[k].includes(str(p[k], 80)) ? str(p[k], 80) : '');
+        const resp = { motivo: str(p.motivo, 300), ...Object.fromEntries(Object.keys(POSTULACION).map((k) => [k, ok(k)])) };
+        if (Object.values(resp).some((v) => !v)) return json({ error: 'Responde las 3 preguntas para postular.' }, 400);
+        lead.postulacion = { ...resp, t: Date.now() };
+        lead.origen = 'formacion-postulacion';
+      }
       // Reserva del Péndulo iniciada desde /pendulo (aún sin confirmar el pago: Mercado Pago no avisa; Karen la marca a mano)
       if (form === 'pendulo' && body.reserva === true) lead.reserva = { monto: 35000, moneda: 'CLP', estado: 'iniciada', t: Date.now() }; // la «reserva» ahora es la primera cuota (2 de $35.000)
       if (form === 'tarot' && body.reserva === true) lead.reserva = { monto: 35, moneda: 'USD', estado: 'iniciada', t: Date.now() }; // la «reserva» ahora es la primera cuota (4 de 35 USD)
@@ -148,7 +162,7 @@ export async function POST(request) {
       // API de conversiones de Meta: el mismo Lead que registra el Píxel, con el mismo id para que no se cuente doble.
       // Quien repite el formulario no se cuenta otra vez como Lead nuevo en las campañas.
       const ctx = contexto(request, lead.utm.fbclid);
-      if (!repetida) enviarDespues({ nombre: 'Lead', id: idValido(body.eventId) || `lead-${ref.id}`, url: ctx.url, user: usuario({ email: lead.email, phone: lead.whatsapp, nombre: lead.name }, ctx) });
+      if (!repetida) enviarDespues({ nombre: 'Lead', id: idValido(body.eventId) || `lead-${ref.id}`, url: ctx.url, user: usuario({ email: lead.email, phone: lead.whatsapp, nombre: lead.name }, ctx), ...(lead.postulacion ? { custom: { content_name: 'Formación Terapeuta Holístico' } } : {}) });
       return json({ ok: true, id: ref.id, ...(codigoFinal ? { codigo: codigoFinal } : {}), ...(repetida ? { repetida: true } : {}) });
     }
     if (body.action === 'all' || body.action === 'status' || body.action === 'update' || body.action === 'delete' || body.action === 'estado' || body.action === 'addProgram' || body.action === 'nota' || body.action === 'etiquetas' || body.action === 'preparar' || body.action === 'codigo' || body.action === 'clasificar' || body.action === 'enviado') {
