@@ -1,6 +1,6 @@
 // Fechas y horarios de las landings: salen del Calendario de la Maestra (/api/horarios), nunca escritos en el HTML.
 // Uso: <script src="/assets/js/landing/horarios.js" data-clase="clase-tarot|clase-pendulo" | data-curso="tarot|pendulo" defer></script>
-//   data-clase  -> "Próxima clase", el selector de fechas (#saturdays) y el bloque "Tu siguiente paso"
+//   data-clase  -> "Próxima clase", los selectores de fechas (#saturdays y select[data-hr-fechas]) y el bloque "Tu siguiente paso"
 //   data-curso  -> rellena [data-next-start] (inicio) y [data-next-detalle] (todas las fechas) y muestra [data-next-wrap]
 //   en cualquier página rellena [data-hr-zona] (hora de Chile y su equivalente en la zona de quien mira) y [data-hr-form] (próximo grupo de la formación)
 // Si falla, o si no hay fechas confirmadas, queda el texto fijo de la página (sin fechas): nunca una fecha vieja.
@@ -66,8 +66,8 @@
       if (lista?.length) {
         const txt = (c) => `${may(fecha(c.fecha))} · ${hora(c.hora)}`;
         const next = document.getElementById('next-class'); if (next) next.textContent = `Próxima clase: ${fecha(lista[0].fecha)} · ${hora(lista[0].hora)}`;
-        const sel = document.getElementById('saturdays');
-        if (sel) sel.replaceChildren(...lista.map((c) => { const o = new Option(txt(c), txt(c)); o.dataset.date = c.fecha; return o; }), new Option(`Avísenme del próximo ${dia}`, `Avísenme del próximo ${dia}`));
+        // #saturdays (formulario de arriba) y [data-hr-fechas] (otros formularios de la misma página)
+        document.querySelectorAll('#saturdays, select[data-hr-fechas]').forEach((sel) => sel.replaceChildren(...lista.map((c) => { const o = new Option(txt(c), txt(c)); o.dataset.date = c.fecha; return o; }), new Option(`Avísenme del próximo ${dia}`, `Avísenme del próximo ${dia}`)));
       }
       // Tu siguiente paso: el próximo curso y la formación
       const bloque = document.querySelector('[data-hr-siguiente]');
