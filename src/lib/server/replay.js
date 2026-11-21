@@ -83,9 +83,9 @@ export async function paginaReplay(request, clase) {
     // En la vista previa local se elige el caso con &e=si|no|neutro
     const seg = prueba ? (['si', 'no', 'neutro'].includes(new URL(request.url).searchParams.get('e')) ? new URL(request.url).searchParams.get('e') : 'neutro') : segmentoDe(c);
     const nombre = esc(primerNombre(c.name));
-    const titulo = seg === 'si' ? `Gracias por estar en la clase, ${nombre}` : seg === 'no' ? `${nombre}, aquí tienes la clase completa, por si no pudiste verla` : `Hola ${nombre}, aquí tienes la grabación de la clase`;
+    const titulo = seg === 'si' ? `Gracias por estar en la masterclass, ${nombre}` : seg === 'no' ? `${nombre}, aquí tienes la masterclass completa, por si no pudiste verla` : `Hola ${nombre}, aquí tienes la grabación de la masterclass`;
     const plat = plataforma();
-    const bajada = seg === 'si' ? `Aquí tienes la grabación para que la repases. Si sientes que es tu camino, abajo puedes inscribirte al curso.` : seg === 'no' ? `Aquí te dejamos la grabación completa de la clase de ${NOMBRE[clase]}. Mírala con calma: cuando termines, abajo puedes inscribirte.` : `Mira la clase completa y, si sientes que es tu camino, abajo puedes inscribirte al curso.`;
+    const bajada = seg === 'si' ? `Aquí tienes la grabación para que la repases. Si sientes que es tu camino, abajo puedes inscribirte al curso.` : seg === 'no' ? `Aquí te dejamos la grabación completa de la masterclass de ${NOMBRE[clase]}. Mírala con calma: cuando termines, abajo puedes inscribirte.` : `Mira la masterclass completa y, si sientes que es tu camino, abajo puedes inscribirte al curso.`;
     if (!prueba) await registrarEvento({ codigo, evento: 'vio_replay', fechaIso: new Date().toISOString(), origen: 'replay' });
     const url = (await configClases()).replay[clase];
     const cierre = cierreOferta(clase), oferta = OFERTAS[clase];
@@ -94,7 +94,7 @@ export async function paginaReplay(request, clase) {
     const abierta = !!oferta && (!cierre || Date.now() < cierre);
     const video = /^https:\/\//i.test(url || '')
       ? reproductor(url)
-      : '<div class="marco"><div><i>▶</i><b>Aquí irá la clase grabada</b><p class="muted" style="color:#c9d4cc">El video estará disponible muy pronto.</p></div></div>';
+      : '<div class="marco"><div><i>▶</i><b>Aquí irá la masterclass grabada</b><p class="muted" style="color:#c9d4cc">El video estará disponible muy pronto.</p></div></div>';
     // Captura del aula por dentro: se pone el archivo en public/assets/general/aula-por-dentro.(webp|png|jpg) y aparece sola
     const capturaArchivo = ['webp', 'png', 'jpg'].find((x) => existsSync(join(process.cwd(), 'public', 'assets', 'general', `aula-por-dentro.${x}`)));
     const captura = capturaArchivo ? `<img src="/assets/general/aula-por-dentro.${capturaArchivo}" alt="Así se ve el aula del estudiante de Casa Muladhara" style="width:100%;border-radius:14px;box-shadow:0 18px 40px -20px rgba(31,63,50,.5)">`
@@ -126,7 +126,7 @@ export async function paginaReplay(request, clase) {
       ['¿Cuánto cuesta?', reserva ? (clase === 'tarot' ? 'El curso completo se paga en 4 cuotas de 35 USD (140 USD en total): la primera al inscribirte, para asegurar tu cupo, y las demás cada 2 semanas. Karen te envía por WhatsApp los links de pago.' : 'El curso completo se paga en 2 cuotas de $35.000: la primera al inscribirte, para asegurar tu cupo, y la segunda antes de la práctica presencial. Karen te envía por WhatsApp los links de pago.') : clase === 'tarot' ? 'Son 2 cuotas mensuales de 70 USD (140 USD en total), con tarjeta.' : (extras() ? 'El curso cuesta $69.900 CLP. Reservas tu cupo con $10.000 por WhatsApp y esa reserva se descuenta: el saldo de $59.900 se paga antes de la primera clase.' : 'El curso cuesta $69.900 CLP.')],
       ...(clase === 'tarot' ? [['¿Cómo se cobran las cuotas?', reserva ? 'Karen te envía por WhatsApp el link de cada cuota.' : 'Pagas la primera cuota hoy y la segunda un mes después, con la misma tarjeta. Después de la segunda no se cobra nada más.']] : (extras() ? [['¿Cómo reservo mi cupo?', 'Pulsa «Reservar mi cupo por WhatsApp»: se abre un chat con Karen con el mensaje ya escrito y ella te indica cómo pagar los $10.000.']] : [])),
       ...(reserva ? [['¿Y si después no puedo asistir?', 'La primera cuota no es reembolsable, pero no la pierdes: la usas en el próximo grupo. Avísanos por WhatsApp antes del inicio.']] : []),
-      ['¿Y si no pude ver la clase en vivo?', 'No pasa nada: esta página tiene la clase completa y puedes verla las veces que quieras.'],
+      ['¿Y si no pude ver la masterclass en vivo?', 'No pasa nada: esta página tiene la masterclass completa y puedes verla las veces que quieras.'],
       ['¿Tengo dudas antes de inscribirme?', 'Escríbenos por WhatsApp y Karen o su equipo te responde.'],
     ];
     // Preguntas frecuentes: las de la landing del curso (si no se pudieron leer, quedan las de siempre)
@@ -134,9 +134,9 @@ export async function paginaReplay(request, clase) {
     const testis = TESTIMONIOS.length ? `<section class="testis"><h2>Lo que dicen quienes ya estuvieron</h2>${TESTIMONIOS.map((t) => `<blockquote>“${esc(t.texto)}”<br><b>${esc(t.nombre)}</b></blockquote>`).join('')}</section>` : '';
     const pagado = new URL(request.url).searchParams.get('pago') === 'ok';
     const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
-<title>Clase grabada · ${NOMBRE[clase]} · Casa Muladhara</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Mulish:wght@400;700&display=swap"><style>${CSS}</style></head><body>
+<title>Masterclass grabada · ${NOMBRE[clase]} · Casa Muladhara</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Mulish:wght@400;700&display=swap"><style>${CSS}</style></head><body>
 ${pagado ? '<div class="top" style="background:#2b5443">¡Pago recibido! Gracias por inscribirte. Karen te escribirá con los siguientes pasos.</div>' : ''}${abierta && !pagado ? `<div class="top">Inscripción abierta hasta el <b>${esc(limite)}</b></div>` : ''}
-<main><section class="hero"><span class="k">Casa Muladhara · Clase grabada</span><h1>${titulo}</h1><p>${bajada}</p></section>
+<main><section class="hero"><span class="k">Casa Muladhara · Masterclass grabada</span><h1>${titulo}</h1><p>${bajada}</p></section>
 ${video}${recibes}${cta}${bloquePlat}${testis}<section><h2>Preguntas frecuentes</h2>${faq.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('')}</section>
 <footer class="muted">¿Dudas? <a class="alt" href="${WHATSAPP}">Escríbele a Karen por WhatsApp</a></footer></main>
 <script>${CUENTA}</script>${pixel('ReplayView', '', { segmento: seg })}</body></html>`;
