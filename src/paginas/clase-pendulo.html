@@ -5,7 +5,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Josefin+Sans:wght@300;400;600&family=Mulish:wght@400;500;700&family=Fredoka:wght@500;600&display=swap">
 <link rel="stylesheet" href="/assets/css/landing.css">
-<style>html,body{margin:0}body{font-size:16px}img{max-width:100%}[hidden]{display:none!important}</style></head><body>
+<style>html,body{margin:0}body{font-size:16px}img{max-width:100%}[hidden]{display:none!important}.hero-izq{min-width:0}.hero-izq .vk{margin:18px 0 4px}@media (min-width:861px){.hero-izq{display:flex;flex-direction:column}.hero-izq .vk{order:9;margin:26px 0 0}}.voces{display:grid;gap:18px;max-width:760px;margin-inline:auto}.voces p{margin:0;font:italic 400 clamp(1.25rem,2.6vw,1.6rem)/1.45 var(--f-display);color:var(--on-brand);text-align:center}.tres{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.tres>div{background:var(--surface,#fffdf6);border:1px solid var(--line);border-radius:18px;padding:26px 22px;display:grid;gap:8px;align-content:start}.tres .num{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:#f2c66d;color:var(--forest-deep);font:400 1.3rem/1 var(--f-display)}.tres b{font:400 1.3rem/1.25 var(--f-display)}.tres p{margin:0;color:var(--muted);font-size:.95rem}.tres-linea{text-align:center;margin:26px 0 0;font-weight:700}@media (max-width:860px){.tres{grid-template-columns:1fr}}</style></head><body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
     <symbol id="mark" viewBox="-50 -50 100 100">
@@ -31,14 +31,13 @@
 </div></header>
 
 <section class="lp-hero hero-light"><svg class="hero-motif" aria-hidden="true"><use href="#mark"/></svg><div class="wrap">
-  <div>
-    <div class="con-karen"><img src="assets/img/e2ec26d75a.webp" alt="Karen Oyarce Sáez, Maestra Holística"><div><small>Con Karen Oyarce</small><span class="eyebrow">Gratis · En vivo · Todos los sábados</span></div></div>
-    <h1>Clase gratis: descubre el Péndulo Hebreo</h1>
-    <p class="lede">Cada sábado, en 30 minutos, Karen te explica qué es el Péndulo Hebreo, cómo ayuda a limpiar y equilibrar tu energía y la de tu casa, y cómo puedes empezar a usarlo. Puedes hacerle tus preguntas en vivo.</p>
-    <div class="facts"><span class="hl">Gratis</span><span>Todos los sábados · 19:00 (hora de Chile) · 30 minutos</span><span>Online en vivo</span><span>Desde cualquier país</span></div>
-    <p class="next-class" id="next-class">Todos los sábados a las 19:00 (hora de Chile), 30 minutos</p>
-    <p class="hr-zona" data-hr-zona hidden style="margin:8px 0 0;font-size:.85rem;opacity:.85"></p>
-    <a class="btn btn-sun go-form" href="#reservar">Quiero mi lugar gratis</a>
+  <div class="hero-izq">
+    <span class="eyebrow">Clase gratis · En vivo con Karen Oyarce · Sábados 19:00 (Chile)</span>
+    <h1>No necesitas un don para usar el péndulo. Necesitas un método.</h1>
+    <!-- Video de Karen (30 a 60 s, con subtítulos grabados): pega el enlace en data-video (YouTube no listado o archivo .mp4 propio). Vacío = se ve la foto de Karen. -->
+    <div class="vk" data-video=""><img src="assets/img/e2ec26d75a.webp" alt="Karen Oyarce Sáez, Maestra Holística"></div>
+    <p class="lede">En esta clase gratis de 30 minutos, Karen te muestra cómo se usa el Péndulo Hebreo para limpiar, proteger y armonizar tu energía, la de tu familia y la de tu casa. Paso a paso y desde cero.</p>
+    <div class="facts"><span class="hl">Gratis</span><span>Online en vivo</span><span>Sábados 19:00 (hora de Chile)</span><span>30 minutos</span></div>
   </div>
   <form class="lp-form" id="reservar" data-lead="clase-pendulo" data-clase="Péndulo Hebreo">
     <h3>Reserva tu lugar <em>gratis</em></h3>
@@ -46,42 +45,35 @@
     <label>WhatsApp *<span class="wa-row"><select name="cc" data-cc aria-label="Código de país"><option value="+56" data-country="Chile">Chile +56</option></select><input name="whatsapp" type="tel" autocomplete="tel-national" placeholder="9 1234 5678" required></span></label>
     <label>Correo *<input name="email" type="email" autocomplete="email" placeholder="tu@correo.com" required></label>
     <label>¿Qué sábado te acomoda?<select name="interest" id="saturdays"><option>El próximo sábado · 19:00</option></select></label>
-    <button class="btn" type="submit">Registrarme</button>
+    <button class="btn" type="submit">Quiero mi lugar</button>
     <p class="lp-ok" hidden>¡Listo! Tu lugar quedó reservado. Karen te escribirá por WhatsApp antes del sábado con el enlace de la clase.</p>
-    <small>Horario de Chile (19:00). Sin costo y sin compromiso.</small>
+    <small>Sin costo. Karen te escribe por WhatsApp antes de la clase con tu enlace personal.</small>
     <p class="wa-alt">¿Prefieres escribirnos tú? <a href="https://wa.me/56940044528?text=Hola%20Karen%2C%20quiero%20m%C3%A1s%20informaci%C3%B3n%20de%20la%20clase%20gratis%20de%20P%C3%A9ndulo" target="_blank" rel="noopener">Abrir WhatsApp</a></p>
   </form>
 </div></section>
 <section class="section tone-dark"><div class="wrap">
-  <div class="section-head"><span class="eyebrow">Qué vas a aprender</span><h2>30 minutos para conocer el Péndulo Hebreo</h2></div>
-  <div class="cols3">
-    <div><b>Qué es el Péndulo Hebreo</b><p>De dónde viene y por qué funciona como herramienta de limpieza energética.</p></div>
-    <div><b>Para qué lo puedes usar</b><p>Para tu energía, la de tu familia y la de tu casa.</p></div>
-    <div><b>Cómo empezar</b><p>Qué necesitas y el primer paso para practicar.</p></div>
-  </div>
-  <div class="next-step" data-hr-siguiente hidden><b>Tu siguiente paso</b>
-    <div data-hr-linea style="margin-top:6px">Próximo curso de Péndulo Hebreo (por ahora solo para Chile): <b data-hr-curso></b>. <a href="/pendulo" style="color:#2b5443">Ver el curso</a></div>
-    <div data-hr-linea style="margin-top:6px">Luego: Formación de Terapeuta Holística Integral, próximo grupo <b data-hr-form></b>. Lo que pagaste en el curso se descuenta de la formación. <a href="/formacion" style="color:#2b5443">Ver la formación</a></div>
-  </div>
+  <div class="section-head" style="margin-inline:auto;text-align:center"><h2>Si alguna vez pensaste esto, esta clase es para ti</h2></div>
+  <div class="voces"><p>“Llego a mi casa y siento el ambiente pesado, pero no sé qué hacer.”</p><p>“Me compré un péndulo y lo tengo guardado, porque me da miedo usarlo mal.”</p><p>“He visto mil videos y no se me queda nada.”</p><p>“Quiero proteger a mis hijos y mi casa, pero no sé por dónde empezar.”</p></div>
 </div></section>
 <section class="section tone-light"><div class="wrap">
-  <div class="section-head"><span class="eyebrow">Ellas ya aprendieron con Karen</span><h2>Clases y graduaciones de Péndulo Hebreo</h2></div>
+  <div class="section-head" style="margin-inline:auto;text-align:center"><h2>En 30 minutos, Karen te muestra 3 cosas</h2></div>
+  <div class="tres"><div><span class="num">1</span><b>El método</b><p>Por qué el Péndulo Hebreo no es algo confuso ni misterioso: es una herramienta con un orden claro.</p></div><div><span class="num">2</span><b>Tú puedes</b><p>Por qué no necesitas un don para usarlo, y qué necesitas en su lugar.</p></div><div><span class="num">3</span><b>No estás sola</b><p>Cómo dar tu primer paso aunque nunca hayas tomado un péndulo, acompañada.</p></div></div>
+  <p class="tres-linea">Y puedes hacerle tus preguntas a Karen en vivo.</p>
+</div></section>
+<section class="section tone-light" style="padding-top:0"><div class="wrap">
+  <div class="section-head" style="margin-inline:auto;text-align:center"><h2>Ellas ya aprendieron con Karen</h2></div>
   <div class="mini-gal"><img loading="lazy" decoding="async" src="assets/img/231aa77989.webp" alt="Graduación de Péndulo Hebreo Nivel 1"><img loading="lazy" decoding="async" src="assets/img/f08f46f33a.webp" alt="Graduación de Péndulo Hebreo Nivel 1"><img loading="lazy" decoding="async" src="assets/img/292ddf3bf0.webp" alt="Graduación de Péndulo Hebreo Nivel 1"><img loading="lazy" decoding="async" src="assets/img/81f0a09164.webp" alt="Graduación de Péndulo Hebreo Nivel 1"><img loading="lazy" decoding="async" src="assets/img/41a246e938.webp" alt="Clase práctica de Péndulo Hebreo"><img loading="lazy" decoding="async" src="assets/img/37953e38df.webp" alt="Graduación de Péndulo Hebreo Nivel 1"></div>
 </div></section>
 <section class="section tone-dark"><div class="wrap kit">
   <img class="lp-photo" src="assets/img/e2ec26d75a.webp" alt="Karen Oyarce Sáez, Maestra Holística">
-  <div><span class="eyebrow">Quién te acompaña</span><h2 style="font-size:clamp(1.8rem,3.6vw,2.6rem);margin-block:12px">Hola, soy Karen</h2><p style="color:var(--muted)">Llevo más de 5 años acompañando procesos y formando terapeutas con el Método Casa Muladhara. Cada sábado te muestro cómo empezar a usar el Péndulo Hebreo desde el primer día. Te espero.</p></div>
+  <div><h2 style="font-size:clamp(1.8rem,3.6vw,2.6rem);margin-block:0 12px">Hola, soy Karen</h2><p style="color:var(--muted)">Yo pensaba que el péndulo servía solo para encontrar cosas o agua. Hoy lo uso en mis terapias y hace más de 5 años que formo terapeutas. No nací sabiendo, y ninguna de mis alumnas tampoco. Cada sábado te muestro por dónde empezar. Te espero.</p></div>
 </div></section>
 <section class="section tone-light"><div class="wrap">
-  <div class="section-head"><span class="eyebrow">Preguntas frecuentes</span><h2>Antes de reservar</h2></div>
-  <div class="faq">
-    <details><summary>¿Tiene algún costo?</summary><p>No. La clase es gratis. Al final Karen cuenta del curso Nivel 1, pero no tienes ninguna obligación.</p></details>
-    <details><summary>¿Necesito tener un péndulo?</summary><p>No para esta clase. Solo ganas de aprender.</p></details>
-    <details><summary>¿Y si no puedo este sábado?</summary><p>La clase se repite todos los sábados a las 19:00 (Chile). Elige otro sábado en el formulario.</p></details>
-  </div>
+  <div class="section-head"><h2>Preguntas frecuentes</h2></div>
+  <div class="faq"><details><summary>¿Tiene algún costo?</summary><p>No. La clase es gratis. Al final Karen te cuenta cómo seguir aprendiendo con el curso Nivel 1, sin ninguna obligación.</p></details><details><summary>¿Necesito tener un péndulo?</summary><p>No. Para esta clase solo necesitas ganas de aprender.</p></details><details><summary>¿Y si no puedo este sábado?</summary><p>La clase se repite todos los sábados a las 19:00 (Chile). Elige otro sábado en el formulario. Si te inscribes y no alcanzas a entrar, te enviamos la repetición por WhatsApp.</p></details></div>
 </div></section>
 <section class="section tone-dark cierre"><div class="wrap">
-  <h2>Te espero este sábado</h2>
+  <h2>Tu primer paso puede ser este sábado.</h2>
   <a class="btn btn-sun" href="#reservar">Reservar mi lugar gratis</a>
 </div></section>
 <footer style="padding-block:28px"><div class="wrap"><p style="margin:0 0 14px;font-size:.82rem;line-height:1.5;color:var(--on-brand-muted)">Las terapias holísticas acompañan tu bienestar y no reemplazan la atención médica ni psicológica.</p><div class="legal" style="margin:0;padding-top:14px"><span>© 2026 Casa Muladhara</span><span>Instagram @casa.muladhara</span></div></div></footer>
@@ -89,5 +81,6 @@
 <script src="/assets/js/landing/horarios.js" data-clase="clase-pendulo" defer></script>
 <script src="/assets/js/landing/menu.js"></script>
 <script src="/assets/js/landing/captacion.js"></script>
+<script src="/assets/js/landing/video-karen.js" defer></script>
 <script src="/assets/js/landing/agendar.js" defer></script>
 </body></html>
