@@ -84,7 +84,8 @@ export function pasoDebido({ l, ev, ahora }) {
   return null;
 }
 
-// Texto libre (dentro de las 24 h) y plantilla de cada paso
+// Texto libre (dentro de las 24 h) y plantilla de cada paso. boton = el código personal, que va en el botón de enlace (…/entrar/{{1}}) de clase_link_personal,
+// clase_recordatorio_dia_antes y clase_recordatorio_1h; gracias y replay no llevan botón (los de respuesta rápida tampoco llevan parámetros).
 function armar(paso, { l, ev, cfg, replay }) {
   const n = primerNombre(l.name) || 'hola', nombre = (OFERTAS[ev.clase] || {}).nombre || (ev.clase === 'tarot' ? 'Tarot Terapéutico' : 'Péndulo Hebreo');
   const dia = diaLargo(ev.fecha), enlace = `${base()}/entrar/${l.codigo}`;
@@ -93,9 +94,9 @@ function armar(paso, { l, ev, cfg, replay }) {
   const T = {
     link: { nombre: 'clase_link_personal', vars: [n, nombre, dia, ev.hora], boton: l.codigo,
       texto: `Hola ${n} 🌿 Este es tu enlace personal para entrar a la clase gratuita de ${nombre}, el ${dia} a las ${ev.hora}: ${enlace}\n\nEs solo tuyo: no lo compartas.` },
-    diaAntes: { nombre: 'clase_recordatorio_dia_antes', vars: [n, nombre, ev.hora, video],
+    diaAntes: { nombre: 'clase_recordatorio_dia_antes', vars: [n, nombre, ev.hora, video], boton: l.codigo,
       texto: `Hola ${n} 🌿 Mañana a las ${ev.hora} es tu clase gratuita de ${nombre} con Karen. Tu enlace para entrar: ${enlace}\n\nTe dejo un video para ir preparándote: ${video}` },
-    unaHora: { nombre: 'clase_recordatorio_1h', vars: [n, nombre, ev.hora],
+    unaHora: { nombre: 'clase_recordatorio_1h', vars: [n, nombre, ev.hora], boton: l.codigo,
       texto: `Hola ${n} 🌿 En una hora (${ev.hora}) empieza tu clase gratuita de ${nombre}. Entra con tu enlace personal: ${enlace}` },
     gracias: { nombre: 'clase_gracias_asistio', vars: [n, nombre, grabacion],
       texto: `Hola ${n} 🌿 Gracias por acompañarnos en la clase de ${nombre}. Aquí tienes la grabación para verla cuando quieras: ${grabacion}` },
@@ -133,7 +134,7 @@ async function enviarPaso({ ref, l, ev, paso, cfg, hoy, ahora, replay }) {
   });
   if (!reservado) return { omitido: 'ya recibió un mensaje hoy, o este paso ya salió' };
   try {
-    const id = abierta ? await enviarTexto(numero, m.texto) : await enviarPlantillaCon(numero, { name: m.nombre, lang: LANG, vars: m.vars, boton: paso === 'link' ? l.codigo : '' });
+    const id = abierta ? await enviarTexto(numero, m.texto) : await enviarPlantillaCon(numero, { name: m.nombre, lang: LANG, vars: m.vars, boton: m.boton || '' });
     await registrarSalida(numero, id, abierta ? m.texto : `[Plantilla ${m.nombre}] ${m.texto}`).catch((e) => console.error('secuencia chat', e));
     await ref.update({ [`secuencia.${k}.${paso}`]: { t: ahora, id: id || '', via: abierta ? 'texto' : 'plantilla' }, ...(paso === 'link' ? { waEnlaceT: ahora } : {}),
       eventos: FieldValue.arrayUnion({ t: ahora, tipo: 'envio', texto: `WhatsApp automático (${paso}): ${abierta ? 'texto' : `plantilla ${m.nombre}`}` }), updatedAt: FieldValue.serverTimestamp() });
