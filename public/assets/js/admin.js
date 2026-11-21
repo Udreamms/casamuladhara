@@ -2,6 +2,7 @@
 // Entra con usuario y contraseña (sin correo): /api/staff los compara con STAFF_USER y STAFF_PASSWORD y entrega la sesión del Staff.
 // Lo que se ve aquí lo protegen las reglas de Firestore: solo una cuenta con el claim admin puede leerlo.
 import { auth, db } from './firebase.js';
+import { filasPostulacion } from './postulacion.js';
 import { profileApi, mountProfileEditor, googlePhoto } from './profile.js';
 import {
   signInWithCustomToken,
@@ -462,10 +463,9 @@ const leadEtapa = (l) => {
   return e;
 };
 
-// Formación: lo que guarda la landing. lead.postulacion = { objetivo, experiencia, inicio, inversion, t }; lead.agendaClicT (apretó «Elegir día y hora»); lead.llamada = { evento, start, fecha, hora, t } (eligió su llamada de orientación)
+// Formación: lo que guarda la landing. lead.postulacion = { motivo, experiencia, horas, t } (motivo: qué la mueve; experiencia: cursos holísticos; horas: por semana; las fichas antiguas traen también objetivo, inicio e inversion); lead.agendaClicT (apretó «Elegir día y hora»); lead.llamada = { evento, start, fecha, hora, t } (eligió su llamada de orientación)
 const llamadaMs = (l) => (l.llamada ? (Number(l.llamada.start) || (l.llamada.fecha && l.llamada.hora ? chileAMs(l.llamada.fecha, l.llamada.hora) : 0)) : 0);
 const llamadaTxt = (l) => (l.llamada?.fecha ? `${diaLargoTxt(l.llamada.fecha)}${l.llamada.hora ? `, ${l.llamada.hora}` : ''}` : '');
-const POSTULACION = [['objetivo', 'Objetivo'], ['experiencia', 'Experiencia'], ['inicio', 'Cuándo quiere empezar'], ['inversion', 'Inversión']];
 const esPostulante = (p) => p.leads.some((l) => !!l.postulacion);
 const formacionBadges = (p) => p.leads.filter((l) => l.form === 'formacion').map((l) => {
   if (l.llamada) { const ms = llamadaMs(l), paso = ms && ms + 20 * 6e4 < Date.now() && etapaPipe(l) === 'llamada_agendada'; return `<span class="pill ${paso ? 'bad' : 'pres'}" title="${paso ? 'Su llamada ya pasó: márcala como Ingresó o No ingresó' : 'Llamada de orientación agendada'}">Llamada: ${esc(llamadaTxt(l))}${paso ? ' · ya pasó' : ''}</span>`; }
@@ -966,7 +966,7 @@ async function pasarACurso(l) {
 const bloquePostulacion = (l) => {
   if (l.form !== 'formacion' || !(l.postulacion || l.llamada || l.agendaClicT)) return '';
   const po = l.postulacion || {};
-  return `<div class="pg-pago"><b>Postulación a la Formación</b>${l.postulacion ? `<dl class="kv" style="font-size:.84rem;gap:4px 12px;margin:0">${POSTULACION.map(([k, t]) => `<dt>${t}</dt><dd>${esc(po[k] || '—')}</dd>`).join('')}</dl>` : '<span class="muted" style="font-size:.82rem">Sin respuestas guardadas.</span>'}
+  return `<div class="pg-pago"><b>Postulación a la Formación</b>${l.postulacion ? `<dl class="kv" style="font-size:.84rem;gap:4px 12px;margin:0">${filasPostulacion(po).map(([t, v]) => `<dt>${t}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : '<span class="muted" style="font-size:.82rem">Sin respuestas guardadas.</span>'}
     ${l.llamada ? `<span style="font-size:.86rem"><b>Llamada de orientación:</b> ${esc(llamadaTxt(l))}</span>` : l.agendaClicT ? `<span class="pill lock" style="justify-self:start">Pulsó agendar el ${esc(fechaCorta(l.agendaClicT))}</span><span class="muted" style="font-size:.8rem">Todavía no eligió día y hora.</span>` : ''}</div>`;
 };
 function leadFichaSimple(id) {
