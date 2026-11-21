@@ -159,7 +159,7 @@
 <script src="/assets/js/landing/petalos.js"></script>
 <script>
 /* Semana Black Friday: del sábado 21 de noviembre 00:00 (se adelantó para lanzar campañas) al lunes 30 de noviembre 23:59 (hora de Chile).
-   Antes de empezar y después de terminar, la oferta se cambia por un aviso que lleva a /formacion.
+   Antes de empezar, la oferta se cambia por un aviso; después de terminar, la página lleva sola a /formacion/postular.
    Para revisarla en el computador local antes del 23: /formacion/black-friday?vista=abierta */
 (() => {
   const INICIO = Date.parse('2026-11-21T00:00:00-03:00'), FIN = Date.parse('2026-11-30T23:59:59-03:00');
@@ -171,7 +171,8 @@
     document.querySelectorAll('.final-cta a[href="#oferta"]').forEach((a) => (a.href = '/formacion'));
   };
   if (!vista && ahora < INICIO) return aviso('La Semana Black Friday empieza pronto', 'Vuelve en unos días para tomar tu Formación con el precio especial.');
-  if (!vista && ahora > FIN) return aviso('La Semana Black Friday terminó', 'Puedes postular a la Formación con el precio normal y agendar tu llamada de orientación.');
+  // Terminada la semana, lleva directo a la postulación (si la redirección no corre, queda el aviso con el botón)
+  if (!vista && ahora > FIN) { aviso('La Semana Black Friday terminó', 'Puedes postular a la Formación con el precio normal y agendar tu llamada de orientación.'); location.replace('/formacion/postular' + location.search); return; }
   const p = (n) => String(n).padStart(2, '0'), u = (k) => document.querySelector(`[data-u="${k}"]`);
   const tick = () => { const s = Math.max(0, Math.floor((FIN - Date.now()) / 1000)); u('d').textContent = p(Math.floor(s / 86400)); u('h').textContent = p(Math.floor(s % 86400 / 3600)); u('m').textContent = p(Math.floor(s % 3600 / 60)); u('s').textContent = p(s % 60); };
   tick(); setInterval(tick, 1000);
