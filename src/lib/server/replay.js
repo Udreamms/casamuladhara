@@ -32,26 +32,26 @@ function landing(clase) {
 // Testimonios: déjalos vacíos hasta tener los reales (con permiso). Mientras estén vacíos, la sección no se muestra.
 const TESTIMONIOS = [];
 
-export const CSS = `*{box-sizing:border-box}body{margin:0;background:#f6f4ec;color:#22302a;font:17px/1.65 Mulish,Segoe UI,system-ui,sans-serif}
-.top{background:#1f3f32;color:#ece7d3;text-align:center;padding:10px 16px;font:700 .8rem/1.4 Mulish,sans-serif;letter-spacing:.06em}
+export const CSS = `*{box-sizing:border-box}body{margin:0;background:#f6f4ec;color:#22302a;font:17px/1.65 Google Sans Flex,system-ui,sans-serif}
+.top{background:#1f3f32;color:#ece7d3;text-align:center;padding:10px 16px;font:700 .8rem/1.4 Google Sans Flex,system-ui,sans-serif;letter-spacing:.06em}
 .top b{color:#e8c98a}main{width:min(860px,100%);margin:0 auto;padding:28px 20px 60px;display:grid;gap:34px}
-.k{font:700 .72rem/1 Mulish,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#a77a3b}
-h1{margin:6px 0 8px;font:400 clamp(1.8rem,5vw,2.6rem)/1.2 Marcellus,Georgia,serif;color:#1f3f32}h2{margin:0 0 10px;font:400 1.6rem/1.25 Marcellus,Georgia,serif;color:#1f3f32}p{margin:0}
+.k{font:600 .9rem/1.3 Google Sans Flex,system-ui,sans-serif;color:#2b5443}
+h1{margin:6px 0 8px;font:600 clamp(1.8rem,5vw,2.7rem)/1.15 Google Sans Flex,system-ui,sans-serif;letter-spacing:-.01em;color:#1d1d1d}h2{margin:0 0 10px;font:600 1.6rem/1.25 Google Sans Flex,system-ui,sans-serif;color:#1f3f32}p{margin:0}
 .hero{text-align:center}.hero p{color:#4b5a52}
 .video{aspect-ratio:16/9;width:100%;border:0;border-radius:18px;background:#000;box-shadow:0 22px 44px -22px rgba(31,63,50,.55)}
 .marco{aspect-ratio:16/9;border-radius:18px;background:radial-gradient(circle at 50% 40%,#2f5a47,#162f25);display:grid;place-items:center;color:#ece7d3;text-align:center;padding:20px;box-shadow:0 22px 44px -22px rgba(31,63,50,.55)}
 .marco i{display:grid;place-items:center;width:84px;height:84px;margin:0 auto 14px;border-radius:50%;background:#e8c98a;color:#1f3f32;font-size:2rem;font-style:normal;padding-left:6px}
 .oferta{background:#fffdf6;border:1px solid #d9d5c3;border-radius:22px;padding:30px 24px;text-align:center;display:grid;gap:14px;justify-items:center;box-shadow:0 12px 30px -16px rgba(31,63,50,.3)}
 .cuenta{display:flex;gap:10px;justify-content:center}.cuenta div{min-width:70px;background:#1f3f32;color:#ece7d3;border-radius:14px;padding:10px 6px}
-.cuenta b{display:block;font:400 1.8rem/1 Marcellus,Georgia,serif}.cuenta small{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:#e8c98a}
-.precio{font:400 1.5rem/1.2 Marcellus,Georgia,serif;color:#1f3f32}
-a.b{display:inline-flex;justify-content:center;align-items:center;padding:18px 34px;border-radius:999px;background:#2b5443;color:#ece7d3;font:700 .95rem/1 Mulish,sans-serif;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;box-shadow:0 10px 24px -10px rgba(31,63,50,.6)}
-a.b:hover{background:#1f3f32}a.alt{color:#2b5443;font-weight:700}.muted{color:#5d6b63;font-size:.9rem}
+.cuenta b{display:block;font:600 1.8rem/1 Google Sans Flex,system-ui,sans-serif}.cuenta small{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:#e8c98a}
+.precio{font:600 1.5rem/1.2 Google Sans Flex,system-ui,sans-serif;color:#1f3f32}
+a.b{display:inline-flex;justify-content:center;align-items:center;padding:18px 34px;border-radius:12px;background:#f2c66d;color:#1d1d1d;font:700 1.02rem/1 Google Sans Flex,system-ui,sans-serif;text-decoration:none;box-shadow:0 10px 24px -12px rgba(0,0,0,.35)}
+a.b:hover{background:#eab84f}a.alt{color:#2b5443;font-weight:700}.muted{color:#5d6b63;font-size:.9rem}
 details{background:#fffdf6;border:1px solid #d9d5c3;border-radius:14px;padding:14px 18px;margin-bottom:10px}summary{cursor:pointer;font-weight:700;color:#1f3f32}details p{margin-top:8px}
 .testis{display:grid;gap:12px}.testis blockquote{margin:0;background:#fffdf6;border-left:4px solid #a77a3b;border-radius:10px;padding:14px 18px}
 .social{display:grid;gap:14px;text-align:center}.social h2{margin:0}.social .fotos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.social .fotos img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:14px;display:block}
-.social .mazo{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;align-items:center;text-align:left}.social .mazo img{width:100%;height:auto;border-radius:18px;display:block;box-shadow:0 22px 44px -22px rgba(31,63,50,.55)}.social ul{list-style:none;margin:0;padding:0;display:grid;gap:12px}.social li b{display:block;font:400 1.15rem/1.3 Marcellus,Georgia,serif;color:#1f3f32}.social li span{color:#5d6b63;font-size:.92rem;line-height:1.45}
-.social blockquote{margin:0;text-align:left;background:#fffdf6;border-left:4px solid #a77a3b;border-radius:10px;padding:14px 18px;font:400 1.05rem/1.55 Marcellus,Georgia,serif;color:#1f3f32}.social blockquote small{display:block;margin-top:8px;font:700 .85rem/1.3 Mulish,sans-serif;color:#5d6b63}
+.social .mazo{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;align-items:center;text-align:left}.social .mazo img{width:100%;height:auto;border-radius:18px;display:block;box-shadow:0 22px 44px -22px rgba(31,63,50,.55)}.social ul{list-style:none;margin:0;padding:0;display:grid;gap:12px}.social li b{display:block;font:600 1.15rem/1.3 Google Sans Flex,system-ui,sans-serif;color:#1f3f32}.social li span{color:#5d6b63;font-size:.92rem;line-height:1.45}
+.social blockquote{margin:0;text-align:left;background:#fffdf6;border-left:4px solid #a77a3b;border-radius:10px;padding:14px 18px;font:600 1.05rem/1.55 Google Sans Flex,system-ui,sans-serif;color:#1f3f32}.social blockquote small{display:block;margin-top:8px;font:700 .85rem/1.3 Google Sans Flex,system-ui,sans-serif;color:#5d6b63}
 @media (max-width:640px){.social .mazo{grid-template-columns:1fr}}
 footer{text-align:center}`;
 
@@ -134,7 +134,7 @@ export async function paginaReplay(request, clase) {
     const testis = TESTIMONIOS.length ? `<section class="testis"><h2>Lo que dicen quienes ya estuvieron</h2>${TESTIMONIOS.map((t) => `<blockquote>“${esc(t.texto)}”<br><b>${esc(t.nombre)}</b></blockquote>`).join('')}</section>` : '';
     const pagado = new URL(request.url).searchParams.get('pago') === 'ok';
     const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
-<title>Masterclass grabada · ${NOMBRE[clase]} · Casa Muladhara</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Mulish:wght@400;700&display=swap"><style>${CSS}</style></head><body>
+<title>Masterclass grabada · ${NOMBRE[clase]} · Casa Muladhara</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;600;700&display=swap"><style>${CSS}</style></head><body>
 ${pagado ? '<div class="top" style="background:#2b5443">¡Pago recibido! Gracias por inscribirte. Karen te escribirá con los siguientes pasos.</div>' : ''}${abierta && !pagado ? `<div class="top">Inscripción abierta hasta el <b>${esc(limite)}</b></div>` : ''}
 <main><section class="hero"><span class="k">Casa Muladhara · Masterclass grabada</span><h1>${titulo}</h1><p>${bajada}</p></section>
 ${video}${recibes}${cta}${bloquePlat}${testis}<section><h2>Preguntas frecuentes</h2>${faq.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('')}</section>
