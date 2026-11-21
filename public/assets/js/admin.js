@@ -3,6 +3,7 @@
 // Lo que se ve aquí lo protegen las reglas de Firestore: solo una cuenta con el claim admin puede leerlo.
 import { auth, db } from './firebase.js';
 import { filasPostulacion } from './postulacion.js';
+import { blackFridayDe, esExalumna, textoBono } from './black-friday.js';
 import { profileApi, mountProfileEditor, googlePhoto } from './profile.js';
 import {
   signInWithCustomToken,
@@ -195,7 +196,7 @@ const data = {
 };
 
 // ---------- Vista ----------
-const S = { view: 'inicio', leadSel: new Set(), crmVista: 'embudo', crmProg: '', crmQ: '', crmOrigen: '', crmSeg: false, crmDesc: false, crmSinCuenta: false, crmEtapa: '', crmReserva: '', crmPost: false, crmTag: '', crmRango: '', crmMetrica: 'origen', fichaTab: 'resumen', crmLista: '', clicOrden: 'recientes', q: '', open: null, filter: 'todas', lvOpen: {}, fq: '', cls: null, ansWho: '', ansLv: 0 };
+const S = { view: 'inicio', leadSel: new Set(), crmVista: 'embudo', crmProg: '', crmQ: '', crmOrigen: '', crmSeg: false, crmDesc: false, crmSinCuenta: false, crmEtapa: '', crmReserva: '', crmPost: false, crmBF: false, crmTag: '', crmRango: '', crmMetrica: 'origen', fichaTab: 'resumen', crmLista: '', clicOrden: 'recientes', q: '', open: null, filter: 'todas', lvOpen: {}, fq: '', cls: null, ansWho: '', ansLv: 0 };
 const NAV = [
   ['inicio', 'Inicio', '<path d="M4 11 12 4l8 7v9H4z"/><path d="M10 20v-6h4v6"/>'],
   ['--', 'CRM'],
@@ -571,6 +572,7 @@ const personasFiltradas = () => {
     && (!S.crmTag || p.tags.includes(S.crmTag))
     && (!S.crmEtapa || !prog || etapaVista(p) === S.crmEtapa)
     && (!S.crmPost || esPostulante(p))
+    && (!S.crmBF || blackFridayDe(p.leads))
     && (!FUNC.reserva || !S.crmReserva || ((x) => (S.crmReserva === 'sin' ? !x : x === S.crmReserva))(reservaPersona(p, prog ? claseDeForm(prog[0]) : '')))
     && (!q || [p.nombre, p.email, p.whatsapp, p.note, ...p.leads.map((l) => `${l.interest} ${l.message}`)].join(' ').toLowerCase().includes(q)))
     .sort((a, b) => ultimaActividad(b) - ultimaActividad(a));
@@ -764,7 +766,7 @@ V.interesadas = () => {
   const primera = prog && esClase(prog[0]) ? 'registrada' : 'nuevo';
   const nSeg = base.filter(seguimientoHoyP).length, nSin = base.filter((p) => !p.alumna).length, nNuevas = base.filter((p) => etapaVista(p) === primera).length;
   const etapasProg = prog && tipoPipe(prog[0]) ? [...PIPES[tipoPipe(prog[0])], ...(esClase(prog[0]) ? [['descartado', 'Descartada']] : [])] : LEAD_STATES.filter(([k]) => !(prog && esPago(prog[0]) && k === 'clase'));
-  const hayFiltro = !!(S.crmQ || S.crmOrigen || (prog && S.crmEtapa) || S.crmPost || (FUNC.reserva && S.crmReserva) || S.crmTag || S.crmSeg || S.crmSinCuenta);
+  const hayFiltro = !!(S.crmQ || S.crmOrigen || (prog && S.crmEtapa) || S.crmPost || S.crmBF || (FUNC.reserva && S.crmReserva) || S.crmTag || S.crmSeg || S.crmSinCuenta);
   const kpi = (k, n, t, on) => `<button type="button" class="crm-kpi" data-crm-kpi="${k}" aria-pressed="${on}"><b>${n}</b><span>${t}</span></button>`;
   const kpis = `<div class="crm-kpis">${kpi('todos', base.length, prog ? 'en este programa' : 'personas', !hayFiltro)}${kpi('nuevas', nNuevas, 'por contactar', S.crmEtapa === primera)}${FUNC.tareas ? kpi('seg', nSeg, 'seguimientos hoy', !!S.crmSeg) : ''}${kpi('sin', nSin, 'sin cuenta en el aula', !!S.crmSinCuenta)}${kpi('clic', filasClic().length, 'clic sin pagar', S.crmLista === 'clic')}</div>`;
   const barra = `<div class="crm-bar">${vistas}
@@ -774,6 +776,7 @@ V.interesadas = () => {
     <select id="crm-post" aria-label="Postulación"><option value="">Postulación: todas</option><option value="si" ${S.crmPost ? 'selected' : ''}>Postulantes de la Formación</option></select>
     ${FUNC.reserva ? `<select id="crm-reserva" aria-label="Reserva"><option value="">Reserva: todas</option>${[['sin', 'Sin etiqueta'], ['iniciada', 'Reserva iniciada, sin pago'], ['pagada', 'Reservó']].map(([k, t]) => `<option value="${k}" ${S.crmReserva === k ? 'selected' : ''}>${t}</option>`).join('')}</select>` : ''}
     ${FUNC.etiquetas && tags.length ? `<select id="crm-tag" aria-label="Etiqueta"><option value="">Etiqueta: todas</option>${tags.map((t) => `<option ${S.crmTag === t ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select>` : ''}
+    ${prog?.[0] === 'formacion' ? `<button type="button" class="chip" data-crm-bf aria-pressed="${!!S.crmBF}" title="Fichas de la Semana Black Friday">Black Friday (${todas.filter((p) => tieneProg(p, prog) && blackFridayDe(p.leads)).length})</button>` : ''}
     ${hayFiltro ? '<button type="button" class="link" data-crm-kpi="todos">Quitar filtros</button>' : ''}</div>`;
   const tabs = `<nav class="crm-tabs" aria-label="Programas">${[['', 'Todos', todas.length], ...LEAD_PROGS.map(([k, t, fs]) => [k, t, todas.filter((p) => tieneProg(p, [k, t, fs])).length])].map(([k, t, n]) => `<button type="button" data-crm-prog="${esc(k)}" aria-pressed="${(S.crmProg || '') === k}">${esc(t)}<span class="n">${n}</span></button>`).join('')}</nav>`;
   const controles = `${ofertaBanner()}${cuposHTML() ? `<div class="cupos">${cuposHTML()}</div>` : ''}${kpis}${barra}${tabs}`;
@@ -807,7 +810,7 @@ V.interesadas = () => {
     return `<article class="kb-card" ${trk ? `draggable="true" data-lead-card="${esc(trk.id)}"` : ''} data-lead-open="${esc(p.id)}">
       <div class="kb-top"><span class="av sm" style="--c:${colorFor(p.id)}">${esc(initials(p.nombre))}</span><div class="kb-id"><b>${esc(p.nombre)}</b>${prog ? `<span class="muted">${linea || 'Formación completa · pagó en la plataforma'}</span>` : ''}</div></div>${prog ? '' : `<span style="display:flex;gap:4px;flex-wrap:wrap">${progPills(p)}</span>`}
       ${trk?.interest ? `<small>${esc(trk.interest)}</small>` : ''}${p.note ? `<small class="muted">📝 ${esc(p.note.slice(0, 70))}${p.note.length > 70 ? '…' : ''}</small>` : ''}
-      <div class="kb-meta">${cuentaBadge(p)}${asistPersona(p)}${pagoPersona(p)}${formacionBadges(p)}${segBadge(p)}${tagsPills(p)}${otras}${p.whatsapp ? `<a class="btn btn-ghost btn-sm" href="${waLink(p.whatsapp)}" data-wa-open="${esc(waNum(p.whatsapp))}" data-wa-name="${esc(p.nombre)}">WhatsApp</a>` : ''}</div></article>`;
+      <div class="kb-meta">${cuentaBadge(p)}${bfBadges(p)}${asistPersona(p)}${pagoPersona(p)}${formacionBadges(p)}${segBadge(p)}${tagsPills(p)}${otras}${p.whatsapp ? `<a class="btn btn-ghost btn-sm" href="${waLink(p.whatsapp)}" data-wa-open="${esc(waNum(p.whatsapp))}" data-wa-name="${esc(p.nombre)}">WhatsApp</a>` : ''}</div></article>`;
   };
   return `${head}${aviso}${controles}
   <div class="crm-hint"><span>${prog ? 'Arrastra una tarjeta para cambiar su etapa. Toca una tarjeta para abrir su ficha.' : 'Cada persona aparece en su etapa más avanzada. Elige un programa para mover tarjetas.'}</span><button type="button" class="chip" data-crm-desc aria-pressed="${verDesc}">Mostrar descartadas (${lista.filter((p) => etapaVista(p) === 'descartado').length})</button></div>
@@ -1114,7 +1117,7 @@ function leadFicha(id) {
 
   // ----- izquierda: persona, contacto editable, seguimiento, etiquetas
   const izquierda = `<div class="ct-cab"><span class="av lg" style="--c:${colorFor(p.id)}">${esc(initials(p.nombre))}</span><div><h3>${esc(p.nombre)}</h3><span class="muted" style="font-size:.8rem">${esc(etapaTxt('', etapaDe(p)))}</span></div></div>
-    <div class="ct-badges" style="margin:0">${cuentaBadge(p)} ${asistPersona(p)} ${pagoPersona(p)} ${segBadge(p)}</div>
+    <div class="ct-badges" style="margin:0">${cuentaBadge(p)} ${bfBadges(p)} ${asistPersona(p)} ${pagoPersona(p)} ${segBadge(p)}</div>
     <div class="ct-acc">${p.whatsapp ? '<button type="button" class="btn btn-primary btn-sm" data-ficha-tab="wa">WhatsApp</button>' : ''}${p.email ? `<a class="btn btn-ghost btn-sm" href="mailto:${esc(p.email)}">Correo</a>` : ''}</div>
     <form class="ct-form" id="ct-form">
       <label>Nombre<input data-ct="name" value="${esc(p.nombre)}" maxlength="120" autocomplete="off"></label>
@@ -1518,6 +1521,9 @@ const pagoBadges = (l, p) => {
   if (FUNC.cuotas && l.cobroFallido) b.push('<span class="pill bad" title="Un cobro falló: escribirle hoy">Cobro fallido</span>');
   return b.join(' ');
 };
+// Black Friday: etiqueta con el plan (ficha y tarjeta del pipeline) y bono de exalumna (Karen lo descuenta al armar el link de Mercado Pago)
+const bonoExalumna = (p) => esExalumna(p.leads, pagoHecho, p.alumna ? ownedOf(p.alumna) : []);
+const bfBadges = (p) => { const bf = blackFridayDe(p.leads); return bf ? `<span class="pill pres" title="Semana Black Friday">Black Friday · ${esc(bf.plan)}</span>${bonoExalumna(p) ? ` <span class="pill done" title="${esc(textoBono(bf.plan))}">Exalumna: bono de $20.000</span>` : ''}` : ''; };
 const pagoPersona = (p) => p.leads.filter((l) => esClase(l.form) || reservaDe(l)).map((l) => pagoBadges(l, p)).filter(Boolean).join(' ');
 const origenMatricula = (l) => `Clase gratis de ${(ofertaDe(claseDeL(l))?.nombre || '').replace(' Hebreo', '').replace(' Terapéutico', '')}${l.claseFecha ? ` del ${l.claseFecha}` : ''} · campaña ${l.utm?.utm_campaign || '—'} · anuncio ${l.utm?.utm_content || '—'}`;
 // Bloque de la ficha: reserva y saldo (Péndulo) o cuotas (Tarot)
@@ -2331,7 +2337,7 @@ document.addEventListener('click', async (e) => {
 document.addEventListener('click', (e) => { document.querySelectorAll('details.menu[open]').forEach((d) => { if (!d.contains(e.target)) d.removeAttribute('open'); }); });
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-copiar]'); if (b) navigator.clipboard?.writeText(b.dataset.copiar).then(() => toast('Copiado.')).catch(() => toast('No se pudo copiar.')); });
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-lead-alumna]'); if (b) { if ($('#dlg').open) $('#dlg').close(); openStudent(b.dataset.leadAlumna); } });
-document.addEventListener('click', (e) => { const b = e.target.closest('[data-inicio-etapa]'); if (!b) return; const [prog, etapa] = b.dataset.inicioEtapa.split('|'); Object.assign(S, { crmProg: prog, crmEtapa: etapa, crmVista: 'embudo', crmQ: '', crmOrigen: '', crmReserva: '', crmPost: false, crmSeg: false, crmSinCuenta: false, crmLista: '' }); S.leadSel = new Set(); go('interesadas'); });
+document.addEventListener('click', (e) => { const b = e.target.closest('[data-inicio-etapa]'); if (!b) return; const [prog, etapa] = b.dataset.inicioEtapa.split('|'); Object.assign(S, { crmProg: prog, crmEtapa: etapa, crmVista: 'embudo', crmQ: '', crmOrigen: '', crmReserva: '', crmPost: false, crmBF: false, crmSeg: false, crmSinCuenta: false, crmLista: '' }); S.leadSel = new Set(); go('interesadas'); });
 document.addEventListener('click', (e) => { if (e.target.closest('[data-crm-hoy]')) { Object.assign(S, { crmSeg: true, crmProg: '', crmQ: '', crmOrigen: '', crmSinCuenta: false, crmEtapa: '', crmReserva: '', crmTag: '', crmVista: 'embudo' }); go('interesadas'); } });
 document.addEventListener('click', (e) => { if (e.target.closest('[data-crm-sincuenta-ya]')) { Object.assign(S, { crmSeg: false, crmProg: '', crmQ: '', crmOrigen: '', crmSinCuenta: true, crmEtapa: 'inscrita', crmReserva: '', crmTag: '', crmVista: 'tabla' }); go('interesadas'); } });
 // Asistencia a una clase gratis: se marcan quienes entraron y pasan juntas a "Tomó la clase"
@@ -2430,7 +2436,7 @@ function bind() {
   document.querySelectorAll('[data-crm-kpi]').forEach((b) => (b.onclick = () => {
     const k = b.dataset.crmKpi, prog = progDe(S.crmProg), primera = prog && esClase(prog[0]) ? 'registrada' : 'nuevo';
     S.crmLista = k === 'clic' && S.crmLista !== 'clic' ? 'clic' : '';
-    if (k === 'todos') Object.assign(S, { crmQ: '', crmOrigen: '', crmEtapa: '', crmReserva: '', crmPost: false, crmTag: '', crmSeg: false, crmSinCuenta: false });
+    if (k === 'todos') Object.assign(S, { crmQ: '', crmOrigen: '', crmEtapa: '', crmReserva: '', crmPost: false, crmBF: false, crmTag: '', crmSeg: false, crmSinCuenta: false });
     else if (k === 'nuevas') S.crmEtapa = S.crmEtapa === primera ? '' : primera;
     else if (k === 'seg') S.crmSeg = !S.crmSeg;
     else if (k === 'sin') S.crmSinCuenta = !S.crmSinCuenta;
@@ -2492,6 +2498,7 @@ function bind() {
   document.querySelectorAll('[data-crm-sincuenta]').forEach((b) => (b.onclick = () => { S.crmSinCuenta = !S.crmSinCuenta; render(false); }));
   const ce = $('#crm-etapa'); if (ce) ce.onchange = () => { S.crmEtapa = ce.value; render(false); };
   const cres = $('#crm-reserva'); if (cres) cres.onchange = () => { S.crmReserva = cres.value; render(false); };
+  document.querySelectorAll('[data-crm-bf]').forEach((b) => (b.onclick = () => { S.crmBF = !S.crmBF; render(false); }));
   const cpost = $('#crm-post'); if (cpost) cpost.onchange = () => { S.crmPost = cpost.value === 'si'; render(false); };
   document.querySelectorAll('[data-crm-seg]').forEach((b) => (b.onclick = () => { S.crmSeg = !S.crmSeg; render(false); }));
   document.querySelectorAll('[data-crm-desc]').forEach((b) => (b.onclick = () => { S.crmDesc = !S.crmDesc; render(false); }));
