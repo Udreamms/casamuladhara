@@ -194,7 +194,7 @@
   }).catch(() => { /* quedan ocultas */ });
 })();
 </script>
-<script>/* Franja de la Semana Black Friday: solo del 23 de noviembre 00:00 al 30 de noviembre 23:59 (hora de Chile). En el computador local se puede ver antes con ?vista=bf */(()=>{const t=Date.now(),v=location.hostname==='localhost'&&new URLSearchParams(location.search).get('vista')==='bf';if(v||(t>=Date.parse('2026-11-23T00:00:00-03:00')&&t<=Date.parse('2026-11-30T23:59:59-03:00'))){const e=document.getElementById('bf-franja');if(e){e.hidden=false;if(v)e.href+='?vista=abierta'}}})()</script>
+<script>/* Franja de la Semana Black Friday: solo del 21 de noviembre 00:00 al 30 de noviembre 23:59 (hora de Chile). En el computador local se puede ver antes con ?vista=bf */(()=>{const t=Date.now(),v=location.hostname==='localhost'&&new URLSearchParams(location.search).get('vista')==='bf';if(v||(t>=Date.parse('2026-11-21T00:00:00-03:00')&&t<=Date.parse('2026-11-30T23:59:59-03:00'))){const e=document.getElementById('bf-franja');if(e){e.hidden=false;if(v)e.href+='?vista=abierta'}}})()</script>
 <script src="/assets/js/landing/horarios.js" defer></script>
 <script src="/assets/js/landing/precios.js" defer></script>
 <script src="/assets/js/landing/menu.js"></script>
