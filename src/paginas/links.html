@@ -2,111 +2,74 @@
 <html lang="es" data-theme="light"><head><meta charset="utf-8"><meta name="color-scheme" content="light"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Casa Muladhara · Karen Oyarce</title><meta name="description" content="Masterclass gratis, formación de terapeutas y terapias holísticas con Karen Oyarce, Casa Muladhara.">
 <meta name="robots" content="noindex">
-<meta name="theme-color" content="#fffdf6"><link rel="preconnect" href="https://fonts.googleapis.com">
+<meta name="theme-color" content="#140e09"><link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Josefin+Sans:wght@300;400;600&family=Mulish:wght@400;500;700&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="/assets/css/landing.css">
 <style>
-html,body{margin:0}body{font-size:16px;background:#fffdf6}img{max-width:100%}[hidden]{display:none!important}
-/* Página del enlace de la bio de Instagram: una sola columna de 420 px, pensada para el celular */
-.lk{max-width:420px;margin:0 auto;padding:40px 20px 28px;display:grid;gap:14px;text-align:center}
-.lk-foto{width:116px;height:116px;border-radius:50%;object-fit:cover;border:3px solid var(--sun);margin:0 auto;display:block;box-shadow:0 14px 30px -16px rgba(31,63,50,.55)}
-.lk h1{font:400 2rem/1.1 var(--f-display);margin:10px 0 0;color:var(--forest-deep)}
-.lk-sub{margin:0 auto;max-width:30ch;color:var(--muted);font-size:.92rem;line-height:1.45}
-.lk-rotulo{margin:14px 0 -2px;font:600 .68rem/1 var(--f-caps);letter-spacing:.24em;text-transform:uppercase;color:#8a6430}
-.lk-btn{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;box-sizing:border-box;padding:16px 18px;border-radius:20px;border:1px solid transparent;text-align:left;text-decoration:none;font:inherit;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 12px 26px -18px rgba(31,63,50,.6)}
-.lk-btn:hover{transform:translateY(-2px)}.lk-btn:focus-visible{outline:3px solid var(--brass);outline-offset:3px}
-.lk-btn b{display:block;font:700 1.02rem/1.25 var(--f-body)}
-.lk-btn small{display:block;margin-top:4px;font-size:.8rem;line-height:1.35;opacity:.88}
-.lk-tag{flex:none;font:700 .58rem/1 var(--f-caps);letter-spacing:.14em;text-transform:uppercase;padding:7px 10px;border-radius:999px}
-.lk-go{flex:none;width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;opacity:.7}
-.lk-sun{background:var(--sun);color:#1f3f32}.lk-sun .lk-tag{background:#1f3f32;color:var(--sun)}
-.lk-vio{background:#4e3a5e;color:#fff}.lk-vio .lk-tag{background:rgba(255,255,255,.2);color:#fff}
-.lk-forest{background:var(--forest);color:#ece7d3}
-.lk-white{background:#fff;color:var(--fg);border-color:var(--line)}
-/* Letra de las landings */:root{--f-body:"Google Sans Flex",system-ui,sans-serif;--f-display:"Google Sans Flex",system-ui,sans-serif;--f-caps:"Google Sans Flex",system-ui,sans-serif}body{font-family:var(--f-body)}.lk h1{font-weight:600}
-/* Semana Black Friday: tarjeta destacada arriba (se muestra sola del 21 al 30 de noviembre) */
-.lk-bf{position:relative;display:block;text-decoration:none;text-align:left;border-radius:24px;padding:22px 20px 20px;background:radial-gradient(120% 120% at 100% 0%,#5a4127 0%,#2a1d12 55%,#140e09 100%);color:#f3e7d3;box-shadow:0 22px 40px -22px rgba(20,14,9,.9);overflow:hidden;animation:lkLatido 2.6s ease-in-out infinite}
-.lk-bf::after{content:"";position:absolute;inset:-40% -60%;background:linear-gradient(110deg,transparent 40%,rgba(255,231,180,.16) 50%,transparent 60%);animation:lkBrillo 3.2s ease-in-out infinite;pointer-events:none}
-@keyframes lkBrillo{0%{transform:translateX(-60%)}60%,100%{transform:translateX(60%)}}
-@keyframes lkLatido{0%,100%{transform:scale(1)}50%{transform:scale(1.015)}}
-@media (prefers-reduced-motion:reduce){.lk-bf,.lk-bf::after{animation:none}}
-.lk-bf-tag{display:inline-block;background:#f2c66d;color:#1d1209;font:800 .72rem/1 var(--f-body);letter-spacing:.08em;text-transform:uppercase;padding:7px 11px;border-radius:999px}
-.lk-bf-50{position:absolute;top:14px;right:16px;font:800 2.6rem/1 var(--f-body);color:#f2c66d;letter-spacing:-.02em}
-.lk-bf b{display:block;margin:12px 0 6px;font:700 1.3rem/1.2 var(--f-body);color:#fff;max-width:15em}
-.lk-bf .px{display:block;font-size:.95rem;color:#f3e7d3}.lk-bf .px s{opacity:.6;margin-right:4px}.lk-bf .px strong{color:#f2c66d}
-.lk-bf .chile{display:block;margin-top:4px;font-size:.78rem;opacity:.75}
-.lk-bf .cta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:16px;background:#f2c66d;color:#1d1209;border-radius:14px;padding:13px 16px;font:700 1rem/1 var(--f-body)}
-.lk-bf .cta i{font-style:normal;font-weight:600;font-size:.8rem;opacity:.8}
-/* Un color por programa, igual que sus landings: Péndulo verde, Tarot morado, Formación dorado */.lk-verde{background:#2b5443;color:#ece7d3}.lk-verde .lk-tag{background:#f2c66d;color:#1f3f32}.lk-oro{background:#6b4f2e;color:#f3e7d3}.lk-oro .lk-tag{background:#f2c66d;color:#33251a}
-.lk-pie{margin:14px 0 0;font-size:.74rem;letter-spacing:.08em;color:var(--muted)}
+html,body{margin:0}body{background:#f6f4ef;font-family:"Google Sans Flex",system-ui,sans-serif;color:#1d1d1d;font-size:16px}img{max-width:100%}[hidden]{display:none!important}
+/* Página del enlace de WhatsApp e Instagram: una columna para el celular, estilo tarjetas con foto */
+.lk{max-width:440px;margin:0 auto;padding:0 0 30px}
+.lk-bar{background:#140e09;color:#f3e7d3;font-size:.78rem;font-weight:600;text-align:center;padding:9px 12px}.lk-bar b{color:#f2c66d}
+.lk-top{background:#fff;padding:26px 20px 18px;text-align:center;border-bottom:1px solid #ece7dc}
+.lk-top img{width:84px;height:84px;border-radius:50%;object-fit:cover;object-position:50% 25%}
+.lk-top h1{margin:10px 0 2px;font-size:1.45rem;font-weight:700}.lk-top p{margin:0;color:#666;font-size:.88rem}
+.lk-sec{padding:18px 16px 0}.lk-rot{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#7a6a55;margin:0 4px 10px}
+.lk-hero{display:block;text-decoration:none;color:#fff;border-radius:20px;overflow:hidden;background:#140e09;box-shadow:0 20px 40px -24px rgba(0,0,0,.7);transition:transform .15s}
+.lk-hero:hover,.lk-card:hover{transform:translateY(-2px)}
+.lk-hero .img{position:relative;height:190px;background:url(/assets/img/231aa77989.webp) center 30%/cover}
+.lk-hero .img::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,14,9,.05) 30%,#140e09 100%)}
+.lk-hero .pct{position:absolute;top:12px;left:12px;z-index:1;background:#f2c66d;color:#1d1209;font-weight:800;font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;padding:7px 10px;border-radius:999px}
+.lk-hero .txt{padding:4px 18px 18px}.lk-hero h2{margin:0 0 6px;font-size:1.35rem;line-height:1.15;font-weight:700}
+.lk-hero .px{font-size:1rem}.lk-hero .px s{opacity:.6}.lk-hero .px b{color:#f2c66d;font-size:1.25rem}.lk-hero .sub{font-size:.85rem;opacity:.8}
+.lk-hero .lk-cta{margin-top:14px;display:flex;justify-content:space-between;align-items:center;background:#f2c66d;color:#1d1209;border-radius:12px;padding:14px 16px;font-weight:700}.lk-hero .lk-cta small{font-weight:600;opacity:.75}
+.lk-card{display:flex;gap:12px;align-items:center;text-decoration:none;color:#1d1d1d;background:#fff;border-radius:18px;padding:10px;margin-bottom:12px;box-shadow:0 10px 24px -20px rgba(0,0,0,.5);border-left:6px solid var(--c);transition:transform .15s}
+.lk-card .ph{flex:none;width:88px;height:88px;border-radius:14px;background:center 30%/cover}
+.lk-card .k{font-size:.66rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--c)}
+.lk-card b{display:block;font-size:1rem;line-height:1.2;margin:3px 0}.lk-card small{color:#666;font-size:.8rem}
+.lk-card .go{margin-left:auto;flex:none;width:34px;height:34px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font-weight:700}
+.lk-mini{display:grid;grid-template-columns:1fr 1fr;gap:10px}.lk-mini a,.lk-mini button{display:block;width:100%;border:0;cursor:pointer;font:inherit;text-decoration:none;color:#1d1d1d;background:#fff;border-radius:14px;padding:14px;font-weight:600;font-size:.9rem;text-align:center;box-shadow:0 10px 24px -20px rgba(0,0,0,.5)}
+.lk h1,.lk h2,.lk b{font-family:"Google Sans Flex",system-ui,sans-serif}
+.lk-pie{text-align:center;color:#888;font-size:.75rem;margin-top:22px}
 </style></head><body>
 <main class="lk">
-  <img class="lk-foto" style="object-position:50% 25%" src="/assets/img/karen-retrato-3.webp" alt="Karen Oyarce Sáez, Maestra Holística" width="116" height="116">
-  <div>
-    <h1>Casa Muladhara</h1>
-    <p class="lk-sub">Karen Oyarce · Terapias holísticas y formación de terapeutas</p>
+  <div class="lk-bar" data-bf hidden><b>SEMANA BLACK FRIDAY</b> · Termina el lunes 30 de noviembre</div>
+  <div class="lk-top"><img src="/assets/img/karen-retrato-3.webp" alt="Karen Oyarce Sáez, Maestra Holística" width="84" height="84"><h1>Casa Muladhara</h1><p>Karen Oyarce · Escuela de formación holística</p></div>
+
+  <div class="lk-sec" data-bf hidden><p class="lk-rot">Oferta de la semana</p>
+    <a class="lk-hero" href="/formacion/black-friday?utm_source=links&amp;utm_medium=whatsapp&amp;utm_content=black-friday"><div class="img"><span class="pct">Black Friday · -50%</span></div><div class="txt"><h2>Formación de Terapeuta Holística Integral</h2><div class="px"><s>$449.000</s> <b>$224.000</b> al contado</div><div class="sub">o 9 cuotas de $39.000 · Solo para Chile</div><div class="lk-cta">Quiero mi lugar <small id="lk-bf-cuenta">Termina el lunes 30</small></div></div></a>
   </div>
 
-  <a class="lk-bf" id="lk-bf" hidden href="/formacion/black-friday?utm_source=links&amp;utm_medium=whatsapp&amp;utm_content=black-friday">
-    <span class="lk-bf-tag">Semana Black Friday</span><span class="lk-bf-50">-50%</span>
-    <b>Formación de Terapeuta Holística Integral</b>
-    <span class="px"><s>$449.000</s> <strong>$224.000</strong> al contado · o 9 cuotas de <strong>$39.000</strong></span>
-    <span class="chile">Solo para Chile · El grupo parte el 8 de diciembre</span>
-    <span class="cta">Ver la oferta <i id="lk-bf-cuenta">Termina el lunes 30</i></span>
-  </a>
+  <div class="lk-sec"><p class="lk-rot">Masterclass gratis · 30 minutos</p>
+    <a class="lk-card" style="--c:#2b5443" href="/clase-pendulo?utm_source=links&amp;utm_medium=whatsapp&amp;utm_content=pendulo"><span class="ph" style="background-image:url(/assets/img/alumna-practica-3.webp);background-position:60% 30%"></span><span><span class="k">Péndulo Hebreo</span><b>No necesitas un don. Necesitas un método.</b><small>Sábados 19:00 (Chile) · Gratis</small></span><span class="go" aria-hidden="true">›</span></a>
+    <a class="lk-card" style="--c:#4e3a5e" href="/clase-tarot?utm_source=links&amp;utm_medium=whatsapp&amp;utm_content=tarot"><span class="ph" style="background-image:url(/assets/img/karen-sombrero.webp)"></span><span><span class="k">Tarot Terapéutico</span><b>Usa el tarot para conocerte, no para adivinar.</b><small>Martes 19:00 (Chile) · Gratis</small></span><span class="go" aria-hidden="true">›</span></a>
+  </div>
 
-  <p class="lk-rotulo">Empieza aquí · gratis</p>
-  <a class="lk-btn lk-verde" href="/clase-pendulo?utm_source=instagram&amp;utm_medium=bio&amp;utm_content=pendulo">
-    <span><b>Masterclass gratis de Péndulo Hebreo</b><small>Sábados 19:00 (Chile) · 30 min en vivo</small></span><span class="lk-tag">Gratis</span>
-  </a>
-  <a class="lk-btn lk-vio" href="/clase-tarot?utm_source=instagram&amp;utm_medium=bio&amp;utm_content=tarot">
-    <span><b>Masterclass gratis de Tarot Terapéutico</b><small>Martes 19:00 (Chile) · desde cualquier país</small></span><span class="lk-tag">Gratis</span>
-  </a>
-
-  <p class="lk-rotulo">Cursos y formación</p>
-  <a class="lk-btn lk-oro" href="/formacion?utm_source=instagram&amp;utm_medium=bio&amp;utm_content=formacion">
-    <span><b>Formación Terapeuta Holística Integral</b><small id="lk-formacion">Inscripciones abiertas</small></span>
-    <svg class="lk-go" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>
-  </a>
-  <button class="lk-btn lk-white" type="button" data-agendar="">
-    <span><b>Reserva una terapia con Karen</b><small>Elige día y hora</small></span>
-    <svg class="lk-go" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>
-  </button>
-  <a class="lk-btn lk-white" href="https://wa.me/56940044528?text=Hola%20Karen%2C%20quiero%20m%C3%A1s%20informaci%C3%B3n" target="_blank" rel="noopener">
-    <span><b>Escríbenos por WhatsApp</b></span>
-    <svg class="lk-go" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>
-  </a>
+  <div class="lk-sec"><p class="lk-rot">Cursos y formación</p>
+    <a class="lk-card" style="--c:#6b4f2e" href="/formacion?utm_source=links&amp;utm_medium=whatsapp&amp;utm_content=formacion"><span class="ph" style="background-image:url(/assets/img/292ddf3bf0.webp)"></span><span><span class="k">Formación · 9 meses</span><b>Terapeuta Holística Integral</b><small id="lk-formacion">Inscripciones abiertas</small></span><span class="go" aria-hidden="true">›</span></a>
+    <div class="lk-mini"><button type="button" data-agendar="">Reserva una terapia</button><a href="https://wa.me/56940044528?text=Hola%20Karen%2C%20quiero%20m%C3%A1s%20informaci%C3%B3n" target="_blank" rel="noopener">WhatsApp</a></div>
+  </div>
 
   <p class="lk-pie">casamuladhara.com</p>
 </main>
 <script>
-// Fecha del próximo grupo de la formación: sale del Calendario de la Maestra (/api/formacion), nunca escrita aquí.
-// Sin fecha (o si falla), queda "Inscripciones abiertas".
+// Fecha del próximo grupo de la formación: sale del Calendario (/api/formacion). Sin fecha (o si falla), queda "Inscripciones abiertas".
 (() => {
   const DIAS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
   const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-  const hoyChile = () => {
-    const p = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: 'America/Santiago', year: 'numeric', month: 'numeric', day: 'numeric' }).formatToParts(new Date()).map((x) => [x.type, x.value]));
-    return Date.UTC(+p.year, +p.month - 1, +p.day);
-  };
   fetch('/api/formacion').then((r) => (r.ok ? r.json() : Promise.reject())).then(({ nextStart }) => {
     const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(nextStart || ''); if (!m) return;
-    const t = Date.UTC(+m[1], +m[2] - 1, +m[3]), hoy = hoyChile(); if (t < hoy) return;
-    const d = new Date(t), anioHoy = new Date(hoy).getUTCFullYear();
-    const sinAnio = d.getUTCFullYear() === anioHoy || (d.getUTCFullYear() === anioHoy + 1 && t - hoy < 183 * 864e5);
-    document.getElementById('lk-formacion').textContent = `Próximo grupo: ${DIAS[d.getUTCDay()]} ${d.getUTCDate()} de ${MESES[d.getUTCMonth()]}${sinAnio ? '' : ` de ${d.getUTCFullYear()}`}`;
-  }).catch(() => { /* queda "Inscripciones abiertas" */ });
+    const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+    document.getElementById('lk-formacion').textContent = `Próximo grupo: ${DIAS[d.getUTCDay()]} ${d.getUTCDate()} de ${MESES[d.getUTCMonth()]}`;
+  }).catch(() => {});
 })();
-</script>
-<script>
-/* Tarjeta Black Friday: visible del sábado 21 de noviembre 00:00 al lunes 30 de noviembre 23:59 (hora de Chile). En el computador local se ve siempre con ?vista=bf */
+/* Semana Black Friday: barra y tarjeta visibles del sábado 21 de noviembre 00:00 al lunes 30 de noviembre 23:59 (hora de Chile). En el computador local se ven siempre con ?vista=bf */
 (() => {
   const INICIO = Date.parse('2026-11-21T00:00:00-03:00'), FIN = Date.parse('2026-11-30T23:59:59-03:00'), t = Date.now();
   const vista = location.hostname === 'localhost' && new URLSearchParams(location.search).get('vista') === 'bf';
   if (!vista && (t < INICIO || t > FIN)) return;
-  const el = document.getElementById('lk-bf'); if (!el) return; el.hidden = false;
+  document.querySelectorAll('[data-bf]').forEach((e) => (e.hidden = false));
   const c = document.getElementById('lk-bf-cuenta');
   const tick = () => { const s = Math.max(0, Math.floor((FIN - Date.now()) / 1000)), d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60);
     c.textContent = d > 0 ? `Termina en ${d}d ${h}h` : `Termina en ${h}h ${m}m`; };
