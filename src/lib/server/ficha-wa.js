@@ -16,7 +16,8 @@ export function variantesNumero(numero) {
   return [...v];
 }
 
-export async function asegurarFicha(firestore, { numero, nombre = '', texto = '', marca }) {
+// fecha (opcional): cuándo escribió por primera vez; si no se da, la ficha queda con la hora actual (`marca`)
+export async function asegurarFicha(firestore, { numero, nombre = '', texto = '', marca, fecha }) {
   const n = String(numero || '').replace(/\D/g, '');
   if (!n) return { creada: false, motivo: 'sin número' };
   const hay = await firestore.collection('leads').where('waKey', 'in', variantesNumero(n)).limit(1).get();
@@ -24,7 +25,7 @@ export async function asegurarFicha(firestore, { numero, nombre = '', texto = ''
   const codigo = String(texto || '').match(RE_CODIGO)?.[1];
   if (codigo) {
     const porCodigo = await firestore.collection('leads').where('codigo', '==', codigo).limit(1).get();
-    if (!porCodigo.empty) return { creada: false, motivo: 'su código ya tiene ficha' };
+    if (!porCodigo.empty) { const d = porCodigo.docs[0]; return { creada: false, motivo: 'su código ya tiene ficha', ficha: { id: d.id, nombre: String(d.data().name || '') } }; }
   }
   const ahora = Date.now(), primero = String(texto || '').replace(/\s+/g, ' ').trim().slice(0, 300);
   try {
@@ -33,11 +34,28 @@ export async function asegurarFicha(firestore, { numero, nombre = '', texto = ''
       form: 'whatsapp', name: String(nombre || '').trim().slice(0, 120) || `+${n}`, email: '', whatsapp: `+${n}`, country: '',
       interest: 'Escribió por WhatsApp', message: primero, page: 'WhatsApp', utm: {}, status: 'nuevo', waKey: n,
       eventos: [{ t: ahora, tipo: 'evento', texto: `Escribió por WhatsApp${primero ? `: ${primero.slice(0, 140)}` : ''}` }],
-      createdAt: marca, updatedAt: marca,
+      createdAt: fecha || marca, updatedAt: marca,
     });
     return { creada: true };
   } catch (e) {
     if (e?.code === 6 || /ALREADY_EXISTS/.test(String(e?.message))) return { creada: false, motivo: 'ya existe' };
     throw e;
   }
+}
+
+// Una sola vez, a pedido de la Maestra: crea la ficha de cada chat que todavía no tiene (los que escribieron antes de que existiera la ficha automática).
+// No envía nada. Si el mensaje trae «Mi código» de alguien ya registrado con otro número, no la duplica: queda en `otras` para que la encuentre por su nombre.
+export async function crearFichasFaltantes(firestore, { marca, tope = 500 }) {
+  const chats = await firestore.collection('wa_chats').limit(tope).get();
+  const salida = { total: chats.docs.length, creadas: 0, yaTenian: 0, otras: [] };
+  for (const c of chats.docs) {
+    const d = c.data() || {}, msgs = await firestore.collection(`wa_chats/${c.id}/messages`).orderBy('ts', 'asc').limit(8).get();
+    const entrantes = msgs.docs.map((m) => m.data()).filter((m) => m.dir === 'in');
+    const texto = entrantes.map((m) => m.text || '').join(' ') || d.lastText || '';
+    const r = await asegurarFicha(firestore, { numero: c.id, nombre: d.name || '', texto, marca, fecha: entrantes[0]?.ts });
+    if (r.creada) salida.creadas++;
+    else if (r.ficha) salida.otras.push({ numero: c.id, nombre: d.name || '', ficha: r.ficha.nombre });
+    else salida.yaTenian++;
+  }
+  return salida;
 }

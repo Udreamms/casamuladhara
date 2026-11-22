@@ -2105,7 +2105,20 @@ document.addEventListener('change', async (e) => {
   const c = e.target.closest('[data-sec-pl]'); if (!c) return;
   try { A.sec = await secApi({ action: 'guardar', aprobadas: { [c.dataset.secPl]: c.checked } }); secPintar(); } catch (err) { toast(err.message); }
 });
-V.whatsapp = () => `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>WhatsApp</h1><p>Conversaciones desde el WhatsApp Business de Karen (+56 9 7280 3407). Lo que escribas aquí sale con ese número.</p></div></div>
+// Chats de WhatsApp que todavía no tienen tarjeta en Interesadas (escribieron sin registrarse): una sola pulsación las crea. No envía nada.
+document.addEventListener('click', async (e) => {
+  const b = e.target.closest('[data-wa-fichas]'); if (!b) return;
+  if (!confirm('¿Crear una tarjeta en Interesadas para cada chat de WhatsApp que todavía no la tiene? No se envía ningún mensaje.')) return;
+  b.disabled = true;
+  try {
+    const r = await waApi({ action: 'fichas' });
+    await data.leads(); A._per = null; paintNav();
+    const otras = (r.otras || []).map((o) => `<li>${esc(o.nombre || `+${o.numero}`)} <span class="muted">→ ya está como «${esc(o.ficha || 'otra ficha')}» (se registró con otro número)</span></li>`).join('');
+    dialog(`<h3 style="margin-top:0">Tarjetas de los chats</h3><p><b>${r.creadas}</b> tarjeta${r.creadas === 1 ? '' : 's'} nueva${r.creadas === 1 ? '' : 's'} en Interesadas (etapa «Nueva», origen «Escribió por WhatsApp»). ${r.yaTenian} chat${r.yaTenian === 1 ? '' : 's'} ya tenía${r.yaTenian === 1 ? '' : 'n'} tarjeta.</p>${otras ? `<p style="margin-bottom:4px">Estas personas escribieron desde otro número, pero ya tienen su tarjeta (búscala por su nombre):</p><ul style="margin-top:0">${otras}</ul>` : ''}`);
+  } catch (err) { fail(err); }
+  b.disabled = false;
+});
+V.whatsapp = () => `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>WhatsApp</h1><p>Conversaciones desde el WhatsApp Business de Karen (+56 9 7280 3407). Lo que escribas aquí sale con ese número.</p></div><div><button class="btn btn-ghost btn-sm" data-wa-fichas title="Crea en Interesadas la tarjeta de cada chat que todavía no tiene. No envía ningún mensaje.">Crear tarjetas de los chats sin tarjeta</button></div></div>
   <section class="card panel" style="display:grid;gap:4px"><h3 class="ini-t" style="margin:0">Secuencia automática de la clase</h3><div id="sec-card">${(setTimeout(secCargar, 0), secHTML())}</div></section>
   ${A.wa.on === false ? '<div class="card empty">WhatsApp todavía no está conectado: faltan las llaves de Meta en Vercel (WHATSAPP_TOKEN y WHATSAPP_PHONE_ID). Los pasos están en el README.</div>' : ''}
   <section class="card wa"><div class="wa-list" id="wa-list">${waListHTML()}</div><div id="wa-pane" style="display:grid;min-width:0;min-height:0">${waChatHTML()}</div></section>`;
