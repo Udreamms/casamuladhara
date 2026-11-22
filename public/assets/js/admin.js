@@ -197,7 +197,7 @@ const data = {
 };
 
 // ---------- Vista ----------
-const S = { view: 'inicio', leadSel: new Set(), crmVista: 'embudo', crmProg: '', crmQ: '', crmOrigen: '', crmSeg: false, crmDesc: false, crmSinCuenta: false, crmEtapa: '', crmReserva: '', crmPost: false, crmBF: false, crmTag: '', crmRango: '', crmMetrica: 'origen', fichaTab: 'resumen', crmLista: '', clicOrden: 'recientes', q: '', open: null, filter: 'todas', lvOpen: {}, fq: '', cls: null, ansWho: '', ansLv: 0 };
+const S = { view: 'inicio', leadSel: new Set(), crmVista: 'embudo', crmProg: '', crmQ: '', crmOrigen: '', crmSeg: false, crmDesc: false, crmSinCuenta: false, crmEtapa: '', crmReserva: '', crmPost: false, crmBF: false, crmSinBv: false, crmTag: '', crmRango: '', crmMetrica: 'origen', fichaTab: 'resumen', crmLista: '', clicOrden: 'recientes', q: '', open: null, filter: 'todas', lvOpen: {}, fq: '', cls: null, ansWho: '', ansLv: 0 };
 const NAV = [
   ['inicio', 'Inicio', '<path d="M4 11 12 4l8 7v9H4z"/><path d="M10 20v-6h4v6"/>'],
   ['--', 'CRM'],
@@ -532,6 +532,25 @@ const personas = () => {
 const personaDe = (leadId) => personas().find((p) => p.leads.some((l) => l.id === leadId));
 const progDe = (k) => LEAD_PROGS.find((x) => x[0] === k);
 const tracksEn = (p, prog) => p.leads.filter((l) => prog[2].includes(l.form));
+// Bienvenida: etiqueta «Bienvenida» en la ficha (el registro) del producto al que se le dio. Se marca sola al enviar la respuesta rápida de bienvenida, o a mano en la ficha.
+const TAG_BIENVENIDA = 'Bienvenida';
+const tieneBv = (l) => (l.tags || []).includes(TAG_BIENVENIDA);
+const bienvenidaEn = (p, prog) => (prog ? tracksEn(p, prog) : p.leads).some(tieneBv);
+const bienvenidaBadge = (p, prog) => (prog && bienvenidaEn(p, prog) ? '<span class="pill done" title="Se le dio la bienvenida">Bienvenida ✓</span>' : '');
+async function marcarBienvenida(p, leadId, on) {
+  const l = p.leads.find((x) => x.id === leadId); if (!l || tieneBv(l) === on) return false;
+  await data.leads({ action: 'etiquetas', ids: [leadId], ...(on ? { agregar: [TAG_BIENVENIDA] } : { quitar: [TAG_BIENVENIDA] }) });
+  l.tags = on ? [...new Set([...(l.tags || []), TAG_BIENVENIDA])] : (l.tags || []).filter((t) => t !== TAG_BIENVENIDA);
+  A._per = null; return true;
+}
+// Al enviar desde el chat de la ficha la respuesta rápida «Bienvenida», queda marcada en el producto de esa respuesta (si falla, el mensaje igual salió)
+let bvPend = null;
+async function bienvenidaTrasEnviar(p) {
+  const x = bvPend; bvPend = null; if (!x || x.id !== p.id || !x.lead) return;
+  try {
+    if (await marcarBienvenida(p, x.lead, true)) { A._per = null; paintNav(); render(false); document.querySelectorAll('#dlg [data-bv]').forEach((c) => { if (c.dataset.bv === x.lead) c.checked = true; }); toast('Enviado. Quedó marcada la bienvenida.'); }
+  } catch (err) { toast('Se envió, pero no se pudo marcar la bienvenida: márcala a mano en la ficha.'); }
+}
 const formacionPagada = (p) => !!p.alumna && paying(p.alumna);
 const tieneProg = (p, prog) => tracksEn(p, prog).length > 0 || (prog[0] === 'formacion' && formacionPagada(p));
 const mejorDe = (es) => { const v = es.filter((k) => k !== 'descartado'); return v.length ? v.reduce((a, b) => ((RANGO_ETAPA[b] ?? 0) > (RANGO_ETAPA[a] ?? 0) ? b : a)) : 'descartado'; };
@@ -574,6 +593,7 @@ const personasFiltradas = () => {
     && (!S.crmEtapa || !prog || etapaVista(p) === S.crmEtapa)
     && (!S.crmPost || esPostulante(p))
     && (!S.crmBF || blackFridayDe(p.leads))
+    && (!S.crmSinBv || !prog || (etapaVista(p) !== 'descartado' && !bienvenidaEn(p, prog)))
     && (!FUNC.reserva || !S.crmReserva || ((x) => (S.crmReserva === 'sin' ? !x : x === S.crmReserva))(reservaPersona(p, prog ? claseDeForm(prog[0]) : '')))
     && (!q || [p.nombre, p.email, p.whatsapp, p.note, ...p.leads.map((l) => `${l.interest} ${l.message}`)].join(' ').toLowerCase().includes(q)))
     .sort((a, b) => ultimaActividad(b) - ultimaActividad(a));
@@ -791,7 +811,7 @@ V.interesadas = () => {
   const primera = prog && esClase(prog[0]) ? 'registrada' : 'nuevo';
   const nSeg = base.filter(seguimientoHoyP).length, nSin = base.filter((p) => !p.alumna).length, nNuevas = base.filter((p) => etapaVista(p) === primera).length;
   const etapasProg = prog && tipoPipe(prog[0]) ? [...PIPES[tipoPipe(prog[0])], ...(esClase(prog[0]) ? [['descartado', 'Descartada']] : [])] : LEAD_STATES.filter(([k]) => !(prog && esPago(prog[0]) && k === 'clase'));
-  const hayFiltro = !!(S.crmQ || S.crmOrigen || (prog && S.crmEtapa) || S.crmPost || S.crmBF || (FUNC.reserva && S.crmReserva) || S.crmTag || S.crmSeg || S.crmSinCuenta);
+  const hayFiltro = !!(S.crmQ || S.crmOrigen || (prog && S.crmEtapa) || S.crmPost || S.crmBF || S.crmSinBv || (FUNC.reserva && S.crmReserva) || S.crmTag || S.crmSeg || S.crmSinCuenta);
   const kpi = (k, n, t, on) => `<button type="button" class="crm-kpi" data-crm-kpi="${k}" aria-pressed="${on}"><b>${n}</b><span>${t}</span></button>`;
   const kpis = `<div class="crm-kpis">${kpi('todos', base.length, prog ? 'en este programa' : 'personas', !hayFiltro)}${kpi('nuevas', nNuevas, 'por contactar', S.crmEtapa === primera)}${FUNC.tareas ? kpi('seg', nSeg, 'seguimientos hoy', !!S.crmSeg) : ''}${kpi('sin', nSin, 'sin cuenta en el aula', !!S.crmSinCuenta)}${kpi('clic', filasClic().length, 'clic sin pagar', S.crmLista === 'clic')}</div>`;
   const barra = `<div class="crm-bar">${vistas}
@@ -802,10 +822,11 @@ V.interesadas = () => {
     ${FUNC.reserva ? `<select id="crm-reserva" aria-label="Reserva"><option value="">Reserva: todas</option>${[['sin', 'Sin etiqueta'], ['iniciada', 'Reserva iniciada, sin pago'], ['pagada', 'Reservó']].map(([k, t]) => `<option value="${k}" ${S.crmReserva === k ? 'selected' : ''}>${t}</option>`).join('')}</select>` : ''}
     ${FUNC.etiquetas && tags.length ? `<select id="crm-tag" aria-label="Etiqueta"><option value="">Etiqueta: todas</option>${tags.map((t) => `<option ${S.crmTag === t ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select>` : ''}
     ${prog?.[0] === 'formacion' ? `<button type="button" class="chip" data-crm-bf aria-pressed="${!!S.crmBF}" title="Fichas de la Semana Black Friday">Black Friday (${todas.filter((p) => tieneProg(p, prog) && blackFridayDe(p.leads)).length})</button>` : ''}
+    ${prog ? `<button type="button" class="chip" data-crm-bv aria-pressed="${!!S.crmSinBv}" title="Personas a las que todavía no se les da la bienvenida (sin contar descartadas)">Sin bienvenida (${base.filter((p) => etapaVista(p) !== 'descartado' && !bienvenidaEn(p, prog)).length})</button>` : ''}
     ${hayFiltro ? '<button type="button" class="link" data-crm-kpi="todos">Quitar filtros</button>' : ''}</div>`;
   const tabs = `<nav class="crm-tabs" aria-label="Programas">${[['', 'Todos', todas.length], ...LEAD_PROGS.map(([k, t, fs]) => [k, t, todas.filter((p) => tieneProg(p, [k, t, fs])).length])].map(([k, t, n]) => `<button type="button" data-crm-prog="${esc(k)}" aria-pressed="${(S.crmProg || '') === k}">${esc(t)}<span class="n">${n}</span></button>`).join('')}</nav>`;
   const controles = `${ofertaBanner()}${cuposHTML() ? `<div class="cupos">${cuposHTML()}</div>` : ''}${kpis}${barra}${tabs}`;
-  const tagsPills = (p) => !FUNC.etiquetas ? '' : p.tags.map((t) => `<span class="pill pres">${esc(t)}</span>`).join(' ');
+  const tagsPills = (p) => !FUNC.etiquetas ? '' : p.tags.filter((t) => t !== TAG_BIENVENIDA).map((t) => `<span class="pill pres">${esc(t)}</span>`).join(' ');
 
   if (vista === 'tabla') {
     const sel = S.leadSel, n = sel.size;
@@ -818,7 +839,7 @@ V.interesadas = () => {
     ${lista.map((p) => { const trk = prog ? tracksEn(p, prog)[0] : null; return `<tr>
       <td><input type="checkbox" data-lead-sel="${esc(p.id)}" aria-label="Seleccionar a ${esc(p.nombre)}" ${sel.has(p.id) ? 'checked' : ''}></td>
       <td class="persona"><button class="link nom" data-lead-open="${esc(p.id)}">${esc(p.nombre)}</button><br><span class="muted" style="font-size:.84rem">${contactoDe(p)}</span>${p.note ? `<br><span class="muted" style="font-size:.84rem">📝 ${esc(p.note.slice(0, 80))}${p.note.length > 80 ? '…' : ''}</span>` : ''}</td>
-      <td style="white-space:normal">${progPills(p)} ${tagsPills(p)}</td>
+      <td style="white-space:normal">${progPills(p)} ${tagsPills(p)} ${bienvenidaBadge(p, prog)}</td>
       <td class="muted" style="font-size:.84rem">${esc(leadOrigenTxt(p.leads[0]))}</td>
       <td class="muted" style="font-size:.84rem">${fdateMs(p.leads[0].createdAt)}</td>
       <td>${cuentaBadge(p)} ${segBadge(p)} ${pagoPersona(p)} ${formacionBadges(p)}</td>
@@ -835,7 +856,7 @@ V.interesadas = () => {
     return `<article class="kb-card" ${trk ? `draggable="true" data-lead-card="${esc(trk.id)}"` : ''} data-lead-open="${esc(p.id)}">
       <div class="kb-top"><span class="av sm" style="--c:${colorFor(p.id)}">${esc(initials(p.nombre))}</span><div class="kb-id"><b>${esc(p.nombre)}</b>${prog ? `<span class="muted">${linea || 'Formación completa · pagó en la plataforma'}</span>` : ''}</div></div>${prog ? '' : `<span style="display:flex;gap:4px;flex-wrap:wrap">${progPills(p)}</span>`}
       ${trk?.interest ? `<small>${esc(trk.interest)}</small>` : ''}${p.note ? `<small class="muted">📝 ${esc(p.note.slice(0, 70))}${p.note.length > 70 ? '…' : ''}</small>` : ''}
-      <div class="kb-meta">${cuentaBadge(p)}${bfBadges(p)}${asistPersona(p)}${pagoPersona(p)}${formacionBadges(p)}${segBadge(p)}${tagsPills(p)}${otras}${p.whatsapp ? `<a class="btn btn-ghost btn-sm" href="${waLink(p.whatsapp)}" data-wa-open="${esc(waNum(p.whatsapp))}" data-wa-name="${esc(p.nombre)}">WhatsApp</a>` : ''}</div></article>`;
+      <div class="kb-meta">${cuentaBadge(p)}${bfBadges(p)}${bienvenidaBadge(p, prog)}${asistPersona(p)}${pagoPersona(p)}${formacionBadges(p)}${segBadge(p)}${tagsPills(p)}${otras}${p.whatsapp ? `<a class="btn btn-ghost btn-sm" href="${waLink(p.whatsapp)}" data-wa-open="${esc(waNum(p.whatsapp))}" data-wa-name="${esc(p.nombre)}">WhatsApp</a>` : ''}</div></article>`;
   };
   return `${head}${aviso}${controles}
   <div class="crm-hint"><span>${prog ? 'Arrastra una tarjeta para cambiar su etapa. Toca una tarjeta para abrir su ficha.' : 'Cada persona aparece en su etapa más avanzada. Elige un programa para mover tarjetas.'}</span><button type="button" class="chip" data-crm-desc aria-pressed="${verDesc}">Mostrar descartadas (${lista.filter((p) => etapaVista(p) === 'descartado').length})</button></div>
@@ -937,7 +958,7 @@ async function leadMover(id, status) {
 
 // Respuestas rápidas del chat: se escriben en el cuadro para que Karen las ajuste antes de enviar
 const RESPUESTAS = [
-  ['Bienvenida (link de la clase)', (c) => `¡Hola, ${c.nombre}! 🌙 Qué alegría que te hayas registrado. Este es tu link personal para la clase gratis de ${c.programaLargo}${c.esTarot ? ', donde vas a aprender a usar las cartas para conocerte y acompañar a otras personas' : ''}:\n👉 ${c.link || '[falta su enlace personal: usa «Preparar contactos»]'}\nNos vemos ${c.dia ? `el ${c.dia}${c.hora ? ` a las ${c.hora} (hora de Chile)` : ''}` : 'en la clase'} ✨`],
+  ['Bienvenida (link de la clase)', (c) => `¡Hola, ${c.nombre}! 🌙 Qué alegría que te hayas registrado. Este es tu link personal para la clase gratis de ${c.programaLargo}${c.esTarot ? ', donde vas a aprender a usar las cartas para conocerte y acompañar a otras personas' : ''}:\n👉 ${c.link || '[falta su enlace personal: usa «Preparar contactos»]'}\nNos vemos ${c.dia ? `el ${c.dia}${c.hora ? ` a las ${c.hora} (hora de Chile)` : ''}` : 'en la clase'} ✨`, 'bienvenida'],
   ['Compromiso de asistir en vivo', (c) => `Una cosita más, ${c.nombre} 💛 Esta clase la preparé para vivirla en vivo, porque ahí es donde podrás hacer preguntas${c.esTarot ? ', sentir las cartas y hacer las lecturas conmigo' : ' y practicar conmigo'}. ¿Me respondes con un "sí" si te comprometes a estar${c.dia ? ` el ${c.dia}${c.hora ? ` a las ${c.hora}` : ''}` : ''}?`],
   ['Confirmación (respondió «sí»)', (c) => `¡Maravilloso! 🙌 Ya te espero${c.dia ? ` el ${c.dia}${c.hora ? ` a las ${c.hora} (hora de Chile)` : ''}` : ' en la clase'}.`],
   ['Recordatorio de la clase', (c) => `Hola ${c.nombre}, te recuerdo tu clase gratis de ${c.programa}${c.fecha ? `: ${c.fecha}` : ''}. Entra por aquí: ${c.link || '[falta su enlace personal: usa «Preparar contactos»]'}`],
@@ -955,6 +976,7 @@ const ctxRespuesta = (p) => {
     dia: trk?.claseFecha ? (() => { const d = new Date(tOf(trk.claseFecha)); return `${DIA_LARGO[d.getUTCDay()]} ${d.getUTCDate()} de ${MES_N[d.getUTCMonth()]}`; })() : '',
     hora: trk?.claseFecha && evt?.time ? evt.time : '',
     esTarot: trk?.form === 'clase-tarot',
+    leadId: trk?.id || '',
     link: trk && esClase(trk.form) ? trk.enlace_entrada || '' : '', // solo el enlace personal /entrar/<codigo>, nunca el de Meet
   };
 };
@@ -1014,6 +1036,7 @@ function leadFichaSimple(id) {
     return `<div class="pg"><div class="pg-top"><b>${esc(LEAD_FORMS[l.form] || l.form)}</b></div>
       <span class="muted" style="font-size:.78rem">${fdateMs(l.createdAt)}${l.claseFecha ? ` · clase ${esc(fechaLarga(l.claseFecha))}` : ''}${l.status === 'descartado' && l.motivo ? ` · motivo: ${esc(l.motivo)}` : ''}</span>
       <label style="display:grid;gap:4px;font-size:.8rem">Etapa<select data-fs-etapa="${esc(l.id)}">${opciones(l).map(([k, t]) => `<option value="${k}" ${act === k ? 'selected' : ''}>${esc(etapaTxt(l.form, k))}</option>`).join('')}</select></label>
+      <label style="display:flex;gap:8px;align-items:center;font-size:.82rem"><input type="checkbox" data-bv="${esc(l.id)}" ${tieneBv(l) ? 'checked' : ''}> Se le dio la bienvenida</label>
       ${esClase(l.form) ? registro(l) : ''}${bloqueReserva(l, p)}${bloquePostulacion(l)}${bloquePagos(l)}</div>`; };
   const n = waNum(p.whatsapp), c = A.wa.chats.find((x) => x.id === n), libre = waLibre(c);
   const chat = !n ? '<div class="wa-empty" style="flex:1;border:1px dashed var(--line);border-radius:12px">Esta persona no dejó WhatsApp.</div>' : `<div class="alert" id="wf-aviso" ${A.wa.on === false ? '' : 'hidden'}><div><b>WhatsApp todavía no está conectado</b><p>Cuando esté el número definitivo y las llaves de Meta, aquí podrás conversar uno a uno. Mientras tanto el chat no envía ni recibe.</p></div></div>
@@ -1042,14 +1065,14 @@ function leadFichaSimple(id) {
   if (n) {
     waFichaMontar(p);
     const t = $('#wf-text'), form = $('#wf-form'), resp = $('#wf-resp'), pl = $('#wf-plantilla');
-    if (resp) resp.onchange = () => { if (resp.value === '') return; t.value = RESPUESTAS[Number(resp.value)][1](ctxRespuesta(p)); resp.value = ''; t.focus(); };
+    if (resp) resp.onchange = () => { if (resp.value === '') return; const r = RESPUESTAS[Number(resp.value)], cx = ctxRespuesta(p); t.value = r[1](cx); bvPend = r[2] === 'bienvenida' ? { id: p.id, lead: cx.leadId } : null; resp.value = ''; t.focus(); };
     if (form) {
       t.onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } };
       form.onsubmit = async (e) => {
         e.preventDefault();
         const text = t.value.trim(); if (!text) return;
         const b = form.querySelector('button'); b.disabled = true;
-        try { await waApi({ action: 'enviar', to: n, text, name: p.nombre }); t.value = ''; } catch (err) { fail(err); }
+        try { await waApi({ action: 'enviar', to: n, text, name: p.nombre }); t.value = ''; await bienvenidaTrasEnviar(p); } catch (err) { fail(err); }
         b.disabled = false;
       };
     }
@@ -1064,6 +1087,9 @@ function leadFichaSimple(id) {
     const contacto = Object.fromEntries(campos.map((c) => [c.dataset.ct, c.value.trim()])), b = $('#ct-save'); b.disabled = true;
     try { await data.leads({ action: 'update', ids, contacto }); p.leads.forEach((l) => Object.assign(l, contacto, { email: contacto.email.toLowerCase() })); refrescar(); leadFichaSimple(id); toast('Cambios guardados.'); } catch (err) { fail(err); b.disabled = false; }
   };
+  document.querySelectorAll('#dlg [data-bv]').forEach((c) => (c.onchange = async () => {
+    try { if (await marcarBienvenida(p, c.dataset.bv, c.checked)) { refrescar(); leadFichaSimple(id); toast('Guardado.'); } } catch (err) { fail(err); c.checked = !c.checked; }
+  }));
   document.querySelectorAll('#dlg [data-fs-etapa]').forEach((s) => (s.onchange = async () => { const cambio = await moverEtapa(s.dataset.fsEtapa, s.value); if (cambio) toast('Guardado.'); leadFichaSimple(id); }));
   document.querySelectorAll('#dlg [data-reserva]').forEach((b) => (b.onclick = async () => {
     const [tid, accion] = b.dataset.reserva.split('|');
@@ -1244,14 +1270,14 @@ function leadFicha(id) {
   if (tab === 'wa') {
     waFichaMontar(p);
     const n = waNum(p.whatsapp), t = $('#wf-text'), form = $('#wf-form'), resp = $('#wf-resp');
-    if (resp) resp.onchange = () => { if (resp.value === '') return; t.value = RESPUESTAS[Number(resp.value)][1](ctxRespuesta(p)); resp.value = ''; t.focus(); };
+    if (resp) resp.onchange = () => { if (resp.value === '') return; const r = RESPUESTAS[Number(resp.value)], cx = ctxRespuesta(p); t.value = r[1](cx); bvPend = r[2] === 'bienvenida' ? { id: p.id, lead: cx.leadId } : null; resp.value = ''; t.focus(); };
     if (form) {
       t.onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } };
       form.onsubmit = async (e) => {
         e.preventDefault();
         const text = t.value.trim(); if (!text) return;
         const b = form.querySelector('button'); b.disabled = true;
-        try { await waApi({ action: 'enviar', to: n, text, name: p.nombre }); t.value = ''; } catch (err) { fail(err); }
+        try { await waApi({ action: 'enviar', to: n, text, name: p.nombre }); t.value = ''; await bienvenidaTrasEnviar(p); } catch (err) { fail(err); }
         b.disabled = false;
       };
     }
@@ -2436,7 +2462,7 @@ function bind() {
   document.querySelectorAll('[data-ans-reload]').forEach((b) => (b.onclick = () => { b.disabled = true; loadAnswers(true).then(() => render(false)).catch(fail); }));
   if (S.view === 'whatsapp') waBind();
   document.querySelectorAll('[data-crm-vista]').forEach((b) => (b.onclick = () => { S.crmVista = b.dataset.crmVista; render(false); }));
-  document.querySelectorAll('[data-crm-prog]').forEach((b) => (b.onclick = () => { S.crmProg = b.dataset.crmProg; S.crmEtapa = ''; S.leadSel = new Set(); render(false); }));
+  document.querySelectorAll('[data-crm-prog]').forEach((b) => (b.onclick = () => { S.crmProg = b.dataset.crmProg; S.crmEtapa = ''; S.crmSinBv = false; S.leadSel = new Set(); render(false); }));
   document.querySelectorAll('[data-crm-metrica]').forEach((b) => (b.onclick = () => { S.crmMetrica = b.dataset.crmMetrica; render(false); }));
   document.querySelectorAll('[data-crm-csv]').forEach((b) => (b.onclick = () => exportarCsv()));
   document.querySelectorAll('[data-crm-remarketing]').forEach((b) => (b.onclick = () => exportarRemarketingCsv()));
@@ -2469,7 +2495,7 @@ function bind() {
   document.querySelectorAll('[data-crm-kpi]').forEach((b) => (b.onclick = () => {
     const k = b.dataset.crmKpi, prog = progDe(S.crmProg), primera = prog && esClase(prog[0]) ? 'registrada' : 'nuevo';
     S.crmLista = k === 'clic' && S.crmLista !== 'clic' ? 'clic' : '';
-    if (k === 'todos') Object.assign(S, { crmQ: '', crmOrigen: '', crmEtapa: '', crmReserva: '', crmPost: false, crmBF: false, crmTag: '', crmSeg: false, crmSinCuenta: false });
+    if (k === 'todos') Object.assign(S, { crmQ: '', crmOrigen: '', crmEtapa: '', crmReserva: '', crmPost: false, crmBF: false, crmSinBv: false, crmTag: '', crmSeg: false, crmSinCuenta: false });
     else if (k === 'nuevas') S.crmEtapa = S.crmEtapa === primera ? '' : primera;
     else if (k === 'seg') S.crmSeg = !S.crmSeg;
     else if (k === 'sin') S.crmSinCuenta = !S.crmSinCuenta;
@@ -2532,6 +2558,7 @@ function bind() {
   const ce = $('#crm-etapa'); if (ce) ce.onchange = () => { S.crmEtapa = ce.value; render(false); };
   const cres = $('#crm-reserva'); if (cres) cres.onchange = () => { S.crmReserva = cres.value; render(false); };
   document.querySelectorAll('[data-crm-bf]').forEach((b) => (b.onclick = () => { S.crmBF = !S.crmBF; render(false); }));
+  document.querySelectorAll('[data-crm-bv]').forEach((b) => (b.onclick = () => { S.crmSinBv = !S.crmSinBv; render(false); }));
   const cpost = $('#crm-post'); if (cpost) cpost.onchange = () => { S.crmPost = cpost.value === 'si'; render(false); };
   document.querySelectorAll('[data-crm-seg]').forEach((b) => (b.onclick = () => { S.crmSeg = !S.crmSeg; render(false); }));
   document.querySelectorAll('[data-crm-desc]').forEach((b) => (b.onclick = () => { S.crmDesc = !S.crmDesc; render(false); }));
