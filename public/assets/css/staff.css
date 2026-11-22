@@ -297,6 +297,8 @@ dialog input[type=checkbox]{width:auto;padding:0;accent-color:var(--accent)}
 .wa-doc,.wa-loc{font-weight:700}.wa-clip{cursor:pointer;align-self:end;min-height:42px;display:inline-flex;align-items:center}.wa-pl{display:inline-flex;gap:8px;align-items:center;flex-wrap:wrap}.wa-pl select{max-width:200px}
 .wa-send{display:grid;grid-template-columns:auto 1fr auto;gap:8px;padding:10px 12px;border-top:1px solid var(--line);align-items:end}
 .wa-send textarea{resize:none;min-height:42px;max-height:140px;border-radius:14px}
+/* Chat dentro de la ficha: la caja ocupa todo el ancho y es más alta; el botón Enviar va debajo, a la derecha */
+#wf-form{grid-template-columns:1fr;gap:10px}#wf-form textarea{min-height:110px;max-height:240px;resize:vertical}#wf-form .btn{justify-self:end;min-width:140px}
 .wa-note{padding:10px 14px;font-size:.84rem;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:color-mix(in srgb,var(--sun) 22%,var(--surface))}
 .wa-empty{display:grid;place-items:center;color:var(--muted);padding:24px;text-align:center}
 @media (max-width:760px){.wa{grid-template-columns:1fr;height:auto}.wa-list{max-height:220px;border-right:0;border-bottom:1px solid var(--line)}.wa-chat{height:60vh}}

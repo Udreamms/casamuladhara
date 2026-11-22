@@ -937,7 +937,9 @@ async function leadMover(id, status) {
 
 // Respuestas rápidas del chat: se escriben en el cuadro para que Karen las ajuste antes de enviar
 const RESPUESTAS = [
-  ['Link de la clase', (c) => `Hola ${c.nombre}, te dejo el link de tu clase gratis de ${c.programa}${c.fecha ? ` (${c.fecha})` : ''}: ${c.link || '[falta su enlace personal: usa «Preparar contactos»]'}. ¡Te espero!`],
+  ['Bienvenida (link de la clase)', (c) => `¡Hola, ${c.nombre}! 🌙 Qué alegría que te hayas registrado. Este es tu link personal para la clase gratis de ${c.programaLargo}${c.esTarot ? ', donde vas a aprender a usar las cartas para conocerte y acompañar a otras personas' : ''}:\n👉 ${c.link || '[falta su enlace personal: usa «Preparar contactos»]'}\nNos vemos ${c.dia ? `el ${c.dia}${c.hora ? ` a las ${c.hora} (hora de Chile)` : ''}` : 'en la clase'} ✨`],
+  ['Compromiso de asistir en vivo', (c) => `Una cosita más, ${c.nombre} 💛 Esta clase la preparé para vivirla en vivo, porque ahí es donde podrás hacer preguntas${c.esTarot ? ', sentir las cartas y hacer las lecturas conmigo' : ' y practicar conmigo'}. ¿Me respondes con un "sí" si te comprometes a estar${c.dia ? ` el ${c.dia}${c.hora ? ` a las ${c.hora}` : ''}` : ''}?`],
+  ['Confirmación (respondió «sí»)', (c) => `¡Maravilloso! 🙌 Ya te espero${c.dia ? ` el ${c.dia}${c.hora ? ` a las ${c.hora} (hora de Chile)` : ''}` : ' en la clase'}.`],
   ['Recordatorio de la clase', (c) => `Hola ${c.nombre}, te recuerdo tu clase gratis de ${c.programa}${c.fecha ? `: ${c.fecha}` : ''}. Entra por aquí: ${c.link || '[falta su enlace personal: usa «Preparar contactos»]'}`],
   ['Después de la clase', (c) => `Hola ${c.nombre}, ¿cómo te fue en la clase de ${c.programa}? Me encantaría saber qué te pareció y resolver tus dudas.`],
   ['Contarle del curso', (c) => `Hola ${c.nombre}, si te gustó la clase, puedo contarte cómo funciona el curso y cómo inscribirte. ¿Te parece?`],
@@ -949,6 +951,10 @@ const ctxRespuesta = (p) => {
     nombre: String(p.nombre || '').split(' ')[0],
     programa: (LEAD_FORMS[trk?.form] || 'Casa Muladhara').replace('Clase gratis ', ''),
     fecha: trk?.claseFecha ? `${fechaLarga(trk.claseFecha)}${evt?.time ? ` a las ${evt.time} (hora de Chile)` : ''}` : '',
+    programaLargo: LEAD_FORMS[String(trk?.form || '').replace('clase-', '')] || (LEAD_FORMS[trk?.form] || 'Casa Muladhara').replace('Clase gratis ', ''), // «Tarot Terapéutico», «Péndulo Hebreo»
+    dia: trk?.claseFecha ? (() => { const d = new Date(tOf(trk.claseFecha)); return `${DIA_LARGO[d.getUTCDay()]} ${d.getUTCDate()} de ${MES_N[d.getUTCMonth()]}`; })() : '',
+    hora: trk?.claseFecha && evt?.time ? evt.time : '',
+    esTarot: trk?.form === 'clase-tarot',
     link: trk && esClase(trk.form) ? trk.enlace_entrada || '' : '', // solo el enlace personal /entrar/<codigo>, nunca el de Meet
   };
 };
