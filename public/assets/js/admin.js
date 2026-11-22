@@ -2061,7 +2061,11 @@ const secHTML = () => {
       <div style="display:grid;gap:6px;margin-top:8px">${c.plantillas.map((p) => `<label style="display:flex;gap:8px;align-items:flex-start;font-size:.86rem"><input type="checkbox" data-sec-pl="${esc(p.nombre)}" ${c.aprobadas[p.nombre] ? 'checked' : ''}><span><b>${esc(p.nombre)}</b> <span class="muted">· ${esc(p.uso)}</span></span></label>`).join('')}
       </div>
       <p class="muted" style="font-size:.8rem;margin:8px 0 0">Marca una plantilla solo cuando Meta la haya aprobado. Una plantilla sin marcar no se usa; si la persona escribió en las últimas 24 horas se le escribe con texto libre.</p></details>
-    <div style="margin-top:10px"><button class="btn btn-ghost btn-sm" data-sec="simular">Ver qué saldría ahora (sin enviar)</button> <span id="sec-sim" class="muted" style="font-size:.84rem"></span></div>`;
+    <div style="margin-top:10px"><button class="btn btn-ghost btn-sm" data-sec="simular">Ver qué saldría ahora (sin enviar)</button> <span id="sec-sim" class="muted" style="font-size:.84rem"></span></div>
+    <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--line);display:grid;gap:8px"><b style="font-size:.9rem">Modo prueba${c.soloNumero ? ' · ACTIVO' : ''}</b>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="sec-solo" type="tel" value="${esc(c.soloNumero ? `+${c.soloNumero}` : '')}" placeholder="Número de prueba, por ejemplo +1 385 384 7208" maxlength="25" aria-label="Número de prueba" style="max-width:280px"><button class="btn btn-ghost btn-sm" data-sec="solo-guardar">Guardar número</button>${c.soloNumero ? '<button class="btn btn-ghost btn-sm" data-sec="solo-quitar">Quitar modo prueba</button>' : ''}</div>
+      <p class="muted" style="font-size:.8rem;margin:0">${c.soloNumero ? `La secuencia solo le escribe a +${esc(c.soloNumero)}: los envíos, lo que se simula y la respuesta automática, aunque esté encendida. Quita el modo prueba cuando termines.` : 'Con un número aquí, la secuencia solo le escribe a esa persona. Úsalo para probar antes de encender. La persona tiene que estar registrada en una clase gratis y haber aceptado recibir WhatsApp.'}</p>
+      ${c.soloNumero ? `<div><button class="btn btn-primary btn-sm" data-sec="ejecutar">Enviar ahora (solo a +${esc(c.soloNumero)})</button> <span id="sec-ejec" class="muted" style="font-size:.84rem"></span></div>` : ''}</div>`;
 };
 const secPintar = () => { const el = $('#sec-card'); if (el) el.innerHTML = secHTML(); };
 async function secCargar() {
@@ -2077,6 +2081,19 @@ document.addEventListener('click', async (e) => {
     if (b.dataset.sec === 'simular') {
       const r = await secApi({ action: 'simular' }), n = r.pendientes.length;
       $('#sec-sim').textContent = n ? `Saldrían ${n}: ${r.pendientes.slice(0, 5).map((p) => `${p.nombre || 'persona'} (${SEC_PASOS[p.paso] || p.paso})`).join(', ')}${n > 5 ? '…' : ''}` : 'Por ahora no saldría ningún mensaje.';
+      return;
+    }
+    if (b.dataset.sec === 'solo-guardar' || b.dataset.sec === 'solo-quitar') {
+      A.sec = await secApi({ action: 'guardar', soloNumero: b.dataset.sec === 'solo-quitar' ? '' : ($('#sec-solo').value || '').trim() }); secPintar();
+      toast(A.sec.soloNumero ? 'Modo prueba guardado.' : 'Modo prueba quitado.'); return;
+    }
+    if (b.dataset.sec === 'ejecutar') {
+      if (!confirm(`¿Enviar ahora? Sale un WhatsApp real (puede tener costo) solo a +${A.sec.soloNumero}, si le corresponde algún paso. Solo envía de 8:00 a 22:00 hora de Chile.`)) return;
+      b.disabled = true;
+      try {
+        const r = await secApi({ action: 'ejecutar' });
+        $('#sec-ejec').textContent = r.aviso || `Enviados: ${r.enviados} · omitidos: ${r.omitidos} · errores: ${r.errores}${(r.detalle || []).length ? ` — ${r.detalle.map((d) => `${d.nombre || 'persona'} (${SEC_PASOS[d.paso] || d.paso}): ${d.resultado}`).join('; ')}` : ' — esa persona no tiene ningún paso pendiente ahora'}`;
+      } finally { b.disabled = false; }
       return;
     }
     if (b.dataset.sec === 'encender' && !confirm('¿Encender la secuencia? Desde ahora enviará WhatsApp automáticos a quienes se registran en las clases gratis. Solo usa las plantillas que marcaste como aprobadas.')) return;

@@ -12,6 +12,9 @@
 //   · nada a quien respondió «no», «baja»… (lead.noContactar), a quien no aceptó recibir WhatsApp ni a quien está descartada
 //   · dentro de las 24 h desde su último mensaje se escribe con texto libre; fuera de esa ventana, solo con plantilla aprobada (si no hay, no se envía)
 //   · cada paso se envía una sola vez por persona y clase (se reserva antes de enviar: dos revisiones a la vez no duplican) y queda en su historial
+//
+// Modo prueba (config/secuenciaWA.soloNumero): con un número escrito, la secuencia SOLO le escribe a esa persona (envíos, simulación y respuesta automática),
+// aunque esté encendida y haya un cron. Mientras haya número de prueba, el botón «Enviar ahora» del panel envía solo a ese número, incluso con la secuencia apagada.
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { chileAUtc, utcAChile } from '@/lib/server/agenda.js';
 import { CODIGO, OFERTAS, RANGO, claseDe, claveClase, configClases, contactoPorCodigo, diaLargo, esClaseGratis, normaliza, primerNombre, waClave } from '@/lib/server/embudo.js';
@@ -33,6 +36,13 @@ export const PLANTILLAS = {
   clase_gratis_pendulo_2: { paso: null, uso: 'Sin paso asignado todavía' },
   clase_gratis_tarot_2: { paso: null, uso: 'Sin paso asignado todavía' },
 };
+// El mismo celular puede venir escrito de dos maneras (Argentina: 54 9 …; México: 52 1 …)
+export function variantesNumero(numero) {
+  const n = String(numero || '').replace(/\D/g, ''), v = new Set(n ? [n] : []);
+  if (/^549\d{10}$/.test(n)) v.add(`54${n.slice(3)}`); else if (/^54\d{10}$/.test(n)) v.add(`549${n.slice(2)}`);
+  if (/^521\d{10}$/.test(n)) v.add(`52${n.slice(3)}`); else if (/^52\d{10}$/.test(n)) v.add(`521${n.slice(2)}`);
+  return [...v];
+}
 const ms = (t) => (t?.toMillis ? t.toMillis() : typeof t === 'number' ? t : 0);
 const base = () => (process.env.APP_URL || 'https://www.casamuladhara.com').replace(/\/$/, '');
 const sano = (k) => `c_${String(k).replace(/[^A-Za-z0-9]/g, '_')}`; // clave segura para un campo de Firestore
@@ -42,18 +52,23 @@ export async function leerConfig() {
   const d = (await db().doc(CFG).get()).data() || {};
   return {
     activa: d.activa === true,
+    soloNumero: waClave(d.soloNumero) || '',
     aprobadas: Object.fromEntries(Object.keys(PLANTILLAS).map((n) => [n, d.aprobadas?.[n] === true])),
   };
 }
 export async function guardarConfig(c, por = '') {
   const actual = await leerConfig();
+  // soloNumero: texto vacío = sin modo prueba; un número = solo se le escribe a esa persona; si no es un número válido, se rechaza
+  let solo = actual.soloNumero;
+  if (typeof c.soloNumero === 'string') { solo = c.soloNumero.trim() ? waClave(c.soloNumero) : ''; if (c.soloNumero.trim() && !solo) throw new Error('Número de prueba no válido (con código de país, por ejemplo +56 9 1234 5678).'); }
   const sig = {
     activa: typeof c.activa === 'boolean' ? c.activa : actual.activa,
+    soloNumero: solo,
     aprobadas: { ...actual.aprobadas, ...Object.fromEntries(Object.keys(PLANTILLAS).filter((n) => typeof c.aprobadas?.[n] === 'boolean').map((n) => [n, c.aprobadas[n]])) },
     actualizado: Date.now(), por: String(por || '').slice(0, 120),
   };
   await db().doc(CFG).set(sig, { merge: true });
-  return { activa: sig.activa, aprobadas: sig.aprobadas };
+  return { activa: sig.activa, soloNumero: sig.soloNumero, aprobadas: sig.aprobadas };
 }
 
 // ---------- Reglas de envío ----------
@@ -109,7 +124,7 @@ async function registrarSalida(numero, id, texto) {
   await db().doc(`wa_chats/${numero}`).set({ number: numero, lastText: texto.slice(0, 200), lastDir: 'out', lastAt: t }, { merge: true });
   await db().doc(`wa_chats/${numero}/messages/${id || `out-${Date.now()}`}`).set({ dir: 'out', text: texto.slice(0, 4000), ts: t, status: 'sent', auto: true }, { merge: true });
 }
-const ventanaAbierta = async (numero) => Date.now() - ms((await db().doc(`wa_chats/${numero}`).get()).data()?.lastInboundAt) < VENTANA;
+const ventanaAbierta = async (numero, ahora = Date.now()) => ahora - ms((await db().doc(`wa_chats/${numero}`).get()).data()?.lastInboundAt) < VENTANA;
 
 // Envía un paso a una persona. Devuelve { ok, via } | { omitido } | { error }.
 async function enviarPaso({ ref, l, ev, paso, cfg, hoy, ahora, replay }) {
@@ -117,7 +132,7 @@ async function enviarPaso({ ref, l, ev, paso, cfg, hoy, ahora, replay }) {
   if (!numero) return { omitido: 'sin número' };
   if ((paso === 'gracias' || paso === 'replay') && !/^https:\/\//i.test(replay || '')) return { omitido: 'la grabación aún no está publicada' };
   const m = armar(paso, { l, ev, cfg, replay });
-  const abierta = await ventanaAbierta(numero);
+  const abierta = await ventanaAbierta(numero, ahora);
   if (paso === 'link' && abierta) return { omitido: 'ya le escribió: recibe el enlace por la respuesta automática' };
   if (!abierta && cfg.aprobadas[m.nombre] !== true) return { omitido: `la plantilla ${m.nombre} aún no está aprobada` };
   const k = sano(ev.id);
@@ -145,15 +160,18 @@ async function enviarPaso({ ref, l, ev, paso, cfg, hoy, ahora, replay }) {
 
 // ---------- Revisión periódica ----------
 // enviar:false = solo simula: lista lo que saldría ahora (sin enviar ni anotar nada, aunque la secuencia esté apagada)
-export async function correrSecuencia({ ahora = Date.now(), enviar = true } = {}) {
+// manual = el botón «Enviar ahora» del panel: solo funciona con número de prueba y envía solo a ese número aunque la secuencia esté apagada
+export async function correrSecuencia({ ahora = Date.now(), enviar = true, manual = false } = {}) {
   const cfg = await leerConfig();
+  const solo = cfg.soloNumero ? variantesNumero(cfg.soloNumero) : null;
   if (enviar) {
-    if (!cfg.activa) return { activa: false, enviados: 0 };
+    if (manual && !solo) return { activa: cfg.activa, enviados: 0, aviso: 'Escribe primero el número de prueba' };
+    if (!cfg.activa && !manual) return { activa: false, enviados: 0 };
     if (!configurado()) return { activa: true, enviados: 0, aviso: 'WhatsApp no está conectado' };
     if (!enHorario(ahora)) return { activa: true, enviados: 0, aviso: 'fuera de horario (8:00 a 22:00 hora de Chile)' };
   }
   const { replay } = await configClases();
-  const hoy = utcAChile(ahora).fecha, salida = { activa: cfg.activa, enviados: 0, omitidos: 0, errores: 0, pendientes: [] };
+  const hoy = utcAChile(ahora).fecha, salida = { activa: cfg.activa, soloNumero: cfg.soloNumero, enviados: 0, omitidos: 0, errores: 0, pendientes: [], ...(solo ? { fueraDePrueba: 0, detalle: [] } : {}) };
   for (const tipo of ['clase-pendulo', 'clase-tarot']) {
     const cal = await db().collection('calendario').where('type', '==', tipo).get();
     for (const d of cal.docs) {
@@ -162,6 +180,7 @@ export async function correrSecuencia({ ahora = Date.now(), enviar = true } = {}
       const personas = await db().collection('leads').where('claseEvento', '==', d.id).get();
       for (const p of personas.docs) {
         const l = p.data();
+        if (solo && !solo.includes(waClave(l.waKey || l.whatsapp))) { salida.fueraDePrueba++; continue; } // modo prueba: solo el número elegido
         if (!esClaseGratis(l.form) || !l.codigo || !CODIGO.test(l.codigo) || NO_ESCRIBIR(l) || l.waAutoDia === hoy) continue;
         const paso = pasoDebido({ l, ev, ahora });
         if (!paso) continue;
@@ -169,6 +188,7 @@ export async function correrSecuencia({ ahora = Date.now(), enviar = true } = {}
         if (salida.enviados >= 80) return salida; // tope por revisión
         const r = await enviarPaso({ ref: p.ref, l: { ...l, id: p.id }, ev, paso, cfg, hoy, ahora, replay: replay[ev.clase] });
         if (r.ok) salida.enviados++; else if (r.error) salida.errores++; else salida.omitidos++;
+        if (solo && salida.detalle.length < 10) salida.detalle.push({ nombre: primerNombre(l.name), paso, resultado: r.ok ? `enviado (${r.via})` : r.error ? `error: ${r.error}` : r.omitido }); // en modo prueba se ve qué pasó con cada paso
       }
     }
   }
@@ -186,6 +206,7 @@ const ultimaClase = (docs) => docs.filter((d) => esClaseGratis(d.data().form) &&
 export async function responderEntrante({ numero, texto, ahora = Date.now() }) {
   const cfg = await leerConfig();
   if (!cfg.activa || !configurado()) return { respondio: false, motivo: 'apagada' };
+  if (cfg.soloNumero && !variantesNumero(cfg.soloNumero).includes(String(numero))) return { respondio: false, motivo: 'modo prueba: solo responde al número de prueba' };
   const t = String(texto || ''), tn = normaliza(t);
   const chatRef = db().doc(`wa_chats/${numero}`);
   let doc = null;
