@@ -383,7 +383,7 @@ V.clase = () => {
   <div class="view-head"><div><span class="eyebrow">Nivel ${lv.n} · ${esc(lv.title)}</span><h1 style="font-size:clamp(1.4rem,2.6vw,1.9rem)">${esc(m.title)}</h1><p>Así la ven tus alumnas. Desde el temario del nivel puedes recorrer todas sus clases.</p></div><a class="btn btn-ghost btn-sm" href="${src}" target="_blank" rel="noopener">Abrir en otra pestaña</a></div>
   <iframe class="aula-frame" src="${src}&embed=1" title="Clase: ${esc(l.t)}"></iframe>`;
 };
-const LEAD_FORMS = { pendulo: 'Péndulo Hebreo', 'clase-pendulo': 'Clase gratis Péndulo', tarot: 'Tarot Terapéutico', 'clase-tarot': 'Clase gratis Tarot', formacion: 'Formación', sala: 'Sala Abierta', terapias: 'Terapias', meditacion: 'Meditación', regalo: 'Portada · Sala Abierta', 'cuenta-gratis': 'Cuenta gratis del aula' };
+const LEAD_FORMS = { pendulo: 'Péndulo Hebreo', 'clase-pendulo': 'Clase gratis Péndulo', tarot: 'Tarot Terapéutico', 'clase-tarot': 'Clase gratis Tarot', formacion: 'Formación', sala: 'Sala Abierta', terapias: 'Terapias', meditacion: 'Meditación', regalo: 'Portada · Sala Abierta', 'cuenta-gratis': 'Cuenta gratis del aula', whatsapp: 'Escribió por WhatsApp' };
 const LEAD_STATES = [['nuevo', 'Nueva'], ['contactado', 'Contactada'], ['clase', 'Tomó la clase'], ['conversando', 'En conversación'], ['inscrita', 'Inscrita'], ['descartado', 'Descartada']];
 // Embudo de las clases gratis (las mismas etapas y rangos que el servidor, src/lib/server/embudo.js). Se guardan en el campo status.
 const ETAPAS_CLASE = [['registrada', 'Registrada'], ['confirmada', 'Confirmada'], ['entro', 'Entró'], ['asistio_confirmado', 'Asistió confirmado'], ['vio_oferta', 'Vio la oferta'], ['reservo_cupo', 'Reservó cupo'], ['matriculada', 'Matriculada'],
@@ -414,7 +414,7 @@ const LEAD_PROGS = [['clase-pendulo', 'Clase gratis Péndulo', ['clase-pendulo']
 // Programas pagos (se pagan por fuera con Karen, salvo la Formación completa, que también se detecta por Stripe) y los que se pueden sumar a una persona
 const PROG_PAGOS = [['pendulo', 'Curso Péndulo'], ['tarot', 'Curso Tarot'], ['formacion', 'Formación completa']];
 const PROG_AGREGAR = [['clase-pendulo', 'Clase gratis Péndulo'], ['clase-tarot', 'Clase gratis Tarot'], ...PROG_PAGOS];
-const PROG_CORTO = { 'clase-pendulo': 'Clase Péndulo', 'clase-tarot': 'Clase Tarot', pendulo: 'Curso Péndulo', tarot: 'Curso Tarot', formacion: 'Formación', sala: 'Sala', terapias: 'Terapias', meditacion: 'Meditación', regalo: 'Portada', 'cuenta-gratis': 'Cuenta gratis' };
+const PROG_CORTO = { 'clase-pendulo': 'Clase Péndulo', 'clase-tarot': 'Clase Tarot', pendulo: 'Curso Péndulo', tarot: 'Curso Tarot', formacion: 'Formación', sala: 'Sala', terapias: 'Terapias', meditacion: 'Meditación', regalo: 'Portada', 'cuenta-gratis': 'Cuenta gratis', whatsapp: 'WhatsApp' };
 const esClase = (f) => f === 'clase-pendulo' || f === 'clase-tarot';
 const esPago = (f) => ['pendulo', 'tarot', 'formacion'].includes(f);
 // En un curso pago la primera etapa es "Interesada"; en una clase gratis, "Inscrita" quiere decir inscrita a un curso
