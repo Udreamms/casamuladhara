@@ -2041,7 +2041,55 @@ async function waCargarPlantillas() {
   try { A.wa.plantillas = (await waApi({ action: 'plantillas' })).plantillas || null; } catch (e) { console.warn('plantillas', e.message); }
   if (S.view === 'whatsapp') waRepaint(true);
 }
+// Secuencia automática de la clase (src/app/api/secuencia): interruptor, plantillas aprobadas por Meta y «qué saldría ahora». Viene apagada.
+const secApi = async (body) => {
+  const r = await fetch('/api/secuencia', { method: 'POST', headers: { Authorization: `Bearer ${await auth.currentUser.getIdToken()}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const out = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(out.error || 'No se pudo completar.');
+  return out;
+};
+const secHTML = () => {
+  const c = A.sec;
+  if (!c) return '<p class="muted" style="margin:0">Cargando…</p>';
+  if (c.error) return `<p class="muted" style="margin:0">${esc(c.error)}</p>`;
+  const nAprob = c.plantillas.filter((p) => c.aprobadas[p.nombre]).length;
+  return `<div style="display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap">
+      <div><b>${c.activa ? 'Encendida' : 'Apagada'}</b> <span class="muted" style="font-size:.86rem">· ${c.activa ? 'envía solo lo que corresponde, de 8:00 a 22:00 y un mensaje al día por persona' : 'no envía ningún mensaje automático'}</span></div>
+      <button class="btn ${c.activa ? 'btn-ghost' : 'btn-primary'} btn-sm" data-sec="${c.activa ? 'apagar' : 'encender'}">${c.activa ? 'Apagar' : 'Encender'}</button></div>
+    ${c.activa && !c.conectado ? '<p class="muted" style="margin:8px 0 0;font-size:.84rem">WhatsApp aún no está conectado: no saldrá nada hasta conectarlo.</p>' : ''}${c.activa && !c.cron ? '<p class="muted" style="margin:8px 0 0;font-size:.84rem">Falta CRON_SECRET en Vercel y el cron de cada 5 minutos: sin eso solo funciona la respuesta a quien escribe.</p>' : ''}
+    <details style="margin-top:10px"><summary style="cursor:pointer;font-weight:600;font-size:.9rem">Plantillas aprobadas por Meta (${nAprob} de ${c.plantillas.length})</summary>
+      <div style="display:grid;gap:6px;margin-top:8px">${c.plantillas.map((p) => `<label style="display:flex;gap:8px;align-items:flex-start;font-size:.86rem"><input type="checkbox" data-sec-pl="${esc(p.nombre)}" ${c.aprobadas[p.nombre] ? 'checked' : ''}><span><b>${esc(p.nombre)}</b> <span class="muted">· ${esc(p.uso)}</span></span></label>`).join('')}
+      </div>
+      <p class="muted" style="font-size:.8rem;margin:8px 0 0">Marca una plantilla solo cuando Meta la haya aprobado. Una plantilla sin marcar no se usa; si la persona escribió en las últimas 24 horas se le escribe con texto libre.</p></details>
+    <div style="margin-top:10px"><button class="btn btn-ghost btn-sm" data-sec="simular">Ver qué saldría ahora (sin enviar)</button> <span id="sec-sim" class="muted" style="font-size:.84rem"></span></div>`;
+};
+const secPintar = () => { const el = $('#sec-card'); if (el) el.innerHTML = secHTML(); };
+async function secCargar() {
+  if (A.sec !== undefined) return;
+  A.sec = null;
+  try { A.sec = await secApi({ action: 'estado' }); } catch (e) { A.sec = { error: e.message }; }
+  secPintar();
+}
+const SEC_PASOS = { link: 'enlace al registrarse', diaAntes: 'recordatorio de 24 h', unaHora: 'recordatorio de 1 h', gracias: 'gracias con la grabación', replay: 'grabación para quien no entró' };
+document.addEventListener('click', async (e) => {
+  const b = e.target.closest('[data-sec]'); if (!b) return;
+  try {
+    if (b.dataset.sec === 'simular') {
+      const r = await secApi({ action: 'simular' }), n = r.pendientes.length;
+      $('#sec-sim').textContent = n ? `Saldrían ${n}: ${r.pendientes.slice(0, 5).map((p) => `${p.nombre || 'persona'} (${SEC_PASOS[p.paso] || p.paso})`).join(', ')}${n > 5 ? '…' : ''}` : 'Por ahora no saldría ningún mensaje.';
+      return;
+    }
+    if (b.dataset.sec === 'encender' && !confirm('¿Encender la secuencia? Desde ahora enviará WhatsApp automáticos a quienes se registran en las clases gratis. Solo usa las plantillas que marcaste como aprobadas.')) return;
+    const cuerpo = { action: 'guardar', activa: b.dataset.sec === 'encender' };
+    A.sec = await secApi(cuerpo); secPintar(); toast(b.dataset.sec === 'encender' ? 'Secuencia encendida.' : 'Secuencia apagada.');
+  } catch (err) { toast(err.message); }
+});
+document.addEventListener('change', async (e) => {
+  const c = e.target.closest('[data-sec-pl]'); if (!c) return;
+  try { A.sec = await secApi({ action: 'guardar', aprobadas: { [c.dataset.secPl]: c.checked } }); secPintar(); } catch (err) { toast(err.message); }
+});
 V.whatsapp = () => `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>WhatsApp</h1><p>Conversaciones desde el WhatsApp Business de Karen (+56 9 7280 3407). Lo que escribas aquí sale con ese número.</p></div></div>
+  <section class="card panel" style="display:grid;gap:4px"><h3 class="ini-t" style="margin:0">Secuencia automática de la clase</h3><div id="sec-card">${(setTimeout(secCargar, 0), secHTML())}</div></section>
   ${A.wa.on === false ? '<div class="card empty">WhatsApp todavía no está conectado: faltan las llaves de Meta en Vercel (WHATSAPP_TOKEN y WHATSAPP_PHONE_ID). Los pasos están en el README.</div>' : ''}
   <section class="card wa"><div class="wa-list" id="wa-list">${waListHTML()}</div><div id="wa-pane" style="display:grid;min-width:0;min-height:0">${waChatHTML()}</div></section>`;
 let waMsgsOff = null, waChatsOff = null;

@@ -15,6 +15,7 @@ import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { auth, db, json } from '@/lib/server/services.js';
 import { bajarArchivo, configurado, enviarArchivo, enviarPlantilla, enviarTexto, normalizar, plantillasAprobadas, TIPO_ARCHIVO } from '@/lib/server/whatsapp.js';
 import { pideParar } from '@/lib/server/embudo.js';
+import { responderEntrante } from '@/lib/server/secuencia.js';
 
 const VENTANA = 24 * 60 * 60 * 1000;
 const LIMITE_ARCHIVO = 4 * 1024 * 1024; // Vercel no deja pasar cuerpos de más de ~4,5 MB
@@ -86,6 +87,8 @@ async function aviso(payload) {
         const numero = normalizar(m.from);
         if (numero) await guardar(numero, { dir: 'in', id: m.id, text: textoDe(m), nombre: nombres[m.from], ms: Number(m.timestamp) * 1000, extra: extraDe(m) });
         if (numero && pideParar(textoDe(m))) await noContactar(numero);
+        // Secuencia de la clase (apagada por defecto): responde con el enlace personal. Si falla, el aviso de Meta igual se da por recibido.
+        else if (numero && ['text', 'button', 'interactive'].includes(m.type)) await responderEntrante({ numero, texto: textoDe(m) }).catch((err) => console.error('whatsapp secuencia', err));
       }
       // Lo que Karen escribe desde la app de WhatsApp Business en su teléfono también queda en el chat del portal
       for (const m of v.message_echoes || []) {

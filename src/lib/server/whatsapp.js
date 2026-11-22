@@ -48,6 +48,16 @@ export function enviarPlantilla(a, nombre, elegida) {
   return llamar({ to: a, type: 'template', template: { name, language: { code: lang }, ...(components.length ? { components } : {}) } });
 }
 
+// Plantilla aprobada con las variables del cuerpo ({{1}}, {{2}}…) y, si lleva un botón de enlace con variable, su valor (el código personal).
+// La usa la secuencia automática de la clase (src/lib/server/secuencia.js).
+export function enviarPlantillaCon(a, { name, lang = 'es_CL', vars = [], boton = '' }) {
+  const components = [
+    ...(vars.length ? [{ type: 'body', parameters: vars.map((v) => ({ type: 'text', text: String(v ?? '').replace(/\s+/g, ' ').trim().slice(0, 900) || '-' })) }] : []),
+    ...(boton ? [{ type: 'button', sub_type: 'url', index: '0', parameters: [{ type: 'text', text: String(boton) }] }] : []),
+  ];
+  return llamar({ to: a, type: 'template', template: { name, language: { code: lang }, ...(components.length ? { components } : {}) } });
+}
+
 // ---------- Archivos (fotos, audios, videos y documentos) ----------
 const AUTH = () => ({ Authorization: `Bearer ${process.env.WHATSAPP_TOKEN.trim()}` });
 export const TIPO_ARCHIVO = (mime = '') => (/^image\/(jpeg|png)$/.test(mime) ? 'image'
