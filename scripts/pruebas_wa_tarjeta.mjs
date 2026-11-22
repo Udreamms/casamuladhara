@@ -2,7 +2,7 @@
 // y que la ficha encuentre su chat. Datos inventados; no usa la base de datos.
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
-import { chatIdDe, fichaDeChat, variantesNum } from '../public/assets/js/wa-ficha.js';
+import { chatIdDe, contactoConNumero, fichaDeChat, paisDeNumero, variantesNum } from '../public/assets/js/wa-ficha.js';
 
 const src = fs.readFileSync(new URL('../public/assets/js/admin.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
 // Como normaliza el portal un número (admin.js: waNum)
@@ -51,7 +51,7 @@ prueba('sin tarjeta: devuelve null (también con un código que no existe o escr
   assert.equal(fichaDeChat('56999999999', undefined, undefined, waNum), null);
 });
 prueba('el portal usa la búsqueda: botones «Abrir su tarjeta» y «Poner su enlace en el mensaje», y avisa si no hay tarjeta', () => {
-  assert.match(src, /import \{ chatIdDe, fichaDeChat, variantesNum \} from '\.\/wa-ficha\.js';/);
+  assert.match(src, /import \{ chatIdDe, contactoConNumero, fichaDeChat, variantesNum \} from '\.\/wa-ficha\.js';/);
   assert.match(src, /const fi = A\.leads \? fichaDeChat\(n, A\.wa\.msgs, A\.leads, waNum\) : undefined;/);
   assert.ok(src.includes('data-wa-tarjeta="${esc(fi.lead.id)}"') && src.includes('data-wa-enlace="${esc(fi.lead.id)}"') && src.includes('No tiene tarjeta en Interesadas.'));
   assert.ok(src.includes("${libre ? `<button class=\"btn btn-ghost btn-sm\" data-wa-enlace"), 'el botón del enlace solo aparece si se le puede escribir libremente');
@@ -67,5 +67,45 @@ prueba('«Poner su enlace»: escribe la bienvenida de esa persona y, al enviarla
   assert.match(src, /if \(waEnlaceDe && waEnlaceDe\.chat === S\.waOpen\) \{ const x = waEnlaceDe\.per; waEnlaceDe = null; await bienvenidaTrasEnviar\(x\); \}/);
   assert.equal(src.split('\n').find((l) => l.includes("const RESPUESTAS = [")) !== undefined, true);
   assert.ok(src.indexOf("['Bienvenida (link de la clase)'") > 0 && src.indexOf("['Bienvenida (link de la clase)'") < src.indexOf("['Compromiso de asistir en vivo'"), 'la bienvenida es la primera respuesta (índice 0)');
+});
+
+// ---- Caso Patricia: se registró con un número y el sistema le puso +56 (Chile), pero escribió desde su +591 (Bolivia)
+prueba('el país según el código del número', () => {
+  assert.equal(paisDeNumero('59172512244'), 'Bolivia'); assert.equal(paisDeNumero('+54 9 2477 352538'), 'Argentina'); assert.equal(paisDeNumero('56972803407'), 'Chile');
+  assert.equal(paisDeNumero('13853847208'), 'Estados Unidos'); assert.equal(paisDeNumero('5215512345678'), 'México'); assert.equal(paisDeNumero('999123'), ''); assert.equal(paisDeNumero(''), '');
+});
+prueba('Patricia: su chat se une a su tarjeta por el código y, al usar el número del chat, pasa a encontrarse por el número', () => {
+  const lead = { id: 'P1', name: 'Patricia Nolasco Guillén', whatsapp: '+56 72512244', waKey: '5672512244', codigo: 'pMFnSqhhTuyJ' };
+  const msgs = [{ dir: 'in', text: 'Hola, ya me registré para la clase gratuita de Tarot Terapéutico con Karen. Mi código: pMFnSqhhTuyJ' }];
+  assert.equal(fichaDeChat('59172512244', msgs, [lead], waNum).por, 'código');
+  const { contacto } = contactoConNumero({ nombre: lead.name, email: 'patricianolasco244@gmail.com', whatsapp: lead.whatsapp, country: 'Chile' }, '59172512244');
+  Object.assign(lead, contacto, { waKey: '59172512244' });
+  const r = fichaDeChat('59172512244', msgs, [lead], waNum);
+  assert.equal(r.por, 'número'); assert.equal(r.lead.id, 'P1');
+});
+prueba('contactoConNumero: guarda el número del chat con «+», conserva nombre y correo, cambia el país y lo explica en la pregunta', () => {
+  const p = { nombre: 'Patricia Nolasco Guillén', email: 'patricianolasco244@gmail.com', whatsapp: '+56 72512244', country: 'Chile' };
+  const { contacto, pregunta } = contactoConNumero(p, '59172512244');
+  assert.deepEqual(contacto, { name: 'Patricia Nolasco Guillén', email: 'patricianolasco244@gmail.com', whatsapp: '+59172512244', country: 'Bolivia' });
+  assert.equal(pregunta, '¿Guardar +59172512244 como el WhatsApp de Patricia Nolasco Guillén? Hoy tiene +56 72512244 y el país pasa a Bolivia.');
+});
+prueba('contactoConNumero: si el país no cambia no lo menciona, y si no conoce el código deja el país que tenía', () => {
+  const mismo = contactoConNumero({ nombre: 'Ana', email: 'a@x.cl', whatsapp: '+54 2477 352538', country: 'Argentina' }, '5492477352538');
+  assert.equal(mismo.contacto.country, 'Argentina'); assert.ok(!mismo.pregunta.includes('el país pasa'));
+  const raro = contactoConNumero({ nombre: 'Eva', email: '', whatsapp: '', country: 'Chile' }, '999123456789');
+  assert.equal(raro.contacto.country, 'Chile'); assert.equal(raro.contacto.whatsapp, '+999123456789'); assert.match(raro.pregunta, /Hoy tiene ninguno/);
+});
+prueba('el portal: el botón solo aparece cuando la tarjeta se encontró por su código; pide confirmación, actualiza todas sus fichas y recarga el chat', () => {
+  assert.ok(src.includes("${fi.por === 'código' ? `<button class=\"btn btn-ghost btn-sm\" data-wa-usar-numero=\"${esc(fi.lead.id)}\""));
+  assert.match(src, /const \{ contacto, pregunta \} = contactoConNumero\(per, S\.waOpen\);\n\s+if \(!confirm\(pregunta\)\) return;/);
+  assert.match(src, /await data\.leads\(\{ action: 'update', ids: per\.leads\.map\(\(l\) => l\.id\), contacto \}\);/);
+  assert.match(src, /per\.leads\.forEach\(\(l\) => Object\.assign\(l, contacto, \{ email: String\(contacto\.email\)\.toLowerCase\(\), waKey: S\.waOpen \}\)\);/);
+  assert.match(src, /A\._per = null; paintNav\(\); waRepaint\(true\); toast\('Listo: su tarjeta ahora tiene el número de este chat\.'\)/);
+  assert.match(src, /import \{ chatIdDe, contactoConNumero, fichaDeChat, variantesNum \} from/);
+});
+prueba('servidor: al editar el WhatsApp de una tarjeta también se actualiza su clave (waKey), que usan la secuencia y la ficha automática', () => {
+  const ruta = fs.readFileSync(new URL('../src/app/api/leads/route.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
+  assert.ok(ruta.includes('Object.assign(cambios, { name, email, whatsapp, country, waKey: waClave(whatsapp) });'));
+  assert.equal((ruta.match(/waKey: waClave\(/g) || []).length, 2); // el registro nuevo y la edición de contacto
 });
 console.log(`\n${ok} pruebas OK`);

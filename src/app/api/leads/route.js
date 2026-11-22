@@ -374,7 +374,7 @@ export async function POST(request) {
           if (name.length < 2) return json({ error: 'Escribe el nombre.' }, 400);
           if (!email && !whatsapp.replace(/\D/g, '')) return json({ error: 'Deja un correo o un WhatsApp para poder contactarla.' }, 400);
           if (email && !EMAIL.test(email)) return json({ error: 'Revisa el correo.' }, 400);
-          Object.assign(cambios, { name, email, whatsapp, country });
+          Object.assign(cambios, { name, email, whatsapp, country, waKey: waClave(whatsapp) }); // waKey: a quién se le escribe y cómo se reconoce su chat; antes quedaba con el número viejo
         }
         if (!Object.keys(cambios).length) return json({ error: 'No hay cambios.' }, 400);
         const eventos = [

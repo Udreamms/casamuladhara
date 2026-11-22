@@ -3,7 +3,7 @@
 // Lo que se ve aquí lo protegen las reglas de Firestore: solo una cuenta con el claim admin puede leerlo.
 import { auth, db } from './firebase.js';
 import { filasPostulacion } from './postulacion.js';
-import { chatIdDe, fichaDeChat, variantesNum } from './wa-ficha.js';
+import { chatIdDe, contactoConNumero, fichaDeChat, variantesNum } from './wa-ficha.js';
 import { blackFridayDe, esExalumna, textoBono } from './black-friday.js';
 import { construirPublicos, csvPublico } from './publicos-meta.js';
 import { profileApi, mountProfileEditor, googlePhoto } from './profile.js';
@@ -2031,7 +2031,7 @@ const waChatHTML = () => {
   // Su tarjeta en Interesadas: por su número o, si escribió desde otro, por el «Mi código» de su primer mensaje
   const fi = A.leads ? fichaDeChat(n, A.wa.msgs, A.leads, waNum) : undefined;
   const acc = fi === undefined ? '' : fi
-    ? `<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="btn btn-ghost btn-sm" data-wa-tarjeta="${esc(fi.lead.id)}" title="${fi.por === 'código' ? 'Se registró con otro número: la encontré por su código' : 'Abre su tarjeta en Interesadas'}">Abrir su tarjeta</button>${libre ? `<button class="btn btn-ghost btn-sm" data-wa-enlace="${esc(fi.lead.id)}" title="Escribe en el cuadro el mensaje de bienvenida con su enlace personal">Poner su enlace en el mensaje</button>` : ''}</div>`
+    ? `<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="btn btn-ghost btn-sm" data-wa-tarjeta="${esc(fi.lead.id)}" title="${fi.por === 'código' ? 'Se registró con otro número: la encontré por su código' : 'Abre su tarjeta en Interesadas'}">Abrir su tarjeta</button>${fi.por === 'código' ? `<button class="btn btn-ghost btn-sm" data-wa-usar-numero="${esc(fi.lead.id)}" title="Su tarjeta tiene otro número: lo cambia por el de este chat">Usar este número en su tarjeta</button>` : ''}${libre ? `<button class="btn btn-ghost btn-sm" data-wa-enlace="${esc(fi.lead.id)}" title="Escribe en el cuadro el mensaje de bienvenida con su enlace personal">Poner su enlace en el mensaje</button>` : ''}</div>`
     : '<span class="muted" style="font-size:.8rem;text-align:right">No tiene tarjeta en Interesadas.<br>Usa «Crear tarjetas de los chats sin tarjeta».</span>';
   return `<div class="wa-chat"><div class="wa-top"><div><b>${esc(waNameOf(n, c))}</b><br><span class="muted" style="font-size:.84rem">+${esc(n)}</span></div>${acc}</div>
     <div class="wa-msgs" id="wa-msgs">${A.wa.msgs.map((m) => { const txt = m.media || m.loc ? String(m.text || '').replace(/^\[[^\]]+\]\s?/, '') : m.text; return `<div class="wa-m ${m.dir === 'out' ? 'out' : ''}">${waMediaHTML(m)}${txt ? esc(txt) : ''}${m.error ? `<span class="bad"> ${esc(m.error)}</span>` : ''}<small class="${m.status === 'failed' ? 'bad' : ''}">${m.ts?.toMillis ? waHora(m.ts.toMillis()) : ''}${estado(m)}</small></div>`; }).join('') || '<div class="wa-empty">Aún no hay mensajes. Empieza con la plantilla.</div>'}</div>
@@ -2169,6 +2169,17 @@ const personaPorLead = (id) => personaDe(id) || personas().find((x) => x.leads.s
 let waEnlaceDe = null;
 function waBind() {
   document.querySelectorAll('[data-wa-tarjeta]').forEach((b) => (b.onclick = () => { const per = personaPorLead(b.dataset.waTarjeta); if (per) { S.fichaTab = 'resumen'; leadFicha(per.id); } }));
+  document.querySelectorAll('[data-wa-usar-numero]').forEach((b) => (b.onclick = async () => {
+    const per = personaPorLead(b.dataset.waUsarNumero); if (!per) return;
+    const { contacto, pregunta } = contactoConNumero(per, S.waOpen);
+    if (!confirm(pregunta)) return;
+    b.disabled = true;
+    try {
+      await data.leads({ action: 'update', ids: per.leads.map((l) => l.id), contacto });
+      per.leads.forEach((l) => Object.assign(l, contacto, { email: String(contacto.email).toLowerCase(), waKey: S.waOpen }));
+      A._per = null; paintNav(); waRepaint(true); toast('Listo: su tarjeta ahora tiene el número de este chat.');
+    } catch (err) { fail(err); b.disabled = false; }
+  }));
   document.querySelectorAll('[data-wa-enlace]').forEach((b) => (b.onclick = () => {
     const per = personaPorLead(b.dataset.waEnlace), t = $('#wa-text'); if (!per || !t) return;
     const cx = ctxRespuesta(per); t.value = RESPUESTAS[0][1](cx); t.focus();

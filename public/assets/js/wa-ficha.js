@@ -29,3 +29,20 @@ export const fichaDeChat = (chatId, msgs, leads, waNum) => {
   }
   return null;
 };
+
+// País según el código del número (los de uso más común aquí); si no lo conocemos, devuelve ''
+const CODIGOS_PAIS = { 1: 'Estados Unidos', 34: 'España', 51: 'Perú', 52: 'México', 53: 'Cuba', 54: 'Argentina', 55: 'Brasil', 56: 'Chile', 57: 'Colombia', 58: 'Venezuela',
+  502: 'Guatemala', 503: 'El Salvador', 504: 'Honduras', 505: 'Nicaragua', 506: 'Costa Rica', 507: 'Panamá', 591: 'Bolivia', 593: 'Ecuador', 595: 'Paraguay', 598: 'Uruguay' };
+export const paisDeNumero = (numero) => {
+  const n = String(numero || '').replace(/\D/g, '');
+  return CODIGOS_PAIS[n.slice(0, 3)] || CODIGOS_PAIS[n.slice(0, 2)] || CODIGOS_PAIS[n.slice(0, 1)] || '';
+};
+
+// Datos de contacto de una persona con el número desde el que escribió: nombre y correo no cambian; el país pasa al del nuevo número si lo conocemos.
+// Devuelve { contacto, pregunta } (pregunta = el texto de confirmación para la Maestra).
+export const contactoConNumero = (persona, chatId) => {
+  const n = String(chatId || '').replace(/\D/g, ''), pais = paisDeNumero(n) || persona.country || '';
+  const contacto = { name: persona.nombre || '', email: persona.email || '', whatsapp: `+${n}`, country: pais };
+  const cambiaPais = pais && pais !== (persona.country || '');
+  return { contacto, pregunta: `¿Guardar +${n} como el WhatsApp de ${persona.nombre}? Hoy tiene ${persona.whatsapp || 'ninguno'}${cambiaPais ? ` y el país pasa a ${pais}` : ''}.` };
+};
