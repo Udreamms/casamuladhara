@@ -2,7 +2,8 @@
 import fs from 'node:fs';
 
 const s = fs.readFileSync(new URL('../public/assets/js/admin.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
-const bloque = s.slice(s.indexOf('// Secuencia automática de la clase'), s.indexOf('V.whatsapp = () =>'));
+const finBloque = s.indexOf('// Chats de WhatsApp que todavía no tienen tarjeta'); // el botón de las tarjetas de los chats va justo después del panel
+const bloque = s.slice(s.indexOf('// Secuencia automática de la clase'), finBloque > 0 ? finBloque : s.indexOf('V.whatsapp = () =>'));
 const cfg = { activa: false, soloNumero: '', aprobadas: { clase_link_personal: false, clase_recordatorio_1h: true }, plantillas: [{ nombre: 'clase_link_personal', uso: 'Al registrarse' }, { nombre: 'clase_recordatorio_1h', uso: '1 hora antes' }], conectado: true, cron: false };
 const llamadas = [], esc = (x) => String(x ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 const nodos = {}, $ = (q) => (nodos[q] ||= { innerHTML: '', textContent: '', value: '' });

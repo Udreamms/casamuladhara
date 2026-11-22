@@ -3,6 +3,7 @@
 // Lo que se ve aquí lo protegen las reglas de Firestore: solo una cuenta con el claim admin puede leerlo.
 import { auth, db } from './firebase.js';
 import { filasPostulacion } from './postulacion.js';
+import { chatIdDe, fichaDeChat, variantesNum } from './wa-ficha.js';
 import { blackFridayDe, esExalumna, textoBono } from './black-friday.js';
 import { construirPublicos, csvPublico } from './publicos-meta.js';
 import { profileApi, mountProfileEditor, googlePhoto } from './profile.js';
@@ -383,7 +384,7 @@ V.clase = () => {
   <div class="view-head"><div><span class="eyebrow">Nivel ${lv.n} · ${esc(lv.title)}</span><h1 style="font-size:clamp(1.4rem,2.6vw,1.9rem)">${esc(m.title)}</h1><p>Así la ven tus alumnas. Desde el temario del nivel puedes recorrer todas sus clases.</p></div><a class="btn btn-ghost btn-sm" href="${src}" target="_blank" rel="noopener">Abrir en otra pestaña</a></div>
   <iframe class="aula-frame" src="${src}&embed=1" title="Clase: ${esc(l.t)}"></iframe>`;
 };
-const LEAD_FORMS = { pendulo: 'Péndulo Hebreo', 'clase-pendulo': 'Clase gratis Péndulo', tarot: 'Tarot Terapéutico', 'clase-tarot': 'Clase gratis Tarot', formacion: 'Formación', sala: 'Sala Abierta', terapias: 'Terapias', meditacion: 'Meditación', regalo: 'Portada · Sala Abierta', 'cuenta-gratis': 'Cuenta gratis del aula' };
+const LEAD_FORMS = { pendulo: 'Péndulo Hebreo', 'clase-pendulo': 'Clase gratis Péndulo', tarot: 'Tarot Terapéutico', 'clase-tarot': 'Clase gratis Tarot', formacion: 'Formación', sala: 'Sala Abierta', terapias: 'Terapias', meditacion: 'Meditación', regalo: 'Portada · Sala Abierta', 'cuenta-gratis': 'Cuenta gratis del aula', whatsapp: 'Escribió por WhatsApp' };
 const LEAD_STATES = [['nuevo', 'Nueva'], ['contactado', 'Contactada'], ['clase', 'Tomó la clase'], ['conversando', 'En conversación'], ['inscrita', 'Inscrita'], ['descartado', 'Descartada']];
 // Embudo de las clases gratis (las mismas etapas y rangos que el servidor, src/lib/server/embudo.js). Se guardan en el campo status.
 const ETAPAS_CLASE = [['registrada', 'Registrada'], ['confirmada', 'Confirmada'], ['entro', 'Entró'], ['asistio_confirmado', 'Asistió confirmado'], ['vio_oferta', 'Vio la oferta'], ['reservo_cupo', 'Reservó cupo'], ['matriculada', 'Matriculada'],
@@ -414,7 +415,7 @@ const LEAD_PROGS = [['clase-pendulo', 'Clase gratis Péndulo', ['clase-pendulo']
 // Programas pagos (se pagan por fuera con Karen, salvo la Formación completa, que también se detecta por Stripe) y los que se pueden sumar a una persona
 const PROG_PAGOS = [['pendulo', 'Curso Péndulo'], ['tarot', 'Curso Tarot'], ['formacion', 'Formación completa']];
 const PROG_AGREGAR = [['clase-pendulo', 'Clase gratis Péndulo'], ['clase-tarot', 'Clase gratis Tarot'], ...PROG_PAGOS];
-const PROG_CORTO = { 'clase-pendulo': 'Clase Péndulo', 'clase-tarot': 'Clase Tarot', pendulo: 'Curso Péndulo', tarot: 'Curso Tarot', formacion: 'Formación', sala: 'Sala', terapias: 'Terapias', meditacion: 'Meditación', regalo: 'Portada', 'cuenta-gratis': 'Cuenta gratis' };
+const PROG_CORTO = { 'clase-pendulo': 'Clase Péndulo', 'clase-tarot': 'Clase Tarot', pendulo: 'Curso Péndulo', tarot: 'Curso Tarot', formacion: 'Formación', sala: 'Sala', terapias: 'Terapias', meditacion: 'Meditación', regalo: 'Portada', 'cuenta-gratis': 'Cuenta gratis', whatsapp: 'WhatsApp' };
 const esClase = (f) => f === 'clase-pendulo' || f === 'clase-tarot';
 const esPago = (f) => ['pendulo', 'tarot', 'formacion'].includes(f);
 // En un curso pago la primera etapa es "Interesada"; en una clase gratis, "Inscrita" quiere decir inscrita a un curso
@@ -988,7 +989,7 @@ const ctxRespuesta = (p) => {
 let waFichaOff = null;
 function waFichaMontar(p) {
   waFichaOff?.(); waFichaOff = null;
-  const n = waNum(p.whatsapp), box = $('#wf-msgs'); if (!n || !box) return;
+  const n = chatIdDe(waNum(p.whatsapp), A.wa.chats), box = $('#wf-msgs'); if (!n || !box) return;
   const pintar = (msgs) => { box.innerHTML = msgs.map((m) => `<div class="wa-m ${m.dir === 'out' ? 'out' : ''}">${esc(m.text)}<small>${m.ts?.toMillis ? waHora(m.ts.toMillis()) : ''}</small></div>`).join('') || '<div class="wa-empty">Todavía no hay mensajes con esta persona.</div>'; box.scrollTop = box.scrollHeight; };
   try {
     waFichaOff = onSnapshot(query(collection(db, 'wa_chats', n, 'messages'), orderBy('ts', 'asc'), limit(200)), (snap) => pintar(snap.docs.map((d) => d.data())),
@@ -1041,7 +1042,7 @@ function leadFichaSimple(id) {
       <label style="display:grid;gap:4px;font-size:.8rem">Etapa<select data-fs-etapa="${esc(l.id)}">${opciones(l).map(([k, t]) => `<option value="${k}" ${act === k ? 'selected' : ''}>${esc(etapaTxt(l.form, k))}</option>`).join('')}</select></label>
       <label style="display:flex;gap:8px;align-items:center;font-size:.82rem"><input type="checkbox" data-bv="${esc(l.id)}" ${tieneBv(l) ? 'checked' : ''}> Se le dio la bienvenida</label>
       ${esClase(l.form) ? registro(l) : ''}${bloqueReserva(l, p)}${bloquePostulacion(l)}${bloquePagos(l)}</div>`; };
-  const n = waNum(p.whatsapp), c = A.wa.chats.find((x) => x.id === n), libre = waLibre(c);
+  const n = chatIdDe(waNum(p.whatsapp), A.wa.chats), c = A.wa.chats.find((x) => x.id === n), libre = waLibre(c);
   const chat = !n ? '<div class="wa-empty" style="flex:1;border:1px dashed var(--line);border-radius:12px">Esta persona no dejó WhatsApp.</div>' : `<div class="alert" id="wf-aviso" ${A.wa.on === false ? '' : 'hidden'}><div><b>WhatsApp todavía no está conectado</b><p>Cuando esté el número definitivo y las llaves de Meta, aquí podrás conversar uno a uno. Mientras tanto el chat no envía ni recibe.</p></div></div>
       <div class="wa-msgs" id="wf-msgs" style="flex:1;min-height:260px;border:1px solid var(--line);border-radius:12px"><div class="wa-empty">Cargando conversación…</div></div>
       ${libre ? `<div style="display:grid;gap:8px"><select id="wf-resp" aria-label="Respuestas rápidas"><option value="">Respuestas rápidas…</option>${RESPUESTAS.map(([t], i) => `<option value="${i}">${esc(t)}</option>`).join('')}</select>
@@ -1136,7 +1137,7 @@ function leadFicha(id) {
   // ----- centro: WhatsApp o Historial
   let centro = '';
   if (tab === 'wa') {
-    const n = waNum(p.whatsapp), c = A.wa.chats.find((x) => x.id === n), libre = waLibre(c);
+    const n = chatIdDe(waNum(p.whatsapp), A.wa.chats), c = A.wa.chats.find((x) => x.id === n), libre = waLibre(c);
     centro = !n ? '<p class="muted">Esta persona no dejó WhatsApp.</p>' : `<div class="alert" id="wf-aviso" ${A.wa.on === false ? '' : 'hidden'}><div><b>WhatsApp todavía no está conectado</b><p>Faltan las llaves de Meta en Vercel. Mientras tanto, el chat aquí no envía ni recibe.</p></div></div>
       <div class="wa-msgs" id="wf-msgs" style="flex:1;min-height:260px;border:1px solid var(--line);border-radius:12px"><div class="wa-empty">Cargando conversación…</div></div>
       ${libre ? `<div style="display:grid;gap:8px"><select id="wf-resp" aria-label="Respuestas rápidas"><option value="">Respuestas rápidas…</option>${RESPUESTAS.map(([t], i) => `<option value="${i}">${esc(t)}</option>`).join('')}</select>
@@ -1272,7 +1273,7 @@ function leadFicha(id) {
   // Centro
   if (tab === 'wa') {
     waFichaMontar(p);
-    const n = waNum(p.whatsapp), t = $('#wf-text'), form = $('#wf-form'), resp = $('#wf-resp');
+    const n = chatIdDe(waNum(p.whatsapp), A.wa.chats), t = $('#wf-text'), form = $('#wf-form'), resp = $('#wf-resp');
     if (resp) resp.onchange = () => { if (resp.value === '') return; const r = RESPUESTAS[Number(resp.value)], cx = ctxRespuesta(p); t.value = r[1](cx); bvPend = r[2] === 'bienvenida' ? { id: p.id, lead: cx.leadId } : null; resp.value = ''; t.focus(); };
     if (form) {
       t.onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } };
@@ -2013,7 +2014,7 @@ function waCargarArchivos() {
     waArchivo(id).then(() => { if (S.view === 'whatsapp') waRepaint(true); }).catch(() => { el.innerHTML = '<span class="muted">No se pudo cargar el archivo.</span>'; });
   });
 }
-const waNameOf = (n, chat) => chat?.name || A.leads?.find((l) => waNum(l.whatsapp) === n)?.name || A.students.find((u) => waNum(u.phone) === n)?.displayName || `+${n}`;
+const waNameOf = (n, chat) => chat?.name || A.leads?.find((l) => variantesNum(n).includes(waNum(l.whatsapp)))?.name || A.students.find((u) => waNum(u.phone) === n)?.displayName || `+${n}`;
 const waHora = (ms) => { const d = new Date(ms); return d.toDateString() === new Date().toDateString() ? d.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' }) : d.toLocaleDateString('es', { day: 'numeric', month: 'short' }); };
 const waChats = () => {
   const l = [...A.wa.chats];
@@ -2027,7 +2028,12 @@ const waChatHTML = () => {
   if (!n) return '<div class="wa-empty">Elige una conversación para verla y responder desde aquí.</div>';
   const c = A.wa.chats.find((x) => x.id === n), libre = waLibre(c);
   const estado = (m) => (m.dir !== 'out' ? '' : { read: ' ✓✓ leído', delivered: ' ✓✓', failed: ' · no se pudo entregar' }[m.status] || ' ✓');
-  return `<div class="wa-chat"><div class="wa-top"><div><b>${esc(waNameOf(n, c))}</b><br><span class="muted" style="font-size:.84rem">+${esc(n)}</span></div></div>
+  // Su tarjeta en Interesadas: por su número o, si escribió desde otro, por el «Mi código» de su primer mensaje
+  const fi = A.leads ? fichaDeChat(n, A.wa.msgs, A.leads, waNum) : undefined;
+  const acc = fi === undefined ? '' : fi
+    ? `<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="btn btn-ghost btn-sm" data-wa-tarjeta="${esc(fi.lead.id)}" title="${fi.por === 'código' ? 'Se registró con otro número: la encontré por su código' : 'Abre su tarjeta en Interesadas'}">Abrir su tarjeta</button>${libre ? `<button class="btn btn-ghost btn-sm" data-wa-enlace="${esc(fi.lead.id)}" title="Escribe en el cuadro el mensaje de bienvenida con su enlace personal">Poner su enlace en el mensaje</button>` : ''}</div>`
+    : '<span class="muted" style="font-size:.8rem;text-align:right">No tiene tarjeta en Interesadas.<br>Usa «Crear tarjetas de los chats sin tarjeta».</span>';
+  return `<div class="wa-chat"><div class="wa-top"><div><b>${esc(waNameOf(n, c))}</b><br><span class="muted" style="font-size:.84rem">+${esc(n)}</span></div>${acc}</div>
     <div class="wa-msgs" id="wa-msgs">${A.wa.msgs.map((m) => { const txt = m.media || m.loc ? String(m.text || '').replace(/^\[[^\]]+\]\s?/, '') : m.text; return `<div class="wa-m ${m.dir === 'out' ? 'out' : ''}">${waMediaHTML(m)}${txt ? esc(txt) : ''}${m.error ? `<span class="bad"> ${esc(m.error)}</span>` : ''}<small class="${m.status === 'failed' ? 'bad' : ''}">${m.ts?.toMillis ? waHora(m.ts.toMillis()) : ''}${estado(m)}</small></div>`; }).join('') || '<div class="wa-empty">Aún no hay mensajes. Empieza con la plantilla.</div>'}</div>
     ${libre ? '<form class="wa-send" id="wa-form"><label class="btn btn-ghost btn-sm wa-clip" title="Enviar foto, audio, video o documento (hasta 4 MB)">📎<input type="file" id="wa-file" hidden accept="image/jpeg,image/png,audio/aac,audio/mp4,audio/mpeg,audio/amr,audio/ogg,video/mp4,video/3gpp,application/pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"></label><textarea id="wa-text" rows="1" placeholder="Escribe un mensaje…" aria-label="Mensaje"></textarea><button class="btn btn-primary btn-sm">Enviar</button></form>'
     : `<div class="wa-note"><span>${c?.lastInboundAt ? 'Pasaron más de 24 horas desde su último mensaje.' : 'Esta persona aún no te ha escrito.'} WhatsApp solo permite empezar con un mensaje de plantilla; cuando responda podrás escribirle libremente.</span><span class="wa-pl">${waPlantillasHTML()}<button class="btn btn-primary btn-sm" data-wa-plantilla>Enviar plantilla</button></span></div>`}</div>`;
@@ -2108,7 +2114,20 @@ document.addEventListener('change', async (e) => {
   const c = e.target.closest('[data-sec-pl]'); if (!c) return;
   try { A.sec = await secApi({ action: 'guardar', aprobadas: { [c.dataset.secPl]: c.checked } }); secPintar(); } catch (err) { toast(err.message); }
 });
-V.whatsapp = () => `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>WhatsApp</h1><p>Conversaciones desde el WhatsApp Business de Karen (+56 9 7280 3407). Lo que escribas aquí sale con ese número.</p></div></div>
+// Chats de WhatsApp que todavía no tienen tarjeta en Interesadas (escribieron sin registrarse): una sola pulsación las crea. No envía nada.
+document.addEventListener('click', async (e) => {
+  const b = e.target.closest('[data-wa-fichas]'); if (!b) return;
+  if (!confirm('¿Crear una tarjeta en Interesadas para cada chat de WhatsApp que todavía no la tiene? No se envía ningún mensaje.')) return;
+  b.disabled = true;
+  try {
+    const r = await waApi({ action: 'fichas' });
+    await data.leads(); A._per = null; paintNav();
+    const otras = (r.otras || []).map((o) => `<li>${esc(o.nombre || `+${o.numero}`)} <span class="muted">→ ya está como «${esc(o.ficha || 'otra ficha')}» (se registró con otro número)</span></li>`).join('');
+    dialog(`<h3 style="margin-top:0">Tarjetas de los chats</h3><p><b>${r.creadas}</b> tarjeta${r.creadas === 1 ? '' : 's'} nueva${r.creadas === 1 ? '' : 's'} en Interesadas (etapa «Nueva», origen «Escribió por WhatsApp»). ${r.yaTenian} chat${r.yaTenian === 1 ? '' : 's'} ya tenía${r.yaTenian === 1 ? '' : 'n'} tarjeta.</p>${otras ? `<p style="margin-bottom:4px">Estas personas escribieron desde otro número, pero ya tienen su tarjeta (búscala por su nombre):</p><ul style="margin-top:0">${otras}</ul>` : ''}`);
+  } catch (err) { fail(err); }
+  b.disabled = false;
+});
+V.whatsapp = () => `<div class="view-head"><div><span class="eyebrow">Portal de la Maestra</span><h1>WhatsApp</h1><p>Conversaciones desde el WhatsApp Business de Karen (+56 9 7280 3407). Lo que escribas aquí sale con ese número.</p></div><div><button class="btn btn-ghost btn-sm" data-wa-fichas title="Crea en Interesadas la tarjeta de cada chat que todavía no tiene. No envía ningún mensaje.">Crear tarjetas de los chats sin tarjeta</button></div></div>
   <section class="card panel" style="display:grid;gap:4px"><h3 class="ini-t" style="margin:0">Secuencia automática de la clase</h3><div id="sec-card">${(setTimeout(secCargar, 0), secHTML())}</div></section>
   ${A.wa.on === false ? '<div class="card empty">WhatsApp todavía no está conectado: faltan las llaves de Meta en Vercel (WHATSAPP_TOKEN y WHATSAPP_PHONE_ID). Los pasos están en el README.</div>' : ''}
   <section class="card wa"><div class="wa-list" id="wa-list">${waListHTML()}</div><div id="wa-pane" style="display:grid;min-width:0;min-height:0">${waChatHTML()}</div></section>`;
@@ -2145,7 +2164,16 @@ function waOpen(n, nombre) {
   }, (e) => console.warn('whatsapp mensajes', e.code));
   if (A.wa.chats.find((x) => x.id === n)?.unread) waApi({ action: 'leido', to: n }).catch(() => {});
 }
+// La persona (tarjeta) de un registro, y la bienvenida que se está armando desde el chat de WhatsApp (para marcarla al enviarla)
+const personaPorLead = (id) => personaDe(id) || personas().find((x) => x.leads.some((l) => l.id === id));
+let waEnlaceDe = null;
 function waBind() {
+  document.querySelectorAll('[data-wa-tarjeta]').forEach((b) => (b.onclick = () => { const per = personaPorLead(b.dataset.waTarjeta); if (per) { S.fichaTab = 'resumen'; leadFicha(per.id); } }));
+  document.querySelectorAll('[data-wa-enlace]').forEach((b) => (b.onclick = () => {
+    const per = personaPorLead(b.dataset.waEnlace), t = $('#wa-text'); if (!per || !t) return;
+    const cx = ctxRespuesta(per); t.value = RESPUESTAS[0][1](cx); t.focus();
+    bvPend = { id: per.id, lead: cx.leadId }; waEnlaceDe = { per, chat: S.waOpen };
+  }));
   const form = $('#wa-form');
   if (form) {
     const t = $('#wa-text');
@@ -2154,7 +2182,10 @@ function waBind() {
       e.preventDefault();
       const text = t.value.trim(); if (!text) return;
       const b = form.querySelector('button'); b.disabled = true;
-      try { await waApi({ action: 'enviar', to: S.waOpen, text, name: S.waName }); t.value = ''; } catch (err) { fail(err); }
+      try {
+        await waApi({ action: 'enviar', to: S.waOpen, text, name: S.waName }); t.value = '';
+        if (waEnlaceDe && waEnlaceDe.chat === S.waOpen) { const x = waEnlaceDe.per; waEnlaceDe = null; await bienvenidaTrasEnviar(x); }
+      } catch (err) { fail(err); }
       b.disabled = false;
     };
   }
@@ -2514,6 +2545,7 @@ function go(v) {
   if (v === 'whatsapp') {
     if (A.wa.on === null) waApi({ action: 'estado' }).then((r) => { A.wa.on = r.configurado; if (!r.configurado && S.view === 'whatsapp') render(false); }).catch(() => {});
     if (S.waOpen) { const m = $('#wa-msgs'); if (m) m.scrollTop = m.scrollHeight; }
+    if (!A.leads) data.leads().then(() => { if (S.view === 'whatsapp') waRepaint(true); }).catch(() => {});
   }
   if (v === 'envios' && !A.plantillas) data.plantillas().then(() => { if (S.view === 'envios') render(false); }).catch(fail);
   if (v === 'calendario') data.cal().then(() => { if (S.view === 'calendario') render(false); }).catch(fail);

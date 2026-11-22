@@ -14,6 +14,7 @@ import crypto from 'node:crypto';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { auth, db, json } from '@/lib/server/services.js';
 import { bajarArchivo, configurado, enviarArchivo, enviarPlantilla, enviarTexto, normalizar, plantillasAprobadas, TIPO_ARCHIVO } from '@/lib/server/whatsapp.js';
+import { asegurarFicha, crearFichasFaltantes } from '@/lib/server/ficha-wa.js';
 import { pideParar } from '@/lib/server/embudo.js';
 import { responderEntrante } from '@/lib/server/secuencia.js';
 
@@ -85,6 +86,8 @@ async function aviso(payload) {
       const nombres = Object.fromEntries((v.contacts || []).map((c) => [c.wa_id, c.profile?.name || '']));
       for (const m of v.messages || []) {
         const numero = normalizar(m.from);
+        // Quien escribe y no tiene ficha queda en el CRM (si falla, el aviso de Meta igual se da por recibido)
+        if (numero) await asegurarFicha(db(), { numero, nombre: nombres[m.from], texto: textoDe(m), marca: FieldValue.serverTimestamp() }).catch((err) => console.error('whatsapp ficha', err));
         if (numero) await guardar(numero, { dir: 'in', id: m.id, text: textoDe(m), nombre: nombres[m.from], ms: Number(m.timestamp) * 1000, extra: extraDe(m) });
         if (numero && pideParar(textoDe(m))) await noContactar(numero);
         // Secuencia de la clase (apagada por defecto): responde con el enlace personal. Si falla, el aviso de Meta igual se da por recibido.
@@ -165,6 +168,10 @@ export async function POST(request) {
   if (error) return error;
 
   if (body.action === 'estado') return json({ configurado: configurado(), plantillas: !!process.env.WHATSAPP_WABA_ID?.trim() });
+  // Crea la ficha de los chats que no la tienen (no envía nada ni necesita Meta)
+  if (body.action === 'fichas') {
+    try { return json({ ok: true, ...(await crearFichasFaltantes(db(), { marca: FieldValue.serverTimestamp() })) }); } catch (e) { console.error('whatsapp fichas', e); return json({ error: 'No se pudieron crear las tarjetas.' }, 500); }
+  }
   if (!configurado()) return json({ error: 'WhatsApp todavía no está conectado: faltan WHATSAPP_TOKEN y WHATSAPP_PHONE_ID en Vercel.' }, 503);
 
   if (body.action === 'plantillas') {
