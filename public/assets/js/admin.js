@@ -476,13 +476,16 @@ const formacionBadges = (p) => p.leads.filter((l) => l.form === 'formacion').map
 // Columna del pipeline en la que está un registro. Lo guardado manda; solo se calcula (sin escribir) lo que el sistema ya sabe:
 //   clase gratis: sin etapa movida a mano → «Ingresó» (clic en su link o informe de Meet) / «No ingresó» (la clase terminó sin clic) / «Replay enviado» (se le envió el replay desde Envíos)
 //   curso: «Reservó» cuando su reserva está pagada, «Pagó completo» cuando el saldo está pagado
+// «Replay enviado» manda mientras la marca del replay sea más nueva que el último cambio de etapa: si la Maestra mueve la tarjeta a mano después, gana lo que ella eligió.
+const ultimaEtapaT = (l) => Math.max(0, ...(l.eventos || []).filter((e) => e?.tipo === 'etapa').map((e) => Number(e.t) || 0));
+const replayPendiente = (l) => !!l.replayEnviadoT && l.replayEnviadoT > ultimaEtapaT(l);
 const etapaPipe = (l) => {
   const tipo = tipoPipe(l.form); if (!tipo) return leadEtapa(l);
   const e = leadEtapa(l);
   if (tipo === 'clase') {
     let k = l.status === 'conversando' ? 'seguimiento' : PIPE_MAPA.clase[e] || 'registrada'; // «En conversación» de antes = Seguimiento
     if (k === 'registrada') { const sc = segClic(l); if (sc === 'entro') k = 'entro'; else if (sc === 'no_entro') k = 'no_asistio'; }
-    if (['registrada', 'entro', 'no_asistio'].includes(k) && l.replayEnviadoT) k = 'replay_enviado';
+    if (['registrada', 'entro', 'no_asistio'].includes(k) && replayPendiente(l)) k = 'replay_enviado';
     return k;
   }
   if (tipo === 'formacion') {
