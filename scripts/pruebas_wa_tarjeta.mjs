@@ -2,11 +2,12 @@
 // y que la ficha encuentre su chat. Datos inventados; no usa la base de datos.
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
-import { chatIdDe, contactoConNumero, fichaDeChat, paisDeNumero, variantesNum } from '../public/assets/js/wa-ficha.js';
+import { chatIdDe, claveNumero, contactoConNumero, fichaDeChat, paisDeNumero, variantesNum } from '../public/assets/js/wa-ficha.js';
+import { variantesNumero } from '../src/lib/server/ficha-wa.js';
 
 const src = fs.readFileSync(new URL('../public/assets/js/admin.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
-// Como normaliza el portal un número (admin.js: waNum)
-const waNum = (n) => { let d = String(n || '').replace(/\D/g, '').replace(/^00/, ''); if (d.length === 9 && d[0] === '9') d = `56${d}`; return d.length >= 8 && d.length <= 15 ? d : ''; };
+// Como normaliza el portal un número: la función real de admin.js
+const waNum = new Function(`${src.match(/^const waNum = .*$/m)[0]}\nreturn waNum;`)();
 let ok = 0;
 const prueba = (nombre, fn) => { fn(); ok++; console.log('OK  ', nombre); };
 
@@ -51,7 +52,7 @@ prueba('sin tarjeta: devuelve null (también con un código que no existe o escr
   assert.equal(fichaDeChat('56999999999', undefined, undefined, waNum), null);
 });
 prueba('el portal usa la búsqueda: botones «Abrir su tarjeta» y «Poner su enlace en el mensaje», y avisa si no hay tarjeta', () => {
-  assert.match(src, /import \{ chatIdDe, contactoConNumero, fichaDeChat, variantesNum \} from '\.\/wa-ficha\.js';/);
+  assert.match(src, /import \{ chatIdDe, claveNumero, contactoConNumero, fichaDeChat \} from '\.\/wa-ficha\.js';/);
   assert.match(src, /const fi = A\.leads \? fichaDeChat\(n, A\.wa\.msgs, A\.leads, waNum\) : undefined;/);
   assert.ok(src.includes('data-wa-tarjeta="${esc(fi.lead.id)}"') && src.includes('data-wa-enlace="${esc(fi.lead.id)}"') && src.includes('No tiene tarjeta en Interesadas.'));
   assert.ok(src.includes("${libre ? `<button class=\"btn btn-ghost btn-sm\" data-wa-enlace"), 'el botón del enlace solo aparece si se le puede escribir libremente');
@@ -59,7 +60,7 @@ prueba('el portal usa la búsqueda: botones «Abrir su tarjeta» y «Poner su en
 });
 prueba('la ficha busca su chat con las dos formas del número (las 4 veces que lo usa) y el nombre del chat también', () => {
   assert.equal((src.match(/chatIdDe\(waNum\(p\.whatsapp\), A\.wa\.chats\)/g) || []).length, 4);
-  assert.match(src, /A\.leads\?\.find\(\(l\) => variantesNum\(n\)\.includes\(waNum\(l\.whatsapp\)\)\)\?\.name/);
+  assert.match(src, /A\.leads\?\.find\(\(l\) => claveNumero\(waNum\(l\.whatsapp\)\) === claveNumero\(n\)\)\?\.name/);
 });
 prueba('«Poner su enlace»: escribe la bienvenida de esa persona y, al enviarla, queda marcada «Bienvenida» solo en ese chat', () => {
   assert.match(src, /const cx = ctxRespuesta\(per\); t\.value = RESPUESTAS\[0\]\[1\]\(cx\); t\.focus\(\);/);
@@ -95,17 +96,53 @@ prueba('contactoConNumero: si el país no cambia no lo menciona, y si no conoce 
   const raro = contactoConNumero({ nombre: 'Eva', email: '', whatsapp: '', country: 'Chile' }, '999123456789');
   assert.equal(raro.contacto.country, 'Chile'); assert.equal(raro.contacto.whatsapp, '+999123456789'); assert.match(raro.pregunta, /Hoy tiene ninguno/);
 });
-prueba('el portal: el botón solo aparece cuando la tarjeta se encontró por su código; pide confirmación, actualiza todas sus fichas y recarga el chat', () => {
-  assert.ok(src.includes("${fi.por === 'código' ? `<button class=\"btn btn-ghost btn-sm\" data-wa-usar-numero=\"${esc(fi.lead.id)}\""));
+prueba('el portal: el botón solo aparece cuando el número de la tarjeta no es el del chat; pide confirmación, actualiza todas sus fichas y recarga el chat', () => {
+  assert.ok(src.includes("${fi.difiere ? `<button class=\"btn btn-ghost btn-sm\" data-wa-usar-numero=\"${esc(fi.lead.id)}\""));
   assert.match(src, /const \{ contacto, pregunta \} = contactoConNumero\(per, S\.waOpen\);\n\s+if \(!confirm\(pregunta\)\) return;/);
   assert.match(src, /await data\.leads\(\{ action: 'update', ids: per\.leads\.map\(\(l\) => l\.id\), contacto \}\);/);
   assert.match(src, /per\.leads\.forEach\(\(l\) => Object\.assign\(l, contacto, \{ email: String\(contacto\.email\)\.toLowerCase\(\), waKey: S\.waOpen \}\)\);/);
   assert.match(src, /A\._per = null; paintNav\(\); waRepaint\(true\); toast\('Listo: su tarjeta ahora tiene el número de este chat\.'\)/);
-  assert.match(src, /import \{ chatIdDe, contactoConNumero, fichaDeChat, variantesNum \} from/);
+  assert.match(src, /import \{ chatIdDe, claveNumero, contactoConNumero, fichaDeChat \} from/);
 });
 prueba('servidor: al editar el WhatsApp de una tarjeta también se actualiza su clave (waKey), que usan la secuencia y la ficha automática', () => {
   const ruta = fs.readFileSync(new URL('../src/app/api/leads/route.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
   assert.ok(ruta.includes('Object.assign(cambios, { name, email, whatsapp, country, waKey: waClave(whatsapp) });'));
   assert.equal((ruta.match(/waKey: waClave\(/g) || []).length, 2); // el registro nuevo y la edición de contacto
+});
+
+// ---- Caso Liz: la tarjeta tiene +595 0984479339 (con un 0 de más) y su chat está en 595984479339
+prueba('claveNumero: el mismo celular da la misma clave aunque venga con 0 de más, con 9 (Argentina) o con 1 (México)', () => {
+  assert.equal(claveNumero('595984479339'), '595984479339'); assert.equal(claveNumero('5950984479339'), '595984479339'); assert.equal(claveNumero('+595 0984479339'), '595984479339');
+  assert.equal(claveNumero('5492477352538'), claveNumero('542477352538')); assert.equal(claveNumero('5215512345678'), claveNumero('525512345678'));
+  assert.equal(claveNumero('56972803407'), '56972803407'); assert.equal(claveNumero('13853847208'), '13853847208'); assert.equal(claveNumero('59172512244'), '59172512244'); assert.equal(claveNumero(''), '');
+});
+prueba('waNum del portal: quita el 0 de más después del código de país y deja los números normales como estaban', () => {
+  assert.equal(waNum('+595 0984479339'), '595984479339'); assert.equal(waNum('0984479339'), '0984479339'); // sin código de país no se adivina
+  assert.equal(waNum('+56 9 7280 3407'), '56972803407'); assert.equal(waNum('972803407'), '56972803407'); assert.equal(waNum('+591 72512244'), '59172512244'); assert.equal(waNum('+1 385 384 7208'), '13853847208');
+  assert.equal(waNum('+54 9 2477 352538'), '5492477352538'); assert.equal(waNum(''), '');
+});
+prueba('Liz: su chat se une a su tarjeta por el número, el portal avisa que el número difiere y, al usar el del chat, deja de diferir', () => {
+  const lead = { id: 'F1', name: 'Liz', whatsapp: '+595 0984479339', waKey: '5950984479339', codigo: 'UqpJRJUy9Npp' };
+  assert.equal(chatIdDe(waNum(lead.whatsapp), [{ id: '595984479339' }]), '595984479339'); // la ficha encuentra su chat
+  const r = fichaDeChat('595984479339', [], [lead], waNum);
+  assert.equal(r.lead.id, 'F1'); assert.equal(r.por, 'número'); assert.equal(r.difiere, true);
+  const { contacto } = contactoConNumero({ nombre: 'Liz', email: 'liz@x.com', whatsapp: lead.whatsapp, country: 'Paraguay' }, '595984479339');
+  assert.equal(contacto.whatsapp, '+595984479339'); assert.equal(contacto.country, 'Paraguay');
+  Object.assign(lead, contacto, { waKey: '595984479339' });
+  assert.equal(fichaDeChat('595984479339', [], [lead], waNum).difiere, false);
+});
+prueba('fichaDeChat: si el número coincide exactamente, no marca que difiera', () => {
+  assert.equal(fichaDeChat('56911111111', [], [{ id: 'a', whatsapp: '+56 9 1111 1111', waKey: '56911111111' }], waNum).difiere, false);
+  assert.equal(fichaDeChat('5492477352538', [], [{ id: 'a', whatsapp: '+54 2477 352538', waKey: '542477352538' }], waNum).difiere, true); // Argentina sin 9 en la tarjeta
+});
+prueba('servidor: waClave y normalizar también quitan el 0 de más (las tarjetas nuevas guardan su clave sin él); la ficha automática busca la forma vieja', () => {
+  const emb = fs.readFileSync(new URL('../src/lib/server/embudo.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
+  const waClave = new Function(`${emb.match(/^export const waClave = .*$/m)[0].replace('export ', '')}\nreturn waClave;`)();
+  assert.equal(waClave('+595 0984479339'), '595984479339'); assert.equal(waClave('+56 9 7280 3407'), '56972803407'); assert.equal(waClave('abc'), '');
+  const wa = fs.readFileSync(new URL('../src/lib/server/whatsapp.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
+  const normalizar = new Function(`${wa.slice(wa.indexOf('export function normalizar'), wa.indexOf('\n}\n', wa.indexOf('export function normalizar')) + 3).replace('export ', '')}\nreturn normalizar;`)();
+  assert.equal(normalizar('+595 0984479339'), '595984479339'); assert.equal(normalizar('+591 72512244'), '59172512244');
+  assert.ok(variantesNumero('595984479339').includes('5950984479339') && variantesNumero('595984479339').includes('595984479339'));
+  assert.ok(!variantesNumero('5950984479339').includes('59500984479339'), 'si el número ya trae el 0 no le agrega otro');
 });
 console.log(`\n${ok} pruebas OK`);

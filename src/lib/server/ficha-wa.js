@@ -13,6 +13,9 @@ export function variantesNumero(numero) {
   else if (/^54\d{10}$/.test(n)) v.add(`549${n.slice(2)}`);
   if (/^521\d{10}$/.test(n)) v.add(`52${n.slice(3)}`);
   else if (/^52\d{10}$/.test(n)) v.add(`521${n.slice(2)}`);
+  // Algunas personas escribieron un 0 de más después del código de país (+595 0984…): las tarjetas viejas guardaron su clave así
+  const cod = ['595', '591', '593', '598', '502', '503', '504', '505', '506', '507', '51', '52', '53', '54', '55', '56', '57', '58', '34'].find((c) => n.startsWith(c));
+  if (cod && n[cod.length] !== '0') v.add(`${cod}0${n.slice(cod.length)}`);
   return [...v];
 }
 

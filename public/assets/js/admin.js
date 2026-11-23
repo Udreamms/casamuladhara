@@ -3,7 +3,7 @@
 // Lo que se ve aquí lo protegen las reglas de Firestore: solo una cuenta con el claim admin puede leerlo.
 import { auth, db } from './firebase.js';
 import { filasPostulacion } from './postulacion.js';
-import { chatIdDe, contactoConNumero, fichaDeChat, variantesNum } from './wa-ficha.js';
+import { chatIdDe, claveNumero, contactoConNumero, fichaDeChat } from './wa-ficha.js';
 import { blackFridayDe, esExalumna, textoBono } from './black-friday.js';
 import { construirPublicos, csvPublico } from './publicos-meta.js';
 import { profileApi, mountProfileEditor, googlePhoto } from './profile.js';
@@ -440,7 +440,7 @@ const PIPE_MAPA = {
 };
 const etapaTxt = (form, k) => PIPE_TXT[tipoPipe(form)]?.[k] ?? (k === 'nuevo' && esPago(form) ? 'Interesada' : ETAPA_NOMBRE[k] || k);
 // Mismo criterio que src/lib/server/whatsapp.js: solo dígitos con código de país (un celular chileno de 9 dígitos que empieza en 9 se toma como +56)
-const waNum = (n) => { let d = String(n || '').replace(/\D/g, '').replace(/^00/, ''); if (d.length === 9 && d[0] === '9') d = `56${d}`; return d.length >= 8 && d.length <= 15 ? d : ''; };
+const waNum = (n) => { let d = String(n || '').replace(/\D/g, '').replace(/^00/, ''); if (d.length === 9 && d[0] === '9') d = `56${d}`; d = d.replace(/^(595|591|593|598|50[2-7]|5[1-8]|34)0(?=\d)/, '$1'); return d.length >= 8 && d.length <= 15 ? d : ''; };
 const waLink = (n) => { const d = String(n || '').replace(/\D/g, ''); return d ? `https://wa.me/${d}` : ''; };
 // Origen de cada registro: lo que trae el enlace del anuncio (utm_source / utm_campaign / utm_content / fbclid). Sin nada de eso = orgánico.
 const leadOrigen = (l) => l.utm?.utm_source || (l.utm?.fbclid ? 'meta' : 'orgánico');
@@ -2014,7 +2014,7 @@ function waCargarArchivos() {
     waArchivo(id).then(() => { if (S.view === 'whatsapp') waRepaint(true); }).catch(() => { el.innerHTML = '<span class="muted">No se pudo cargar el archivo.</span>'; });
   });
 }
-const waNameOf = (n, chat) => chat?.name || A.leads?.find((l) => variantesNum(n).includes(waNum(l.whatsapp)))?.name || A.students.find((u) => waNum(u.phone) === n)?.displayName || `+${n}`;
+const waNameOf = (n, chat) => chat?.name || A.leads?.find((l) => claveNumero(waNum(l.whatsapp)) === claveNumero(n))?.name || A.students.find((u) => waNum(u.phone) === n)?.displayName || `+${n}`;
 const waHora = (ms) => { const d = new Date(ms); return d.toDateString() === new Date().toDateString() ? d.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' }) : d.toLocaleDateString('es', { day: 'numeric', month: 'short' }); };
 const waChats = () => {
   const l = [...A.wa.chats];
@@ -2031,7 +2031,7 @@ const waChatHTML = () => {
   // Su tarjeta en Interesadas: por su número o, si escribió desde otro, por el «Mi código» de su primer mensaje
   const fi = A.leads ? fichaDeChat(n, A.wa.msgs, A.leads, waNum) : undefined;
   const acc = fi === undefined ? '' : fi
-    ? `<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="btn btn-ghost btn-sm" data-wa-tarjeta="${esc(fi.lead.id)}" title="${fi.por === 'código' ? 'Se registró con otro número: la encontré por su código' : 'Abre su tarjeta en Interesadas'}">Abrir su tarjeta</button>${fi.por === 'código' ? `<button class="btn btn-ghost btn-sm" data-wa-usar-numero="${esc(fi.lead.id)}" title="Su tarjeta tiene otro número: lo cambia por el de este chat">Usar este número en su tarjeta</button>` : ''}${libre ? `<button class="btn btn-ghost btn-sm" data-wa-enlace="${esc(fi.lead.id)}" title="Escribe en el cuadro el mensaje de bienvenida con su enlace personal">Poner su enlace en el mensaje</button>` : ''}</div>`
+    ? `<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="btn btn-ghost btn-sm" data-wa-tarjeta="${esc(fi.lead.id)}" title="${fi.por === 'código' ? 'Se registró con otro número: la encontré por su código' : 'Abre su tarjeta en Interesadas'}">Abrir su tarjeta</button>${fi.difiere ? `<button class="btn btn-ghost btn-sm" data-wa-usar-numero="${esc(fi.lead.id)}" title="Su tarjeta tiene otro número: lo cambia por el de este chat">Usar este número en su tarjeta</button>` : ''}${libre ? `<button class="btn btn-ghost btn-sm" data-wa-enlace="${esc(fi.lead.id)}" title="Escribe en el cuadro el mensaje de bienvenida con su enlace personal">Poner su enlace en el mensaje</button>` : ''}</div>`
     : '<span class="muted" style="font-size:.8rem;text-align:right">No tiene tarjeta en Interesadas.<br>Usa «Crear tarjetas de los chats sin tarjeta».</span>';
   return `<div class="wa-chat"><div class="wa-top"><div><b>${esc(waNameOf(n, c))}</b><br><span class="muted" style="font-size:.84rem">+${esc(n)}</span></div>${acc}</div>
     <div class="wa-msgs" id="wa-msgs">${A.wa.msgs.map((m) => { const txt = m.media || m.loc ? String(m.text || '').replace(/^\[[^\]]+\]\s?/, '') : m.text; return `<div class="wa-m ${m.dir === 'out' ? 'out' : ''}">${waMediaHTML(m)}${txt ? esc(txt) : ''}${m.error ? `<span class="bad"> ${esc(m.error)}</span>` : ''}<small class="${m.status === 'failed' ? 'bad' : ''}">${m.ts?.toMillis ? waHora(m.ts.toMillis()) : ''}${estado(m)}</small></div>`; }).join('') || '<div class="wa-empty">Aún no hay mensajes. Empieza con la plantilla.</div>'}</div>
