@@ -97,7 +97,7 @@ await prueba('filtro «Sin bienvenida»: solo dentro de un programa, sin descart
   assert.match(src, /&& \(!S\.crmSinBv \|\| !prog \|\| \(etapaVista\(p\) !== 'descartado' && !bienvenidaEn\(p, prog\)\)\)/);
   assert.match(src, /\$\{prog \? `<button type="button" class="chip" data-crm-bv aria-pressed="\$\{!!S\.crmSinBv\}"[^`]*Sin bienvenida \(/);
   assert.match(src, /S\.crmPost \|\| S\.crmBF \|\| S\.crmSinBv/);
-  assert.match(src, /crmBF: false, crmSinBv: false, crmTag: ''/);
+  assert.match(src, /crmBF: false, crmSinBv: false, crmReplay: false, crmTag: ''/);
   assert.match(src, /S\.crmEtapa = ''; S\.crmSinBv = false;/);
   assert.match(src, /\[data-crm-bv\]'\)\.forEach\(\(b\) => \(b\.onclick = \(\) => \{ S\.crmSinBv = !S\.crmSinBv;/);
 });

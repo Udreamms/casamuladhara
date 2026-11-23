@@ -59,7 +59,7 @@ prueba('el portal usa la búsqueda: botones «Abrir su tarjeta» y «Poner su en
   assert.match(src, /if \(!A\.leads\) data\.leads\(\)\.then\(\(\) => \{ if \(S\.view === 'whatsapp'\) waRepaint\(true\); \}\)/);
 });
 prueba('la ficha busca su chat con las dos formas del número (las 4 veces que lo usa) y el nombre del chat también', () => {
-  assert.equal((src.match(/chatIdDe\(waNum\(p\.whatsapp\), A\.wa\.chats\)/g) || []).length, 4);
+  assert.equal((src.match(/chatIdDe\(waNum\(p\.whatsapp\), A\.wa\.chats\)/g) || []).length, 5); // las 4 de la tarjeta y la de «Falta el replay» (ventana de 24 h)
   assert.match(src, /A\.leads\?\.find\(\(l\) => claveNumero\(waNum\(l\.whatsapp\)\) === claveNumero\(n\)\)\?\.name/);
 });
 prueba('«Poner su enlace»: escribe la bienvenida de esa persona y, al enviarla, queda marcada «Bienvenida» solo en ese chat', () => {
