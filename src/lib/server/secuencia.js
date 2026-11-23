@@ -25,11 +25,14 @@ const H = 36e5, MIN = 6e4, VENTANA = 24 * H;
 const HORA_DESDE = 8, HORA_HASTA = 22;
 const CFG = 'config/secuenciaWA';
 export const LANG = 'es_CL';
+// Qué mensajes salen solos (se eligen en el panel). Al principio: la bienvenida y los dos recordatorios; lo de después de la clase queda apagado.
+export const PASOS_INICIAL = { link: true, diaAntes: true, unaHora: true, gracias: false, replay: false };
 // Plantillas (español de Chile). Mientras Meta no las apruebe, aprobadas[nombre] queda en false y no se usan.
 export const PLANTILLAS = {
   clase_link_personal: { paso: 'link', uso: 'Al registrarse: enlace personal a la clase' },
+  clase_link_personal_2: { paso: 'link', uso: 'Al registrarse (versión con el aviso de que habrá recordatorios; si está aprobada se usa en lugar de la anterior)' },
   clase_recordatorio_dia_antes_2: { paso: 'diaAntes', uso: '24 horas antes de la clase' },
-  clase_recordatorio_1h: { paso: 'unaHora', uso: '1 hora antes de la clase' },
+  clase_recordatorio_40min: { paso: 'unaHora', uso: '40 minutos antes de la clase' },
   clase_gracias_asistio: { paso: 'gracias', uso: 'Después de la clase, a quien entró (con la grabación)' },
   clase_replay_no_asistio: { paso: 'replay', uso: 'Después de la clase, a quien no entró (con la grabación)' },
   bienvenida_general_2: { paso: null, uso: 'Sin paso asignado todavía' },
@@ -53,6 +56,7 @@ export async function leerConfig() {
   return {
     activa: d.activa === true,
     soloNumero: waClave(d.soloNumero) || '',
+    pasos: Object.fromEntries(Object.entries(PASOS_INICIAL).map(([k, v]) => [k, typeof d.pasos?.[k] === 'boolean' ? d.pasos[k] : v])),
     aprobadas: Object.fromEntries(Object.keys(PLANTILLAS).map((n) => [n, d.aprobadas?.[n] === true])),
   };
 }
@@ -64,11 +68,12 @@ export async function guardarConfig(c, por = '') {
   const sig = {
     activa: typeof c.activa === 'boolean' ? c.activa : actual.activa,
     soloNumero: solo,
+    pasos: { ...actual.pasos, ...Object.fromEntries(Object.keys(PASOS_INICIAL).filter((k) => typeof c.pasos?.[k] === 'boolean').map((k) => [k, c.pasos[k]])) },
     aprobadas: { ...actual.aprobadas, ...Object.fromEntries(Object.keys(PLANTILLAS).filter((n) => typeof c.aprobadas?.[n] === 'boolean').map((n) => [n, c.aprobadas[n]])) },
     actualizado: Date.now(), por: String(por || '').slice(0, 120),
   };
   await db().doc(CFG).set(sig, { merge: true });
-  return { activa: sig.activa, soloNumero: sig.soloNumero, aprobadas: sig.aprobadas };
+  return { activa: sig.activa, soloNumero: sig.soloNumero, pasos: sig.pasos, aprobadas: sig.aprobadas };
 }
 
 // ---------- Reglas de envío ----------
@@ -91,7 +96,7 @@ export function pasoDebido({ l, ev, ahora }) {
     const a = l.asistencia?.sesiones?.[claveClase({ evento: ev.id, fecha: ev.fecha })] || l.asistencia || {};
     return a.entro || a.confirmada ? 'gracias' : 'replay';
   }
-  if (ahora >= S - H && ahora < S - 15 * MIN && !hecho('unaHora')) return 'unaHora';
+  if (ahora >= S - 40 * MIN && ahora < S - 15 * MIN && !hecho('unaHora')) return 'unaHora'; // recordatorio 40 minutos antes
   if (ahora >= S - 24 * H && ahora < S - 18 * H && !hecho('diaAntes') && reg < S - 23 * H) return 'diaAntes';
   if (ahora >= reg + 2 * MIN && ahora < S - 15 * MIN && !hecho('link') && !l.waEnlaceT && !l.waEscribioT) return 'link';
   return null;
@@ -104,12 +109,12 @@ function armar(paso, { l, ev, cfg, replay }) {
   const dia = diaLargo(ev.fecha), enlace = `${base()}/entrar/${l.codigo}`;
   const grabacion = `${base()}/clase-${ev.clase}/replay?l=${l.codigo}`;
   const T = {
-    link: { nombre: 'clase_link_personal', vars: [n, nombre, dia, ev.hora], boton: l.codigo,
+    link: { nombre: cfg?.aprobadas?.clase_link_personal_2 ? 'clase_link_personal_2' : 'clase_link_personal', vars: [n, nombre, dia, ev.hora], boton: l.codigo,
       texto: `Hola ${n} 🌿 Este es tu enlace personal para entrar a la clase gratuita de ${nombre}, el ${dia} a las ${ev.hora}: ${enlace}\n\nEs solo tuyo: no lo compartas.` },
     diaAntes: { nombre: 'clase_recordatorio_dia_antes_2', vars: [n, nombre, ev.hora], boton: l.codigo,
       texto: `Hola ${n} 🌿 Mañana a las ${ev.hora} es tu clase gratuita de ${nombre} con Karen. Tu enlace para entrar: ${enlace}` },
-    unaHora: { nombre: 'clase_recordatorio_1h', vars: [n, nombre, ev.hora], boton: l.codigo,
-      texto: `Hola ${n} 🌿 En una hora (${ev.hora}) empieza tu clase gratuita de ${nombre}. Entra con tu enlace personal: ${enlace}` },
+    unaHora: { nombre: 'clase_recordatorio_40min', vars: [n, nombre, ev.hora], boton: l.codigo,
+      texto: `Hola ${n} 🌿 En unos minutos, hoy a las ${ev.hora}, empieza tu clase gratuita de ${nombre}. Entra con tu enlace personal: ${enlace}` },
     gracias: { nombre: 'clase_gracias_asistio', vars: [n, nombre, grabacion],
       texto: `Hola ${n} 🌿 Gracias por acompañarnos en la clase de ${nombre}. Aquí tienes la grabación para verla cuando quieras: ${grabacion}` },
     replay: { nombre: 'clase_replay_no_asistio', vars: [n, nombre, grabacion],
@@ -117,6 +122,13 @@ function armar(paso, { l, ev, cfg, replay }) {
   };
   return T[paso];
 }
+
+// Bienvenida con su enlace personal (el mismo texto para quien escribe con su código y para la respuesta rápida «Bienvenida» del portal), con el aviso de que habrá recordatorios
+export const textoBienvenida = (l, ev) => {
+  const clase = l.clase || claseDe(l.form), nombre = (OFERTAS[clase] || {}).nombre || (clase === 'tarot' ? 'Tarot Terapéutico' : clase === 'pendulo' ? 'Péndulo Hebreo' : 'la clase gratuita');
+  const cuando = ev ? `el ${diaLargo(ev.fecha)} a las ${ev.hora} (hora de Chile)` : 'en la clase';
+  return `¡Hola, ${primerNombre(l.name) || 'hola'}! 🌙 Qué alegría que te hayas registrado. Este es tu link personal para la clase gratis de ${nombre}${clase === 'tarot' ? ', donde vas a aprender a usar las cartas para conocerte y acompañar a otras personas' : ''}:\n👉 ${base()}/entrar/${l.codigo}\nNos vemos ${cuando} ✨\n\nSolo para que sepas: te enviaré unos recordatorios por aquí antes de la clase.`;
+};
 
 // ---------- Salida al chat del portal ----------
 async function registrarSalida(numero, id, texto) {
@@ -183,7 +195,7 @@ export async function correrSecuencia({ ahora = Date.now(), enviar = true, manua
         if (solo && !solo.includes(waClave(l.waKey || l.whatsapp))) { salida.fueraDePrueba++; continue; } // modo prueba: solo el número elegido
         if (!esClaseGratis(l.form) || !l.codigo || !CODIGO.test(l.codigo) || NO_ESCRIBIR(l) || l.waAutoDia === hoy) continue;
         const paso = pasoDebido({ l, ev, ahora });
-        if (!paso) continue;
+        if (!paso || cfg.pasos[paso] !== true) continue; // solo los mensajes que la Maestra dejó encendidos
         if (!enviar) { salida.pendientes.push({ id: p.id, nombre: primerNombre(l.name), paso, clase: ev.clase, fecha: ev.fecha }); continue; }
         if (salida.enviados >= 80) return salida; // tope por revisión
         const r = await enviarPaso({ ref: p.ref, l: { ...l, id: p.id }, ev, paso, cfg, hoy, ahora, replay: replay[ev.clase] });
@@ -207,6 +219,7 @@ export async function responderEntrante({ numero, texto, ahora = Date.now() }) {
   const cfg = await leerConfig();
   if (!cfg.activa || !configurado()) return { respondio: false, motivo: 'apagada' };
   if (cfg.soloNumero && !variantesNumero(cfg.soloNumero).includes(String(numero))) return { respondio: false, motivo: 'modo prueba: solo responde al número de prueba' };
+  if (cfg.pasos.link !== true) return { respondio: false, motivo: 'la bienvenida está apagada' };
   const t = String(texto || ''), tn = normaliza(t);
   const chatRef = db().doc(`wa_chats/${numero}`);
   let doc = null;
@@ -234,10 +247,7 @@ export async function responderEntrante({ numero, texto, ahora = Date.now() }) {
   if (!porCodigo && l.waEnlaceT && !PIDE_ENLACE.test(tn)) { await doc.ref.update(marca); return { respondio: false, motivo: 'ya tiene su enlace' }; }
   let ev = null;
   if (l.claseEvento) { const s = await db().doc(`calendario/${l.claseEvento}`).get(); ev = s.exists ? claseDeEvento(s.id, s.data()) : null; }
-  const clase = l.clase || claseDe(l.form), nombre = (OFERTAS[clase] || {}).nombre || 'la clase gratuita', n = primerNombre(l.name);
-  const cuando = ev ? `, el ${diaLargo(ev.fecha)} a las ${ev.hora}` : '';
-  const msg = `Hola${n ? ` ${n}` : ''} 🌿 ¡Qué alegría! Este es tu enlace personal para entrar a la clase gratuita de ${nombre}${cuando}: ${base()}/entrar/${l.codigo}\n\nEs solo tuyo: no lo compartas. Si necesitas algo más, escríbeme por aquí.`;
-  const id = await enviarTexto(numero, msg);
+  const msg = textoBienvenida(l, ev), id = await enviarTexto(numero, msg);
   await registrarSalida(numero, id, msg).catch((e) => console.error('secuencia chat', e));
   await doc.ref.update({ ...marca, waEnlaceT: ahora, eventos: FieldValue.arrayUnion({ t: ahora, tipo: 'envio', texto: 'Escribió por WhatsApp: se le envió su enlace personal' }), updatedAt: FieldValue.serverTimestamp() });
   return { respondio: true, motivo: 'enlace enviado' };

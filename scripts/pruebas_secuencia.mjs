@@ -82,7 +82,7 @@ usuario = { admin: false }; ok((await post({ action: 'guardar', activa: true }))
 ok((await post({ action: 'guardar', activa: true }, 'malo')).status === 401, 'sin sesión: 401');
 let e = await post({ action: 'estado' });
 ok(!('videoUrl' in e.body) && !e.body.plantillas.some((p) => p.nombre === 'clase_recordatorio_dia_antes') && e.body.plantillas.some((p) => p.nombre === 'clase_recordatorio_dia_antes_2'), 'la plantilla vieja ya no existe y el campo del video tampoco');
-ok(e.body.activa === false && e.body.plantillas.length === 8 && Object.values(e.body.aprobadas).every((v) => v === false), 'las 8 plantillas empiezan sin aprobar');
+ok(e.body.activa === false && e.body.plantillas.length === 9 && Object.values(e.body.aprobadas).every((v) => v === false), 'las 9 plantillas empiezan sin aprobar');
 
 // ---- 3. Encendida pero sin plantillas aprobadas: fuera de la ventana de 24 h no se envía nada
 e = await post({ action: 'guardar', activa: true });
@@ -112,13 +112,15 @@ r = await M.correrSecuencia({ ahora: S - 23 * H + 20 * MIN });
 const sb = salida.find((x) => x.a === num('b02'));
 ok(sb && sb.tipo === 'texto' && sb.texto.includes(`https://sitio.cl/entrar/${lead('b02').codigo}`) && !sb.texto.includes('meet') && !/video/i.test(sb.texto) && (sb.texto.match(/https:/g) || []).length === 1, 'si escribió en las últimas 24 h se le escribe con texto libre y su enlace personal');
 
-// ---- 6. Una hora antes; el máximo diario no aplica entre días distintos
-await post({ action: 'guardar', aprobadas: { clase_recordatorio_1h: true } });
+// ---- 6. 40 minutos antes; el máximo diario no aplica entre días distintos
+await post({ action: 'guardar', aprobadas: { clase_recordatorio_40min: true } });
 const antes = salida.length;
-r = await M.correrSecuencia({ ahora: S - 50 * MIN });
-const u1 = salida.slice(antes).find((x) => x.name === 'clase_recordatorio_1h');
-ok(u1 && u1.vars.join('|') === 'Prueba|Péndulo Hebreo|19:00' && u1.a === num('a01'), '1 hora antes: plantilla clase_recordatorio_1h (nombre, clase, hora)');
-r = await M.correrSecuencia({ ahora: S - 40 * MIN }); ok(salida.slice(antes).filter((x) => x.a === num('a01')).length === 1, 'y solo una vez');
+r = await M.correrSecuencia({ ahora: S - 45 * MIN });
+ok(salida.length === antes, 'a 45 minutos de la clase todavía no sale el recordatorio');
+r = await M.correrSecuencia({ ahora: S - 38 * MIN });
+const u1 = salida.slice(antes).find((x) => x.name === 'clase_recordatorio_40min');
+ok(u1 && u1.vars.join('|') === 'Prueba|Péndulo Hebreo|19:00' && u1.a === num('a01'), '40 minutos antes: plantilla clase_recordatorio_40min (nombre, clase, hora)');
+r = await M.correrSecuencia({ ahora: S - 30 * MIN }); ok(salida.slice(antes).filter((x) => x.a === num('a01')).length === 1, 'y solo una vez');
 r = await M.correrSecuencia({ ahora: S - 10 * MIN }); ok(salida.length === antes + salida.slice(antes).length, 'a 10 minutos de la clase ya no se envía nada nuevo de la secuencia');
 
 // ---- 7. Enlace personal al registrarse (clase_link_personal) y máximo 1 por día
@@ -142,7 +144,7 @@ const ev = tablas.get('calendario/e2'); mk('d17', { claseEvento: 'e2' }); r = aw
 // ---- 9. Después de la clase: entró → gracias, no entró → replay (con la grabación publicada)
 mk('p20', { asistencia: { sesiones: { e1: { entro: S + 5 * MIN } } } }); mk('p21');
 const ahoraPost = F1 + 35 * MIN; // 20:35 de Chile
-await post({ action: 'guardar', aprobadas: { clase_gracias_asistio: true, clase_replay_no_asistio: true } });
+await post({ action: 'guardar', aprobadas: { clase_gracias_asistio: true, clase_replay_no_asistio: true }, pasos: { gracias: true, replay: true } });
 let k0 = salida.length; r = await M.correrSecuencia({ ahora: ahoraPost });
 ok(!salida.slice(k0).some((x) => x.a === num('p20')), 'sin la grabación publicada no se envía el mensaje de después de la clase');
 tablas.set('config/clases', { enlacePendulo: MEET, replayPendulo: 'https://youtu.be/abc' });
@@ -193,7 +195,7 @@ ok(!r.respondio && c2.activa === false && salida.length === n, 'al apagarla vuel
 const boton = (x) => (x.cuerpo.template.components || []).find((c) => c.type === 'button');
 const idDe = (a) => [...tablas.keys()].filter((k) => k.startsWith('leads/')).map((k) => k.slice(6)).find((id) => lead(id).waKey === a);
 const por = (nombre) => salida.find((x) => x.name === nombre && x.cuerpo);
-for (const nombre of ['clase_link_personal', 'clase_recordatorio_dia_antes_2', 'clase_recordatorio_1h']) {
+for (const nombre of ['clase_link_personal', 'clase_recordatorio_dia_antes_2', 'clase_recordatorio_40min']) {
   const x = por(nombre), b = x && boton(x);
   ok(b && b.sub_type === 'url' && b.index === '0' && b.parameters.length === 1 && b.parameters[0].type === 'text' && b.parameters[0].text === lead(idDe(x.a)).codigo, `${nombre}: el cuerpo lleva el botón url (index 0) con el código personal`);
   ok(x && x.cuerpo.template.components.find((c) => c.type === 'body') && x.cuerpo.template.language.code === 'es_CL', `${nombre}: y además el cuerpo con sus variables, en es_CL`);
@@ -256,5 +258,67 @@ await post({ action: 'guardar', soloNumero: '' }); salida.length = 0;
 mk('p06', { createdAt: S - 10 * H - 10 * MIN, codigo: cod(906) });
 r = await M.correrSecuencia({ ahora: hoyAhora });
 ok(r.enviados >= 1 && salida.some((x) => x.a === num('p06')) && r.fueraDePrueba === undefined, 'al quitar el modo prueba vuelve a escribir a todas las que corresponde');
+
+// ---- 15. Secuencia sencilla: bienvenida + recordatorio de un día antes + recordatorio 40 minutos antes; lo de después de la clase queda apagado
+const T1 = S - 10 * H;
+await post({ action: 'guardar', activa: true, soloNumero: '', aprobadas: { clase_link_personal: true, clase_recordatorio_dia_antes_2: true, clase_recordatorio_40min: true, clase_gracias_asistio: true, clase_replay_no_asistio: true }, pasos: { link: true, diaAntes: true, unaHora: true, gracias: false, replay: false } });
+ok((await M.leerConfig()).pasos.link === true, 'los mensajes que salen solos se guardan');
+let cfg15 = (await post({ action: 'estado' })).body;
+ok(JSON.stringify(cfg15.pasos) === JSON.stringify({ link: true, diaAntes: true, unaHora: true, gracias: false, replay: false }), 'el estado trae qué mensajes salen solos');
+ok(cfg15.plantillas.some((p) => p.nombre === 'clase_link_personal_2') && cfg15.plantillas.some((p) => p.nombre === 'clase_recordatorio_40min') && !cfg15.plantillas.some((p) => p.nombre === 'clase_recordatorio_1h'), 'las plantillas nuevas están en la lista y la de 1 hora ya no');
+const pasosInicial = new Function('return null;'); void pasosInicial;
+tablas.delete('config/secuenciaWA'); ok(JSON.stringify((await M.leerConfig()).pasos) === JSON.stringify({ link: true, diaAntes: true, unaHora: true, gracias: false, replay: false }), 'sin configuración guardada, al encender salen la bienvenida y los dos recordatorios, y no lo de después de la clase');
+await post({ action: 'guardar', activa: true, aprobadas: { clase_link_personal: true, clase_recordatorio_dia_antes_2: true, clase_recordatorio_40min: true, clase_gracias_asistio: true, clase_replay_no_asistio: true } });
+ok((await post({ action: 'guardar', pasos: { gracias: 'si', otro: true } })).body.pasos.gracias === false, 'un valor que no es verdadero/falso, o un mensaje que no existe, se ignora');
+usuario = { admin: false }; ok((await post({ action: 'guardar', pasos: { gracias: true } })).status === 403, 'solo la Maestra elige qué mensajes salen'); usuario = { admin: true, email: 'karen@example.com' };
+
+// Recordatorio a los 40 minutos
+const YA_ENLACE = { createdAt: S - 3 * 864e5, waEnlaceT: S - 2 * 864e5 }; // ya recibió su enlace: así solo se prueban los recordatorios
+mk('x91', YA_ENLACE); salida.length = 0;
+r = await M.correrSecuencia({ ahora: S - 45 * MIN }); ok(!salida.some((x) => x.a === num('x91')), 'a 45 minutos de la clase todavía no sale el recordatorio');
+r = await M.correrSecuencia({ ahora: S - 38 * MIN });
+const r40 = salida.find((x) => x.a === num('x91'));
+ok(r40 && r40.name === 'clase_recordatorio_40min' && r40.vars.join('|') === 'Prueba|Péndulo Hebreo|19:00' && r40.boton === lead('x91').codigo, 'a los 40 minutos antes sale clase_recordatorio_40min con nombre, clase, hora y el código en el botón');
+const n15 = salida.length; r = await M.correrSecuencia({ ahora: S - 30 * MIN }); ok(salida.length === n15, 'y solo una vez');
+r = await M.correrSecuencia({ ahora: S - 10 * MIN }); ok(salida.length === n15, 'a 10 minutos de la clase ya no sale nada');
+// con la ventana abierta, el recordatorio sale como texto libre con la hora de hoy
+mk('x92', YA_ENLACE); tablas.set(`wa_chats/${num('x92')}`, { lastInboundAt: S - 2 * H }); salida.length = 0;
+r = await M.correrSecuencia({ ahora: S - 38 * MIN });
+ok(salida.find((x) => x.a === num('x92'))?.texto === `Hola Prueba 🌿 En unos minutos, hoy a las 19:00, empieza tu clase gratuita de Péndulo Hebreo. Entra con tu enlace personal: https://sitio.cl/entrar/${lead('x92').codigo}`, 'con la ventana abierta el texto dice «en unos minutos, hoy a las 19:00» (no «en una hora»)');
+
+// Casillas: cada mensaje se enciende y se apaga solo
+await post({ action: 'guardar', pasos: { unaHora: false } });
+mk('x93', YA_ENLACE); salida.length = 0; r = await M.correrSecuencia({ ahora: S - 38 * MIN });
+ok(!salida.some((x) => x.a === num('x93')), 'con el recordatorio de 40 minutos apagado no sale');
+r = await M.correrSecuencia({ ahora: S - 38 * MIN, enviar: false }); ok(!r.pendientes.some((x) => x.id === 'x93'), 'ni aparece en «Ver qué saldría ahora»');
+await post({ action: 'guardar', pasos: { unaHora: true } });
+// Lo de después de la clase queda apagado aunque haya grabación y plantillas aprobadas
+tablas.set('config/clases', { enlacePendulo: MEET, replayPendulo: 'https://youtu.be/abc' });
+mk('x94', { createdAt: S - 3 * 864e5, asistencia: { entro: S + 5 * MIN } }); mk('x95', { createdAt: S - 3 * 864e5 }); salida.length = 0;
+r = await M.correrSecuencia({ ahora: S + 60 * MIN + 31 * MIN });
+ok(!salida.some((x) => x.a === num('x94') || x.a === num('x95')), 'después de la clase no sale ni el «gracias» ni la grabación mientras estén apagados');
+await post({ action: 'guardar', pasos: { gracias: true, replay: true } }); r = await M.correrSecuencia({ ahora: S + 60 * MIN + 31 * MIN });
+ok(salida.some((x) => x.a === num('x94') && x.name === 'clase_gracias_asistio') && salida.some((x) => x.a === num('x95') && x.name === 'clase_replay_no_asistio'), 'si la Maestra los enciende, salen');
+await post({ action: 'guardar', pasos: { gracias: false, replay: false } });
+
+// Bienvenida: la plantilla nueva (con el aviso de recordatorios) se usa cuando está aprobada
+mk('x96', { createdAt: T1 - 10 * MIN }); salida.length = 0; r = await M.correrSecuencia({ ahora: T1 });
+ok(salida.find((x) => x.a === num('x96'))?.name === 'clase_link_personal', 'la bienvenida por plantilla usa clase_link_personal mientras la nueva no esté aprobada');
+await post({ action: 'guardar', aprobadas: { clase_link_personal_2: true } });
+mk('x97', { createdAt: T1 - 10 * MIN }); r = await M.correrSecuencia({ ahora: T1 + 60 * MIN });
+const l2 = salida.find((x) => x.a === num('x97'));
+ok(l2 && l2.name === 'clase_link_personal_2' && l2.vars.join('|') === 'Prueba|Péndulo Hebreo|sábado 21 de noviembre|19:00' && l2.boton === lead('x97').codigo, 'cuando clase_link_personal_2 está aprobada se usa esa, con las mismas variables y el código en el botón');
+// Texto de bienvenida (quien escribe con su código) y casilla de la bienvenida
+tablas.set('calendario/e9', { type: 'clase-tarot', date: '2026-11-21', time: '19:00', duration: 60 });
+mk('x98', { name: 'María Soledad', form: 'clase-tarot', clase: 'tarot', claseEvento: 'e9', claseFecha: '2026-11-21' }); salida.length = 0;
+let rb = await M.responderEntrante({ numero: num('x98'), texto: `Mi código: ${lead('x98').codigo}`, ahora: S - 5 * H });
+ok(rb.respondio && salida[0].texto === `¡Hola, María! 🌙 Qué alegría que te hayas registrado. Este es tu link personal para la clase gratis de Tarot Terapéutico, donde vas a aprender a usar las cartas para conocerte y acompañar a otras personas:\n👉 https://sitio.cl/entrar/${lead('x98').codigo}\nNos vemos el sábado 21 de noviembre a las 19:00 (hora de Chile) ✨\n\nSolo para que sepas: te enviaré unos recordatorios por aquí antes de la clase.`, 'a quien escribe con su código se le responde con la bienvenida acordada (Tarot), el enlace en su línea y el aviso de que habrá recordatorios');
+mk('x99', { name: 'Luz Pérez' }); salida.length = 0; rb = await M.responderEntrante({ numero: num('x99'), texto: `Mi código: ${lead('x99').codigo}`, ahora: S - 5 * H });
+ok(salida[0].texto === `¡Hola, Luz! 🌙 Qué alegría que te hayas registrado. Este es tu link personal para la clase gratis de Péndulo Hebreo:\n👉 https://sitio.cl/entrar/${lead('x99').codigo}\nNos vemos el sábado 21 de noviembre a las 19:00 (hora de Chile) ✨\n\nSolo para que sepas: te enviaré unos recordatorios por aquí antes de la clase.`, 'Péndulo: la misma bienvenida sin «las cartas»');
+await post({ action: 'guardar', pasos: { link: false } }); mk('y01'); salida.length = 0; const nB = salida.length;
+rb = await M.responderEntrante({ numero: num('y01'), texto: `Mi código: ${lead('y01').codigo}`, ahora: S - 5 * H });
+ok(!rb.respondio && /bienvenida está apagada/.test(rb.motivo) && salida.length === nB, 'con la casilla de la bienvenida apagada tampoco se responde con el enlace');
+mk('y02', { createdAt: T1 - 10 * MIN }); r = await M.correrSecuencia({ ahora: T1 }); ok(!salida.some((x) => x.a === num('y02')), 'ni sale la bienvenida por plantilla');
+await post({ action: 'guardar', pasos: { link: true } });
 
 console.log(fallas ? `\n${fallas} fallas` : '\nTodo en orden');

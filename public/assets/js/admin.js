@@ -965,7 +965,7 @@ async function leadMover(id, status) {
 
 // Respuestas rápidas del chat: se escriben en el cuadro para que Karen las ajuste antes de enviar
 const RESPUESTAS = [
-  ['Bienvenida (link de la clase)', (c) => `¡Hola, ${c.nombre}! 🌙 Qué alegría que te hayas registrado. Este es tu link personal para la clase gratis de ${c.programaLargo}${c.esTarot ? ', donde vas a aprender a usar las cartas para conocerte y acompañar a otras personas' : ''}:\n👉 ${c.link || '[falta su enlace personal: usa «Preparar contactos»]'}\nNos vemos ${c.dia ? `el ${c.dia}${c.hora ? ` a las ${c.hora} (hora de Chile)` : ''}` : 'en la clase'} ✨`, 'bienvenida'],
+  ['Bienvenida (link de la clase)', (c) => `¡Hola, ${c.nombre}! 🌙 Qué alegría que te hayas registrado. Este es tu link personal para la clase gratis de ${c.programaLargo}${c.esTarot ? ', donde vas a aprender a usar las cartas para conocerte y acompañar a otras personas' : ''}:\n👉 ${c.link || '[falta su enlace personal: usa «Preparar contactos»]'}\nNos vemos ${c.dia ? `el ${c.dia}${c.hora ? ` a las ${c.hora} (hora de Chile)` : ''}` : 'en la clase'} ✨\n\nSolo para que sepas: te enviaré unos recordatorios por aquí antes de la clase.`, 'bienvenida'],
   ['Compromiso de asistir en vivo', (c) => `Una cosita más, ${c.nombre} 💛 Esta clase la preparé para vivirla en vivo, porque ahí es donde podrás hacer preguntas${c.esTarot ? ', sentir las cartas y hacer las lecturas conmigo' : ' y practicar conmigo'}. ¿Me respondes con un "sí" si te comprometes a estar${c.dia ? ` el ${c.dia}${c.hora ? ` a las ${c.hora}` : ''}` : ''}?`],
   ['Confirmación (respondió «sí»)', (c) => `¡Maravilloso! 🙌 Ya te espero${c.dia ? ` el ${c.dia}${c.hora ? ` a las ${c.hora} (hora de Chile)` : ''}` : ' en la clase'}.`],
   ['Recordatorio de la clase', (c) => `Hola ${c.nombre}, te recuerdo tu clase gratis de ${c.programa}${c.fecha ? `: ${c.fecha}` : ''}. Entra por aquí: ${c.link || '[falta su enlace personal: usa «Preparar contactos»]'}`],
@@ -2077,6 +2077,13 @@ const secApi = async (body) => {
   if (!r.ok) throw new Error(out.error || 'No se pudo completar.');
   return out;
 };
+const SEC_MSG = [
+  ['link', 'Bienvenida con su enlace', 'al registrarse; si ella te escribe con su código, se le responde con el mismo texto'],
+  ['diaAntes', 'Recordatorio un día antes', 'el día anterior a la clase'],
+  ['unaHora', 'Recordatorio 40 minutos antes', 'el mismo día de la clase'],
+  ['gracias', 'Gracias después de la clase', 'a quien entró, con la grabación (tiene costo)'],
+  ['replay', 'Grabación después de la clase', 'a quien no entró, con la grabación (tiene costo)'],
+];
 const secHTML = () => {
   const c = A.sec;
   if (!c) return '<p class="muted" style="margin:0">Cargando…</p>';
@@ -2085,6 +2092,8 @@ const secHTML = () => {
   return `<div style="display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap">
       <div><b>${c.activa ? 'Encendida' : 'Apagada'}</b> <span class="muted" style="font-size:.86rem">· ${c.activa ? 'envía solo lo que corresponde, de 8:00 a 22:00 y un mensaje al día por persona' : 'no envía ningún mensaje automático'}</span></div>
       <button class="btn ${c.activa ? 'btn-ghost' : 'btn-primary'} btn-sm" data-sec="${c.activa ? 'apagar' : 'encender'}">${c.activa ? 'Apagar' : 'Encender'}</button></div>
+    <div style="margin-top:10px;display:grid;gap:6px"><b style="font-size:.9rem">Mensajes que salen solos</b>
+      ${SEC_MSG.map(([k, t, d]) => `<label style="display:flex;gap:8px;align-items:flex-start;font-size:.86rem"><input type="checkbox" data-sec-paso="${k}" ${c.pasos?.[k] ? 'checked' : ''}><span><b>${t}</b> <span class="muted">· ${d}</span></span></label>`).join('')}</div>
     ${c.activa && !c.conectado ? '<p class="muted" style="margin:8px 0 0;font-size:.84rem">WhatsApp aún no está conectado: no saldrá nada hasta conectarlo.</p>' : ''}${c.activa && !c.cron ? '<p class="muted" style="margin:8px 0 0;font-size:.84rem">Falta CRON_SECRET en Vercel y el cron de cada 5 minutos: sin eso solo funciona la respuesta a quien escribe.</p>' : ''}
     <details style="margin-top:10px"><summary style="cursor:pointer;font-weight:600;font-size:.9rem">Plantillas aprobadas por Meta (${nAprob} de ${c.plantillas.length})</summary>
       <div style="display:grid;gap:6px;margin-top:8px">${c.plantillas.map((p) => `<label style="display:flex;gap:8px;align-items:flex-start;font-size:.86rem"><input type="checkbox" data-sec-pl="${esc(p.nombre)}" ${c.aprobadas[p.nombre] ? 'checked' : ''}><span><b>${esc(p.nombre)}</b> <span class="muted">· ${esc(p.uso)}</span></span></label>`).join('')}
@@ -2103,7 +2112,7 @@ async function secCargar() {
   try { A.sec = await secApi({ action: 'estado' }); } catch (e) { A.sec = { error: e.message }; }
   secPintar();
 }
-const SEC_PASOS = { link: 'enlace al registrarse', diaAntes: 'recordatorio de 24 h', unaHora: 'recordatorio de 1 h', gracias: 'gracias con la grabación', replay: 'grabación para quien no entró' };
+const SEC_PASOS = { link: 'enlace al registrarse', diaAntes: 'recordatorio de 24 h', unaHora: 'recordatorio de 40 min', gracias: 'gracias con la grabación', replay: 'grabación para quien no entró' };
 document.addEventListener('click', async (e) => {
   const b = e.target.closest('[data-sec]'); if (!b) return;
   try {
@@ -2131,6 +2140,8 @@ document.addEventListener('click', async (e) => {
   } catch (err) { toast(err.message); }
 });
 document.addEventListener('change', async (e) => {
+  const m = e.target.closest('[data-sec-paso]');
+  if (m) { try { A.sec = await secApi({ action: 'guardar', pasos: { [m.dataset.secPaso]: m.checked } }); secPintar(); } catch (err) { toast(err.message); secPintar(); } return; }
   const c = e.target.closest('[data-sec-pl]'); if (!c) return;
   try { A.sec = await secApi({ action: 'guardar', aprobadas: { [c.dataset.secPl]: c.checked } }); secPintar(); } catch (err) { toast(err.message); }
 });
