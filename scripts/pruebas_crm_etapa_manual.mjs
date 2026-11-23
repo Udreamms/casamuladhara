@@ -31,4 +31,25 @@ prueba('el pipeline de las clases usa esa regla, y la marca del replay no se bor
   assert.ok(!/includes\(k\) && l\.replayEnviadoT\)/.test(src));
   assert.match(src, /'Recibieron el replay', \(l\) => !!l\.replayEnviadoT/);
 });
+// ---- Caso Neysa: su etapa guardada ya es «Ingresó» (entró con su enlace) pero el pipeline la muestra en «Replay enviado» por la marca del replay
+const k = src.indexOf('const yaEstaAhi'), k2 = src.indexOf('async function leadMover');
+assert.ok(k > 0 && k2 > k, 'no se encontró yaEstaAhi');
+const mk = (leadEtapa, etapaActual) => new Function('leadEtapa', 'etapaActual', `${src.slice(k, k2)}\nreturn yaEstaAhi;`)(leadEtapa, etapaActual);
+prueba('Neysa: aunque su etapa guardada ya sea «Ingresó», mover la tarjeta a esa columna cuenta (porque se ve en «Replay enviado»)', () => {
+  const l = { status: 'entro' };
+  const yaEstaAhi = mk(() => 'entro', () => 'replay_enviado');
+  assert.equal(yaEstaAhi(l, 'entro'), false); // se puede mover: se guarda y gana lo que eligió
+  assert.equal(yaEstaAhi(l, 'replay_enviado'), false);
+});
+prueba('si la tarjeta de verdad se ve en esa columna, soltarla ahí no hace nada (como antes)', () => {
+  assert.equal(mk(() => 'entro', () => 'entro')({ status: 'entro' }, 'entro'), true);
+  assert.equal(mk(() => 'registrada', () => 'registrada')({ status: 'registrada' }, 'registrada'), true);
+});
+prueba('mover a otra etapa distinta siempre se permite', () => {
+  assert.equal(mk(() => 'entro', () => 'entro')({ status: 'entro' }, 'seguimiento'), false);
+});
+prueba('leadMover usa esa regla en lugar de la anterior', () => {
+  assert.match(src, /async function leadMover\(id, status\) \{\n  const l = \(A\.leads \|\| \[\]\)\.find\(\(x\) => x\.id === id\); if \(!l\) return false;\n  if \(yaEstaAhi\(l, status\)\) return false;/);
+  assert.ok(!src.includes('if (l.status === status && leadEtapa(l) === status) return false;'));
+});
 console.log(`\n${ok} pruebas OK`);
