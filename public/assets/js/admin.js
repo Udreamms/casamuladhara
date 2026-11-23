@@ -930,9 +930,12 @@ async function moverEtapa(id, key) {
   }
   return leadMover(id, key);
 }
+// Una tarjeta «ya está ahí» solo si de verdad se ve en esa columna: si su etapa guardada es la misma pero el pipeline la muestra en otra (p. ej. «Replay enviado» por la marca
+// del replay), mover la tarjeta a esa columna sí cuenta y se guarda, para que gane lo que eligió la Maestra.
+const yaEstaAhi = (l, status) => l.status === status && leadEtapa(l) === status && etapaActual(l) === status;
 async function leadMover(id, status) {
   const l = (A.leads || []).find((x) => x.id === id); if (!l) return false;
-  if (l.status === status && leadEtapa(l) === status) return false;
+  if (yaEstaAhi(l, status)) return false;
   const p = personaDe(id);
   let extra = [], motivo = '';
   if ((status === 'inscrita' || status === 'matriculada') && esClase(l.form)) {
