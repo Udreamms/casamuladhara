@@ -198,7 +198,7 @@ const data = {
 };
 
 // ---------- Vista ----------
-const S = { view: 'inicio', leadSel: new Set(), crmVista: 'embudo', crmProg: '', crmQ: '', crmOrigen: '', crmSeg: false, crmDesc: false, crmSinCuenta: false, crmEtapa: '', crmReserva: '', crmPost: false, crmBF: false, crmSinBv: false, crmTag: '', crmRango: '', crmMetrica: 'origen', fichaTab: 'resumen', crmLista: '', clicOrden: 'recientes', q: '', open: null, filter: 'todas', lvOpen: {}, fq: '', cls: null, ansWho: '', ansLv: 0 };
+const S = { view: 'inicio', leadSel: new Set(), crmVista: 'embudo', crmProg: '', crmQ: '', crmOrigen: '', crmSeg: false, crmDesc: false, crmSinCuenta: false, crmEtapa: '', crmReserva: '', crmPost: false, crmBF: false, crmSinBv: false, crmReplay: false, crmTag: '', crmRango: '', crmMetrica: 'origen', fichaTab: 'resumen', crmLista: '', clicOrden: 'recientes', q: '', open: null, filter: 'todas', lvOpen: {}, fq: '', cls: null, ansWho: '', ansLv: 0 };
 const NAV = [
   ['inicio', 'Inicio', '<path d="M4 11 12 4l8 7v9H4z"/><path d="M10 20v-6h4v6"/>'],
   ['--', 'CRM'],
@@ -598,6 +598,7 @@ const personasFiltradas = () => {
     && (!S.crmPost || esPostulante(p))
     && (!S.crmBF || blackFridayDe(p.leads))
     && (!S.crmSinBv || !prog || (etapaVista(p) !== 'descartado' && !bienvenidaEn(p, prog)))
+    && (!S.crmReplay || !prog || tracksEn(p, prog).some((l) => replayPorEnviar(l, p)))
     && (!FUNC.reserva || !S.crmReserva || ((x) => (S.crmReserva === 'sin' ? !x : x === S.crmReserva))(reservaPersona(p, prog ? claseDeForm(prog[0]) : '')))
     && (!q || [p.nombre, p.email, p.whatsapp, p.note, ...p.leads.map((l) => `${l.interest} ${l.message}`)].join(' ').toLowerCase().includes(q)))
     .sort((a, b) => ultimaActividad(b) - ultimaActividad(a));
@@ -815,7 +816,7 @@ V.interesadas = () => {
   const primera = prog && esClase(prog[0]) ? 'registrada' : 'nuevo';
   const nSeg = base.filter(seguimientoHoyP).length, nSin = base.filter((p) => !p.alumna).length, nNuevas = base.filter((p) => etapaVista(p) === primera).length;
   const etapasProg = prog && tipoPipe(prog[0]) ? [...PIPES[tipoPipe(prog[0])], ...(esClase(prog[0]) ? [['descartado', 'Descartada']] : [])] : LEAD_STATES.filter(([k]) => !(prog && esPago(prog[0]) && k === 'clase'));
-  const hayFiltro = !!(S.crmQ || S.crmOrigen || (prog && S.crmEtapa) || S.crmPost || S.crmBF || S.crmSinBv || (FUNC.reserva && S.crmReserva) || S.crmTag || S.crmSeg || S.crmSinCuenta);
+  const hayFiltro = !!(S.crmQ || S.crmOrigen || (prog && S.crmEtapa) || S.crmPost || S.crmBF || S.crmSinBv || S.crmReplay || (FUNC.reserva && S.crmReserva) || S.crmTag || S.crmSeg || S.crmSinCuenta);
   const kpi = (k, n, t, on) => `<button type="button" class="crm-kpi" data-crm-kpi="${k}" aria-pressed="${on}"><b>${n}</b><span>${t}</span></button>`;
   const kpis = `<div class="crm-kpis">${kpi('todos', base.length, prog ? 'en este programa' : 'personas', !hayFiltro)}${kpi('nuevas', nNuevas, 'por contactar', S.crmEtapa === primera)}${FUNC.tareas ? kpi('seg', nSeg, 'seguimientos hoy', !!S.crmSeg) : ''}${kpi('sin', nSin, 'sin cuenta en el aula', !!S.crmSinCuenta)}${kpi('clic', filasClic().length, 'clic sin pagar', S.crmLista === 'clic')}</div>`;
   const barra = `<div class="crm-bar">${vistas}
@@ -826,6 +827,7 @@ V.interesadas = () => {
     ${FUNC.reserva ? `<select id="crm-reserva" aria-label="Reserva"><option value="">Reserva: todas</option>${[['sin', 'Sin etiqueta'], ['iniciada', 'Reserva iniciada, sin pago'], ['pagada', 'Reservó']].map(([k, t]) => `<option value="${k}" ${S.crmReserva === k ? 'selected' : ''}>${t}</option>`).join('')}</select>` : ''}
     ${FUNC.etiquetas && tags.length ? `<select id="crm-tag" aria-label="Etiqueta"><option value="">Etiqueta: todas</option>${tags.map((t) => `<option ${S.crmTag === t ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select>` : ''}
     ${prog?.[0] === 'formacion' ? `<button type="button" class="chip" data-crm-bf aria-pressed="${!!S.crmBF}" title="Fichas de la Semana Black Friday">Black Friday (${todas.filter((p) => tieneProg(p, prog) && blackFridayDe(p.leads)).length})</button>` : ''}
+    ${prog && esClase(prog[0]) ? `<button type="button" class="chip" data-crm-replay aria-pressed="${!!S.crmReplay}" title="Personas de clases ya terminadas a las que todavía no se les envió el replay">Falta el replay (${base.filter((p) => tracksEn(p, prog).some((l) => replayPorEnviar(l, p))).length})</button>` : ''}
     ${prog ? `<button type="button" class="chip" data-crm-bv aria-pressed="${!!S.crmSinBv}" title="Personas a las que todavía no se les da la bienvenida (sin contar descartadas)">Sin bienvenida (${base.filter((p) => etapaVista(p) !== 'descartado' && !bienvenidaEn(p, prog)).length})</button>` : ''}
     ${hayFiltro ? '<button type="button" class="link" data-crm-kpi="todos">Quitar filtros</button>' : ''}</div>`;
   const tabs = `<nav class="crm-tabs" aria-label="Programas">${[['', 'Todos', todas.length], ...LEAD_PROGS.map(([k, t, fs]) => [k, t, todas.filter((p) => tieneProg(p, [k, t, fs])).length])].map(([k, t, n]) => `<button type="button" data-crm-prog="${esc(k)}" aria-pressed="${(S.crmProg || '') === k}">${esc(t)}<span class="n">${n}</span></button>`).join('')}</nav>`;
@@ -860,7 +862,7 @@ V.interesadas = () => {
     return `<article class="kb-card" ${trk ? `draggable="true" data-lead-card="${esc(trk.id)}"` : ''} data-lead-open="${esc(p.id)}">
       <div class="kb-top"><span class="av sm" style="--c:${colorFor(p.id)}">${esc(initials(p.nombre))}</span><div class="kb-id"><b>${esc(p.nombre)}</b>${prog ? `<span class="muted">${linea || 'Formación completa · pagó en la plataforma'}</span>` : ''}</div></div>${prog ? '' : `<span style="display:flex;gap:4px;flex-wrap:wrap">${progPills(p)}</span>`}
       ${trk?.interest ? `<small>${esc(trk.interest)}</small>` : ''}${p.note ? `<small class="muted">📝 ${esc(p.note.slice(0, 70))}${p.note.length > 70 ? '…' : ''}</small>` : ''}
-      <div class="kb-meta">${cuentaBadge(p)}${bfBadges(p)}${bienvenidaBadge(p, prog)}${asistPersona(p)}${pagoPersona(p)}${formacionBadges(p)}${segBadge(p)}${tagsPills(p)}${otras}${p.whatsapp ? `<a class="btn btn-ghost btn-sm" href="${waLink(p.whatsapp)}" data-wa-open="${esc(waNum(p.whatsapp))}" data-wa-name="${esc(p.nombre)}">WhatsApp</a>` : ''}</div></article>`;
+      <div class="kb-meta">${cuentaBadge(p)}${bfBadges(p)}${bienvenidaBadge(p, prog)}${prog ? replayBadge(p, prog) : ''}${asistPersona(p)}${pagoPersona(p)}${formacionBadges(p)}${segBadge(p)}${tagsPills(p)}${otras}${p.whatsapp ? `<a class="btn btn-ghost btn-sm" href="${waLink(p.whatsapp)}" data-wa-open="${esc(waNum(p.whatsapp))}" data-wa-name="${esc(p.nombre)}">WhatsApp</a>` : ''}</div></article>`;
   };
   return `${head}${aviso}${controles}
   <div class="crm-hint"><span>${prog ? 'Arrastra una tarjeta para cambiar su etapa. Toca una tarjeta para abrir su ficha.' : 'Cada persona aparece en su etapa más avanzada. Elige un programa para mover tarjetas.'}</span><button type="button" class="chip" data-crm-desc aria-pressed="${verDesc}">Mostrar descartadas (${lista.filter((p) => etapaVista(p) === 'descartado').length})</button></div>
@@ -1044,6 +1046,7 @@ function leadFichaSimple(id) {
       <span class="muted" style="font-size:.78rem">${fdateMs(l.createdAt)}${l.claseFecha ? ` · clase ${esc(fechaLarga(l.claseFecha))}` : ''}${l.status === 'descartado' && l.motivo ? ` · motivo: ${esc(l.motivo)}` : ''}</span>
       <label style="display:grid;gap:4px;font-size:.8rem">Etapa<select data-fs-etapa="${esc(l.id)}">${opciones(l).map(([k, t]) => `<option value="${k}" ${act === k ? 'selected' : ''}>${esc(etapaTxt(l.form, k))}</option>`).join('')}</select></label>
       <label style="display:flex;gap:8px;align-items:center;font-size:.82rem"><input type="checkbox" data-bv="${esc(l.id)}" ${tieneBv(l) ? 'checked' : ''}> Se le dio la bienvenida</label>
+      ${replayBloque(l, p)}
       ${esClase(l.form) ? registro(l) : ''}${bloqueReserva(l, p)}${bloquePostulacion(l)}${bloquePagos(l)}</div>`; };
   const n = chatIdDe(waNum(p.whatsapp), A.wa.chats), c = A.wa.chats.find((x) => x.id === n), libre = waLibre(c);
   const chat = !n ? '<div class="wa-empty" style="flex:1;border:1px dashed var(--line);border-radius:12px">Esta persona no dejó WhatsApp.</div>' : `<div class="alert" id="wf-aviso" ${A.wa.on === false ? '' : 'hidden'}><div><b>WhatsApp todavía no está conectado</b><p>Cuando esté el número definitivo y las llaves de Meta, aquí podrás conversar uno a uno. Mientras tanto el chat no envía ni recibe.</p></div></div>
@@ -1103,6 +1106,16 @@ function leadFichaSimple(id) {
   };
   document.querySelectorAll('#dlg [data-bv]').forEach((c) => (c.onchange = async () => {
     try { if (await marcarBienvenida(p, c.dataset.bv, c.checked)) { refrescar(); leadFichaSimple(id); toast('Guardado.'); } } catch (err) { fail(err); c.checked = !c.checked; }
+  }));
+  // «Ya le envié el replay» (lo mandaste desde tu WhatsApp Business): se anota como enviado y la tarjeta pasa a «Replay enviado»
+  document.querySelectorAll('#dlg [data-replay-hecho]').forEach((b) => (b.onclick = async () => {
+    const l = p.leads.find((x) => x.id === b.dataset.replayHecho); if (!l) return;
+    b.disabled = true;
+    try {
+      await data.leads({ action: 'enviado', ids: [l.id], canal: 'whatsapp', plantilla: 'replay (desde el celular)', replay: true });
+      l.replayEnviadoT = Date.now(); l.ultimoEnvio = { ...(l.ultimoEnvio || {}), whatsapp: Date.now() };
+      refrescar(); leadFichaSimple(id); toast('Anotado: se le envió el replay.');
+    } catch (err) { fail(err); b.disabled = false; }
   }));
   document.querySelectorAll('#dlg [data-fs-etapa]').forEach((s) => (s.onchange = async () => { const cambio = await moverEtapa(s.dataset.fsEtapa, s.value); if (cambio) toast('Guardado.'); leadFichaSimple(id); }));
   document.querySelectorAll('#dlg [data-reserva]').forEach((b) => (b.onclick = async () => {
@@ -1761,6 +1774,31 @@ const listaMatricula = () => {
 };
 
 // ----- Seguimiento: «No abrió el replay» (24 h o más después de enviárselo) y «Cobro fallido» (cuota del Tarot que no se pudo cobrar)
+// Replay que hay que mandar a mano: la clase ya terminó (+30 min), no se le envió ni solo ni a mano, y no es alguien a quien no se debe escribir.
+// Si su ventana de 24 h está abierta, el replay le sale solo (gratis) cuando esa casilla está encendida en el panel de la secuencia; si está cerrada, la Maestra se lo manda
+// desde su WhatsApp Business (gratis) y pulsa «Ya le envié el replay». Aparece 30 min después del fin de la clase y se quita en cuanto sale solo o se marca.
+const finClaseMs = (l) => {
+  const ev = l.claseEvento ? (A.cal || []).find((e) => e.id === l.claseEvento) : null, o = ofertaDe(claseDeL(l)) || {};
+  const fecha = ev?.date || l.claseFecha, hora = ev?.time || o.claseHora;
+  return fecha && hora ? chileAMs(fecha, hora) + (Number(ev?.duration) > 0 ? Number(ev.duration) : 60) * 6e4 : 0;
+};
+const claveSecuencia = (l) => `c_${String(l.claseEvento || '').replace(/[^A-Za-z0-9]/g, '_')}`; // la misma clave que usa el servidor (secuencia.js)
+const replayPorEnviar = (l, p) => {
+  if (!esClase(l.form) || !l.claseEvento) return false;
+  const fin = finClaseMs(l), ahora = Date.now();
+  if (!fin || ahora < fin + 30 * 6e4 || ahora > fin + 7 * 864e5) return false;
+  const s = l.secuencia?.[claveSecuencia(l)] || {};
+  return !l.replayEnviadoT && !l.replayT && !s.gracias && !s.replay && !excluidaDeEnvio(l, p) && !!(l.enlace_replay || l.codigo);
+};
+const ventanaAbiertaP = (p) => waLibre(A.wa.chats.find((x) => x.id === chatIdDe(waNum(p.whatsapp), A.wa.chats)));
+const replayBadge = (p, prog) => ((prog ? tracksEn(p, prog) : p.leads).some((l) => replayPorEnviar(l, p))
+  ? (ventanaAbiertaP(p) ? '<span class="pill lock" title="Su ventana de 24 h está abierta: el replay le sale solo si «Grabación después de la clase» está encendida en el panel de la secuencia">Falta el replay</span>'
+    : '<span class="pill bad" title="Su ventana de 24 h está cerrada: mándale el replay desde tu WhatsApp Business (es gratis) y márcalo en su tarjeta">Replay · desde el celular</span>') : '');
+const replayBloque = (l, p) => (replayPorEnviar(l, p)
+  ? `<div style="display:grid;gap:6px;border:1px solid var(--line);border-radius:12px;padding:10px;font-size:.84rem"><b>Falta enviarle el replay</b>
+    <span class="muted">${ventanaAbiertaP(p) ? 'Su ventana de 24 h está abierta: le sale solo (gratis) si «Grabación después de la clase» está encendida. Si no, mándaselo tú.' : 'Su ventana de 24 h está cerrada: mándaselo desde tu WhatsApp Business (es gratis) con este enlace y luego pulsa el botón.'}</span>
+    <code style="word-break:break-all;font-size:.78rem">${esc(l.enlace_replay || '')}</code>
+    <button type="button" class="btn btn-ghost btn-sm" data-replay-hecho="${esc(l.id)}" style="justify-self:start">Ya le envié el replay</button></div>` : '');
 const replaySinAbrir = (l, p) => esClase(l.form) && !!l.replayEnviadoT && Date.now() - l.replayEnviadoT >= 24 * 36e5 && !l.replayT && leadEtapa(l) !== 'vio_replay'
   && !pagoHecho(l) && !reservaDe(l)?.pagada && !reservoLinea(p, claseDeL(l)) && !['descartado', 'reservo_cupo', 'lista_espera', 'remarketing'].includes(leadEtapa(l)) && !(p?.tags || []).includes('No contactar') && !l.noContactar && !(l.seguimientoReplayT > l.replayEnviadoT);
 const filasReplay = () => personas().flatMap((p) => p.leads.filter((l) => replaySinAbrir(l, p)).map((l) => ({ p, l }))).sort((a, b) => a.l.replayEnviadoT - b.l.replayEnviadoT);
@@ -2640,7 +2678,7 @@ function bind() {
   document.querySelectorAll('[data-ans-reload]').forEach((b) => (b.onclick = () => { b.disabled = true; loadAnswers(true).then(() => render(false)).catch(fail); }));
   if (S.view === 'whatsapp') waBind();
   document.querySelectorAll('[data-crm-vista]').forEach((b) => (b.onclick = () => { S.crmVista = b.dataset.crmVista; render(false); }));
-  document.querySelectorAll('[data-crm-prog]').forEach((b) => (b.onclick = () => { S.crmProg = b.dataset.crmProg; S.crmEtapa = ''; S.crmSinBv = false; S.leadSel = new Set(); render(false); }));
+  document.querySelectorAll('[data-crm-prog]').forEach((b) => (b.onclick = () => { S.crmProg = b.dataset.crmProg; S.crmEtapa = ''; S.crmSinBv = false; S.crmReplay = false; S.leadSel = new Set(); render(false); }));
   document.querySelectorAll('[data-crm-metrica]').forEach((b) => (b.onclick = () => { S.crmMetrica = b.dataset.crmMetrica; render(false); }));
   document.querySelectorAll('[data-crm-csv]').forEach((b) => (b.onclick = () => exportarCsv()));
   document.querySelectorAll('[data-crm-remarketing]').forEach((b) => (b.onclick = () => exportarRemarketingCsv()));
@@ -2673,7 +2711,7 @@ function bind() {
   document.querySelectorAll('[data-crm-kpi]').forEach((b) => (b.onclick = () => {
     const k = b.dataset.crmKpi, prog = progDe(S.crmProg), primera = prog && esClase(prog[0]) ? 'registrada' : 'nuevo';
     S.crmLista = k === 'clic' && S.crmLista !== 'clic' ? 'clic' : '';
-    if (k === 'todos') Object.assign(S, { crmQ: '', crmOrigen: '', crmEtapa: '', crmReserva: '', crmPost: false, crmBF: false, crmSinBv: false, crmTag: '', crmSeg: false, crmSinCuenta: false });
+    if (k === 'todos') Object.assign(S, { crmQ: '', crmOrigen: '', crmEtapa: '', crmReserva: '', crmPost: false, crmBF: false, crmSinBv: false, crmReplay: false, crmTag: '', crmSeg: false, crmSinCuenta: false });
     else if (k === 'nuevas') S.crmEtapa = S.crmEtapa === primera ? '' : primera;
     else if (k === 'seg') S.crmSeg = !S.crmSeg;
     else if (k === 'sin') S.crmSinCuenta = !S.crmSinCuenta;
@@ -2736,6 +2774,7 @@ function bind() {
   const ce = $('#crm-etapa'); if (ce) ce.onchange = () => { S.crmEtapa = ce.value; render(false); };
   const cres = $('#crm-reserva'); if (cres) cres.onchange = () => { S.crmReserva = cres.value; render(false); };
   document.querySelectorAll('[data-crm-bf]').forEach((b) => (b.onclick = () => { S.crmBF = !S.crmBF; render(false); }));
+  document.querySelectorAll('[data-crm-replay]').forEach((b) => (b.onclick = () => { S.crmReplay = !S.crmReplay; render(false); }));
   document.querySelectorAll('[data-crm-bv]').forEach((b) => (b.onclick = () => { S.crmSinBv = !S.crmSinBv; render(false); }));
   const cpost = $('#crm-post'); if (cpost) cpost.onchange = () => { S.crmPost = cpost.value === 'si'; render(false); };
   document.querySelectorAll('[data-crm-seg]').forEach((b) => (b.onclick = () => { S.crmSeg = !S.crmSeg; render(false); }));

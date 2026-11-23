@@ -290,13 +290,13 @@ r = await M.correrSecuencia({ ahora: S - 10 * MIN }); ok(salida.length === n15, 
 // con la ventana abierta, el recordatorio sale como texto libre con la hora de hoy
 mk('x92', YA_ENLACE); tablas.set(`wa_chats/${num('x92')}`, { lastInboundAt: S - 2 * H }); salida.length = 0;
 r = await M.correrSecuencia({ ahora: S - 38 * MIN });
-ok(salida.find((x) => x.a === num('x92'))?.texto === 'Hola Prueba 🌿 En unos minutos, hoy a las 19:00, empieza tu clase gratuita de Péndulo Hebreo. Si tienes algún problema con tu link, avísanos por aquí.', 'con la ventana abierta el texto dice «en unos minutos, hoy a las 19:00», no repite el enlace y ofrece ayuda');
-// Botones de la plantilla: «Tengo un problema con el link» recibe su enlace de nuevo; «Ya me conecto» no recibe respuesta (solo abre la ventana de 24 h)
+ok(salida.find((x) => x.a === num('x92'))?.texto === 'Hola Prueba 🌿 En unos minutos empieza tu clase gratuita de Péndulo Hebreo, hoy a las 19:00. Si tienes algún problema con tu link, avísanos por aquí.', 'con la ventana abierta el texto dice «en unos minutos… hoy a las 19:00», no repite el enlace y ofrece ayuda');
+// Botón de la plantilla «¡Ya me conecto!» no recibe respuesta (solo abre la ventana de 24 h); quien escribe que tiene un problema con el link recibe su enlace de nuevo
 mk('x90', { createdAt: S - 3 * 864e5, waEnlaceT: S - 2 * 864e5 }); salida.length = 0;
 let bt = await M.responderEntrante({ numero: num('x90'), texto: 'Ya me conecto', ahora: S - 30 * MIN });
-ok(!bt.respondio && salida.length === 0, '«Ya me conecto»: no se le contesta (solo se abre la ventana de 24 h)');
+ok(!bt.respondio && salida.length === 0, '«Ya me conecto» (el botón): no se le contesta (solo se abre la ventana de 24 h)');
 bt = await M.responderEntrante({ numero: num('x90'), texto: 'Tengo un problema con el link', ahora: S - 25 * MIN });
-ok(bt.respondio && bt.motivo === 'enlace enviado' && salida[0].texto.includes(`https://sitio.cl/entrar/${lead('x90').codigo}`), '«Tengo un problema con el link»: se le envía su enlace de nuevo, con la fecha y la hora');
+ok(bt.respondio && bt.motivo === 'enlace enviado' && salida[0].texto.includes(`https://sitio.cl/entrar/${lead('x90').codigo}`), 'si escribe «Tengo un problema con el link»: se le envía su enlace de nuevo, con la fecha y la hora');
 
 // Casillas: cada mensaje se enciende y se apaga solo
 await post({ action: 'guardar', pasos: { unaHora: false } });
