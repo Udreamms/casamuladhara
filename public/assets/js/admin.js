@@ -1050,7 +1050,7 @@ function leadFichaSimple(id) {
       <div class="wa-msgs" id="wf-msgs" style="flex:1;min-height:260px;border:1px solid var(--line);border-radius:12px"><div class="wa-empty">Cargando conversación…</div></div>
       ${libre ? `<div style="display:grid;gap:8px"><select id="wf-resp" aria-label="Respuestas rápidas"><option value="">Respuestas rápidas…</option>${RESPUESTAS.map(([t], i) => `<option value="${i}">${esc(t)}</option>`).join('')}</select>
         <form class="wa-send" id="wf-form" style="padding:0;border:0"><textarea id="wf-text" rows="2" placeholder="Escribe un mensaje…" aria-label="Mensaje"></textarea><button class="btn btn-primary btn-sm">Enviar</button></form></div>`
-      : `<div class="wa-note"><span>${c?.lastInboundAt ? 'Pasaron más de 24 horas desde su último mensaje.' : 'Esta persona aún no te ha escrito.'} WhatsApp solo permite empezar con un mensaje de plantilla (con costo); cuando responda podrás escribirle libremente.</span><button type="button" class="btn btn-primary btn-sm" id="wf-plantilla">Enviar plantilla</button></div>`}`;
+      : `<div class="wa-note"><span>${c?.lastInboundAt ? 'Pasaron más de 24 horas desde su último mensaje.' : 'Esta persona aún no te ha escrito.'} WhatsApp solo permite empezar con un mensaje de plantilla (con costo); cuando responda podrás escribirle libremente.</span><span class="wa-pl"><span id="wf-pl-wrap">${waPlantillasHTML('wf-pl')}</span><button type="button" class="btn btn-primary btn-sm" id="wf-plantilla">Enviar plantilla</button></span></div>`}`;
   dialog(`<div class="ct"><aside class="ct-izq"><div class="ct-cab"><span class="av lg" style="--c:${colorFor(p.id)}">${esc(initials(p.nombre))}</span><div><h3>${esc(p.nombre)}</h3><span class="muted" style="font-size:.8rem">${esc(etapaTxt('', etapaDe(p)))}</span></div></div>
     <div class="ct-badges" style="margin:0">${cuentaBadge(p)} ${asistPersona(p)}</div>
     <div class="ct-acc">${p.email ? `<a class="btn btn-ghost btn-sm" href="mailto:${esc(p.email)}">Escribir correo</a>` : ''}</div>
@@ -1083,7 +1083,14 @@ function leadFichaSimple(id) {
         b.disabled = false;
       };
     }
-    if (pl) pl.onclick = async () => { pl.disabled = true; try { await waApi({ action: 'plantilla', to: n, name: p.nombre }); toast('Plantilla enviada. Cuando responda podrás escribirle aquí.'); } catch (err) { fail(err); pl.disabled = false; } };
+    if (pl) {
+      waCargarPlantillas().then(() => { const w = $('#wf-pl-wrap'); if (w) w.innerHTML = waPlantillasHTML('wf-pl'); });
+      pl.onclick = async () => {
+        pl.disabled = true;
+        const sel = $('#wf-pl'), elegida = sel ? (A.wa.plantillas || []).filter((x) => x.usable)[Number(sel.value)] : null;
+        try { await waApi({ action: 'plantilla', to: n, name: p.nombre, ...(elegida ? { plantilla: { name: elegida.name, lang: elegida.lang, vars: elegida.vars } } : {}) }); toast('Plantilla enviada. Cuando responda podrás escribirle aquí.'); } catch (err) { fail(err); pl.disabled = false; }
+      };
+    }
   }
   const campos = [...document.querySelectorAll('#dlg [data-ct]')], orig = { name: p.nombre, email: p.email, whatsapp: p.whatsapp, country: p.country };
   const sucio = () => campos.some((c) => c.value.trim() !== (orig[c.dataset.ct] || ''));
@@ -1145,7 +1152,7 @@ function leadFicha(id) {
       <div class="wa-msgs" id="wf-msgs" style="flex:1;min-height:260px;border:1px solid var(--line);border-radius:12px"><div class="wa-empty">Cargando conversación…</div></div>
       ${libre ? `<div style="display:grid;gap:8px"><select id="wf-resp" aria-label="Respuestas rápidas"><option value="">Respuestas rápidas…</option>${RESPUESTAS.map(([t], i) => `<option value="${i}">${esc(t)}</option>`).join('')}</select>
         <form class="wa-send" id="wf-form" style="padding:0;border:0"><textarea id="wf-text" rows="2" placeholder="Escribe un mensaje…" aria-label="Mensaje"></textarea><button class="btn btn-primary btn-sm">Enviar</button></form></div>`
-      : `<div class="wa-note"><span>${c?.lastInboundAt ? 'Pasaron más de 24 horas desde su último mensaje.' : 'Esta persona aún no te ha escrito.'} WhatsApp solo permite empezar con un mensaje de plantilla (con costo); cuando responda podrás escribirle libremente.</span><button type="button" class="btn btn-primary btn-sm" id="wf-plantilla">Enviar plantilla</button></div>`}`;
+      : `<div class="wa-note"><span>${c?.lastInboundAt ? 'Pasaron más de 24 horas desde su último mensaje.' : 'Esta persona aún no te ha escrito.'} WhatsApp solo permite empezar con un mensaje de plantilla (con costo); cuando responda podrás escribirle libremente.</span><span class="wa-pl"><span id="wf-pl-wrap">${waPlantillasHTML('wf-pl')}</span><button type="button" class="btn btn-primary btn-sm" id="wf-plantilla">Enviar plantilla</button></span></div>`}`;
   } else {
     const evs = [];
     p.leads.forEach((l) => {
@@ -1289,7 +1296,14 @@ function leadFicha(id) {
       };
     }
     const pl = $('#wf-plantilla');
-    if (pl) pl.onclick = async () => { pl.disabled = true; try { await waApi({ action: 'plantilla', to: n, name: p.nombre }); toast('Plantilla enviada. Cuando responda podrás escribirle aquí.'); } catch (err) { fail(err); pl.disabled = false; } };
+    if (pl) {
+      waCargarPlantillas().then(() => { const w = $('#wf-pl-wrap'); if (w) w.innerHTML = waPlantillasHTML('wf-pl'); });
+      pl.onclick = async () => {
+        pl.disabled = true;
+        const sel = $('#wf-pl'), elegida = sel ? (A.wa.plantillas || []).filter((x) => x.usable)[Number(sel.value)] : null;
+        try { await waApi({ action: 'plantilla', to: n, name: p.nombre, ...(elegida ? { plantilla: { name: elegida.name, lang: elegida.lang, vars: elegida.vars } } : {}) }); toast('Plantilla enviada. Cuando responda podrás escribirle aquí.'); } catch (err) { fail(err); pl.disabled = false; }
+      };
+    }
   } else {
     $('#nota-form').onsubmit = async (e) => {
       e.preventDefault();
@@ -2042,16 +2056,19 @@ const waChatHTML = () => {
     : `<div class="wa-note"><span>${c?.lastInboundAt ? 'Pasaron más de 24 horas desde su último mensaje.' : 'Esta persona aún no te ha escrito.'} WhatsApp solo permite empezar con un mensaje de plantilla; cuando responda podrás escribirle libremente.</span><span class="wa-pl">${waPlantillasHTML()}<button class="btn btn-primary btn-sm" data-wa-plantilla>Enviar plantilla</button></span></div>`}</div>`;
 };
 // Lista de plantillas aprobadas por Meta (se pide una vez); si no está disponible, se usa la plantilla por defecto del servidor
-const waPlantillasHTML = () => {
+const waPlantillasHTML = (id = 'wa-pl') => {
   const l = (A.wa.plantillas || []).filter((p) => p.usable);
   if (!l.length) return '';
-  return `<select id="wa-pl" aria-label="Plantilla">${l.map((p, i) => `<option value="${i}" title="${esc(p.texto)}">${esc(p.name)} (${esc(p.lang)})</option>`).join('')}</select>`;
+  return `<select id="${id}" aria-label="Plantilla">${l.map((p, i) => `<option value="${i}" title="${esc(p.texto)}">${esc(p.name)} (${esc(p.lang)})</option>`).join('')}</select>`;
 };
 async function waCargarPlantillas() {
-  if (A.wa.plantillas !== undefined) return;
+  if (A.wa.plantillas !== undefined) return A.wa.plantillasP; // ya cargada o cargándose: quien llame después también puede esperar
   A.wa.plantillas = null;
-  try { A.wa.plantillas = (await waApi({ action: 'plantillas' })).plantillas || null; } catch (e) { console.warn('plantillas', e.message); }
-  if (S.view === 'whatsapp') waRepaint(true);
+  A.wa.plantillasP = (async () => {
+    try { A.wa.plantillas = (await waApi({ action: 'plantillas' })).plantillas || null; } catch (e) { console.warn('plantillas', e.message); }
+    if (S.view === 'whatsapp') waRepaint(true);
+  })();
+  return A.wa.plantillasP;
 }
 // Secuencia automática de la clase (src/app/api/secuencia): interruptor, plantillas aprobadas por Meta y «qué saldría ahora». Viene apagada.
 const secApi = async (body) => {
