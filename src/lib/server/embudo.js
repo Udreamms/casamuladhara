@@ -55,7 +55,7 @@ export function nuevoCodigo() {
   return s;
 }
 export const CODIGO = /^[A-Za-z0-9]{12}$/;
-export const waClave = (n) => { let d = String(n || '').replace(/\D/g, '').replace(/^00/, ''); if (d.length === 9 && d[0] === '9') d = `56${d}`; return d.length >= 8 && d.length <= 15 ? d : ''; };
+export const waClave = (n) => { let d = String(n || '').replace(/\D/g, '').replace(/^00/, ''); if (d.length === 9 && d[0] === '9') d = `56${d}`; d = d.replace(/^(595|591|593|598|50[2-7]|5[1-8]|34)0(?=\d)/, '$1'); return d.length >= 8 && d.length <= 15 ? d : ''; };
 
 // Enlaces de una persona (base = dirección pública del sitio)
 export const enlacesDe = (codigo, clase, base) => (base ? {

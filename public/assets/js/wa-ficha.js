@@ -1,5 +1,15 @@
 // Ayudantes del chat de WhatsApp del portal (sin dependencias, para poder probarlos): encontrar la tarjeta de un chat y el chat de una tarjeta,
-// aunque el número venga escrito de otra manera (Argentina con y sin el 9, México con y sin el 1) o la persona haya escrito desde otro número con su «Mi código».
+// aunque el número venga escrito de otra manera (Argentina con y sin el 9, México con y sin el 1, un 0 de más después del código de país como en +595 0984…)
+// o la persona haya escrito desde otro número con su «Mi código».
+
+// País según el código del número (los de uso más común aquí)
+const CODIGOS_PAIS = { 1: 'Estados Unidos', 34: 'España', 51: 'Perú', 52: 'México', 53: 'Cuba', 54: 'Argentina', 55: 'Brasil', 56: 'Chile', 57: 'Colombia', 58: 'Venezuela',
+  502: 'Guatemala', 503: 'El Salvador', 504: 'Honduras', 505: 'Nicaragua', 506: 'Costa Rica', 507: 'Panamá', 591: 'Bolivia', 593: 'Ecuador', 595: 'Paraguay', 598: 'Uruguay' };
+export const paisDeNumero = (numero) => {
+  const n = String(numero || '').replace(/\D/g, '');
+  return CODIGOS_PAIS[n.slice(0, 3)] || CODIGOS_PAIS[n.slice(0, 2)] || CODIGOS_PAIS[n.slice(0, 1)] || '';
+};
+
 export const variantesNum = (numero) => {
   const n = String(numero || '').replace(/\D/g, ''), v = new Set(n ? [n] : []);
   if (/^549\d{10}$/.test(n)) v.add(`54${n.slice(3)}`); else if (/^54\d{10}$/.test(n)) v.add(`549${n.slice(2)}`);
@@ -7,25 +17,73 @@ export const variantesNum = (numero) => {
   return [...v];
 };
 
-// El id del chat de un número: el que ya existe (con o sin el 9) o, si no hay chat, el mismo número
+// La misma persona tiene siempre la misma clave aunque el número venga escrito distinto: sin el 0 de marcación nacional que algunas ponen después del código
+// de país (+595 0984… = +595 984…) y sin el 9 de Argentina ni el 1 de México. Sirve para comparar, no para escribirle.
+export const claveNumero = (numero) => {
+  let n = String(numero || '').replace(/\D/g, '');
+  const cod = [3, 2, 1].map((k) => n.slice(0, k)).find((c) => CODIGOS_PAIS[c]);
+  if (cod && n[cod.length] === '0') n = cod + n.slice(cod.length + 1);
+  if (/^549\d{10}$/.test(n)) n = `54${n.slice(3)}`;
+  if (/^521\d{10}$/.test(n)) n = `52${n.slice(3)}`;
+  return n;
+};
+
+// El id del chat de un número: el que ya existe (aunque el número venga escrito distinto) o, si no hay chat, el mismo número
 export const chatIdDe = (num, chats) => {
   if (!num) return num;
-  const v = variantesNum(num);
-  return (chats || []).find((c) => v.includes(c.id))?.id || num;
+  const k = claveNumero(num);
+  return (chats || []).find((c) => claveNumero(c.id) === k)?.id || num;
 };
 
 const RE_CODIGO = /mi c[oó]digo:?\s*([A-Za-z0-9]{8,20})/i;
-// La tarjeta (registro) de un chat: primero por su número (en cualquiera de sus dos formas) y, si no, por el «Mi código: XXXX» que escribió.
-// Devuelve { lead, por: 'número' | 'código' } o null. waNum = cómo el portal normaliza un número.
+// La tarjeta (registro) de un chat: primero por su número (aunque esté escrito distinto) y, si no, por el «Mi código: XXXX» que escribió.
+// Devuelve { lead, por: 'número' | 'código', difiere } o null. difiere = el número guardado en la tarjeta no es exactamente el del chat.
+// waNum = cómo el portal normaliza un número.
 export const fichaDeChat = (chatId, msgs, leads, waNum) => {
-  const v = variantesNum(chatId), todas = leads || [];
-  const porNumero = todas.filter((l) => v.includes(waNum(l.whatsapp)) || v.includes(String(l.waKey || '')));
-  if (porNumero.length) return { lead: porNumero.find((l) => l.codigo) || porNumero[0], por: 'número' };
+  const k = claveNumero(chatId), todas = leads || [];
+  const porNumero = todas.filter((l) => claveNumero(waNum(l.whatsapp)) === k || claveNumero(l.waKey) === k);
+  if (porNumero.length) {
+    const lead = porNumero.find((l) => l.codigo) || porNumero[0];
+    return { lead, por: 'número', difiere: String(lead.waKey || waNum(lead.whatsapp) || '') !== String(chatId) }; // waKey = a quién se le escribe de verdad
+  }
   for (const m of msgs || []) {
     if (m.dir !== 'in') continue;
     const codigo = String(m.text || '').match(RE_CODIGO)?.[1];
     const l = codigo ? todas.find((x) => x.codigo === codigo) : null;
-    if (l) return { lead: l, por: 'código' };
+    if (l) return { lead: l, por: 'código', difiere: true };
   }
   return null;
+};
+
+// Datos de contacto de una persona con el número desde el que escribió: nombre y correo no cambian; el país pasa al del nuevo número si lo conocemos.
+// Devuelve { contacto, pregunta } (pregunta = el texto de confirmación para la Maestra).
+export const contactoConNumero = (persona, chatId) => {
+  const n = String(chatId || '').replace(/\D/g, ''), pais = paisDeNumero(n) || persona.country || '';
+  const contacto = { name: persona.nombre || '', email: persona.email || '', whatsapp: `+${n}`, country: pais };
+  const cambiaPais = pais && pais !== (persona.country || '');
+  return { contacto, pregunta: `¿Guardar +${n} como el WhatsApp de ${persona.nombre}? Hoy tiene ${persona.whatsapp || 'ninguno'}${cambiaPais ? ` y el país pasa a ${pais}` : ''}.` };
+};
+
+// Plan para corregir de una vez los números de las tarjetas que no coinciden con el de su chat. No cambia nada: devuelve qué se propone.
+//   chats = [{ id }]; leads = tarjetas; textosPorChat = { idDelChat: [textos de lo que la persona escribió] } (para reconocerla por su «Mi código»).
+// Devuelve { cambios: [{ lead, chatId, por }], dudosas: [{ lead, chats, motivo }] }.
+// Se deja como dudosa (y no se propone nada) una tarjeta que se une a dos chats distintos (por ejemplo, su número guardado ya tiene un chat y además escribió
+// con su código desde otro): ahí la persona escribió desde dos números y no se sabe cuál es el bueno.
+export const planNumeros = ({ chats, leads, textosPorChat, waNum }) => {
+  const encontrados = new Map(); // id de la tarjeta -> { lead, ids de chat, por }
+  for (const c of chats || []) {
+    const mensajes = (textosPorChat?.[c.id] || []).map((text) => ({ dir: 'in', text }));
+    const fi = fichaDeChat(c.id, mensajes, leads, waNum);
+    if (!fi) continue;
+    const previo = encontrados.get(fi.lead.id) || { lead: fi.lead, chats: [], por: fi.por, difiere: false };
+    previo.chats.push(c.id); previo.difiere = previo.difiere || fi.difiere;
+    encontrados.set(fi.lead.id, previo);
+  }
+  const cambios = [], dudosas = [];
+  for (const { lead, chats: ids, por, difiere } of encontrados.values()) {
+    if (ids.length === 1 && !difiere) continue; // ya coincide
+    if (ids.length > 1) dudosas.push({ lead, chats: ids, motivo: 'escribió desde más de un número' });
+    else cambios.push({ lead, chatId: ids[0], por });
+  }
+  return { cambios, dudosas };
 };

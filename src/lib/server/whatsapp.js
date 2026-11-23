@@ -16,7 +16,7 @@ export const configurado = () => !!(process.env.WHATSAPP_TOKEN?.trim() && proces
 // Número como lo pide WhatsApp: solo dígitos con código de país. Un celular chileno sin código (9 dígitos que empiezan en 9) se toma como +56.
 export function normalizar(numero) {
   let d = String(numero || '').replace(/\D/g, '').replace(/^00/, '');
-  if (d.length === 9 && d[0] === '9') d = `56${d}`;
+  if (d.length === 9 && d[0] === '9') d = `56${d}`; d = d.replace(/^(595|591|593|598|50[2-7]|5[1-8]|34)0(?=\d)/, '$1');
   return d.length >= 8 && d.length <= 15 ? d : '';
 }
 

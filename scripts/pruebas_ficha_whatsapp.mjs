@@ -57,9 +57,12 @@ await prueba('celulares de Argentina: ficha guardada sin el 9 y mensaje que lleg
   assert.equal(sin9.docs.size, 1);
   const con9 = baseFalsa([{ id: 'm', form: 'clase-tarot', waKey: '5493516137941', name: 'Milvia' }]);
   assert.equal((await asegurarFicha(con9, { numero: '543516137941', texto: 'Hola', marca: MARCA })).creada, false);
-  assert.deepEqual(variantesNumero('5493516137941').sort(), ['543516137941', '5493516137941']);
-  assert.deepEqual(variantesNumero('521' + '5512345678').sort(), ['5215512345678', '525512345678']);
-  assert.deepEqual(variantesNumero('56912345678'), ['56912345678']);
+  // Siempre incluye las dos formas (con y sin el 9 / el 1); además la forma con un 0 de más después del código de país (+595 0984…), que algunas tarjetas viejas tienen
+  const incluye = (n, esperadas) => esperadas.every((x) => variantesNumero(n).includes(x));
+  assert.ok(incluye('5493516137941', ['543516137941', '5493516137941']));
+  assert.ok(incluye('5215512345678', ['5215512345678', '525512345678']));
+  assert.ok(incluye('56912345678', ['56912345678']));
+  assert.ok(incluye('595984479339', ['595984479339', '5950984479339']), 'Paraguay: encuentra la tarjeta guardada con el 0 de más');
 });
 await prueba('si el mensaje trae «Mi código» y ese código ya tiene ficha (otro número): no se duplica', async () => {
   const db = baseFalsa([{ id: 'd', form: 'clase-tarot', waKey: '59170000000', codigo: 'de0PtAURPX0W', name: 'Dorysiña' }]);
@@ -142,7 +145,8 @@ await prueba('la ruta tiene la acción «fichas» después de comprobar a la Mae
 });
 await prueba('el botón del portal: pide confirmación, llama a «fichas», recarga Interesadas y muestra el resultado con las personas que escribieron desde otro número', async () => {
   const adm = fs.readFileSync(new URL('../public/assets/js/admin.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
-  const bloque = adm.slice(adm.indexOf('// Chats de WhatsApp que todavía no tienen tarjeta'), adm.indexOf('V.whatsapp = () =>'));
+  const finBloque = adm.indexOf('// Corregir de una vez los números de las tarjetas'); // el botón de revisar números va justo después (se prueba en pruebas_wa_tarjeta.mjs)
+  const bloque = adm.slice(adm.indexOf('// Chats de WhatsApp que todavía no tienen tarjeta'), finBloque > 0 ? finBloque : adm.indexOf('V.whatsapp = () =>'));
   const llamadas = [], dialogos = []; let confirma = true, handler;
   const documento = { addEventListener: (t, f) => { handler = f; } };
   const A = { _per: 'cache' }, data = { leads: async () => llamadas.push('leads') };
