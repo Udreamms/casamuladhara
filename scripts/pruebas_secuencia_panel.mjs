@@ -4,7 +4,7 @@ import fs from 'node:fs';
 const s = fs.readFileSync(new URL('../public/assets/js/admin.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
 const finBloque = s.indexOf('// Chats de WhatsApp que todavía no tienen tarjeta'); // el botón de las tarjetas de los chats va justo después del panel
 const bloque = s.slice(s.indexOf('// Secuencia automática de la clase'), finBloque > 0 ? finBloque : s.indexOf('V.whatsapp = () =>'));
-const cfg = { activa: false, soloNumero: '', aprobadas: { clase_link_personal: false, clase_recordatorio_1h: true }, plantillas: [{ nombre: 'clase_link_personal', uso: 'Al registrarse' }, { nombre: 'clase_recordatorio_1h', uso: '1 hora antes' }], conectado: true, cron: false };
+const cfg = { activa: false, soloNumero: '', pasos: { link: true, diaAntes: true, unaHora: true, gracias: false, replay: false }, aprobadas: { clase_link_personal: false, clase_recordatorio_1h: true }, plantillas: [{ nombre: 'clase_link_personal', uso: 'Al registrarse' }, { nombre: 'clase_recordatorio_1h', uso: '1 hora antes' }], conectado: true, cron: false };
 const llamadas = [], esc = (x) => String(x ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 const nodos = {}, $ = (q) => (nodos[q] ||= { innerHTML: '', textContent: '', value: '' });
 const handlers = {}, document = { addEventListener: (t, f) => { handlers[t] = f; } };
@@ -18,6 +18,7 @@ globalThis.fetch = async (u, i) => {
   if (b.action === 'guardar') {
     if (typeof b.activa === 'boolean') cfg.activa = b.activa;
     if (b.aprobadas) Object.assign(cfg.aprobadas, b.aprobadas);
+    if (b.pasos) Object.assign(cfg.pasos, b.pasos);
     if (typeof b.soloNumero === 'string') {
       const d = b.soloNumero.replace(/\D/g, '');
       if (b.soloNumero.trim() && d.length < 8) return { ok: false, json: async () => ({ error: 'Número de prueba no válido (con código de país, por ejemplo +56 9 1234 5678).' }) };
@@ -41,7 +42,7 @@ ok(llamadas.at(-1).action === 'guardar' && llamadas.at(-1).activa === true && ht
 await handlers.change({ target: { closest: (q) => (q === '[data-sec-pl]' ? { dataset: { secPl: 'clase_link_personal' }, checked: true } : null) } });
 ok(llamadas.at(-1).aprobadas.clase_link_personal === true && cfg.aprobadas.clase_link_personal === true, 'marcar una plantilla como aprobada la guarda');
 await clic('simular');
-ok($('#sec-sim').textContent.includes('Saldrían 1') && $('#sec-sim').textContent.includes('recordatorio de 1 h'), '«Ver qué saldría» lista los pendientes sin enviar');
+ok($('#sec-sim').textContent.includes('Saldrían 1') && $('#sec-sim').textContent.includes('recordatorio de 40 min'), '«Ver qué saldría» lista los pendientes sin enviar');
 await clic('apagar');
 ok(llamadas.at(-1).activa === false && html().includes('Apagada'), 'Apagar la deja apagada');
 ok(!html().includes('sec-video'), 'el panel no pide enlace de video');
@@ -73,4 +74,12 @@ ok(llamadas.at(-1).soloNumero === '' && cfg.soloNumero === '' && !html().include
 $('#sec-solo').value = '12';
 await clic('solo-guardar');
 ok(toasts.at(-1).includes('Número de prueba no válido') && cfg.soloNumero === '', 'un número inválido muestra el error del servidor y no activa nada');
+// ---- Qué mensajes salen solos
+const marca = (k, checked) => handlers.change({ target: { closest: (q) => (q === '[data-sec-paso]' ? { dataset: { secPaso: k }, checked } : null) } });
+ok(['link', 'diaAntes', 'unaHora'].every((k) => new RegExp(`data-sec-paso="${k}" checked`).test(html())) && ['gracias', 'replay'].every((k) => html().includes(`data-sec-paso="${k}" >`)), 'se ven 5 casillas: la bienvenida y los dos recordatorios marcados; lo de después de la clase sin marcar');
+ok(html().includes('Mensajes que salen solos') && html().includes('Bienvenida con su enlace') && html().includes('Recordatorio un día antes') && html().includes('Recordatorio 40 minutos antes') && html().includes('Gracias después de la clase') && html().includes('Grabación después de la clase'), 'dice qué es cada mensaje (con 40 minutos antes)');
+await marca('gracias', true);
+ok(llamadas.at(-1).action === 'guardar' && JSON.stringify(llamadas.at(-1).pasos) === '{"gracias":true}' && cfg.pasos.gracias === true && html().includes('data-sec-paso="gracias" checked'), 'marcar una casilla enciende solo ese mensaje');
+await marca('gracias', false); await marca('unaHora', false);
+ok(cfg.pasos.gracias === false && cfg.pasos.unaHora === false && !html().includes('data-sec-paso="unaHora" checked') && cfg.pasos.link === true, 'desmarcarla lo apaga sin tocar los demás');
 console.log(fallas ? `\n${fallas} fallas` : '\nTodo en orden');
