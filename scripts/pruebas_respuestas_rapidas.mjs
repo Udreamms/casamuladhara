@@ -27,7 +27,7 @@ prueba('hay 6 respuestas: las 3 nuevas y las 3 que se mantienen (la de bienvenid
 });
 prueba('bienvenida (Tarot): idéntica al texto pedido, con el día completo y el link solo en su línea', () => {
   assert.equal(texto('Bienvenida', tarot),
-    '¡Hola, Dorysiña! 🌙 Qué alegría que te hayas registrado. Este es tu link personal para la clase gratis de Tarot Terapéutico, donde vas a aprender a usar las cartas para conocerte y acompañar a otras personas:\n👉 https://www.casamuladhara.com/entrar/de0PtAURPX0W\nNos vemos el martes 1 de diciembre a las 19:00 (hora de Chile) ✨\n\nSolo para que sepas: te enviaré unos recordatorios por aquí antes de la clase.');
+    'Hola, Dorysiña! Qué alegría que te hayas registrado. Este es tu link personal para la clase gratis de Tarot Terapéutico, donde vas a aprender a usar las cartas para conocerte y acompañar a otras personas:\nhttps://www.casamuladhara.com/entrar/de0PtAURPX0W\nNos vemos el martes 1 de diciembre a las 19:00 (hora de Chile) ✨\n\nSolo para que sepas: te enviaré unos recordatorios por aquí antes de la clase.');
 });
 prueba('compromiso (Tarot): texto pedido', () => {
   assert.equal(texto('Compromiso', tarot),

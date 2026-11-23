@@ -30,11 +30,10 @@ export const PASOS_INICIAL = { link: true, diaAntes: true, unaHora: true, gracia
 // Plantillas (español de Chile). Mientras Meta no las apruebe, aprobadas[nombre] queda en false y no se usan.
 export const PLANTILLAS = {
   clase_link_personal: { paso: 'link', uso: 'Al registrarse: enlace personal a la clase' },
-  clase_link_personal_2: { paso: 'link', uso: 'Al registrarse (versión con el aviso de que habrá recordatorios; si está aprobada se usa en lugar de la anterior)' },
   clase_recordatorio_dia_antes_2: { paso: 'diaAntes', uso: '24 horas antes de la clase' },
   clase_recordatorio_40min: { paso: 'unaHora', uso: '40 minutos antes de la clase' },
-  clase_gracias_asistio: { paso: 'gracias', uso: 'Después de la clase, a quien entró (con la grabación)' },
-  clase_replay_no_asistio: { paso: 'replay', uso: 'Después de la clase, a quien no entró (con la grabación)' },
+  clase_gracias_asistio: { paso: 'gracias', uso: 'Ya no se usa: lo de después de la clase sale solo con texto libre y gratis' },
+  clase_replay_no_asistio: { paso: 'replay', uso: 'Ya no se usa: lo de después de la clase sale solo con texto libre y gratis' },
   bienvenida_general_2: { paso: null, uso: 'Sin paso asignado todavía' },
   clase_gratis_pendulo_2: { paso: null, uso: 'Sin paso asignado todavía' },
   clase_gratis_tarot_2: { paso: null, uso: 'Sin paso asignado todavía' },
@@ -109,7 +108,7 @@ function armar(paso, { l, ev, cfg, replay }) {
   const dia = diaLargo(ev.fecha), enlace = `${base()}/entrar/${l.codigo}`;
   const grabacion = `${base()}/clase-${ev.clase}/replay?l=${l.codigo}`;
   const T = {
-    link: { nombre: cfg?.aprobadas?.clase_link_personal_2 ? 'clase_link_personal_2' : 'clase_link_personal', vars: [n, nombre, dia, ev.hora], boton: l.codigo,
+    link: { nombre: 'clase_link_personal', vars: [n, nombre, dia, ev.hora], boton: l.codigo,
       texto: `Hola ${n} 🌿 Este es tu enlace personal para entrar a la clase gratuita de ${nombre}, el ${dia} a las ${ev.hora}: ${enlace}\n\nEs solo tuyo: no lo compartas.` },
     diaAntes: { nombre: 'clase_recordatorio_dia_antes_2', vars: [n, nombre, ev.hora], boton: l.codigo,
       texto: `Hola ${n} 🌿 Mañana a las ${ev.hora} es tu clase gratuita de ${nombre} con Karen. Tu enlace para entrar: ${enlace}` },
@@ -127,7 +126,7 @@ function armar(paso, { l, ev, cfg, replay }) {
 export const textoBienvenida = (l, ev) => {
   const clase = l.clase || claseDe(l.form), nombre = (OFERTAS[clase] || {}).nombre || (clase === 'tarot' ? 'Tarot Terapéutico' : clase === 'pendulo' ? 'Péndulo Hebreo' : 'la clase gratuita');
   const cuando = ev ? `el ${diaLargo(ev.fecha)} a las ${ev.hora} (hora de Chile)` : 'en la clase';
-  return `¡Hola, ${primerNombre(l.name) || 'hola'}! 🌙 Qué alegría que te hayas registrado. Este es tu link personal para la clase gratis de ${nombre}${clase === 'tarot' ? ', donde vas a aprender a usar las cartas para conocerte y acompañar a otras personas' : ''}:\n👉 ${base()}/entrar/${l.codigo}\nNos vemos ${cuando} ✨\n\nSolo para que sepas: te enviaré unos recordatorios por aquí antes de la clase.`;
+  return `Hola, ${primerNombre(l.name) || 'hola'}! Qué alegría que te hayas registrado. Este es tu link personal para la clase gratis de ${nombre}${clase === 'tarot' ? ', donde vas a aprender a usar las cartas para conocerte y acompañar a otras personas' : ''}:\n${base()}/entrar/${l.codigo}\nNos vemos ${cuando} ✨\n\nSolo para que sepas: te enviaré unos recordatorios por aquí antes de la clase.`;
 };
 
 // ---------- Salida al chat del portal ----------
@@ -146,6 +145,8 @@ async function enviarPaso({ ref, l, ev, paso, cfg, hoy, ahora, replay }) {
   const m = armar(paso, { l, ev, cfg, replay });
   const abierta = await ventanaAbierta(numero, ahora);
   if (paso === 'link' && abierta) return { omitido: 'ya le escribió: recibe el enlace por la respuesta automática' };
+  // Después de la clase solo se escribe con texto libre (gratis): si no escribió en las últimas 24 h no se manda plantilla, que tendría costo
+  if (!abierta && (paso === 'gracias' || paso === 'replay')) return { omitido: 'lo de después de la clase solo sale con la ventana de 24 h abierta (es gratis); con plantilla tendría costo' };
   if (!abierta && cfg.aprobadas[m.nombre] !== true) return { omitido: `la plantilla ${m.nombre} aún no está aprobada` };
   const k = sano(ev.id);
   // Se reserva el paso antes de enviar: si dos revisiones coinciden, solo una lo envía
