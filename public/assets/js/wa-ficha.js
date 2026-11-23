@@ -63,3 +63,27 @@ export const contactoConNumero = (persona, chatId) => {
   const cambiaPais = pais && pais !== (persona.country || '');
   return { contacto, pregunta: `¿Guardar +${n} como el WhatsApp de ${persona.nombre}? Hoy tiene ${persona.whatsapp || 'ninguno'}${cambiaPais ? ` y el país pasa a ${pais}` : ''}.` };
 };
+
+// Plan para corregir de una vez los números de las tarjetas que no coinciden con el de su chat. No cambia nada: devuelve qué se propone.
+//   chats = [{ id }]; leads = tarjetas; textosPorChat = { idDelChat: [textos de lo que la persona escribió] } (para reconocerla por su «Mi código»).
+// Devuelve { cambios: [{ lead, chatId, por }], dudosas: [{ lead, chats, motivo }] }.
+// Se deja como dudosa (y no se propone nada) una tarjeta que se une a dos chats distintos (por ejemplo, su número guardado ya tiene un chat y además escribió
+// con su código desde otro): ahí la persona escribió desde dos números y no se sabe cuál es el bueno.
+export const planNumeros = ({ chats, leads, textosPorChat, waNum }) => {
+  const encontrados = new Map(); // id de la tarjeta -> { lead, ids de chat, por }
+  for (const c of chats || []) {
+    const mensajes = (textosPorChat?.[c.id] || []).map((text) => ({ dir: 'in', text }));
+    const fi = fichaDeChat(c.id, mensajes, leads, waNum);
+    if (!fi) continue;
+    const previo = encontrados.get(fi.lead.id) || { lead: fi.lead, chats: [], por: fi.por, difiere: false };
+    previo.chats.push(c.id); previo.difiere = previo.difiere || fi.difiere;
+    encontrados.set(fi.lead.id, previo);
+  }
+  const cambios = [], dudosas = [];
+  for (const { lead, chats: ids, por, difiere } of encontrados.values()) {
+    if (ids.length === 1 && !difiere) continue; // ya coincide
+    if (ids.length > 1) dudosas.push({ lead, chats: ids, motivo: 'escribió desde más de un número' });
+    else cambios.push({ lead, chatId: ids[0], por });
+  }
+  return { cambios, dudosas };
+};

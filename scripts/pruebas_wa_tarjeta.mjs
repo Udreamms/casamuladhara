@@ -2,7 +2,7 @@
 // y que la ficha encuentre su chat. Datos inventados; no usa la base de datos.
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
-import { chatIdDe, claveNumero, contactoConNumero, fichaDeChat, paisDeNumero, variantesNum } from '../public/assets/js/wa-ficha.js';
+import { chatIdDe, claveNumero, contactoConNumero, fichaDeChat, paisDeNumero, planNumeros, variantesNum } from '../public/assets/js/wa-ficha.js';
 import { variantesNumero } from '../src/lib/server/ficha-wa.js';
 
 const src = fs.readFileSync(new URL('../public/assets/js/admin.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
@@ -52,7 +52,7 @@ prueba('sin tarjeta: devuelve null (también con un código que no existe o escr
   assert.equal(fichaDeChat('56999999999', undefined, undefined, waNum), null);
 });
 prueba('el portal usa la búsqueda: botones «Abrir su tarjeta» y «Poner su enlace en el mensaje», y avisa si no hay tarjeta', () => {
-  assert.match(src, /import \{ chatIdDe, claveNumero, contactoConNumero, fichaDeChat \} from '\.\/wa-ficha\.js';/);
+  assert.match(src, /import \{ chatIdDe, claveNumero, contactoConNumero, fichaDeChat, planNumeros \} from '\.\/wa-ficha\.js';/);
   assert.match(src, /const fi = A\.leads \? fichaDeChat\(n, A\.wa\.msgs, A\.leads, waNum\) : undefined;/);
   assert.ok(src.includes('data-wa-tarjeta="${esc(fi.lead.id)}"') && src.includes('data-wa-enlace="${esc(fi.lead.id)}"') && src.includes('No tiene tarjeta en Interesadas.'));
   assert.ok(src.includes("${libre ? `<button class=\"btn btn-ghost btn-sm\" data-wa-enlace"), 'el botón del enlace solo aparece si se le puede escribir libremente');
@@ -102,7 +102,7 @@ prueba('el portal: el botón solo aparece cuando el número de la tarjeta no es 
   assert.match(src, /await data\.leads\(\{ action: 'update', ids: per\.leads\.map\(\(l\) => l\.id\), contacto \}\);/);
   assert.match(src, /per\.leads\.forEach\(\(l\) => Object\.assign\(l, contacto, \{ email: String\(contacto\.email\)\.toLowerCase\(\), waKey: S\.waOpen \}\)\);/);
   assert.match(src, /A\._per = null; paintNav\(\); waRepaint\(true\); toast\('Listo: su tarjeta ahora tiene el número de este chat\.'\)/);
-  assert.match(src, /import \{ chatIdDe, claveNumero, contactoConNumero, fichaDeChat \} from/);
+  assert.match(src, /import \{ chatIdDe, claveNumero, contactoConNumero, fichaDeChat, planNumeros \} from/);
 });
 prueba('servidor: al editar el WhatsApp de una tarjeta también se actualiza su clave (waKey), que usan la secuencia y la ficha automática', () => {
   const ruta = fs.readFileSync(new URL('../src/app/api/leads/route.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
@@ -144,5 +144,62 @@ prueba('servidor: waClave y normalizar también quitan el 0 de más (las tarjeta
   assert.equal(normalizar('+595 0984479339'), '595984479339'); assert.equal(normalizar('+591 72512244'), '59172512244');
   assert.ok(variantesNumero('595984479339').includes('5950984479339') && variantesNumero('595984479339').includes('595984479339'));
   assert.ok(!variantesNumero('5950984479339').includes('59500984479339'), 'si el número ya trae el 0 no le agrega otro');
+});
+
+// ---- Corregir de una vez los números de todas las tarjetas que no coinciden con su chat
+const L = (id, name, whatsapp, waKey, extra = {}) => ({ id, name, whatsapp, waKey, ...extra });
+const CODE = (c) => `Hola, ya me registré para la clase gratuita. Mi código: ${c}`;
+prueba('planNumeros: propone corregir a Liz (0 de más), María (Argentina sin 9) y Patricia (escribió con su código desde otro país); no toca a quien ya coincide', () => {
+  const leads = [
+    L('liz', 'Liz', '+595 0984479339', '5950984479339', { codigo: 'UqpJRJUy9Npp' }),
+    L('mar', 'María', '+54 2477 352538', '542477352538', { codigo: 'aHsIXCyzaJ6v' }),
+    L('pat', 'Patricia', '+56 72512244', '5672512244', { codigo: 'pMFnSqhhTuyJ' }),
+    L('ok', 'Ya coincide', '+56 9 1111 1111', '56911111111', { codigo: 'AAAAAAAAAAAA' }),
+  ];
+  const chats = [{ id: '595984479339' }, { id: '5492477352538' }, { id: '59172512244' }, { id: '56911111111' }, { id: '56988888888' }];
+  const { cambios, dudosas } = planNumeros({ chats, leads, waNum, textosPorChat: { '59172512244': [CODE('pMFnSqhhTuyJ')], '56988888888': ['Hola'] } });
+  assert.deepEqual(cambios.map((c) => [c.lead.id, c.chatId, c.por]).sort(), [['liz', '595984479339', 'número'], ['mar', '5492477352538', 'número'], ['pat', '59172512244', 'código']]);
+  assert.deepEqual(dudosas, []);
+});
+prueba('planNumeros: no inventa nada: sin tarjeta o sin coincidencia no propone cambios', () => {
+  assert.deepEqual(planNumeros({ chats: [{ id: '56999999999' }], leads: [L('a', 'A', '+56 9 1111 1111', '56911111111')], textosPorChat: { '56999999999': ['Mi código: NOEXISTE12345'] }, waNum }), { cambios: [], dudosas: [] });
+  assert.deepEqual(planNumeros({ chats: [], leads: [], waNum }), { cambios: [], dudosas: [] });
+  assert.deepEqual(planNumeros({ waNum }), { cambios: [], dudosas: [] });
+});
+prueba('planNumeros: deja como dudosa (sin proponer) a quien escribió desde dos números (también si uno es el número que ya tiene guardado)', () => {
+  const doble = L('d', 'Doble', '+56 9 2222 2222', '56922222222', { codigo: 'BBBBBBBBBBBB' });
+  const a = planNumeros({ chats: [{ id: '595111111111' }, { id: '595222222222' }], leads: [L('x', 'X', '+595 0111111111', '5950111111111'), doble], textosPorChat: {}, waNum });
+  assert.equal(a.cambios.length, 1); // X sí: solo un chat
+  const b = planNumeros({ chats: [{ id: '56922222222' }, { id: '59177777777' }], leads: [doble], textosPorChat: { '59177777777': [CODE('BBBBBBBBBBBB')] }, waNum });
+  assert.equal(b.cambios.length, 0); assert.equal(b.dudosas.length, 1); assert.match(b.dudosas[0].motivo, /más de un número/);
+  const c = planNumeros({ chats: [{ id: '595984479339' }, { id: '5950984479339' }], leads: [L('liz', 'Liz', '+595 0984479339', '5950984479339')], waNum });
+  assert.equal(c.dudosas.length, 1); assert.match(c.dudosas[0].motivo, /más de un número/);
+});
+prueba('el botón del portal: busca los chats sin tarjeta por número, lee sus primeros mensajes, muestra la lista y solo cambia lo que se confirma', async () => {
+  const adm = fs.readFileSync(new URL('../public/assets/js/admin.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
+  assert.ok(adm.includes('data-wa-revisar title="Busca las tarjetas cuyo WhatsApp no coincide con el de su chat y te deja corregirlas todas. No envía mensajes.">Revisar números de las tarjetas</button>'));
+  const bloque = adm.slice(adm.indexOf('// Corregir de una vez los números de las tarjetas'), adm.indexOf('V.whatsapp = () =>'));
+  const handlers = [], dialogos = [], llamadas = [];
+  const documento = { addEventListener: (t, f) => handlers.push(f) };
+  const persona = { id: 'pliz', nombre: 'Liz', email: 'liz@x.com', whatsapp: '+595 0984479339', country: 'Paraguay', leads: [{ id: 'liz', name: 'Liz', whatsapp: '+595 0984479339', waKey: '5950984479339', codigo: 'UqpJRJUy9Npp' }] };
+  const A = { leads: persona.leads, wa: { chats: [{ id: '595984479339' }] }, _per: 'cache' };
+  const data = { leads: async (b) => llamadas.push(b?.action || 'cargar') };
+  const esc = (x) => String(x ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  const lecturas = [];
+  const fn = new Function('document', 'A', 'data', 'waNum', 'getDocs', 'query', 'collection', 'db', 'orderBy', 'limit', 'planNumeros', 'fichaDeChat', 'contactoConNumero', 'personaPorLead', 'esc', 'dialog', 'fail', 'paintNav', 'waRepaint', '$', bloque);
+  fn(documento, A, data, waNum, async () => { lecturas.push('lee'); return { docs: [] }; }, () => ({}), () => ({}), {}, () => ({}), () => ({}), planNumeros, fichaDeChat, contactoConNumero, () => persona, esc, (h) => dialogos.push(h), (e) => dialogos.push(`ERROR ${e.message}`), () => llamadas.push('nav'), () => llamadas.push('repinta'), () => ({ close() { dialogos.push('CERRADO'); } }));
+  const [revisar, cerrar, aplicar] = handlers;
+  const boton = { disabled: false }, clic = (sel, el) => ({ target: { closest: (q) => (q === sel ? el : null) } });
+  await revisar(clic('[data-wa-revisar]', boton));
+  assert.equal(boton.disabled, false); assert.equal(llamadas.length, 0, 'revisar no cambia nada');
+  assert.match(dialogos[0], /<b>1<\/b> tarjeta tiene un número distinto al de su chat/); assert.match(dialogos[0], /\+595 0984479339 → <b>\+595984479339<\/b>/);
+  assert.match(dialogos[0], /data-wa-aplicar-numeros>Corregir las 1</); assert.match(dialogos[0], /data-wa-cerrar>No cambiar nada/);
+  cerrar(clic('[data-wa-cerrar]', {})); assert.equal(dialogos.at(-1), 'CERRADO');
+  await aplicar(clic('[data-wa-aplicar-numeros]', { disabled: false }));
+  assert.deepEqual(llamadas.filter((x) => x === 'update'), ['update']);
+  assert.equal(persona.leads[0].waKey, '595984479339'); assert.equal(persona.leads[0].whatsapp, '+595984479339'); assert.equal(A._per, null);
+  assert.match(dialogos.at(-1), /Se corrigieron <b>1<\/b> tarjeta\./);
+  await aplicar(clic('[data-wa-aplicar-numeros]', { disabled: false })); // pulsar dos veces no repite nada
+  assert.equal(llamadas.filter((x) => x === 'update').length, 1);
 });
 console.log(`\n${ok} pruebas OK`);

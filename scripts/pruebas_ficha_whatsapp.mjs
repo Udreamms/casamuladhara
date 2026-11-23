@@ -145,7 +145,8 @@ await prueba('la ruta tiene la acción «fichas» después de comprobar a la Mae
 });
 await prueba('el botón del portal: pide confirmación, llama a «fichas», recarga Interesadas y muestra el resultado con las personas que escribieron desde otro número', async () => {
   const adm = fs.readFileSync(new URL('../public/assets/js/admin.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
-  const bloque = adm.slice(adm.indexOf('// Chats de WhatsApp que todavía no tienen tarjeta'), adm.indexOf('V.whatsapp = () =>'));
+  const finBloque = adm.indexOf('// Corregir de una vez los números de las tarjetas'); // el botón de revisar números va justo después (se prueba en pruebas_wa_tarjeta.mjs)
+  const bloque = adm.slice(adm.indexOf('// Chats de WhatsApp que todavía no tienen tarjeta'), finBloque > 0 ? finBloque : adm.indexOf('V.whatsapp = () =>'));
   const llamadas = [], dialogos = []; let confirma = true, handler;
   const documento = { addEventListener: (t, f) => { handler = f; } };
   const A = { _per: 'cache' }, data = { leads: async () => llamadas.push('leads') };
