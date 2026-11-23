@@ -199,12 +199,14 @@ ok(!r.respondio && c2.activa === false && salida.length === n, 'al apagarla vuel
 const boton = (x) => (x.cuerpo.template.components || []).find((c) => c.type === 'button');
 const idDe = (a) => [...tablas.keys()].filter((k) => k.startsWith('leads/')).map((k) => k.slice(6)).find((id) => lead(id).waKey === a);
 const por = (nombre) => salida.find((x) => x.name === nombre && x.cuerpo);
-for (const nombre of ['clase_link_personal', 'clase_recordatorio_dia_antes_2', 'clase_recordatorio_40min']) {
+for (const nombre of ['clase_link_personal', 'clase_recordatorio_dia_antes_2']) {
   const x = por(nombre), b = x && boton(x);
   ok(b && b.sub_type === 'url' && b.index === '0' && b.parameters.length === 1 && b.parameters[0].type === 'text' && b.parameters[0].text === lead(idDe(x.a)).codigo, `${nombre}: el cuerpo lleva el botón url (index 0) con el código personal`);
   ok(x && x.cuerpo.template.components.find((c) => c.type === 'body') && x.cuerpo.template.language.code === 'es_CL', `${nombre}: y además el cuerpo con sus variables, en es_CL`);
 }
 ok(!salida.some((x) => x.name === 'clase_gracias_asistio' || x.name === 'clase_replay_no_asistio'), 'lo de después de la clase nunca sale por plantilla (solo texto libre y gratis)');
+const u40 = por('clase_recordatorio_40min');
+ok(u40 && u40.cuerpo.template.language.code === 'es_CL' && u40.cuerpo.template.components.length === 1 && u40.cuerpo.template.components[0].type === 'body' && u40.cuerpo.template.components[0].parameters.map((x) => x.text).join('|') === 'Prueba|Péndulo Hebreo|19:00', 'clase_recordatorio_40min: solo el cuerpo con nombre, clase y hora (sin botón de enlace: lleva botones de respuesta rápida, que no llevan parámetros)');
 
 // ---- 13. Modo prueba: la secuencia solo le escribe al número elegido (aunque esté encendida) y «Enviar ahora» funciona incluso apagada
 salida.length = 0;
@@ -282,13 +284,19 @@ mk('x91', YA_ENLACE); salida.length = 0;
 r = await M.correrSecuencia({ ahora: S - 45 * MIN }); ok(!salida.some((x) => x.a === num('x91')), 'a 45 minutos de la clase todavía no sale el recordatorio');
 r = await M.correrSecuencia({ ahora: S - 38 * MIN });
 const r40 = salida.find((x) => x.a === num('x91'));
-ok(r40 && r40.name === 'clase_recordatorio_40min' && r40.vars.join('|') === 'Prueba|Péndulo Hebreo|19:00' && r40.boton === lead('x91').codigo, 'a los 40 minutos antes sale clase_recordatorio_40min con nombre, clase, hora y el código en el botón');
+ok(r40 && r40.name === 'clase_recordatorio_40min' && r40.vars.join('|') === 'Prueba|Péndulo Hebreo|19:00' && !r40.boton && !JSON.stringify(r40).includes('entrar/'), 'a los 40 minutos antes sale clase_recordatorio_40min con nombre, clase y hora, y SIN el enlace');
 const n15 = salida.length; r = await M.correrSecuencia({ ahora: S - 30 * MIN }); ok(salida.length === n15, 'y solo una vez');
 r = await M.correrSecuencia({ ahora: S - 10 * MIN }); ok(salida.length === n15, 'a 10 minutos de la clase ya no sale nada');
 // con la ventana abierta, el recordatorio sale como texto libre con la hora de hoy
 mk('x92', YA_ENLACE); tablas.set(`wa_chats/${num('x92')}`, { lastInboundAt: S - 2 * H }); salida.length = 0;
 r = await M.correrSecuencia({ ahora: S - 38 * MIN });
-ok(salida.find((x) => x.a === num('x92'))?.texto === `Hola Prueba 🌿 En unos minutos, hoy a las 19:00, empieza tu clase gratuita de Péndulo Hebreo. Entra con tu enlace personal: https://sitio.cl/entrar/${lead('x92').codigo}`, 'con la ventana abierta el texto dice «en unos minutos, hoy a las 19:00» (no «en una hora»)');
+ok(salida.find((x) => x.a === num('x92'))?.texto === 'Hola Prueba 🌿 En unos minutos, hoy a las 19:00, empieza tu clase gratuita de Péndulo Hebreo. Si tienes algún problema con tu link, avísanos por aquí.', 'con la ventana abierta el texto dice «en unos minutos, hoy a las 19:00», no repite el enlace y ofrece ayuda');
+// Botones de la plantilla: «Tengo un problema con el link» recibe su enlace de nuevo; «Ya me conecto» no recibe respuesta (solo abre la ventana de 24 h)
+mk('x90', { createdAt: S - 3 * 864e5, waEnlaceT: S - 2 * 864e5 }); salida.length = 0;
+let bt = await M.responderEntrante({ numero: num('x90'), texto: 'Ya me conecto', ahora: S - 30 * MIN });
+ok(!bt.respondio && salida.length === 0, '«Ya me conecto»: no se le contesta (solo se abre la ventana de 24 h)');
+bt = await M.responderEntrante({ numero: num('x90'), texto: 'Tengo un problema con el link', ahora: S - 25 * MIN });
+ok(bt.respondio && bt.motivo === 'enlace enviado' && salida[0].texto.includes(`https://sitio.cl/entrar/${lead('x90').codigo}`), '«Tengo un problema con el link»: se le envía su enlace de nuevo, con la fecha y la hora');
 
 // Casillas: cada mensaje se enciende y se apaga solo
 await post({ action: 'guardar', pasos: { unaHora: false } });

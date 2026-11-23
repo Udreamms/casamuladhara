@@ -101,8 +101,8 @@ export function pasoDebido({ l, ev, ahora }) {
   return null;
 }
 
-// Texto libre (dentro de las 24 h) y plantilla de cada paso. boton = el código personal, que va en el botón de enlace (…/entrar/{{1}}) de clase_link_personal,
-// clase_recordatorio_dia_antes_2 y clase_recordatorio_1h; gracias y replay no llevan botón (los de respuesta rápida tampoco llevan parámetros).
+// Texto libre (dentro de las 24 h) y plantilla de cada paso. boton = el código personal, que va en el botón de enlace (…/entrar/{{1}}) de clase_link_personal
+// y clase_recordatorio_dia_antes_2; el recordatorio de 40 minutos, gracias y replay no llevan botón de enlace (los de respuesta rápida tampoco llevan parámetros).
 function armar(paso, { l, ev, cfg, replay }) {
   const n = primerNombre(l.name) || 'hola', nombre = (OFERTAS[ev.clase] || {}).nombre || (ev.clase === 'tarot' ? 'Tarot Terapéutico' : 'Péndulo Hebreo');
   const dia = diaLargo(ev.fecha), enlace = `${base()}/entrar/${l.codigo}`;
@@ -112,8 +112,10 @@ function armar(paso, { l, ev, cfg, replay }) {
       texto: `Hola ${n} 🌿 Este es tu enlace personal para entrar a la clase gratuita de ${nombre}, el ${dia} a las ${ev.hora}: ${enlace}\n\nEs solo tuyo: no lo compartas.` },
     diaAntes: { nombre: 'clase_recordatorio_dia_antes_2', vars: [n, nombre, ev.hora], boton: l.codigo,
       texto: `Hola ${n} 🌿 Mañana a las ${ev.hora} es tu clase gratuita de ${nombre} con Karen. Tu enlace para entrar: ${enlace}` },
-    unaHora: { nombre: 'clase_recordatorio_40min', vars: [n, nombre, ev.hora], boton: l.codigo,
-      texto: `Hola ${n} 🌿 En unos minutos, hoy a las ${ev.hora}, empieza tu clase gratuita de ${nombre}. Entra con tu enlace personal: ${enlace}` },
+    // Sin enlace (ya lo recibió varias veces): solo avisa y ofrece ayuda. La plantilla lleva dos botones de respuesta rápida («Ya me conecto» y «Tengo un problema con el link»),
+    // que no llevan parámetros; quien toca el segundo recibe su enlace de nuevo (responderEntrante) y cualquiera de los dos abre la ventana de 24 h.
+    unaHora: { nombre: 'clase_recordatorio_40min', vars: [n, nombre, ev.hora],
+      texto: `Hola ${n} 🌿 En unos minutos, hoy a las ${ev.hora}, empieza tu clase gratuita de ${nombre}. Si tienes algún problema con tu link, avísanos por aquí.` },
     gracias: { nombre: 'clase_gracias_asistio', vars: [n, nombre, grabacion],
       texto: `Hola ${n} 🌿 Gracias por acompañarnos en la clase de ${nombre}. Aquí tienes la grabación para verla cuando quieras: ${grabacion}` },
     replay: { nombre: 'clase_replay_no_asistio', vars: [n, nombre, grabacion],
