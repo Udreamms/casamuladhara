@@ -17,6 +17,7 @@ import { bajarArchivo, configurado, enviarArchivo, enviarPlantilla, enviarTexto,
 import { asegurarFicha, crearFichasFaltantes } from '@/lib/server/ficha-wa.js';
 import { pideParar } from '@/lib/server/embudo.js';
 import { responderEntrante } from '@/lib/server/secuencia.js';
+import { marcarReplayEnviado } from '@/lib/server/replay-eco.js';
 
 const VENTANA = 24 * 60 * 60 * 1000;
 const LIMITE_ARCHIVO = 4 * 1024 * 1024; // Vercel no deja pasar cuerpos de más de ~4,5 MB
@@ -97,6 +98,8 @@ async function aviso(payload) {
       for (const m of v.message_echoes || []) {
         const numero = normalizar(m.to);
         if (numero) await guardar(numero, { dir: 'out', id: m.id, text: textoDe(m), ms: Number(m.timestamp) * 1000, status: 'sent', extra: extraDe(m) });
+        // Si el mensaje lleva el enlace del replay de esa persona, su tarjeta queda marcada «Replay enviado» (si falla, el aviso de Meta igual se da por recibido)
+        if (numero) await marcarReplayEnviado(db(), { texto: textoDe(m), ahora: Number(m.timestamp) * 1000 || Date.now(), arrayUnion: (e) => FieldValue.arrayUnion(e), marca: FieldValue.serverTimestamp() }).catch((err) => console.error('whatsapp replay', err));
       }
       for (const s of v.statuses || []) {
         const numero = normalizar(s.recipient_id);
